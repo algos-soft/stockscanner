@@ -9,10 +9,10 @@
     /*background: gray;*/
     display: flex;
     flex-direction: row;
-    align-items: bottom;
+    align-items: center ;
     font-size: 130%;
     font-weight: bold;
-    gap: 0.2em;
+    gap: 0.3em;
 }
 
 .indexes-dialog .body {

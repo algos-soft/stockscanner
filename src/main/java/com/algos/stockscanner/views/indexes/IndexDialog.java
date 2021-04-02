@@ -1,6 +1,9 @@
 package com.algos.stockscanner.views.indexes;
 
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -37,6 +40,8 @@ public class IndexDialog extends Dialog {
     private NumberField ovnBuyDayFld;
     private NumberField ovnBuyWEFld;
 
+    private Div imgPlaceholder;
+
     public IndexDialog(IndexModel model, IndexDialogConfirmListener confirmListener) {
         this.model=model;
         this.confirmListener=confirmListener;
@@ -67,10 +72,32 @@ public class IndexDialog extends Dialog {
     private Component buildHeader(){
         Div header = new Div();
         header.addClassName("header");
-        Icon icon = VaadinIcon.LINE_BAR_CHART.create();
+
+        imgPlaceholder=new Div();
+
+        symbolImage = new Image("images/generic_index.png", "Index");
+        setHeaderImage(symbolImage);
+
+        imgPlaceholder.addClickListener(new ComponentEventListener<ClickEvent<Div>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Div> divClickEvent) {
+                symbolImage = new Image("https://etoro-cdn.etorostatic.com/market-avatars/ucg.mi/150x150.png", "DummyImage");
+                setHeaderImage(symbolImage);
+            }
+        });
+
+
+        //Icon icon = VaadinIcon.LINE_BAR_CHART.create();
         Label title = new Label("Index");
-        header.add(icon, title);
+        header.add(imgPlaceholder, title);
         return header;
+    }
+
+    private void setHeaderImage(Image img){
+        imgPlaceholder.removeAll();
+        img.setWidth(2, Unit.EM);
+        img.setHeight(2, Unit.EM);
+        imgPlaceholder.add(img);
     }
 
     private Component buildBody(){
@@ -143,6 +170,10 @@ public class IndexDialog extends Dialog {
         //StreamResource resource = new StreamResource("icons/icon.png", () -> new ByteArrayInputStream(imageBytes));
         //Image image = new Image(resource, "dummy image");
         //add(image);
+
+//        Image image = new Image("https://dummyimage.com/600x400/000/fff", "DummyImage");
+//        add(image);
+
 
         return symbolImage;
     }
