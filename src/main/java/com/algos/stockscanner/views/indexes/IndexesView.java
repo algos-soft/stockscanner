@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.service.MarketIndexRepository;
 import com.algos.stockscanner.utils.Utils;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -36,6 +38,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     Grid<IndexModel> grid = new Grid<>();
 
     private @Autowired Utils utils;
+    private @Autowired  MarketIndexRepository marketIndexRepository;
 
     public IndexesView() {
         addClassName("indexes-view");
@@ -88,9 +91,16 @@ public class IndexesView extends Div implements AfterNavigationObserver {
      * Present an empty dialog to create a new index
      */
     private void addNewIndex(){
-        IndexDialog dialog = new IndexDialog(null);
+        IndexDialog dialog = new IndexDialog(null, new IndexDialogConfirmListener() {
+            @Override
+            public void onConfirm(IndexModel model) {
+                MarketIndex entity = model.toEntity();
+                marketIndexRepository.save(entity);
+            }
+        });
         dialog.open();
     }
+
 
 
     private HorizontalLayout createCard(IndexModel index) {
