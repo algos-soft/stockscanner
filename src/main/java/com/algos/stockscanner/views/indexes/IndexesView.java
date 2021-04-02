@@ -8,15 +8,16 @@ import com.algos.stockscanner.utils.Utils;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
@@ -32,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @CssImport("./views/indexes/indexes-view.css")
 public class IndexesView extends Div implements AfterNavigationObserver {
 
-    Grid<Person> grid = new Grid<>();
+    Grid<IndexModel> grid = new Grid<>();
 
     private @Autowired Utils utils;
 
@@ -41,7 +42,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         setSizeFull();
         grid.setHeight("100%");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        grid.addComponentColumn(person -> createCard(person));
+        grid.addComponentColumn(index -> createCard(index));
         add(grid);
 
         // customize the header
@@ -70,24 +71,36 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             }
         });
 
-        Button downloadButton = new Button("Download Index",  new Icon(VaadinIcon.ARROW_CIRCLE_DOWN));
-        downloadButton.getStyle().set("margin-left","1em");
-        downloadButton.getStyle().set("margin-right","1em");
-        downloadButton.setIconAfterText(true);
+        Button addButton = new Button("Add Index",  new Icon(VaadinIcon.PLUS_CIRCLE));
+        addButton.getStyle().set("margin-left","1em");
+        addButton.getStyle().set("margin-right","1em");
+        addButton.setIconAfterText(true);
+        addButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
+            addNewIndex();
+        });
 
         header.add(searchBox);
-        header.add(downloadButton);
+        header.add(addButton);
     }
 
 
-    private HorizontalLayout createCard(Person person) {
+    /**
+     * Present an empty dialog to create a new index
+     */
+    private void addNewIndex(){
+        IndexDialog dialog = new IndexDialog(null);
+        dialog.open();
+    }
+
+
+    private HorizontalLayout createCard(IndexModel index) {
         HorizontalLayout card = new HorizontalLayout();
         card.addClassName("card");
         card.setSpacing(false);
         card.getThemeList().add("spacing-s");
 
         Image image = new Image();
-        image.setSrc(person.getImage());
+        image.setSrc(index.getImage());
         VerticalLayout description = new VerticalLayout();
         description.addClassName("description");
         description.setSpacing(false);
@@ -98,13 +111,13 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         header.setSpacing(false);
         header.getThemeList().add("spacing-s");
 
-        Span name = new Span(person.getName());
+        Span name = new Span(index.getName());
         name.addClassName("name");
-        Span date = new Span(person.getDate());
+        Span date = new Span(index.getDate());
         date.addClassName("date");
         header.add(name, date);
 
-        Span post = new Span(person.getPost());
+        Span post = new Span(index.getPost());
         post.addClassName("post");
 
         HorizontalLayout actions = new HorizontalLayout();
@@ -113,27 +126,42 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         actions.getThemeList().add("spacing-s");
 
         IronIcon likeIcon = new IronIcon("vaadin", "heart");
-        Span likes = new Span(person.getLikes());
+        Span likes = new Span(index.getLikes());
         likes.addClassName("likes");
         IronIcon commentIcon = new IronIcon("vaadin", "comment");
-        Span comments = new Span(person.getComments());
+        Span comments = new Span(index.getComments());
         comments.addClassName("comments");
         IronIcon shareIcon = new IronIcon("vaadin", "connect");
-        Span shares = new Span(person.getShares());
+        Span shares = new Span(index.getShares());
         shares.addClassName("shares");
 
-        actions.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
+        Component action = buildActionCombo();
 
+        actions.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
         description.add(header, post, actions);
-        card.add(image, description);
+        card.add(image, description, action);
         return card;
+    }
+
+
+    private Component buildActionCombo(){
+
+        MenuBar menuBar = new MenuBar();
+        MenuItem account = menuBar.addItem("Actions...");
+
+        account.getSubMenu().addItem("Download data", e -> System.out.println("Download data"));
+        account.getSubMenu().addItem("Edit index", e -> System.out.println("Edit index"));
+        account.getSubMenu().addItem("Delete index", e -> System.out.println("Delete index"));
+
+        return menuBar;
+
     }
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
 
         // Set some data when this view is displayed.
-        List<Person> persons = Arrays.asList( //
+        List<IndexModel> indexes = Arrays.asList( //
                 createPerson("https://randomuser.me/api/portraits/men/42.jpg", "John Smith", "May 8",
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
                         "1K", "500", "20"),
@@ -182,12 +210,12 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         );
 
-        grid.setItems(persons);
+        grid.setItems(indexes);
     }
 
-    private static Person createPerson(String image, String name, String date, String post, String likes,
-            String comments, String shares) {
-        Person p = new Person();
+    private static IndexModel createPerson(String image, String name, String date, String post, String likes,
+                                           String comments, String shares) {
+        IndexModel p = new IndexModel();
         p.setImage(image);
         p.setName(name);
         p.setDate(date);

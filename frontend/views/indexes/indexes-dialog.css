@@ -1,0 +1,13 @@
+.indexes-dialog {
+  display: block;
+  height: 100%;
+}
+
+.indexes-dialog .btn-layout {
+display: flex;
+    justify-content:  flex-end ;
+}
+
+.indexes-dialog .spc-div {
+    width: 1em
+}

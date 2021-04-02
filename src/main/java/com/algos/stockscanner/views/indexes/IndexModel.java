@@ -1,6 +1,6 @@
 package com.algos.stockscanner.views.indexes;
 
-public class Person {
+public class IndexModel {
 
     private String image;
     private String name;
@@ -10,7 +10,7 @@ public class Person {
     private String comments;
     private String shares;
 
-    public Person() {
+    public IndexModel() {
     }
 
     public String getImage() {
