@@ -33,9 +33,14 @@
   align-items: baseline;
 }
 
-.indexes-view .name {
+.indexes-view .symbol {
   font-size: var(--lumo-font-size-s);
   font-weight: bold;
+  margin-right: var(--lumo-space-s);
+}
+
+.indexes-view .name {
+  font-size: var(--lumo-font-size-s);
   margin-right: var(--lumo-space-s);
 }
 

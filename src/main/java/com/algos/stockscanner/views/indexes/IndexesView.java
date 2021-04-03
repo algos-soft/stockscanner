@@ -1,13 +1,12 @@
 package com.algos.stockscanner.views.indexes;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import com.algos.stockscanner.data.entity.MarketIndex;
-import com.algos.stockscanner.data.service.MarketIndexRepository;
 import com.algos.stockscanner.beans.Utils;
+import com.algos.stockscanner.data.service.MarketIndexService;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -31,6 +30,8 @@ import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.dependency.CssImport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import javax.annotation.PostConstruct;
 
@@ -45,7 +46,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     private  Utils utils;
 
     @Autowired
-    private  MarketIndexRepository marketIndexRepository;
+    private MarketIndexService marketIndexService;
 
     @Autowired
     private ApplicationContext context;
@@ -110,8 +111,10 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         IndexDialogConfirmListener listener =  new IndexDialogConfirmListener() {
             @Override
             public void onConfirm(IndexModel model) {
-                MarketIndex entity = model.toEntity();
-                marketIndexRepository.save(entity);
+                MarketIndex entity = new MarketIndex();
+                updateEntity(entity, model);
+                //MarketIndex entity = model.toEntity();
+                marketIndexService.update(entity);
             }
         };
 
@@ -122,32 +125,36 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
 
-    private HorizontalLayout createCard(IndexModel index) {
+    private HorizontalLayout createCard(IndexModel model) {
+
         HorizontalLayout card = new HorizontalLayout();
         card.addClassName("card");
         card.setSpacing(false);
         card.getThemeList().add("spacing-s");
 
-        Image image = index.getImage();
+        Image image = model.getImage();
 
-        VerticalLayout description = new VerticalLayout();
-        description.addClassName("description");
-        description.setSpacing(false);
-        description.setPadding(false);
+        VerticalLayout body = new VerticalLayout();
+        body.addClassName("description");
+        body.setSpacing(false);
+        body.setPadding(false);
 
         HorizontalLayout header = new HorizontalLayout();
         header.addClassName("header");
         header.setSpacing(false);
         header.getThemeList().add("spacing-s");
 
-        Span name = new Span(index.getName());
+        Span symbol = new Span(model.getSymbol());
+        symbol.addClassName("symbol");
+
+        Span name = new Span(model.getName());
         name.addClassName("name");
 
-        Span date = new Span(index.getDate());
+        Span date = new Span(model.getDate());
         date.addClassName("date");
-        header.add(name, date);
+        header.add(symbol, name, date);
 
-        Span post = new Span(index.getPost());
+        Span post = new Span(model.getPost());
         post.addClassName("post");
 
         HorizontalLayout actions = new HorizontalLayout();
@@ -156,36 +163,71 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         actions.getThemeList().add("spacing-s");
 
         IronIcon likeIcon = new IronIcon("vaadin", "heart");
-        Span likes = new Span(index.getLikes());
+        Span likes = new Span(model.getLikes());
         likes.addClassName("likes");
         IronIcon commentIcon = new IronIcon("vaadin", "comment");
-        Span comments = new Span(index.getComments());
+        Span comments = new Span(model.getComments());
         comments.addClassName("comments");
         IronIcon shareIcon = new IronIcon("vaadin", "connect");
-        Span shares = new Span(index.getShares());
+        Span shares = new Span(model.getShares());
         shares.addClassName("shares");
 
-        Component action = buildActionCombo();
+        Component action = buildActionCombo(model);
 
         actions.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
-        description.add(header, post, actions);
+        body.add(header, post, actions);
 
-        card.add(image, description, action);
+        card.add(image, body, action);
         return card;
     }
 
 
-    private Component buildActionCombo(){
+    private Component buildActionCombo(IndexModel model){
 
         MenuBar menuBar = new MenuBar();
         MenuItem account = menuBar.addItem("Actions...");
 
         account.getSubMenu().addItem("Download data", e -> System.out.println("Download data"));
-        account.getSubMenu().addItem("Edit index", e -> System.out.println("Edit index"));
+
+        // edit item
+        account.getSubMenu().addItem("Edit index", e -> {
+
+            Optional<MarketIndex> entity = marketIndexService.get(model.getId());
+
+            IndexDialogConfirmListener listener =  new IndexDialogConfirmListener() {
+                @Override
+                public void onConfirm(IndexModel model) {
+                    updateEntity(entity.get(), model);
+                    marketIndexService.update(entity.get());
+                    grid.getDataProvider().refreshAll();
+                }
+            };
+
+            //IndexModel model = IndexModel.fromEntity(entity.get());
+            IndexDialog dialog = context.getBean(IndexDialog.class, model, listener);
+
+            dialog.open();
+
+        });
+
         account.getSubMenu().addItem("Delete index", e -> System.out.println("Delete index"));
 
         return menuBar;
 
+    }
+
+    /**
+     * Update entity from model
+     */
+    private void updateEntity(MarketIndex entity, IndexModel model){
+        entity.setImage(model.getImageData());
+        entity.setSymbol(model.getSymbol());
+        entity.setName(model.getName());
+        entity.setBuySpreadPercent(model.getBuySpreadPercent());
+        entity.setOvnBuyDay(model.getOvnBuyDay());
+        entity.setOvnBuyWe(model.getOvnBuyWe());
+        entity.setOvnSellDay(model.getOvnSellDay());
+        entity.setOvnSellWe(model.getOvnSellWe());
     }
 
 
@@ -194,87 +236,26 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     public void afterNavigation(AfterNavigationEvent event) {
 
         // Set some data when this view is displayed.
-
-        List<MarketIndex> indexes = marketIndexRepository.findAll();
-
-
         List<IndexModel> outList=new ArrayList<>();
 
-        indexes.stream().forEach(e -> outList.add(createIndex(e)));
+        Pageable p = Pageable.unpaged();
+        Page<MarketIndex> page = marketIndexService.list(p);
+
+        page.stream().forEach(e -> {
+            outList.add(createIndex(e));
+        });
 
         grid.setItems(outList);
 
 
-//        // Set some data when this view is displayed.
-//        List<IndexModel> indexes = Arrays.asList( //
-//                createPerson("https://randomuser.me/api/portraits/men/42.jpg", "John Smith", "May 8",
-//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-//                        "1K", "500", "20"),
-//                createPerson("https://randomuser.me/api/portraits/women/42.jpg", "Abagail Libbie", "May 3",
-//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-//                        "1K", "500", "20"),
-//                createPerson("https://randomuser.me/api/portraits/men/24.jpg", "Alberto Raya", "May 3",
-//
-//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-//                        "1K", "500", "20"),
-//                createPerson("https://randomuser.me/api/portraits/women/24.jpg", "Emmy Elsner", "Apr 22",
-//
-//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-//                        "1K", "500", "20"),
-//                createPerson("https://randomuser.me/api/portraits/men/76.jpg", "Alf Huncoot", "Apr 21",
-//
-//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-//                        "1K", "500", "20"),
-//                createPerson("https://randomuser.me/api/portraits/women/76.jpg", "Lidmila Vilensky", "Apr 17",
-//
-//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-//                        "1K", "500", "20"),
-//                createPerson("https://randomuser.me/api/portraits/men/94.jpg", "Jarrett Cawsey", "Apr 17",
-//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-//                        "1K", "500", "20"),
-//                createPerson("https://randomuser.me/api/portraits/women/94.jpg", "Tania Perfilyeva", "Mar 8",
-//
-//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-//                        "1K", "500", "20"),
-//                createPerson("https://randomuser.me/api/portraits/men/16.jpg", "Ivan Polo", "Mar 5",
-//
-//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-//                        "1K", "500", "20"),
-//                createPerson("https://randomuser.me/api/portraits/women/16.jpg", "Emelda Scandroot", "Mar 5",
-//
-//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-//                        "1K", "500", "20"),
-//                createPerson("https://randomuser.me/api/portraits/men/67.jpg", "Marcos Sá", "Mar 4",
-//
-//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-//                        "1K", "500", "20"),
-//                createPerson("https://randomuser.me/api/portraits/women/67.jpg", "Jacqueline Asong", "Mar 2",
-//
-//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-//                        "1K", "500", "20")
-//
-//        );
-
-        //grid.setItems(indexes);
     }
 
-    private static IndexModel createPerson(String image, String name, String date, String post, String likes,
-                                           String comments, String shares) {
-        IndexModel p = new IndexModel();
-        //p.setImage(image);
-        p.setName(name);
-        p.setDate(date);
-        p.setPost(post);
-        p.setLikes(likes);
-        p.setComments(comments);
-        p.setShares(shares);
-
-        return p;
-    }
 
     private IndexModel createIndex(MarketIndex index) {
         IndexModel m = new IndexModel();
+        m.setId(index.getId());
         m.setSymbol(index.getSymbol());
+        m.setImageData(index.getImage());
         m.setImage(utils.byteArrayToImage(index.getImage()));
         m.setSymbol(index.getSymbol());
         m.setName(index.getName());

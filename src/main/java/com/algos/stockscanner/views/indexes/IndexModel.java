@@ -2,10 +2,10 @@ package com.algos.stockscanner.views.indexes;
 
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.vaadin.flow.component.html.Image;
-import org.apache.commons.lang3.ObjectUtils;
 
 public class IndexModel {
 
+    private Integer id;
     private byte[] imageData;
     private Image image;
     private String symbol;
@@ -25,6 +25,14 @@ public class IndexModel {
     private String shares;
 
     public IndexModel() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public Image getImage() {
@@ -144,16 +152,34 @@ public class IndexModel {
         this.imageData = imageData;
     }
 
-    public MarketIndex toEntity(){
-        MarketIndex index = new MarketIndex();
-        index.setImage(getImageData());
-        index.setSymbol(getSymbol());
-        index.setName(getName());
-        index.setBuySpreadPercent(getBuySpreadPercent());
-        index.setOvnBuyDay(getOvnBuyDay());
-        index.setOvnBuyWe(getOvnBuyWe());
-        index.setOvnSellDay(getOvnSellDay());
-        index.setOvnSellWe(getOvnSellWe());
-        return index;
+//    public MarketIndex toEntity(){
+//        MarketIndex entity = new MarketIndex();
+//        entity.setId(getId());
+//        entity.setImage(getImageData());
+//        entity.setSymbol(getSymbol());
+//        entity.setName(getName());
+//        entity.setBuySpreadPercent(getBuySpreadPercent());
+//        entity.setOvnBuyDay(getOvnBuyDay());
+//        entity.setOvnBuyWe(getOvnBuyWe());
+//        entity.setOvnSellDay(getOvnSellDay());
+//        entity.setOvnSellWe(getOvnSellWe());
+//        return entity;
+//    }
+
+    /**
+     * Create a new model from an entity
+     */
+    public static IndexModel fromEntity(MarketIndex entity){
+        IndexModel model = new IndexModel();
+        model.setImageData(entity.getImage());
+        model.setSymbol(entity.getSymbol());
+        model.setName(entity.getName());
+        model.setBuySpreadPercent(entity.getBuySpreadPercent());
+        model.setOvnBuyDay(entity.getOvnBuyDay());
+        model.setOvnBuyWe(entity.getOvnBuyWe());
+        model.setOvnSellDay(entity.getOvnSellDay());
+        model.setOvnSellWe(entity.getOvnSellWe());
+        return model;
     }
+
 }

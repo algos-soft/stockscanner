@@ -2,8 +2,7 @@ package com.algos.stockscanner.data.entity;
 
 import com.algos.stockscanner.data.AbstractEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
@@ -11,6 +10,7 @@ public class MarketIndex extends AbstractEntity {
 
 
     @Column(length=65535) // -> MySQL BLOB type
+//    @Basic(fetch= FetchType.EAGER)
     private byte[] image;
     private String symbol;
     private String name;
@@ -19,6 +19,8 @@ public class MarketIndex extends AbstractEntity {
     private double ovnSellWe;
     private double ovnBuyDay;
     private double ovnBuyWe;
+
+
 
     public byte[] getImage() {
         return image;

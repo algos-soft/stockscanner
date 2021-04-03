@@ -87,6 +87,10 @@ public class IndexDialog extends Dialog {
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
         add(buildContent());
+
+        if(model!=null){
+            populateFromModel();
+        }
     }
 
 
@@ -225,7 +229,7 @@ public class IndexDialog extends Dialog {
         btnLayout.addClassName("footer");
 
         Button confirmButton = new Button("Confirm", event -> {
-            model = buildModelFromDialog();
+            IndexModel model = modelFromDialog();
             confirmListener.onConfirm(model);
             close();
         });
@@ -261,10 +265,16 @@ public class IndexDialog extends Dialog {
     }
 
     /**
-     * Build a new model from the data displayed in the dialog
+     * Build a new model or update the current model from the data displayed in the dialog
      */
-    private IndexModel buildModelFromDialog(){
-        IndexModel model = new IndexModel();
+    private IndexModel modelFromDialog(){
+        IndexModel model;
+        if(this.model!=null){
+            model=this.model;
+        }else{
+            model = new IndexModel();
+        }
+
         model.setImageData(imageData);
         model.setImage(utils.byteArrayToImage(imageData));
         model.setSymbol(symbolFld.getValue());
@@ -276,6 +286,20 @@ public class IndexDialog extends Dialog {
         model.setOvnBuyWe(getDouble(ovnBuyWEFld));
         return model;
     }
+
+
+    private void populateFromModel(){
+        imageData=model.getImageData();
+        updateIcon();
+        symbolFld.setValue(model.getSymbol());
+        nameFld.setValue(model.getName());
+        buySpreadFld.setValue(model.getBuySpreadPercent());
+        ovnSellDayFld.setValue(model.getOvnSellDay());
+        ovnSellWEFld.setValue(model.getOvnSellWe());
+        ovnBuyDayFld.setValue(model.getOvnBuyDay());
+        ovnBuyWEFld.setValue(model.getOvnBuyWe());
+    }
+
 
     private Double getDouble(NumberField field){
         Double d = field.getValue();
