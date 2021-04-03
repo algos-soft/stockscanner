@@ -2,7 +2,7 @@ package com.algos.stockscanner.views.settings;
 
 import com.algos.stockscanner.data.entity.SamplePerson;
 import com.algos.stockscanner.data.service.SamplePersonService;
-import com.algos.stockscanner.utils.Utils;
+import com.algos.stockscanner.beans.Utils;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -23,8 +23,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;

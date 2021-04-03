@@ -1,11 +1,10 @@
 package com.algos.stockscanner.views.simulations;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.service.SimulationService;
-import com.algos.stockscanner.utils.Utils;
+import com.algos.stockscanner.beans.Utils;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;

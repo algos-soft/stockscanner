@@ -1,11 +1,13 @@
 package com.algos.stockscanner.views.indexes;
 
 import com.algos.stockscanner.data.entity.MarketIndex;
+import com.vaadin.flow.component.html.Image;
 import org.apache.commons.lang3.ObjectUtils;
 
 public class IndexModel {
 
-    private String image;
+    private byte[] imageData;
+    private Image image;
     private String symbol;
     private String name;
     private double BuySpreadPercent;
@@ -25,11 +27,11 @@ public class IndexModel {
     public IndexModel() {
     }
 
-    public String getImage() {
+    public Image getImage() {
         return image;
     }
 
-    public void setImage(String image) {
+    public void setImage(Image image) {
         this.image = image;
     }
 
@@ -134,12 +136,19 @@ public class IndexModel {
         this.ovnBuyWe = ovnBuyWe;
     }
 
+    public byte[] getImageData() {
+        return imageData;
+    }
+
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
+    }
 
     public MarketIndex toEntity(){
         MarketIndex index = new MarketIndex();
+        index.setImage(getImageData());
         index.setSymbol(getSymbol());
         index.setName(getName());
-        index.setImage(null);
         index.setBuySpreadPercent(getBuySpreadPercent());
         index.setOvnBuyDay(getOvnBuyDay());
         index.setOvnBuyWe(getOvnBuyWe());

@@ -1,5 +1,7 @@
 package com.algos.stockscanner.views.indexes;
 
+import com.algos.stockscanner.beans.HttpClient;
+import com.algos.stockscanner.beans.Utils;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -13,20 +15,37 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.io.Resource;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 
 /**
  * Dialog to edit an index
  */
 @CssImport("./views/indexes/indexes-dialog.css")
+@org.springframework.stereotype.Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class IndexDialog extends Dialog {
+
+    private static final int MAX_IMG_WIDTH=64;
+    private static final int MAX_IMG_HEIGHT=64;
 
     private IndexModel model;
     private IndexDialogConfirmListener confirmListener;
 
-    private Image symbolImage;
+    private byte[] imageData;
     private TextField symbolFld;
     private TextField nameFld;
     private NumberField buySpreadFld;
@@ -38,12 +57,32 @@ public class IndexDialog extends Dialog {
 
     private Div imgPlaceholder;
 
+    @Autowired
+    private Utils utils;
+
+    @Autowired
+    private HttpClient httpClient;
+
+    @Autowired
+    private ApplicationContext context;
+
+
+    public IndexDialog() {
+        this((IndexDialogConfirmListener)null);
+    }
+
+    public IndexDialog(IndexDialogConfirmListener confirmListener) {
+        this((IndexModel)null, confirmListener);
+        this.model=model;
+    }
+
     public IndexDialog(IndexModel model, IndexDialogConfirmListener confirmListener) {
         this.model=model;
         this.confirmListener=confirmListener;
-        init();
     }
 
+
+    @PostConstruct
     private void init(){
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
@@ -56,7 +95,7 @@ public class IndexDialog extends Dialog {
         Div layout = new Div();
         layout.addClassName("indexes-dialog");
         Component header =buildHeader();
-        Component body =buildBody();
+        Component body = buildBody();
         Component footer = buildFooter();
         layout.add(header, body, footer);
 
@@ -70,28 +109,45 @@ public class IndexDialog extends Dialog {
         header.addClassName("header");
 
         imgPlaceholder=new Div();
-
-        symbolImage = new Image("images/generic_index.png", "Index");
-        setHeaderImage(symbolImage);
-
         imgPlaceholder.addClickListener((ComponentEventListener<ClickEvent<Div>>) divClickEvent -> {
             changeIconByUrl();
         });
 
+        // load default icon
+        Resource res=context.getResource("images/generic_index.png");
+        try {
+            imageData = Files.readAllBytes(Paths.get(res.getURI()));
+            imageData = utils.scaleImage(imageData, MAX_IMG_WIDTH, MAX_IMG_HEIGHT);
+            updateIcon();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        //Icon icon = VaadinIcon.LINE_BAR_CHART.create();
         Label title = new Label("Index");
         header.add(imgPlaceholder, title);
         return header;
     }
 
-    private void setHeaderImage(Image img){
+    /**
+     * Updates the icon in the header based on the current byte array
+     */
+    private void updateIcon(){
+        Image img = utils.byteArrayToImage(imageData);
         imgPlaceholder.removeAll();
         img.setWidth(2, Unit.EM);
         img.setHeight(2, Unit.EM);
         imgPlaceholder.add(img);
     }
 
+
+    private byte[] getBytes(String url) throws IOException {
+        Request request = new Request.Builder().url(url).build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            return response.body().bytes();
+        }
+
+    }
 
     /**
      * Ask for an URL in a dialog and change the index icon
@@ -110,10 +166,11 @@ public class IndexDialog extends Dialog {
             dialog.close();
             String url = tf.getValue();
             try {
-                symbolImage = new Image(url,"Index icon");
-                setHeaderImage(symbolImage);
+                imageData = getBytes(url);
+                imageData = utils.scaleImage(imageData, MAX_IMG_WIDTH, MAX_IMG_HEIGHT);
+                updateIcon();
             }catch (Exception e){
-                int a = 21;
+                e.printStackTrace();
             }
         });
 
@@ -185,7 +242,7 @@ public class IndexDialog extends Dialog {
 
 
     private Component buildImage(){
-        symbolImage = new Image("images/logo.png", "Image");
+        //symbolImage = new Image("images/logo.png", "Image");
 
         //Div imageDiv = new Div();
         //imageDiv.add();
@@ -199,7 +256,8 @@ public class IndexDialog extends Dialog {
 //        add(image);
 
 
-        return symbolImage;
+        //return symbolImage;
+        return null;
     }
 
     /**
@@ -207,7 +265,8 @@ public class IndexDialog extends Dialog {
      */
     private IndexModel buildModelFromDialog(){
         IndexModel model = new IndexModel();
-        //model.setImage(symbolImage.);
+        model.setImageData(imageData);
+        model.setImage(utils.byteArrayToImage(imageData));
         model.setSymbol(symbolFld.getValue());
         model.setName(nameFld.getValue());
         model.setBuySpreadPercent(getDouble(buySpreadFld));

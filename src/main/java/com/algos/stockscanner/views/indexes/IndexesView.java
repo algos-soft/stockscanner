@@ -1,12 +1,13 @@
 package com.algos.stockscanner.views.indexes;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexRepository;
-import com.algos.stockscanner.utils.Utils;
+import com.algos.stockscanner.beans.Utils;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -29,6 +30,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.dependency.CssImport;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+
+import javax.annotation.PostConstruct;
 
 @Route(value = "indexes", layout = MainView.class)
 @PageTitle("Indexes")
@@ -37,10 +41,22 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
     Grid<IndexModel> grid = new Grid<>();
 
-    private @Autowired Utils utils;
-    private @Autowired  MarketIndexRepository marketIndexRepository;
+    @Autowired
+    private  Utils utils;
+
+    @Autowired
+    private  MarketIndexRepository marketIndexRepository;
+
+    @Autowired
+    private ApplicationContext context;
+
 
     public IndexesView() {
+    }
+
+
+    @PostConstruct
+    private void init(){
         addClassName("indexes-view");
         setSizeFull();
         grid.setHeight("100%");
@@ -59,7 +75,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                 }
             }
         });
-
     }
 
     private void customizeHeader(HorizontalLayout header){
@@ -91,13 +106,17 @@ public class IndexesView extends Div implements AfterNavigationObserver {
      * Present an empty dialog to create a new index
      */
     private void addNewIndex(){
-        IndexDialog dialog = new IndexDialog(null, new IndexDialogConfirmListener() {
+
+        IndexDialogConfirmListener listener =  new IndexDialogConfirmListener() {
             @Override
             public void onConfirm(IndexModel model) {
                 MarketIndex entity = model.toEntity();
                 marketIndexRepository.save(entity);
             }
-        });
+        };
+
+        IndexDialog dialog = context.getBean(IndexDialog.class, listener);
+
         dialog.open();
     }
 
@@ -109,8 +128,8 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         card.setSpacing(false);
         card.getThemeList().add("spacing-s");
 
-        Image image = new Image();
-        image.setSrc(index.getImage());
+        Image image = index.getImage();
+
         VerticalLayout description = new VerticalLayout();
         description.addClassName("description");
         description.setSpacing(false);
@@ -123,6 +142,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         Span name = new Span(index.getName());
         name.addClassName("name");
+
         Span date = new Span(index.getDate());
         date.addClassName("date");
         header.add(name, date);
@@ -149,6 +169,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         actions.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
         description.add(header, post, actions);
+
         card.add(image, description, action);
         return card;
     }
@@ -167,66 +188,80 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
     }
 
+
+
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
 
         // Set some data when this view is displayed.
-        List<IndexModel> indexes = Arrays.asList( //
-                createPerson("https://randomuser.me/api/portraits/men/42.jpg", "John Smith", "May 8",
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/42.jpg", "Abagail Libbie", "May 3",
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/24.jpg", "Alberto Raya", "May 3",
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/24.jpg", "Emmy Elsner", "Apr 22",
+        List<MarketIndex> indexes = marketIndexRepository.findAll();
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/76.jpg", "Alf Huncoot", "Apr 21",
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/76.jpg", "Lidmila Vilensky", "Apr 17",
+        List<IndexModel> outList=new ArrayList<>();
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/94.jpg", "Jarrett Cawsey", "Apr 17",
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/94.jpg", "Tania Perfilyeva", "Mar 8",
+        indexes.stream().forEach(e -> outList.add(createIndex(e)));
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/16.jpg", "Ivan Polo", "Mar 5",
+        grid.setItems(outList);
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/16.jpg", "Emelda Scandroot", "Mar 5",
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/67.jpg", "Marcos Sá", "Mar 4",
+//        // Set some data when this view is displayed.
+//        List<IndexModel> indexes = Arrays.asList( //
+//                createPerson("https://randomuser.me/api/portraits/men/42.jpg", "John Smith", "May 8",
+//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+//                        "1K", "500", "20"),
+//                createPerson("https://randomuser.me/api/portraits/women/42.jpg", "Abagail Libbie", "May 3",
+//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+//                        "1K", "500", "20"),
+//                createPerson("https://randomuser.me/api/portraits/men/24.jpg", "Alberto Raya", "May 3",
+//
+//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+//                        "1K", "500", "20"),
+//                createPerson("https://randomuser.me/api/portraits/women/24.jpg", "Emmy Elsner", "Apr 22",
+//
+//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+//                        "1K", "500", "20"),
+//                createPerson("https://randomuser.me/api/portraits/men/76.jpg", "Alf Huncoot", "Apr 21",
+//
+//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+//                        "1K", "500", "20"),
+//                createPerson("https://randomuser.me/api/portraits/women/76.jpg", "Lidmila Vilensky", "Apr 17",
+//
+//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+//                        "1K", "500", "20"),
+//                createPerson("https://randomuser.me/api/portraits/men/94.jpg", "Jarrett Cawsey", "Apr 17",
+//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+//                        "1K", "500", "20"),
+//                createPerson("https://randomuser.me/api/portraits/women/94.jpg", "Tania Perfilyeva", "Mar 8",
+//
+//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+//                        "1K", "500", "20"),
+//                createPerson("https://randomuser.me/api/portraits/men/16.jpg", "Ivan Polo", "Mar 5",
+//
+//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+//                        "1K", "500", "20"),
+//                createPerson("https://randomuser.me/api/portraits/women/16.jpg", "Emelda Scandroot", "Mar 5",
+//
+//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+//                        "1K", "500", "20"),
+//                createPerson("https://randomuser.me/api/portraits/men/67.jpg", "Marcos Sá", "Mar 4",
+//
+//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+//                        "1K", "500", "20"),
+//                createPerson("https://randomuser.me/api/portraits/women/67.jpg", "Jacqueline Asong", "Mar 2",
+//
+//                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+//                        "1K", "500", "20")
+//
+//        );
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/67.jpg", "Jacqueline Asong", "Mar 2",
-
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20")
-
-        );
-
-        grid.setItems(indexes);
+        //grid.setItems(indexes);
     }
 
     private static IndexModel createPerson(String image, String name, String date, String post, String likes,
                                            String comments, String shares) {
         IndexModel p = new IndexModel();
-        p.setImage(image);
+        //p.setImage(image);
         p.setName(name);
         p.setDate(date);
         p.setPost(post);
@@ -236,5 +271,20 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         return p;
     }
+
+    private IndexModel createIndex(MarketIndex index) {
+        IndexModel m = new IndexModel();
+        m.setSymbol(index.getSymbol());
+        m.setImage(utils.byteArrayToImage(index.getImage()));
+        m.setSymbol(index.getSymbol());
+        m.setName(index.getName());
+        m.setBuySpreadPercent(index.getBuySpreadPercent());
+        m.setOvnBuyDay(index.getOvnBuyDay());
+        m.setOvnBuyWe(index.getOvnBuyWe());
+        m.setOvnSellDay(index.getOvnSellDay());
+        m.setOvnSellWe(index.getOvnSellWe());
+        return m;
+    }
+
 
 }

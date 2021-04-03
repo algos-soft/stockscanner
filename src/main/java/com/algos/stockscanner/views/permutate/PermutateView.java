@@ -1,6 +1,6 @@
 package com.algos.stockscanner.views.permutate;
 
-import com.algos.stockscanner.utils.Utils;
+import com.algos.stockscanner.beans.Utils;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
