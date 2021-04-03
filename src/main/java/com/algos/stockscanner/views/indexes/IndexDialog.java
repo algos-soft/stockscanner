@@ -11,14 +11,10 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.server.StreamResource;
-
-import java.io.ByteArrayInputStream;
+import org.claspina.confirmdialog.ButtonOption;
+import org.claspina.confirmdialog.ConfirmDialog;
 
 
 /**
@@ -78,12 +74,8 @@ public class IndexDialog extends Dialog {
         symbolImage = new Image("images/generic_index.png", "Index");
         setHeaderImage(symbolImage);
 
-        imgPlaceholder.addClickListener(new ComponentEventListener<ClickEvent<Div>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Div> divClickEvent) {
-                symbolImage = new Image("https://etoro-cdn.etorostatic.com/market-avatars/ucg.mi/150x150.png", "DummyImage");
-                setHeaderImage(symbolImage);
-            }
+        imgPlaceholder.addClickListener((ComponentEventListener<ClickEvent<Div>>) divClickEvent -> {
+            changeIconByUrl();
         });
 
 
@@ -99,6 +91,38 @@ public class IndexDialog extends Dialog {
         img.setHeight(2, Unit.EM);
         imgPlaceholder.add(img);
     }
+
+
+    /**
+     * Ask for an URL in a dialog and change the index icon
+     */
+    private void changeIconByUrl(){
+
+        TextField tf = new TextField();
+        tf.setLabel("Icon URL");
+
+        Button bConfirm = new Button();
+        ConfirmDialog dialog = ConfirmDialog.create().withMessage(tf)
+                .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
+                .withButton(bConfirm, ButtonOption.caption("Confirm"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
+
+        bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+            dialog.close();
+            String url = tf.getValue();
+            try {
+                symbolImage = new Image(url,"Index icon");
+                setHeaderImage(symbolImage);
+            }catch (Exception e){
+                int a = 21;
+            }
+        });
+
+        dialog.setWidth("30em");
+        dialog.open();
+        tf.focus();
+
+    }
+
 
     private Component buildBody(){
 
