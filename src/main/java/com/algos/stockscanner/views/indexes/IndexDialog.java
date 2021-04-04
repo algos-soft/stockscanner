@@ -118,7 +118,7 @@ public class IndexDialog extends Dialog {
         });
 
         // load default icon
-        Resource res=context.getResource("images/generic_index.png");
+        Resource res=context.getResource("images/generic_index.jpg");
         try {
             imageData = Files.readAllBytes(Paths.get(res.getURI()));
             imageData = utils.scaleImage(imageData, MAX_IMG_WIDTH, MAX_IMG_HEIGHT);

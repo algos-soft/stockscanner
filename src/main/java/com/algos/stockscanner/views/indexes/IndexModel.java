@@ -16,14 +16,6 @@ public class IndexModel {
     private double ovnBuyDay;
     private double ovnBuyWe;
 
-
-
-    private String date;
-    private String post;
-    private String likes;
-    private String comments;
-    private String shares;
-
     public IndexModel() {
     }
 
@@ -49,51 +41,6 @@ public class IndexModel {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-
-
-
-
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getPost() {
-        return post;
-    }
-
-    public void setPost(String post) {
-        this.post = post;
-    }
-
-    public String getLikes() {
-        return likes;
-    }
-
-    public void setLikes(String likes) {
-        this.likes = likes;
-    }
-
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
-    public String getShares() {
-        return shares;
-    }
-
-    public void setShares(String shares) {
-        this.shares = shares;
     }
 
     public String getSymbol() {
@@ -152,34 +99,5 @@ public class IndexModel {
         this.imageData = imageData;
     }
 
-//    public MarketIndex toEntity(){
-//        MarketIndex entity = new MarketIndex();
-//        entity.setId(getId());
-//        entity.setImage(getImageData());
-//        entity.setSymbol(getSymbol());
-//        entity.setName(getName());
-//        entity.setBuySpreadPercent(getBuySpreadPercent());
-//        entity.setOvnBuyDay(getOvnBuyDay());
-//        entity.setOvnBuyWe(getOvnBuyWe());
-//        entity.setOvnSellDay(getOvnSellDay());
-//        entity.setOvnSellWe(getOvnSellWe());
-//        return entity;
-//    }
-
-    /**
-     * Create a new model from an entity
-     */
-    public static IndexModel fromEntity(MarketIndex entity){
-        IndexModel model = new IndexModel();
-        model.setImageData(entity.getImage());
-        model.setSymbol(entity.getSymbol());
-        model.setName(entity.getName());
-        model.setBuySpreadPercent(entity.getBuySpreadPercent());
-        model.setOvnBuyDay(entity.getOvnBuyDay());
-        model.setOvnBuyWe(entity.getOvnBuyWe());
-        model.setOvnSellDay(entity.getOvnSellDay());
-        model.setOvnSellWe(entity.getOvnSellWe());
-        return model;
-    }
 
 }

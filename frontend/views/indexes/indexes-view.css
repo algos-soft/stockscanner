@@ -22,7 +22,7 @@
 }
 
 .indexes-view img {
-  border-radius: 50%;
+  border-radius: 10%;
   flex-shrink: 0;
   height: var(--lumo-size-m);
   margin-right: calc(var(--lumo-space-s) * 1.5);

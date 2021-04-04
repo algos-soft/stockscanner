@@ -4,6 +4,9 @@
   padding: 0px;
 }
 
+.indexes-dialog img {
+  border-radius: 10%;
+}
 
 .indexes-dialog .header {
     /*background: gray;*/

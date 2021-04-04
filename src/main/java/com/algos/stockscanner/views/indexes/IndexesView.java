@@ -28,6 +28,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.dependency.CssImport;
+import org.claspina.confirmdialog.ButtonOption;
+import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
@@ -113,8 +115,8 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             public void onConfirm(IndexModel model) {
                 MarketIndex entity = new MarketIndex();
                 updateEntity(entity, model);
-                //MarketIndex entity = model.toEntity();
                 marketIndexService.update(entity);
+                loadAll();
             }
         };
 
@@ -125,7 +127,40 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
 
+
     private HorizontalLayout createCard(IndexModel model) {
+
+        HorizontalLayout card = new HorizontalLayout();
+        card.addClassName("card");
+        card.setSpacing(false);
+        card.getThemeList().add("spacing-s");
+
+        VerticalLayout body = new VerticalLayout();
+        body.addClassName("description");
+        body.setSpacing(false);
+        body.setPadding(false);
+        body.getThemeList().add("spacing-s");
+
+        Span symbol = new Span(model.getSymbol());
+        symbol.addClassName("symbol");
+
+        Span name = new Span(model.getName());
+        name.addClassName("name");
+
+        body.add(symbol, name);
+
+        Image image = model.getImage();
+        Component action = buildActionCombo(model);
+
+        card.add(image, body, action);
+        return card;
+    }
+
+
+
+
+
+    private HorizontalLayout createCardOld(IndexModel model) {
 
         HorizontalLayout card = new HorizontalLayout();
         card.addClassName("card");
@@ -150,32 +185,32 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         Span name = new Span(model.getName());
         name.addClassName("name");
 
-        Span date = new Span(model.getDate());
-        date.addClassName("date");
-        header.add(symbol, name, date);
+//        Span date = new Span(model.getDate());
+//        date.addClassName("date");
+//        header.add(symbol, name, date);
 
-        Span post = new Span(model.getPost());
-        post.addClassName("post");
+//        Span post = new Span(model.getPost());
+//        post.addClassName("post");
 
         HorizontalLayout actions = new HorizontalLayout();
         actions.addClassName("actions");
         actions.setSpacing(false);
         actions.getThemeList().add("spacing-s");
 
-        IronIcon likeIcon = new IronIcon("vaadin", "heart");
-        Span likes = new Span(model.getLikes());
-        likes.addClassName("likes");
-        IronIcon commentIcon = new IronIcon("vaadin", "comment");
-        Span comments = new Span(model.getComments());
-        comments.addClassName("comments");
-        IronIcon shareIcon = new IronIcon("vaadin", "connect");
-        Span shares = new Span(model.getShares());
-        shares.addClassName("shares");
+//        IronIcon likeIcon = new IronIcon("vaadin", "heart");
+//        Span likes = new Span(model.getLikes());
+//        likes.addClassName("likes");
+//        IronIcon commentIcon = new IronIcon("vaadin", "comment");
+//        Span comments = new Span(model.getComments());
+//        comments.addClassName("comments");
+//        IronIcon shareIcon = new IronIcon("vaadin", "connect");
+//        Span shares = new Span(model.getShares());
+//        shares.addClassName("shares");
 
         Component action = buildActionCombo(model);
 
-        actions.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
-        body.add(header, post, actions);
+//        actions.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
+//        body.add(header, post, actions);
 
         card.add(image, body, action);
         return card;
@@ -187,10 +222,10 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         MenuBar menuBar = new MenuBar();
         MenuItem account = menuBar.addItem("Actions...");
 
-        account.getSubMenu().addItem("Download data", e -> System.out.println("Download data"));
+        account.getSubMenu().addItem("Download historic data", i -> System.out.println("Download data"));
 
         // edit item
-        account.getSubMenu().addItem("Edit index", e -> {
+        account.getSubMenu().addItem("Edit index", i -> {
 
             Optional<MarketIndex> entity = marketIndexService.get(model.getId());
 
@@ -210,7 +245,24 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         });
 
-        account.getSubMenu().addItem("Delete index", e -> System.out.println("Delete index"));
+        account.getSubMenu().addItem("Delete index", i -> {
+
+            Button bConfirm = new Button();
+            ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete "+model.getSymbol()+"?")
+                    .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
+                    .withButton(bConfirm, ButtonOption.caption("Delete"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
+
+            bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+                try {
+                    marketIndexService.delete(model.getId());
+                    loadAll();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            });
+
+            dialog.open();
+        });
 
         return menuBar;
 
@@ -231,11 +283,19 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
 
-
+    /**
+     * Reload data when this view is displayed.
+     */
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
+        loadAll();
+    }
 
-        // Set some data when this view is displayed.
+
+    /**
+     * Load all data in the grid
+     */
+    private void loadAll(){
         List<IndexModel> outList=new ArrayList<>();
 
         Pageable p = Pageable.unpaged();
@@ -246,8 +306,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         });
 
         grid.setItems(outList);
-
-
     }
 
 
