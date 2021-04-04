@@ -38,6 +38,13 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+
+        <!-- For Alpha Vantage -->
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+
     </repositories>
 
     <pluginRepositories>
@@ -191,6 +198,12 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>4.9.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.crazzyghost</groupId>
+            <artifactId>alphavantage-java</artifactId>
+            <version>1.5.0</version>
         </dependency>
 
     </dependencies>

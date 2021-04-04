@@ -5,6 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.vaadin.artur.helpers.LaunchUtil;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 /**
  * The entry point of the Spring Boot application.
  */
