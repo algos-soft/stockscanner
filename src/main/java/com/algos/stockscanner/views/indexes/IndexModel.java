@@ -1,5 +1,6 @@
 package com.algos.stockscanner.views.indexes;
 
+import com.algos.stockscanner.data.entity.IndexCategories;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.vaadin.flow.component.html.Image;
 
@@ -10,6 +11,7 @@ public class IndexModel {
     private Image image;
     private String symbol;
     private String name;
+    private IndexCategories category;
     private double BuySpreadPercent;
     private double ovnSellDay;
     private double ovnSellWe;
@@ -49,6 +51,14 @@ public class IndexModel {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
+    }
+
+    public IndexCategories getCategory() {
+        return category;
+    }
+
+    public void setCategory(IndexCategories category) {
+        this.category = category;
     }
 
     public double getBuySpreadPercent() {

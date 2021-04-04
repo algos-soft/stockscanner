@@ -2,10 +2,8 @@ package com.algos.stockscanner.views.indexes;
 
 import com.algos.stockscanner.beans.HttpClient;
 import com.algos.stockscanner.beans.Utils;
-import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Unit;
+import com.algos.stockscanner.data.entity.IndexCategories;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -13,6 +11,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import okhttp3.Request;
@@ -48,6 +47,7 @@ public class IndexDialog extends Dialog {
     private byte[] imageData;
     private TextField symbolFld;
     private TextField nameFld;
+    private Select<IndexCategories> categoryFld;
     private NumberField buySpreadFld;
 
     private NumberField ovnSellDayFld;
@@ -200,6 +200,16 @@ public class IndexDialog extends Dialog {
         nameFld = new TextField();
         nameFld.setLabel("Name");
 
+        categoryFld = new Select<IndexCategories>();
+        categoryFld.setLabel("Category");
+        categoryFld.setItems(IndexCategories.values());
+        categoryFld.setTextRenderer(new ItemLabelGenerator<IndexCategories>() {
+            @Override
+            public String apply(IndexCategories item) {
+                return item.getDescription();
+            }
+        });
+
         buySpreadFld = new NumberField();
         buySpreadFld.setLabel("Buy spread %");
 
@@ -219,7 +229,7 @@ public class IndexDialog extends Dialog {
         ovnBuyWEFld.setLabel("Buy, weekend, $");
         divBuy.add(ovnBuyDayFld, ovnBuyWEFld);
 
-        body.add(symbolFld, nameFld, buySpreadFld, divSell, divBuy);
+        body.add(symbolFld, nameFld, categoryFld, buySpreadFld, divSell, divBuy);
         return body;
     }
 
@@ -279,6 +289,7 @@ public class IndexDialog extends Dialog {
         model.setImage(utils.byteArrayToImage(imageData));
         model.setSymbol(symbolFld.getValue());
         model.setName(nameFld.getValue());
+        model.setCategory(categoryFld.getValue());
         model.setBuySpreadPercent(getDouble(buySpreadFld));
         model.setOvnSellDay(getDouble(ovnSellDayFld));
         model.setOvnSellWe(getDouble(ovnSellWEFld));
@@ -293,6 +304,7 @@ public class IndexDialog extends Dialog {
         updateIcon();
         symbolFld.setValue(model.getSymbol());
         nameFld.setValue(model.getName());
+        categoryFld.setValue(model.getCategory());
         buySpreadFld.setValue(model.getBuySpreadPercent());
         ovnSellDayFld.setValue(model.getOvnSellDay());
         ovnSellWEFld.setValue(model.getOvnSellWe());

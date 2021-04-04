@@ -14,6 +14,7 @@ public class MarketIndex extends AbstractEntity {
     private byte[] image;
     private String symbol;
     private String name;
+    private String category;
     private double BuySpreadPercent;
     private double ovnSellDay;
     private double ovnSellWe;
@@ -44,6 +45,14 @@ public class MarketIndex extends AbstractEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public double getBuySpreadPercent() {

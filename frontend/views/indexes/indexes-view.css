@@ -34,14 +34,18 @@
 }
 
 .indexes-view .symbol {
-  font-size: var(--lumo-font-size-s);
+  font-size: var(--lumo-font-size-m);
   font-weight: bold;
-  margin-right: var(--lumo-space-s);
+  margin-right: var(--lumo-space-m);
 }
 
 .indexes-view .name {
   font-size: var(--lumo-font-size-s);
   margin-right: var(--lumo-space-s);
+}
+
+.indexes-view .category {
+  font-size: var(--lumo-font-size-xs);
 }
 
 .indexes-view .date {

@@ -15,6 +15,7 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
@@ -38,6 +39,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 @PWA(name = "StockScanner", shortName = "StockScanner", enableInstallPrompt = false)
 @JsModule("./styles/shared-styles.js")
 @CssImport("./views/main/main-view.css")
+@Push   // or you can not access the UI from non-UI threads. This annotation must be on a top-level layout.
 public class MainView extends AppLayout {
 
     private final Tabs menu;

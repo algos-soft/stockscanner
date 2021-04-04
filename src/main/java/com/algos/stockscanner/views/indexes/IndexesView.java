@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.algos.stockscanner.data.entity.IndexCategories;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.algos.stockscanner.services.MarketService;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
@@ -22,12 +25,14 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.server.Command;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +54,9 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
     @Autowired
     private MarketIndexService marketIndexService;
+
+    @Autowired
+    private MarketService marketService;
 
     @Autowired
     private ApplicationContext context;
@@ -147,7 +155,15 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         Span name = new Span(model.getName());
         name.addClassName("name");
 
-        body.add(symbol, name);
+        String categoryDesc=null;
+        IndexCategories indexCategory=model.getCategory();
+        if (indexCategory!=null){
+            categoryDesc=indexCategory.getDescription();
+        }
+        Span category = new Span(categoryDesc);
+        category.addClassName("category");
+
+        body.add(symbol, name, category);
 
         Image image = model.getImage();
         Component action = buildActionCombo(model);
@@ -222,23 +238,58 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         MenuBar menuBar = new MenuBar();
         MenuItem account = menuBar.addItem("Actions...");
 
-        account.getSubMenu().addItem("Download historic data", i -> System.out.println("Download data"));
+        account.getSubMenu().addItem("Download historic data", i -> {
+
+            Dialog dialog = new Dialog(new Text("Loading..."));
+            dialog.setCloseOnEsc(false);
+            dialog.setCloseOnOutsideClick(false);
+            dialog.open();
+
+            UI ui = UI.getCurrent();
+
+            new Thread(() -> marketService.download(new MarketService.DownloadProgressListener() {
+                @Override
+                public void onDownloadCompleted() {
+                    ui.access(new Command() {
+                        @Override
+                        public void execute() {
+                            dialog.close();
+                        }
+                    });
+
+                }
+            })).start();
+
+
+//            new Thread(() -> marketService.download(new MarketService.DownloadProgressListener() {
+//                @Override
+//                public void onDownloadCompleted() {
+//                    Command command = new Command() {
+//                        @Override
+//                        public void execute() {
+//                            dialog.close();
+//                        }
+//                    };
+//                    getUI().get().access(command);
+//                    //dialog.close();
+//                }
+//            })).start();
+
+            //ConfirmDialog dialog = ConfirmDialog.createInfo().withMessage("Loading...").with;
+            //dialog.open();
+        });
 
         // edit item
         account.getSubMenu().addItem("Edit index", i -> {
 
             Optional<MarketIndex> entity = marketIndexService.get(model.getId());
 
-            IndexDialogConfirmListener listener =  new IndexDialogConfirmListener() {
-                @Override
-                public void onConfirm(IndexModel model) {
-                    updateEntity(entity.get(), model);
-                    marketIndexService.update(entity.get());
-                    grid.getDataProvider().refreshAll();
-                }
+            IndexDialogConfirmListener listener = model1 -> {
+                updateEntity(entity.get(), model1);
+                marketIndexService.update(entity.get());
+                grid.getDataProvider().refreshAll();
             };
 
-            //IndexModel model = IndexModel.fromEntity(entity.get());
             IndexDialog dialog = context.getBean(IndexDialog.class, model, listener);
 
             dialog.open();
@@ -275,6 +326,12 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         entity.setImage(model.getImageData());
         entity.setSymbol(model.getSymbol());
         entity.setName(model.getName());
+
+        IndexCategories category=model.getCategory();
+        if(category!=null){
+            entity.setCategory(category.getCode());
+        }
+
         entity.setBuySpreadPercent(model.getBuySpreadPercent());
         entity.setOvnBuyDay(model.getOvnBuyDay());
         entity.setOvnBuyWe(model.getOvnBuyWe());
@@ -313,10 +370,17 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         IndexModel m = new IndexModel();
         m.setId(index.getId());
         m.setSymbol(index.getSymbol());
+        m.setName(index.getName());
+
+        String categoryCode=index.getCategory();
+        Optional<IndexCategories> oCategory= IndexCategories.getItem(categoryCode);
+        if(oCategory.isPresent()){
+            m.setCategory(oCategory.get());
+        }
+
         m.setImageData(index.getImage());
         m.setImage(utils.byteArrayToImage(index.getImage()));
         m.setSymbol(index.getSymbol());
-        m.setName(index.getName());
         m.setBuySpreadPercent(index.getBuySpreadPercent());
         m.setOvnBuyDay(index.getOvnBuyDay());
         m.setOvnBuyWe(index.getOvnBuyWe());
