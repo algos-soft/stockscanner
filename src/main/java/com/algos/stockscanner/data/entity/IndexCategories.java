@@ -4,8 +4,8 @@ import java.util.Optional;
 
 public enum IndexCategories {
 
-    STOCKTIMESERIES ("STOCK","Stock Time Series"),
-    FOREXRATE ("FOREX","Forex Rate"),
+    STOCKTIMESERIES ("STOCK","Stock"),
+    FOREXRATE ("FOREX","Forex"),
     EXCHANGERATE ("EXCHANGE","Exchange Rate"),
     DIGITALCURRENCY("CRYPTO","Digital Currency"),
     TECHNICALINDICATOR("TECH","Technical Indicator"),

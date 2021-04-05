@@ -1,19 +1,16 @@
 package com.algos.stockscanner.views.indexes;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.IndexCategories;
 import com.algos.stockscanner.data.entity.MarketIndex;
-import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.services.MarketService;
+import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
@@ -25,13 +22,11 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
-import com.algos.stockscanner.views.main.MainView;
-import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
@@ -41,6 +36,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Route(value = "indexes", layout = MainView.class)
 @PageTitle("Indexes")
@@ -163,7 +161,22 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         Span category = new Span(categoryDesc);
         category.addClassName("category");
 
-        body.add(symbol, name, category);
+
+
+        Div details = new Div();
+        IronIcon likeIcon = new IronIcon("vaadin", "calendar-o");
+        Span likes = new Span("21-12-2027 -> 30-11-2020");
+        likes.addClassName("likes");
+        IronIcon commentIcon = new IronIcon("vaadin", "ellipsis-dots-h");
+        Span comments = new Span("5.812");
+        comments.addClassName("comments");
+        IronIcon shareIcon = new IronIcon("vaadin", "clock");
+        Span shares = new Span("Daily");
+        shares.addClassName("shares");
+        details.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
+
+
+        body.add(symbol, name, category, details);
 
         Image image = model.getImage();
         Component action = buildActionCombo(model);
@@ -176,61 +189,61 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
 
-    private HorizontalLayout createCardOld(IndexModel model) {
-
-        HorizontalLayout card = new HorizontalLayout();
-        card.addClassName("card");
-        card.setSpacing(false);
-        card.getThemeList().add("spacing-s");
-
-        Image image = model.getImage();
-
-        VerticalLayout body = new VerticalLayout();
-        body.addClassName("description");
-        body.setSpacing(false);
-        body.setPadding(false);
-
-        HorizontalLayout header = new HorizontalLayout();
-        header.addClassName("header");
-        header.setSpacing(false);
-        header.getThemeList().add("spacing-s");
-
-        Span symbol = new Span(model.getSymbol());
-        symbol.addClassName("symbol");
-
-        Span name = new Span(model.getName());
-        name.addClassName("name");
-
-//        Span date = new Span(model.getDate());
-//        date.addClassName("date");
-//        header.add(symbol, name, date);
-
-//        Span post = new Span(model.getPost());
-//        post.addClassName("post");
-
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.addClassName("actions");
-        actions.setSpacing(false);
-        actions.getThemeList().add("spacing-s");
-
-//        IronIcon likeIcon = new IronIcon("vaadin", "heart");
-//        Span likes = new Span(model.getLikes());
-//        likes.addClassName("likes");
-//        IronIcon commentIcon = new IronIcon("vaadin", "comment");
-//        Span comments = new Span(model.getComments());
-//        comments.addClassName("comments");
-//        IronIcon shareIcon = new IronIcon("vaadin", "connect");
-//        Span shares = new Span(model.getShares());
-//        shares.addClassName("shares");
-
-        Component action = buildActionCombo(model);
-
-//        actions.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
-//        body.add(header, post, actions);
-
-        card.add(image, body, action);
-        return card;
-    }
+//    private HorizontalLayout createCardOld(IndexModel model) {
+//
+//        HorizontalLayout card = new HorizontalLayout();
+//        card.addClassName("card");
+//        card.setSpacing(false);
+//        card.getThemeList().add("spacing-s");
+//
+//        Image image = model.getImage();
+//
+//        VerticalLayout body = new VerticalLayout();
+//        body.addClassName("description");
+//        body.setSpacing(false);
+//        body.setPadding(false);
+//
+//        HorizontalLayout header = new HorizontalLayout();
+//        header.addClassName("header");
+//        header.setSpacing(false);
+//        header.getThemeList().add("spacing-s");
+//
+//        Span symbol = new Span(model.getSymbol());
+//        symbol.addClassName("symbol");
+//
+//        Span name = new Span(model.getName());
+//        name.addClassName("name");
+//
+////        Span date = new Span(model.getDate());
+////        date.addClassName("date");
+////        header.add(symbol, name, date);
+//
+////        Span post = new Span(model.getPost());
+////        post.addClassName("post");
+//
+//        HorizontalLayout actions = new HorizontalLayout();
+//        actions.addClassName("actions");
+//        actions.setSpacing(false);
+//        actions.getThemeList().add("spacing-s");
+//
+////        IronIcon likeIcon = new IronIcon("vaadin", "heart");
+////        Span likes = new Span(model.getLikes());
+////        likes.addClassName("likes");
+////        IronIcon commentIcon = new IronIcon("vaadin", "comment");
+////        Span comments = new Span(model.getComments());
+////        comments.addClassName("comments");
+////        IronIcon shareIcon = new IronIcon("vaadin", "connect");
+////        Span shares = new Span(model.getShares());
+////        shares.addClassName("shares");
+//
+//        Component action = buildActionCombo(model);
+//
+////        actions.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
+////        body.add(header, post, actions);
+//
+//        card.add(image, body, action);
+//        return card;
+//    }
 
 
     private Component buildActionCombo(IndexModel model){
@@ -238,48 +251,8 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         MenuBar menuBar = new MenuBar();
         MenuItem account = menuBar.addItem("Actions...");
 
-        account.getSubMenu().addItem("Download historic data", i -> {
 
-            Dialog dialog = new Dialog(new Text("Loading..."));
-            dialog.setCloseOnEsc(false);
-            dialog.setCloseOnOutsideClick(false);
-            dialog.open();
-
-            UI ui = UI.getCurrent();
-
-            new Thread(() -> marketService.download(new MarketService.DownloadProgressListener() {
-                @Override
-                public void onDownloadCompleted() {
-                    ui.access(new Command() {
-                        @Override
-                        public void execute() {
-                            dialog.close();
-                        }
-                    });
-
-                }
-            })).start();
-
-
-//            new Thread(() -> marketService.download(new MarketService.DownloadProgressListener() {
-//                @Override
-//                public void onDownloadCompleted() {
-//                    Command command = new Command() {
-//                        @Override
-//                        public void execute() {
-//                            dialog.close();
-//                        }
-//                    };
-//                    getUI().get().access(command);
-//                    //dialog.close();
-//                }
-//            })).start();
-
-            //ConfirmDialog dialog = ConfirmDialog.createInfo().withMessage("Loading...").with;
-            //dialog.open();
-        });
-
-        // edit item
+        // edit an Index
         account.getSubMenu().addItem("Edit index", i -> {
 
             Optional<MarketIndex> entity = marketIndexService.get(model.getId());
@@ -296,6 +269,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         });
 
+        // Delete an Index
         account.getSubMenu().addItem("Delete index", i -> {
 
             Button bConfirm = new Button();
@@ -313,6 +287,84 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             });
 
             dialog.open();
+        });
+
+
+        // download data for the index
+        account.getSubMenu().addItem("Download historic data", i -> {
+
+            final MarketService.DownloadHandler[] handler = {null}; // use single-element array to avoid the need to be final
+
+            // setup the progress dialog
+            Text text = new Text("Loading...");
+            ProgressBar progressBar = new ProgressBar();
+            progressBar.setIndeterminate(true);
+            VerticalLayout layout = new VerticalLayout();
+            layout.add(text, progressBar);
+            Button bAbort = new Button();
+            ConfirmDialog dialog = ConfirmDialog.create()
+                    .withMessage(layout)
+                    .withButton(bAbort, ButtonOption.caption("Abort"), ButtonOption.closeOnClick(false));
+            dialog.setCloseOnEsc(false);
+            dialog.setCloseOnOutsideClick(false);
+            bAbort.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+                handler[0].setAbort(true);
+            });
+            dialog.setWidth("20em");
+            dialog.open();
+
+            UI ui = UI.getCurrent();
+
+            // download data in a separate thread
+            new Thread(() -> {
+
+                handler[0] =  marketService.download(model.getSymbol(), new MarketService.DownloadListener() {
+                    @Override
+                    public void onDownloadCompleted() {
+                        ui.access(new Command() {
+                            @Override
+                            public void execute() {
+                                dialog.close();
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onDownloadAborted(Exception e) {
+                        ui.access(new Command() {
+                            @Override
+                            public void execute() {
+                                dialog.close();
+                                ConfirmDialog dialog1 = ConfirmDialog.createError().withMessage("Download failed: "+e.getMessage());
+                                dialog1.open();
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onDownloadProgress(int current, int total, String message) {
+
+                        ui.access(new Command() {
+                            @Override
+                            public void execute() {
+                                progressBar.setMax(total);
+                                progressBar.setValue(current);
+                                if(current==0){
+                                    progressBar.setIndeterminate(true);
+                                    text.setText(message);
+                                }else{
+                                    progressBar.setIndeterminate(false);
+                                    text.setText(message+": "+current+"/"+total);
+                                }
+                            }
+                        });
+                    }
+
+                });
+            }).start();
+
         });
 
         return menuBar;

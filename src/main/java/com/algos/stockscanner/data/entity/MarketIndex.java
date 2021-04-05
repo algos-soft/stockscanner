@@ -4,6 +4,8 @@ import com.algos.stockscanner.data.AbstractEntity;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class MarketIndex extends AbstractEntity {
@@ -21,7 +23,11 @@ public class MarketIndex extends AbstractEntity {
     private double ovnBuyDay;
     private double ovnBuyWe;
 
-
+//    @OneToMany(
+//            cascade = CascadeType.ALL,
+//            orphanRemoval = true
+//    )
+//    private List<IndexUnit> units = new ArrayList<>();
 
     public byte[] getImage() {
         return image;
@@ -94,4 +100,12 @@ public class MarketIndex extends AbstractEntity {
     public void setOvnBuyWe(double ovnBuyWe) {
         this.ovnBuyWe = ovnBuyWe;
     }
+
+//    public List<IndexUnit> getUnits() {
+//        return units;
+//    }
+//
+//    public void setUnits(List<IndexUnit> units) {
+//        this.units = units;
+//    }
 }
