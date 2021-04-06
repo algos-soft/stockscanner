@@ -33,16 +33,16 @@ public class DataGenerator {
             ExampleDataGenerator<Simulation> simulationRepositoryGenerator = new ExampleDataGenerator<>(
                     Simulation.class, LocalDateTime.of(2021, 4, 1, 0, 0, 0));
             simulationRepositoryGenerator.setData(Simulation::setId, DataType.ID);
-            simulationRepositoryGenerator.setData(Simulation::setIndex, DataType.WORD);
-            simulationRepositoryGenerator.setData(Simulation::setStart_ts, DataType.DATE_OF_BIRTH);
-            simulationRepositoryGenerator.setData(Simulation::setEnd_ts, DataType.DATE_OF_BIRTH);
-            simulationRepositoryGenerator.setData(Simulation::setAmount, DataType.NUMBER_UP_TO_1000);
+            //simulationRepositoryGenerator.setData(Simulation::setIndex, DataType.WORD);
+            simulationRepositoryGenerator.setData(Simulation::setStartTs, DataType.DATE_OF_BIRTH);
+            simulationRepositoryGenerator.setData(Simulation::setEndTs, DataType.DATE_OF_BIRTH);
+//            simulationRepositoryGenerator.setData(Simulation::setInitialAmount, DataType.NUMBER_UP_TO_1000);
             simulationRepositoryGenerator.setData(Simulation::setLeverage, DataType.NUMBER_UP_TO_100);
-            simulationRepositoryGenerator.setData(Simulation::setWidth, DataType.NUMBER_UP_TO_100);
-            simulationRepositoryGenerator.setData(Simulation::setBalancing, DataType.NUMBER_UP_TO_10);
-            simulationRepositoryGenerator.setData(Simulation::setNum_buy, DataType.NUMBER_UP_TO_100);
-            simulationRepositoryGenerator.setData(Simulation::setNum_sell, DataType.NUMBER_UP_TO_100);
-            simulationRepositoryGenerator.setData(Simulation::setPl_percent, DataType.NUMBER_UP_TO_100);
+//            simulationRepositoryGenerator.setData(Simulation::setWidth, DataType.NUMBER_UP_TO_100);
+//            simulationRepositoryGenerator.setData(Simulation::setBalancing, DataType.NUMBER_UP_TO_10);
+//            simulationRepositoryGenerator.setData(Simulation::setNum_buy, DataType.NUMBER_UP_TO_100);
+//            simulationRepositoryGenerator.setData(Simulation::setNum_sell, DataType.NUMBER_UP_TO_100);
+//            simulationRepositoryGenerator.setData(Simulation::setPl_percent, DataType.NUMBER_UP_TO_100);
             simulationRepository.saveAll(simulationRepositoryGenerator.create(100, seed));
 
             logger.info("Generated demo data");

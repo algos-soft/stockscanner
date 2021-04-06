@@ -71,7 +71,7 @@ public class SimulationsView extends Div {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn("indexCode").setAutoWidth(true);
+        //grid.addColumn("indexCode").setAutoWidth(true);
         grid.addColumn("start_ts").setAutoWidth(true);
         grid.addColumn("end_ts").setAutoWidth(true);
         grid.addColumn("amount").setAutoWidth(true);
@@ -170,7 +170,7 @@ public class SimulationsView extends Div {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
-        indexCode = new TextField("IndexCode");
+        //indexCode = new TextField("IndexCode");
         start_ts = new DatePicker("Start_ts");
         end_ts = new DatePicker("End_ts");
         amount = new TextField("Amount");
@@ -180,7 +180,7 @@ public class SimulationsView extends Div {
         num_buy = new TextField("Num_buy");
         num_sell = new TextField("Num_sell");
         pl_percent = new TextField("Pl_percent");
-        Component[] fields = new Component[]{indexCode, start_ts, end_ts, amount, leverage, width, balancing, num_buy,
+        Component[] fields = new Component[]{start_ts, end_ts, amount, leverage, width, balancing, num_buy,
                 num_sell, pl_percent};
 
         for (Component field : fields) {
