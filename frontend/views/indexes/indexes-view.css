@@ -71,9 +71,9 @@
   width: calc(var(--lumo-icon-size-s) * 0.8);
 }
 
-.indexes-view .likes,
-.indexes-view .comments,
-.indexes-view .shares {
+.indexes-view .interval,
+.indexes-view .points,
+.indexes-view .frequency {
   color: var(--lumo-tertiary-text-color);
   font-size: var(--lumo-font-size-xs);
   margin-right: var(--lumo-space-l);

@@ -145,7 +145,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         card.getThemeList().add("spacing-s");
 
         VerticalLayout body = new VerticalLayout();
-        body.addClassName("description");
+        //body.addClassName("description");
         body.setSpacing(false);
         body.setPadding(false);
         body.getThemeList().add("spacing-s");
@@ -176,11 +176,11 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             text = "no data";
         }
         Span intervalSpan = new Span(text);
-        intervalSpan.addClassName("likes");
+        intervalSpan.addClassName("interval");
 
         IronIcon pointsIcon = new IronIcon("vaadin", "ellipsis-dots-h");
         Span pointsSpan = new Span(String.format("%,d", model.getNumUnits()));
-        pointsSpan.addClassName("comments");
+        pointsSpan.addClassName("points");
 
         IronIcon frequencyIcon = new IronIcon("vaadin", "clock");
         String frequencyDesc=null;
@@ -189,9 +189,8 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             frequencyDesc=frequencyType.getDescription();
         }
         Span frequancySpan = new Span(frequencyDesc);
-        frequancySpan.addClassName("shares");
+        frequancySpan.addClassName("frequency");
         details.add(intervalIcon, intervalSpan, pointsIcon, pointsSpan, frequencyIcon, frequancySpan);
-
 
         body.add(symbol, name, category, details);
 
@@ -206,6 +205,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         if(d!=null){
             return d.format(DateTimeFormatter.ofPattern("dd MMM u"));
         }
+
         return null;
     }
 
