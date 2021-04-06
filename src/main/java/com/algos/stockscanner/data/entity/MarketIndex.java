@@ -12,7 +12,6 @@ public class MarketIndex extends AbstractEntity {
 
 
     @Column(length=65535) // -> MySQL BLOB type
-//    @Basic(fetch= FetchType.EAGER)
     private byte[] image;
     private String symbol;
     private String name;
@@ -23,11 +22,13 @@ public class MarketIndex extends AbstractEntity {
     private double ovnBuyDay;
     private double ovnBuyWe;
 
-//    @OneToMany(
-//            cascade = CascadeType.ALL,
-//            orphanRemoval = true
-//    )
-//    private List<IndexUnit> units = new ArrayList<>();
+    @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<IndexUnit> units = new ArrayList<>();
+
+    private LocalDate unitsFrom;
+    private LocalDate unitsTo;
+    private int numUnits;
+    private String unitFrequency;
 
     public byte[] getImage() {
         return image;
@@ -101,11 +102,43 @@ public class MarketIndex extends AbstractEntity {
         this.ovnBuyWe = ovnBuyWe;
     }
 
-//    public List<IndexUnit> getUnits() {
-//        return units;
-//    }
-//
-//    public void setUnits(List<IndexUnit> units) {
-//        this.units = units;
-//    }
+    public List<IndexUnit> getUnits() {
+        return units;
+    }
+
+    public void setUnits(List<IndexUnit> units) {
+        this.units = units;
+    }
+
+    public LocalDate getUnitsFrom() {
+        return unitsFrom;
+    }
+
+    public void setUnitsFrom(LocalDate unitsFrom) {
+        this.unitsFrom = unitsFrom;
+    }
+
+    public LocalDate getUnitsTo() {
+        return unitsTo;
+    }
+
+    public void setUnitsTo(LocalDate unitsTo) {
+        this.unitsTo = unitsTo;
+    }
+
+    public int getNumUnits() {
+        return numUnits;
+    }
+
+    public void setNumUnits(int numUnits) {
+        this.numUnits = numUnits;
+    }
+
+    public String getUnitFrequency() {
+        return unitFrequency;
+    }
+
+    public void setUnitFrequency(String unitFrequency) {
+        this.unitFrequency = unitFrequency;
+    }
 }

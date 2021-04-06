@@ -24,9 +24,9 @@
 .indexes-view img {
   border-radius: 10%;
   flex-shrink: 0;
-  height: var(--lumo-size-m);
+  height: var(--lumo-size-xl);
+  width: var(--lumo-size-xl);
   margin-right: calc(var(--lumo-space-s) * 1.5);
-  width: var(--lumo-size-m);
 }
 
 .indexes-view .header {

@@ -38,8 +38,8 @@ import java.nio.file.Paths;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class IndexDialog extends Dialog {
 
-    private static final int MAX_IMG_WIDTH=64;
-    private static final int MAX_IMG_HEIGHT=64;
+    private static final int MAX_IMG_WIDTH=128;
+    private static final int MAX_IMG_HEIGHT=128;
 
     private IndexModel model;
     private IndexDialogConfirmListener confirmListener;
@@ -138,8 +138,8 @@ public class IndexDialog extends Dialog {
     private void updateIcon(){
         Image img = utils.byteArrayToImage(imageData);
         imgPlaceholder.removeAll();
-        img.setWidth(2, Unit.EM);
-        img.setHeight(2, Unit.EM);
+        img.setWidth(3, Unit.EM);
+        img.setHeight(3, Unit.EM);
         imgPlaceholder.add(img);
     }
 

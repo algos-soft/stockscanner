@@ -1,6 +1,7 @@
 package com.algos.stockscanner.views.indexes;
 
 import com.algos.stockscanner.beans.Utils;
+import com.algos.stockscanner.data.entity.FrequencyTypes;
 import com.algos.stockscanner.data.entity.IndexCategories;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
@@ -36,6 +37,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -164,16 +167,30 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
         Div details = new Div();
-        IronIcon likeIcon = new IronIcon("vaadin", "calendar-o");
-        Span likes = new Span("21-12-2027 -> 30-11-2020");
-        likes.addClassName("likes");
-        IronIcon commentIcon = new IronIcon("vaadin", "ellipsis-dots-h");
-        Span comments = new Span("5.812");
-        comments.addClassName("comments");
-        IronIcon shareIcon = new IronIcon("vaadin", "clock");
-        Span shares = new Span("Daily");
-        shares.addClassName("shares");
-        details.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
+
+        IronIcon intervalIcon = new IronIcon("vaadin", "calendar-o");
+        String text;
+        if(model.getNumUnits()>0){
+            text=format(model.getUnitsFrom())+" -> "+format(model.getUnitsTo());
+        }else{
+            text = "no data";
+        }
+        Span intervalSpan = new Span(text);
+        intervalSpan.addClassName("likes");
+
+        IronIcon pointsIcon = new IronIcon("vaadin", "ellipsis-dots-h");
+        Span pointsSpan = new Span(String.format("%,d", model.getNumUnits()));
+        pointsSpan.addClassName("comments");
+
+        IronIcon frequencyIcon = new IronIcon("vaadin", "clock");
+        String frequencyDesc=null;
+        FrequencyTypes frequencyType=model.getUnitFrequency();
+        if (frequencyType!=null){
+            frequencyDesc=frequencyType.getDescription();
+        }
+        Span frequancySpan = new Span(frequencyDesc);
+        frequancySpan.addClassName("shares");
+        details.add(intervalIcon, intervalSpan, pointsIcon, pointsSpan, frequencyIcon, frequancySpan);
 
 
         body.add(symbol, name, category, details);
@@ -183,6 +200,13 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         card.add(image, body, action);
         return card;
+    }
+
+    private String format(LocalDate d){
+        if(d!=null){
+            return d.format(DateTimeFormatter.ofPattern("dd MMM u"));
+        }
+        return null;
     }
 
 
@@ -325,6 +349,11 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                             @Override
                             public void execute() {
                                 dialog.close();
+
+                                MarketIndex entity = marketIndexService.get(model.getId()).get();
+                                entityToModel(entity, model);
+                                grid.getDataProvider().refreshItem(model);
+
                             }
                         });
 
@@ -418,27 +447,48 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
 
+    /**
+     * Transform Entity to view Model
+     */
     private IndexModel createIndex(MarketIndex index) {
         IndexModel m = new IndexModel();
-        m.setId(index.getId());
-        m.setSymbol(index.getSymbol());
-        m.setName(index.getName());
+        entityToModel(index, m);
+        return m;
+    }
 
-        String categoryCode=index.getCategory();
+
+    /**
+     * Copy data from Entity to Model*/
+    private void entityToModel(MarketIndex entity, IndexModel model){
+        model.setId(entity.getId());
+        model.setSymbol(entity.getSymbol());
+        model.setName(entity.getName());
+
+        String categoryCode=entity.getCategory();
         Optional<IndexCategories> oCategory= IndexCategories.getItem(categoryCode);
         if(oCategory.isPresent()){
-            m.setCategory(oCategory.get());
+            model.setCategory(oCategory.get());
         }
 
-        m.setImageData(index.getImage());
-        m.setImage(utils.byteArrayToImage(index.getImage()));
-        m.setSymbol(index.getSymbol());
-        m.setBuySpreadPercent(index.getBuySpreadPercent());
-        m.setOvnBuyDay(index.getOvnBuyDay());
-        m.setOvnBuyWe(index.getOvnBuyWe());
-        m.setOvnSellDay(index.getOvnSellDay());
-        m.setOvnSellWe(index.getOvnSellWe());
-        return m;
+        model.setImageData(entity.getImage());
+        model.setImage(utils.byteArrayToImage(entity.getImage()));
+        model.setSymbol(entity.getSymbol());
+        model.setBuySpreadPercent(entity.getBuySpreadPercent());
+        model.setOvnBuyDay(entity.getOvnBuyDay());
+        model.setOvnBuyWe(entity.getOvnBuyWe());
+        model.setOvnSellDay(entity.getOvnSellDay());
+        model.setOvnSellWe(entity.getOvnSellWe());
+
+        model.setUnitsFrom(entity.getUnitsFrom());
+        model.setUnitsTo(entity.getUnitsTo());
+        model.setNumUnits(entity.getNumUnits());
+
+        String frequencyCode=entity.getUnitFrequency();
+        Optional<FrequencyTypes> oFrequency= FrequencyTypes.getItem(frequencyCode);
+        if(oFrequency.isPresent()){
+            model.setUnitFrequency(oFrequency.get());
+        }
+
     }
 
 

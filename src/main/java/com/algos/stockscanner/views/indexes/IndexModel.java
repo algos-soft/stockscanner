@@ -1,9 +1,16 @@
 package com.algos.stockscanner.views.indexes;
 
+import com.algos.stockscanner.data.entity.FrequencyTypes;
 import com.algos.stockscanner.data.entity.IndexCategories;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.vaadin.flow.component.html.Image;
 
+import java.time.LocalDate;
+
+
+/***
+ * Model of an Index for the View
+ */
 public class IndexModel {
 
     private Integer id;
@@ -17,6 +24,11 @@ public class IndexModel {
     private double ovnSellWe;
     private double ovnBuyDay;
     private double ovnBuyWe;
+
+    private LocalDate unitsFrom;
+    private LocalDate unitsTo;
+    private int numUnits;
+    private FrequencyTypes unitFrequency;
 
     public IndexModel() {
     }
@@ -109,5 +121,35 @@ public class IndexModel {
         this.imageData = imageData;
     }
 
+    public LocalDate getUnitsFrom() {
+        return unitsFrom;
+    }
 
+    public void setUnitsFrom(LocalDate unitsFrom) {
+        this.unitsFrom = unitsFrom;
+    }
+
+    public LocalDate getUnitsTo() {
+        return unitsTo;
+    }
+
+    public void setUnitsTo(LocalDate unitsTo) {
+        this.unitsTo = unitsTo;
+    }
+
+    public int getNumUnits() {
+        return numUnits;
+    }
+
+    public void setNumUnits(int numUnits) {
+        this.numUnits = numUnits;
+    }
+
+    public FrequencyTypes getUnitFrequency() {
+        return unitFrequency;
+    }
+
+    public void setUnitFrequency(FrequencyTypes unitFrequency) {
+        this.unitFrequency = unitFrequency;
+    }
 }

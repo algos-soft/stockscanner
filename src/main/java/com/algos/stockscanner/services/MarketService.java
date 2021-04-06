@@ -1,12 +1,11 @@
 package com.algos.stockscanner.services;
 
 import com.algos.stockscanner.beans.HttpClient;
+import com.algos.stockscanner.data.entity.FrequencyTypes;
 import com.algos.stockscanner.data.entity.IndexCategories;
 import com.algos.stockscanner.data.entity.IndexUnit;
 import com.algos.stockscanner.data.entity.MarketIndex;
-import com.algos.stockscanner.data.service.IndexUnitRepository;
 import com.algos.stockscanner.data.service.IndexUnitService;
-import com.algos.stockscanner.data.service.MarketIndexRepository;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.crazzyghost.alphavantage.AlphaVantage;
 import com.crazzyghost.alphavantage.AlphaVantageException;
@@ -14,10 +13,8 @@ import com.crazzyghost.alphavantage.parameters.DataType;
 import com.crazzyghost.alphavantage.parameters.OutputSize;
 import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
 import com.crazzyghost.alphavantage.timeseries.response.TimeSeriesResponse;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,7 +22,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
-import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -45,14 +41,9 @@ public class MarketService {
 
     //private final Moshi moshi = new Moshi.Builder().build();
 
-    @Autowired
-    private MarketIndexRepository marketIndexRepository;
 
     @Autowired
     private MarketIndexService marketIndexService;
-
-    @Autowired
-    private IndexUnitRepository indexUnitRepository;
 
     @Autowired
     private IndexUnitService indexUnitService;
@@ -72,16 +63,13 @@ public class MarketService {
 
         DownloadHandler downloadHandler=null;
 
-        // retrieve the item from the db
         MarketIndex item;
-        MarketIndex miExample = new MarketIndex();
-        miExample.setSymbol(symbol);
-        List<MarketIndex> list = marketIndexRepository.findAll(Example.of(miExample));
-        if(list.size()!=1){
-            downloadListener.onDownloadAborted(new Exception("Symbol "+symbol+" not found in database."));
+        try {
+            item = marketIndexService.findUniqueBySymbol(symbol);
+        } catch (Exception e) {
+            downloadListener.onDownloadAborted(e);
             return null;
         }
-        item=list.get(0);
 
         // retrieve the category
         java.util.Optional<IndexCategories> oCategory = IndexCategories.getItem(item.getCategory());
@@ -131,22 +119,14 @@ public class MarketService {
     public void handleSuccess(TimeSeriesResponse response, MarketIndex marketIndex, DownloadListener downloadListener, DownloadHandler downloadHandler) {
 
         // delete all previous unit data
-        List<IndexUnit> indexUnits = indexUnitRepository.findByIndex(marketIndex);
-        int i=0;
-        int tot=indexUnits.size();
-        for(IndexUnit iu : indexUnits){
-            i++;
-            downloadListener.onDownloadProgress(i,tot,"Deleting old data");
-            indexUnitService.delete(iu.getId());
-        }
-
-        // this approach must be done in batches of 100 records or you get StackOverflow
-        // Iterable<IndexUnit> iterable = () -> indexUnits.iterator();
-        // indexUnitRepository.deleteInBatch(iterable);
+        downloadListener.onDownloadProgress(0,0,"Deleting old data");
+        indexUnitService.deleteByIndex(marketIndex);
 
         // Iterate the new units and save them
         List<StockUnit> units = response.getStockUnits();
         int j=0;
+        LocalDateTime minDateTime=null;
+        LocalDateTime maxDateTime=null;
         for(StockUnit unit : units){
             if (downloadHandler.isAbort()){
                 downloadListener.onDownloadAborted(new Exception("Abort requested by client"));
@@ -154,8 +134,33 @@ public class MarketService {
             }
             j++;
             downloadListener.onDownloadProgress(j, units.size(),"Processing item");
-            saveItem(unit, marketIndex);
+            IndexUnit indexUnit = saveItem(unit, marketIndex);
+
+            // keep minDateTime and maxDateTime up to date
+            if(minDateTime==null){
+                minDateTime=indexUnit.getDateTime();
+            }else{
+                if(indexUnit.getDateTime().isBefore(minDateTime)){
+                    minDateTime=indexUnit.getDateTime();
+                }
+            }
+            if(maxDateTime==null){
+                maxDateTime=indexUnit.getDateTime();
+            }else{
+                if(indexUnit.getDateTime().isAfter(maxDateTime)){
+                    maxDateTime=indexUnit.getDateTime();
+                }
+            }
+
         }
+
+        // Consolidate the totals in the MarketIndex
+        marketIndex.setUnitsFrom(minDateTime.toLocalDate());
+        marketIndex.setUnitsTo(maxDateTime.toLocalDate());
+        marketIndex.setNumUnits(units.size());
+        marketIndex.setUnitFrequency(FrequencyTypes.DAILY.getCode());
+        marketIndexService.update(marketIndex);
+
 
         // completed
         downloadListener.onDownloadCompleted();
@@ -167,10 +172,10 @@ public class MarketService {
     }
 
 
-    private void saveItem(StockUnit unit, MarketIndex marketIndex){
+    private IndexUnit saveItem(StockUnit unit, MarketIndex marketIndex){
         IndexUnit indexUnit = createIndexUnit(unit);
         indexUnit.setIndex(marketIndex);
-        indexUnitRepository.save(indexUnit);
+        return indexUnitService.update(indexUnit);
     }
 
     private IndexUnit createIndexUnit(StockUnit unit){

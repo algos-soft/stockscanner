@@ -10,4 +10,6 @@ public interface IndexUnitRepository extends JpaRepository<IndexUnit, Integer> {
 
     List<IndexUnit> findByIndex (MarketIndex index);
 
+    long deleteByIndex (MarketIndex index);
+
 }
