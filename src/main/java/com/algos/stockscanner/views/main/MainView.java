@@ -21,7 +21,7 @@ import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.router.PageTitle;
-import com.algos.stockscanner.views.permutate.PermutateView;
+import com.algos.stockscanner.views.permutations.PermutationsView;
 import com.algos.stockscanner.views.indexes.IndexesView;
 import com.algos.stockscanner.views.settings.SettingsView;
 import com.algos.stockscanner.views.about.AboutView;
@@ -99,8 +99,11 @@ public class MainView extends AppLayout {
     }
 
     private Component[] createMenuItems() {
-        return new Tab[]{createTab("Permutate", PermutateView.class), createTab("Simulations", SimulationsView.class),
-                createTab("Indexes", IndexesView.class), createTab("Settings", SettingsView.class),
+        return new Tab[]{
+                createTab("Permutations", PermutationsView.class),
+                createTab("Simulations", SimulationsView.class),
+                createTab("Indexes", IndexesView.class),
+                createTab("Settings", SettingsView.class),
                 createTab("About", AboutView.class)};
     }
 

@@ -106,7 +106,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         addButton.getStyle().set("margin-right","1em");
         addButton.setIconAfterText(true);
         addButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
-            addNewIndex();
+            addNewItem();
         });
 
         header.add(searchBox);
@@ -115,9 +115,9 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
     /**
-     * Present an empty dialog to create a new index
+     * Present an empty dialog to create a new item
      */
-    private void addNewIndex(){
+    private void addNewItem(){
 
         IndexDialogConfirmListener listener =  new IndexDialogConfirmListener() {
             @Override

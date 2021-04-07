@@ -1,0 +1,45 @@
+.indexes-dialog {
+  display: flex;
+  flex-direction: column;
+  padding: 0px;
+}
+
+.indexes-dialog img {
+  border-radius: 10%;
+}
+
+.indexes-dialog .header {
+    /*background: gray;*/
+    display: flex;
+    flex-direction: row;
+    align-items: center ;
+    font-size: 130%;
+    font-weight: bold;
+    gap: 0.3em;
+}
+
+.indexes-dialog .body {
+    /*background: yellow;*/
+    display: flex;
+    flex-direction: column;
+    margin-top: 1em;
+}
+
+.indexes-dialog .footer {
+    /*background: blue;*/
+    display: flex;
+    flex-direction: row;
+    margin-top: 1em;
+    align-items:center;
+    /*width: 100%*/
+    justify-content:  flex-end ;
+    gap: 1em;
+}
+
+.indexes-dialog .overnight-box {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+}
+
+
