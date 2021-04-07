@@ -18,11 +18,13 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.Optional;
 
 @Route(value = "simulations", layout = MainView.class)
@@ -89,12 +91,12 @@ public class SimulationsView extends Div {
 
     private void createGrid() {
 
-
         CallbackDataProvider<SimulationModel, Void> provider;
         provider = DataProvider.fromCallbacks(fetchCallback -> {
             int offset = fetchCallback.getOffset();
             int limit = fetchCallback.getLimit();
-            return simulationService.fetch(offset, limit)
+            List<QuerySortOrder> sorts = fetchCallback.getSortOrders();
+            return simulationService.fetch(offset, limit, sorts)
                     .stream();
         }, countCallback -> {
             return simulationService.count();
@@ -105,7 +107,7 @@ public class SimulationsView extends Div {
 
         grid.setDataProvider(provider);
 
-        grid.addColumn(SimulationModel::getId).setHeader("Id");
+        grid.addColumn(SimulationModel::getId, "Id").setHeader("Id");
         grid.addColumn(SimulationModel::getSymbol).setHeader("Symbol");
         grid.addColumn(SimulationModel::getStartTs).setHeader("Start");
         grid.addColumn(SimulationModel::getEndTs).setHeader("End");
