@@ -7,6 +7,7 @@ import java.time.LocalDate;
  */
 public class SimulationModel {
 
+    private int id;
     private byte[] imageData;
     private String symbol;
     private LocalDate startTs;
@@ -25,6 +26,14 @@ public class SimulationModel {
     private int maxPointsHold;
     private int minPointsHold;
     private int totPointsHold;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public byte[] getImageData() {
         return imageData;

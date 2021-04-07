@@ -29,7 +29,7 @@ public class DataGenerator {
 
             logger.info("Generating demo data");
 
-            logger.info("... generating 100 Simulation entities...");
+            logger.info("... generating Simulation entities...");
             ExampleDataGenerator<Simulation> simulationRepositoryGenerator = new ExampleDataGenerator<>(
                     Simulation.class, LocalDateTime.of(2021, 4, 1, 0, 0, 0));
             simulationRepositoryGenerator.setData(Simulation::setId, DataType.ID);
@@ -43,7 +43,7 @@ public class DataGenerator {
 //            simulationRepositoryGenerator.setData(Simulation::setNum_buy, DataType.NUMBER_UP_TO_100);
 //            simulationRepositoryGenerator.setData(Simulation::setNum_sell, DataType.NUMBER_UP_TO_100);
 //            simulationRepositoryGenerator.setData(Simulation::setPl_percent, DataType.NUMBER_UP_TO_100);
-            simulationRepository.saveAll(simulationRepositoryGenerator.create(100, seed));
+            simulationRepository.saveAll(simulationRepositoryGenerator.create(2000, seed));
 
             logger.info("Generated demo data");
         };
