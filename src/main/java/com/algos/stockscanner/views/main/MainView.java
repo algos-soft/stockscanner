@@ -2,13 +2,12 @@ package com.algos.stockscanner.views.main;
 
 import java.util.Optional;
 
+import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Label;
@@ -21,12 +20,8 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.PWA;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
-import com.algos.stockscanner.views.main.MainView;
 import com.algos.stockscanner.views.permutate.PermutateView;
-import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.algos.stockscanner.views.indexes.IndexesView;
 import com.algos.stockscanner.views.settings.SettingsView;
 import com.algos.stockscanner.views.about.AboutView;
