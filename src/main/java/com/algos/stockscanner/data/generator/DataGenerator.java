@@ -1,21 +1,38 @@
 package com.algos.stockscanner.data.generator;
 
+import com.algos.stockscanner.beans.Utils;
+import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.service.MarketIndexService;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 
 import com.algos.stockscanner.data.service.SimulationRepository;
 import com.algos.stockscanner.data.entity.Simulation;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.Resource;
 import org.vaadin.artur.exampledata.DataType;
 import org.vaadin.artur.exampledata.ExampleDataGenerator;
 
 @SpringComponent
 public class DataGenerator {
+
+    @Autowired
+    private MarketIndexService marketIndexService;
+
+    @Autowired
+    private ApplicationContext context;
+
 
     @Bean
     public CommandLineRunner loadData(SimulationRepository simulationRepository) {
@@ -45,8 +62,96 @@ public class DataGenerator {
 //            simulationRepositoryGenerator.setData(Simulation::setPl_percent, DataType.NUMBER_UP_TO_100);
             simulationRepository.saveAll(simulationRepositoryGenerator.create(2000, seed));
 
+
+            generateMarketIndexes();
+
+
             logger.info("Generated demo data");
         };
+    }
+
+    private void generateMarketIndexes(){
+        Logger logger = LoggerFactory.getLogger(getClass());
+
+        logger.info("... generating MarketIndex entities...");
+
+
+        Resource res=context.getResource("images/generic_index.jpg");
+        byte[] imageData = new byte[0];
+        try {
+            imageData = Files.readAllBytes(Paths.get(res.getURI()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        MarketIndex index;
+
+        index = new MarketIndex();
+        index.setSymbol("TSLA");
+        index.setName("Tesla");
+        index.setCategory("STOCK");
+        index.setImage(imageData);
+        marketIndexService.update(index);
+
+        index = new MarketIndex();
+        index.setSymbol("MSFT");
+        index.setName("Microsoft");
+        index.setCategory("STOCK");
+        index.setImage(imageData);
+        marketIndexService.update(index);
+
+        index = new MarketIndex();
+        index.setSymbol("IBM");
+        index.setName("Ibm");
+        index.setCategory("STOCK");
+        index.setImage(imageData);
+        marketIndexService.update(index);
+
+        index = new MarketIndex();
+        index.setSymbol("AAPL");
+        index.setName("Apple");
+        index.setCategory("STOCK");
+        index.setImage(imageData);
+        marketIndexService.update(index);
+
+        index = new MarketIndex();
+        index.setSymbol("MRK");
+        index.setName("Merck");
+        index.setCategory("STOCK");
+        index.setImage(imageData);
+        marketIndexService.update(index);
+
+        index = new MarketIndex();
+        index.setSymbol("NFLX");
+        index.setName("Netflix");
+        index.setCategory("STOCK");
+        index.setImage(imageData);
+        marketIndexService.update(index);
+
+        index = new MarketIndex();
+        index.setSymbol("NKE");
+        index.setName("Nike");
+        index.setCategory("STOCK");
+        index.setImage(imageData);
+        marketIndexService.update(index);
+
+        index = new MarketIndex();
+        index.setSymbol("MARA");
+        index.setName("Marathon Patent Group Inc");
+        index.setCategory("STOCK");
+        index.setImage(imageData);
+        marketIndexService.update(index);
+
+
+
+
+
+
+
+
+        logger.info("Generated MarketIndex entities");
+
     }
 
 }

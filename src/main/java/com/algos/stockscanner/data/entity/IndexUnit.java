@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 @Table(indexes = @Index(columnList = "dateTime"))
 public class IndexUnit extends AbstractEntity {
 
-    private Float open=0f;
-    private Float close=0f;
+    private Float open;
+    private Float close;
     private LocalDateTime dateTime;
 
     @ManyToOne(fetch = FetchType.LAZY)

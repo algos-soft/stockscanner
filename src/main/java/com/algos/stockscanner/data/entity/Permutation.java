@@ -12,33 +12,33 @@ public class Permutation extends AbstractEntity {
 
     // fixed properties
     @ManyToOne(fetch = FetchType.LAZY)
-    private MarketIndex marketIndex;
+    private MarketIndex index;
     private LocalDate startDate;  // start date
-    private Integer days=0;   // number of days
-    private Float amount=0f;  // amount invested
-    private Integer leverage=1;
+    private Integer days;   // number of days
+    private Float amount;  // amount invested
+    private Integer leverage;
 
     // permutable properties
 
-    private Float amplitude=0f;
-    private Boolean permutateAmpitude=false;
-    private Float amplitudeMin=0f;    // min amplitude, percent
-    private Float amplitudeMax=0f;    // max amplitude, percent
-    private Integer amplitudeSteps=0;    // how many steps
+    private Float amplitude;
+    private Boolean permutateAmpitude;
+    private Float amplitudeMin;    // min amplitude, percent
+    private Float amplitudeMax;    // max amplitude, percent
+    private Integer amplitudeSteps;    // how many steps
 
-    private Float balancing=0f;
-    private Boolean permutateBalancing=false;
-    private Float balancingMin=0f;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
-    private Float balancingMax=0f;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
-    private Integer balancingSteps=0;  // how many steps
+    private Float balancing;
+    private Boolean permutateBalancing;
+    private Float balancingMin;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
+    private Float balancingMax;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
+    private Integer balancingSteps;  // how many steps
 
 
-    public MarketIndex getMarketIndex() {
-        return marketIndex;
+    public MarketIndex getIndex() {
+        return index;
     }
 
-    public void setMarketIndex(MarketIndex marketIndex) {
-        this.marketIndex = marketIndex;
+    public void setIndex(MarketIndex index) {
+        this.index = index;
     }
 
     public LocalDate getStartDate() {

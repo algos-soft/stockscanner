@@ -8,13 +8,16 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -50,6 +53,8 @@ public class PermutationDialog extends Dialog {
     private PermutationDialogConfirmListener confirmListener;
 
     private ComboBox<MarketIndex> indexCombo;
+    private DatePicker startDatePicker;
+    private IntegerField numberOfDays;
 
 
     private byte[] imageData;
@@ -160,6 +165,31 @@ public class PermutationDialog extends Dialog {
 
         body.add(indexCombo);
 
+        startDatePicker=new DatePicker("Start date");
+        startDatePicker.setMaxWidth("10em");
+        startDatePicker.setRequired(true);
+
+        numberOfDays = new IntegerField("Number of days");
+        numberOfDays.setLabel("Number of days");
+        numberOfDays.setHasControls(true);
+        numberOfDays.setMin(2);
+
+        FlexLayout layout = new FlexLayout();
+        layout.getStyle().set("gap","1em");
+        layout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        layout.add(startDatePicker, numberOfDays);
+
+        body.add(layout);
+
+
+
+
+
+
+
+
+
+
 //        indexFld.setItems(IndexCategories.values());
 //        indexFld.setTextRenderer(new ItemLabelGenerator<IndexCategories>() {
 //            @Override
@@ -233,16 +263,34 @@ public class PermutationDialog extends Dialog {
 
         // create a renderer for the items in the combo list
         Renderer<MarketIndex> listItemRenderer = new ComponentRenderer<>(item -> {
-            Div text = new Div();
-            text.setText(item.getSymbol());
+
+
+
+            Div divSymbol = new Div();
+            divSymbol.setText(item.getSymbol());
+            divSymbol.getStyle().set("font-weight", "bold");
+            Div divName = new Div();
+//            divName.add(new Text(item.getName()));
+            divName.setText(item.getName());
+            divName.setMaxHeight("0.6em");
+            divName.getStyle().set("font-size", "60%");
+            FlexLayout texts = new FlexLayout();
+            texts.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+            texts.add(divSymbol, divName);
+            texts.getStyle().set("margin-left", "0.5em");
+
 
             Image image = utils.byteArrayToImage(item.getImage());
             image.setWidth("2em");
             image.setHeight("2em");
 
             FlexLayout wrapper = new FlexLayout();
-            text.getStyle().set("margin-left", "0.5em");
-            wrapper.add(image, text);
+            wrapper.setFlexDirection(FlexLayout.FlexDirection.ROW);
+            wrapper.add(image, texts);
+
+//            text.getStyle().set("margin-left", "0.5em");
+//            wrapper.add(image, text);
+
             return wrapper;
         });
 
@@ -250,6 +298,7 @@ public class PermutationDialog extends Dialog {
         indexCombo.setLabel("Index");
         indexCombo.setDataProvider(dataProvider);
         indexCombo.setRenderer(listItemRenderer);
+        indexCombo.setItemLabelGenerator(MarketIndex::getSymbol);
         indexCombo.setRequired(true);
 
     }
@@ -322,6 +371,7 @@ public class PermutationDialog extends Dialog {
 
 
     private void populateFromModel() {
+        //indexCombo.setValue(model.get);
 //        imageData=model.getImageData();
 //        updateIcon();
 //        symbolFld.setValue(model.getSymbol());

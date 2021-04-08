@@ -16,20 +16,28 @@ public class MarketIndex extends AbstractEntity {
     private String symbol;
     private String name;
     private String category;
-    private Double buySpreadPercent=0d;
-    private Double ovnSellDay=0d;
-    private Double ovnSellWe=0d;
-    private Double ovnBuyDay=0d;
-    private Double ovnBuyWe=0d;
+    private Double buySpreadPercent;
+    private Double ovnSellDay;
+    private Double ovnSellWe;
+    private Double ovnBuyDay;
+    private Double ovnBuyWe;
+
+
+    private LocalDate unitsFrom;
+    private LocalDate unitsTo;
+    private Integer numUnits;
+
+    private String unitFrequency;
 
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IndexUnit> units = new ArrayList<>();
 
-    private LocalDate unitsFrom;
-    private LocalDate unitsTo;
-    private Integer numUnits=0;
+    @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Permutation> permutations = new ArrayList<>();
 
-    private String unitFrequency;
+    @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Simulation> simulations = new ArrayList<>();
+
 
     public byte[] getImage() {
         return image;

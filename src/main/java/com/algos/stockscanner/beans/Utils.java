@@ -94,5 +94,31 @@ public class Utils {
     }
 
 
+    public double toPrimitive(Double wrapper){
+        if(wrapper!=null){
+            return wrapper.doubleValue();
+        }else{
+            return 0d;
+        }
+    }
+
+    public float toPrimitive(Float wrapper){
+        if(wrapper!=null){
+            return wrapper.floatValue();
+        }else{
+            return 0f;
+        }
+    }
+
+    public int toPrimitive(Integer wrapper){
+        if(wrapper!=null){
+            return wrapper.intValue();
+        }else{
+            return 0;
+        }
+    }
+
+
+
 
 }

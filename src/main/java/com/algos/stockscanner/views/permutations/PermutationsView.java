@@ -226,44 +226,10 @@ public class PermutationsView extends Div {
      */
     private PermutationModel createModel(Permutation entity) {
         PermutationModel m = new PermutationModel();
-        entityToModel(entity, m);
+        permutationService.entityToModel(entity, m);
         return m;
     }
 
-    /**
-     * Copy data from Entity to Model
-     * */
-    private void entityToModel(Permutation entity, PermutationModel model){
-        model.setId(entity.getId());
-//        model.setSymbol(entity.getSymbol());
-//        model.setName(entity.getName());
-//
-//        String categoryCode=entity.getCategory();
-//        Optional<IndexCategories> oCategory= IndexCategories.getItem(categoryCode);
-//        if(oCategory.isPresent()){
-//            model.setCategory(oCategory.get());
-//        }
-//
-//        model.setImageData(entity.getImage());
-//        model.setImage(utils.byteArrayToImage(entity.getImage()));
-//        model.setSymbol(entity.getSymbol());
-//        model.setBuySpreadPercent(entity.getBuySpreadPercent());
-//        model.setOvnBuyDay(entity.getOvnBuyDay());
-//        model.setOvnBuyWe(entity.getOvnBuyWe());
-//        model.setOvnSellDay(entity.getOvnSellDay());
-//        model.setOvnSellWe(entity.getOvnSellWe());
-//
-//        model.setUnitsFrom(entity.getUnitsFrom());
-//        model.setUnitsTo(entity.getUnitsTo());
-//        model.setNumUnits(entity.getNumUnits());
-//
-//        String frequencyCode=entity.getUnitFrequency();
-//        Optional<FrequencyTypes> oFrequency= FrequencyTypes.getItem(frequencyCode);
-//        if(oFrequency.isPresent()){
-//            model.setUnitFrequency(oFrequency.get());
-//        }
-
-    }
 
 
 

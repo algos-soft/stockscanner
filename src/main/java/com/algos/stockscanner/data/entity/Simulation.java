@@ -12,34 +12,34 @@ public class Simulation extends AbstractEntity {
 
     // --- parameters
     @ManyToOne(fetch = FetchType.LAZY)
-    private MarketIndex marketIndex;
+    private MarketIndex index;
 
     private LocalDate startTs;  // timestamp of first point scanned
     private LocalDate endTs;  // timestamp of last point scanned
-    private Float initialAmount=0f;  // initial amount
-    private Integer leverage=0;
-    private Float amplitude=0f;    // amplitude of the oscillation max/min, in percent
-    private Float balancing=0f;  // balancing of amplitude between up and down phases: 0 = 50% up /50% down, 1 = 100% up, -1=100% down
+    private Float initialAmount;  // initial amount
+    private Integer leverage;
+    private Float amplitude;    // amplitude of the oscillation max/min, in percent
+    private Float balancing;  // balancing of amplitude between up and down phases: 0 = 50% up /50% down, 1 = 100% up, -1=100% down
 
     // ---- consolidated data
-    private Float finalAmount=0f;  // amount at the end of the simulation
-    private Float totSpread=0f;    // total amount of buy spreads paid
-    private Float totCommission=0f;    // total amount of commission paid
-    private Integer numBuy=0;    // number of buy orders
-    private Integer numSell=0;    // number of sell orders
-    private Integer plPercent=0;  // profit/loss percentage
-    private Integer numPointsScanned=0; // number of points scanned
-    private Integer maxPointsHold=0;  // maximum number of points holding a position
-    private Integer minPointsHold=0;  // minimum number of points holding a position
-    private Integer totPointsHold=0;    // total points in holding position
+    private Float finalAmount;  // amount at the end of the simulation
+    private Float totSpread;    // total amount of buy spreads paid
+    private Float totCommission;    // total amount of commission paid
+    private Integer numBuy;    // number of buy orders
+    private Integer numSell;    // number of sell orders
+    private Integer plPercent;  // profit/loss percentage
+    private Integer numPointsScanned; // number of points scanned
+    private Integer maxPointsHold;  // maximum number of points holding a position
+    private Integer minPointsHold;  // minimum number of points holding a position
+    private Integer totPointsHold;    // total points in holding position
 
 
-    public MarketIndex getMarketIndex() {
-        return marketIndex;
+    public MarketIndex getIndex() {
+        return index;
     }
 
-    public void setMarketIndex(MarketIndex marketIndex) {
-        this.marketIndex = marketIndex;
+    public void setIndex(MarketIndex index) {
+        this.index = index;
     }
 
     public LocalDate getStartTs() {

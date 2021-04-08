@@ -351,7 +351,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                                 dialog.close();
 
                                 MarketIndex entity = marketIndexService.get(model.getId()).get();
-                                entityToModel(entity, model);
+                                marketIndexService.entityToModel(entity, model);
                                 grid.getDataProvider().refreshItem(model);
 
                             }
@@ -452,44 +452,10 @@ public class IndexesView extends Div implements AfterNavigationObserver {
      */
     private IndexModel createIndex(MarketIndex index) {
         IndexModel m = new IndexModel();
-        entityToModel(index, m);
+        marketIndexService.entityToModel(index, m);
         return m;
     }
 
-
-    /**
-     * Copy data from Entity to Model*/
-    private void entityToModel(MarketIndex entity, IndexModel model){
-        model.setId(entity.getId());
-        model.setSymbol(entity.getSymbol());
-        model.setName(entity.getName());
-
-        String categoryCode=entity.getCategory();
-        Optional<IndexCategories> oCategory= IndexCategories.getItem(categoryCode);
-        if(oCategory.isPresent()){
-            model.setCategory(oCategory.get());
-        }
-
-        model.setImageData(entity.getImage());
-        model.setImage(utils.byteArrayToImage(entity.getImage()));
-        model.setSymbol(entity.getSymbol());
-        model.setBuySpreadPercent(entity.getBuySpreadPercent());
-        model.setOvnBuyDay(entity.getOvnBuyDay());
-        model.setOvnBuyWe(entity.getOvnBuyWe());
-        model.setOvnSellDay(entity.getOvnSellDay());
-        model.setOvnSellWe(entity.getOvnSellWe());
-
-        model.setUnitsFrom(entity.getUnitsFrom());
-        model.setUnitsTo(entity.getUnitsTo());
-        model.setNumUnits(entity.getNumUnits());
-
-        String frequencyCode=entity.getUnitFrequency();
-        Optional<FrequencyTypes> oFrequency= FrequencyTypes.getItem(frequencyCode);
-        if(oFrequency.isPresent()){
-            model.setUnitFrequency(oFrequency.get());
-        }
-
-    }
 
 
 }

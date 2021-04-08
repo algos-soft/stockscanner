@@ -14,7 +14,7 @@ public class SamplePerson extends AbstractEntity {
     private String phone;
     private LocalDate dateOfBirth;
     private String occupation;
-    private Boolean important=false;
+    private Boolean important;
 
 
     public String getFirstName() {

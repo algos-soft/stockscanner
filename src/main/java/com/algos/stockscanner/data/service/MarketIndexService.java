@@ -1,20 +1,26 @@
 package com.algos.stockscanner.data.service;
 
+import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
-import com.algos.stockscanner.data.entity.Simulation;
-import com.algos.stockscanner.views.simulations.SimulationModel;
-import com.vaadin.flow.data.provider.QuerySortOrder;
-import com.vaadin.flow.data.provider.SortDirection;
+import com.algos.stockscanner.data.enums.FrequencyTypes;
+import com.algos.stockscanner.data.enums.IndexCategories;
+import com.algos.stockscanner.views.indexes.IndexModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MarketIndexService extends CrudService<MarketIndex, Integer> {
+
+    @Autowired
+    private Utils utils;
 
     private MarketIndexRepository repository;
 
@@ -67,5 +73,42 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
     protected MarketIndexRepository getRepository() {
         return repository;
     }
+
+    /**
+     * Copy data from Entity to Model*/
+    public void entityToModel(MarketIndex entity, IndexModel model){
+        model.setId(entity.getId());
+        model.setSymbol(entity.getSymbol());
+        model.setName(entity.getName());
+
+        String categoryCode=entity.getCategory();
+        Optional<IndexCategories> oCategory= IndexCategories.getItem(categoryCode);
+        if(oCategory.isPresent()){
+            model.setCategory(oCategory.get());
+        }
+
+        model.setImageData(entity.getImage());
+        model.setImage(utils.byteArrayToImage(entity.getImage()));
+        model.setSymbol(entity.getSymbol());
+
+        model.setBuySpreadPercent(utils.toPrimitive(entity.getBuySpreadPercent()));
+        model.setOvnBuyDay(utils.toPrimitive(entity.getOvnBuyDay()));
+        model.setOvnBuyWe(utils.toPrimitive(entity.getOvnBuyWe()));
+        model.setOvnSellDay(utils.toPrimitive(entity.getOvnSellDay()));
+        model.setOvnSellWe(utils.toPrimitive(entity.getOvnSellWe()));
+
+        model.setUnitsFrom(entity.getUnitsFrom());
+        model.setUnitsTo(entity.getUnitsTo());
+        model.setNumUnits(utils.toPrimitive(entity.getNumUnits()));
+
+        String frequencyCode=entity.getUnitFrequency();
+        Optional<FrequencyTypes> oFrequency= FrequencyTypes.getItem(frequencyCode);
+        if(oFrequency.isPresent()){
+            model.setUnitFrequency(oFrequency.get());
+        }
+
+    }
+
+
 
 }

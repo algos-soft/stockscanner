@@ -1,5 +1,6 @@
 package com.algos.stockscanner.data.service;
 
+import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.data.provider.QuerySortOrder;
@@ -16,6 +17,9 @@ import java.util.List;
 
 @Service
 public class SimulationService extends CrudService<Simulation, Integer> {
+
+    @Autowired
+    private Utils utils;
 
     private SimulationRepository repository;
 
@@ -80,11 +84,11 @@ public class SimulationService extends CrudService<Simulation, Integer> {
      * Copy data from Entity to View Model
      * */
     private void entityToModel(Simulation entity, SimulationModel model){
-        model.setId(entity.getId());
+        model.setId(utils.toPrimitive(entity.getId()));
 
-        if(entity.getMarketIndex()!=null){
-            model.setSymbol(entity.getMarketIndex().getSymbol());
-            model.setImageData(entity.getMarketIndex().getImage());
+        if(entity.getIndex()!=null){
+            model.setSymbol(entity.getIndex().getSymbol());
+            model.setImageData(entity.getIndex().getImage());
         }
 
     }
