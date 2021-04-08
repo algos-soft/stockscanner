@@ -1,5 +1,6 @@
 package com.algos.stockscanner.data.generator;
 
+import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
@@ -76,7 +77,7 @@ public class DataGenerator {
         logger.info("... generating MarketIndex entities...");
 
 
-        Resource res=context.getResource("images/generic_index.jpg");
+        Resource res=context.getResource(Application.GENERIC_INDEX_ICON);
         byte[] imageData = new byte[0];
         try {
             imageData = Files.readAllBytes(Paths.get(res.getURI()));

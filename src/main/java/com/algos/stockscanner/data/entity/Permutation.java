@@ -14,23 +14,32 @@ public class Permutation extends AbstractEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private MarketIndex index;
     private LocalDate startDate;  // start date
+    private Boolean fixedDays;  // true for fixed number of days, false to go or until TP/SL or until end of index data
     private Integer days;   // number of days
     private Float amount;  // amount invested
     private Integer leverage;
+    private Float stopLoss; // of the whole operation, not of the single shot
+    private Float takeProfit; // of the whole operation, not of the single shot
 
     // permutable properties
 
     private Float amplitude;
-    private Boolean permutateAmpitude;
+    private Boolean amplitudePermutate;
     private Float amplitudeMin;    // min amplitude, percent
     private Float amplitudeMax;    // max amplitude, percent
     private Integer amplitudeSteps;    // how many steps
 
-    private Float balancing;
-    private Boolean permutateBalancing;
-    private Float balancingMin;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
-    private Float balancingMax;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
-    private Integer balancingSteps;  // how many steps
+//    private Float balancing;
+//    private Boolean permutateBalancing;
+//    private Float balancingMin;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
+//    private Float balancingMax;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
+//    private Integer balancingSteps;  // how many steps
+
+    private Integer avgDays;    // number of days taken in account to calculate the starting average value
+    private Boolean avgDaysPermutate;
+    private Integer avgDaysMin;
+    private Integer avgDaysMax;
+    private Integer avgDaysSteps;   // must be divisor of maxAvgDays-minAvgDays
 
 
     public MarketIndex getIndex() {
@@ -47,6 +56,14 @@ public class Permutation extends AbstractEntity {
 
     public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
+    }
+
+    public Boolean getFixedDays() {
+        return fixedDays;
+    }
+
+    public void setFixedDays(Boolean fixedDays) {
+        this.fixedDays = fixedDays;
     }
 
     public Integer getDays() {
@@ -73,6 +90,22 @@ public class Permutation extends AbstractEntity {
         this.leverage = leverage;
     }
 
+    public Float getStopLoss() {
+        return stopLoss;
+    }
+
+    public void setStopLoss(Float stopLoss) {
+        this.stopLoss = stopLoss;
+    }
+
+    public Float getTakeProfit() {
+        return takeProfit;
+    }
+
+    public void setTakeProfit(Float takeProfit) {
+        this.takeProfit = takeProfit;
+    }
+
     public Float getAmplitude() {
         return amplitude;
     }
@@ -81,12 +114,12 @@ public class Permutation extends AbstractEntity {
         this.amplitude = amplitude;
     }
 
-    public Boolean getPermutateAmpitude() {
-        return permutateAmpitude;
+    public Boolean getAmplitudePermutate() {
+        return amplitudePermutate;
     }
 
-    public void setPermutateAmpitude(Boolean permutateAmpitude) {
-        this.permutateAmpitude = permutateAmpitude;
+    public void setAmplitudePermutate(Boolean amplitudePermutate) {
+        this.amplitudePermutate = amplitudePermutate;
     }
 
     public Float getAmplitudeMin() {
@@ -113,43 +146,44 @@ public class Permutation extends AbstractEntity {
         this.amplitudeSteps = amplitudeSteps;
     }
 
-    public Float getBalancing() {
-        return balancing;
+    public Integer getAvgDays() {
+        return avgDays;
     }
 
-    public void setBalancing(Float balancing) {
-        this.balancing = balancing;
+    public void setAvgDays(Integer avgDays) {
+        this.avgDays = avgDays;
     }
 
-    public Boolean getPermutateBalancing() {
-        return permutateBalancing;
+    public Boolean getAvgDaysPermutate() {
+        return avgDaysPermutate;
     }
 
-    public void setPermutateBalancing(Boolean permutateBalancing) {
-        this.permutateBalancing = permutateBalancing;
+    public void setAvgDaysPermutate(Boolean avgDaysPermutate) {
+        this.avgDaysPermutate = avgDaysPermutate;
     }
 
-    public Float getBalancingMin() {
-        return balancingMin;
+    public Integer getAvgDaysMin() {
+        return avgDaysMin;
     }
 
-    public void setBalancingMin(Float balancingMin) {
-        this.balancingMin = balancingMin;
+    public void setAvgDaysMin(Integer avgDaysMin) {
+        this.avgDaysMin = avgDaysMin;
     }
 
-    public Float getBalancingMax() {
-        return balancingMax;
+    public Integer getAvgDaysMax() {
+        return avgDaysMax;
     }
 
-    public void setBalancingMax(Float balancingMax) {
-        this.balancingMax = balancingMax;
+    public void setAvgDaysMax(Integer avgDaysMax) {
+        this.avgDaysMax = avgDaysMax;
     }
 
-    public Integer getBalancingSteps() {
-        return balancingSteps;
+    public Integer getAvgDaysSteps() {
+        return avgDaysSteps;
     }
 
-    public void setBalancingSteps(Integer balancingSteps) {
-        this.balancingSteps = balancingSteps;
+    public void setAvgDaysSteps(Integer avgDaysSteps) {
+        this.avgDaysSteps = avgDaysSteps;
     }
+
 }

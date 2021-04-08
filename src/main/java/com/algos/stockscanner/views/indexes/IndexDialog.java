@@ -1,5 +1,6 @@
 package com.algos.stockscanner.views.indexes;
 
+import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.HttpClient;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.enums.IndexCategories;
@@ -118,7 +119,7 @@ public class IndexDialog extends Dialog {
         });
 
         // load default icon
-        Resource res=context.getResource("images/generic_index.jpg");
+        Resource res=context.getResource(Application.GENERIC_INDEX_ICON);
         try {
             imageData = Files.readAllBytes(Paths.get(res.getURI()));
             imageData = utils.scaleImage(imageData, MAX_IMG_WIDTH, MAX_IMG_HEIGHT);

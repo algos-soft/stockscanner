@@ -1,12 +1,16 @@
 package com.algos.stockscanner.views.permutations;
 
+import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
-import com.algos.stockscanner.data.enums.IndexCategories;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -14,12 +18,12 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
-import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -35,6 +39,8 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -46,29 +52,36 @@ import java.util.concurrent.atomic.AtomicReference;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PermutationDialog extends Dialog {
 
-    private static final int MAX_IMG_WIDTH = 64;
-    private static final int MAX_IMG_HEIGHT = 64;
+    private static final int MAX_IMG_WIDTH = 128;
+    private static final int MAX_IMG_HEIGHT = 128;
 
     private PermutationModel model;
     private PermutationDialogConfirmListener confirmListener;
 
+    private FlexLayout imgPlaceholder;
+
     private ComboBox<MarketIndex> indexCombo;
     private DatePicker startDatePicker;
+
+    private NumberField amountFld;
+    private IntegerField leverageFld;
+    private NumberField stopLossFld;
+    private NumberField takeProfitFld;
+
+    private RadioButtonGroup<String> lengthRadioGroup;
     private IntegerField numberOfDays;
 
+    private Checkbox permutateAmplitudeCheckbox;
+    private IntegerField amplitudeFld;
+    private IntegerField amplitudeMinFld;
+    private IntegerField amplitudeMaxFld;
+    private IntegerField amplitudeStepsFld;
 
-    private byte[] imageData;
-    private TextField symbolFld;
-    private TextField nameFld;
-    private Select<IndexCategories> categoryFld;
-    private NumberField buySpreadFld;
-
-    private NumberField ovnSellDayFld;
-    private NumberField ovnSellWEFld;
-    private NumberField ovnBuyDayFld;
-    private NumberField ovnBuyWEFld;
-
-    private Div imgPlaceholder;
+    private Checkbox permutateAvgDaysCheckbox;
+    private IntegerField avgDaysFld;
+    private IntegerField avgDaysMinFld;
+    private IntegerField avgDaysMaxFld;
+    private IntegerField avgDaysStepsFld;
 
     @Autowired
     private Utils utils;
@@ -97,6 +110,8 @@ public class PermutationDialog extends Dialog {
 
     @PostConstruct
     private void init() {
+        setWidth("30em");
+        setHeight("35em");
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
         add(buildContent());
@@ -110,7 +125,7 @@ public class PermutationDialog extends Dialog {
     private Component buildContent() {
 
         Div layout = new Div();
-        layout.addClassName("indexes-dialog");
+        layout.addClassName("dialog");
         Component header = buildHeader();
         Component body = buildBody();
         Component footer = buildFooter();
@@ -147,11 +162,11 @@ public class PermutationDialog extends Dialog {
     /**
      * Updates the icon in the header based on the current byte array
      */
-    private void updateIcon() {
+    private void updateIcon(byte[] imageData) {
         Image img = utils.byteArrayToImage(imageData);
         imgPlaceholder.removeAll();
-        img.setWidth(3, Unit.EM);
-        img.setHeight(3, Unit.EM);
+        img.setWidth(3f, Unit.EM);
+        img.setHeight(3f, Unit.EM);
         imgPlaceholder.add(img);
     }
 
@@ -161,86 +176,165 @@ public class PermutationDialog extends Dialog {
         Div body = new Div();
         body.addClassName("body");
 
-        buildCombo();
+        Tab tab1 = new Tab("General");
+        Component page1 = buildPage1();
 
-        body.add(indexCombo);
+        Tab tab2 = new Tab("Permutations");
+        Component page2 = buildPage2();
+        page2.setVisible(false);
+
+
+        Map<Tab, Component> tabsToPages = new HashMap<>();
+        tabsToPages.put(tab1, page1);
+        tabsToPages.put(tab2, page2);
+        Tabs tabs = new Tabs(tab1, tab2);
+        Div pages = new Div(page1, page2);
+
+        tabs.addSelectedChangeListener(event -> {
+            tabsToPages.values().forEach(page -> page.setVisible(false));
+            Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
+            selectedPage.setVisible(true);
+        });
+
+        body.add(tabs, pages);
+
+        return body;
+    }
+
+    private Component buildPage1(){
+        FlexLayout layout = new FlexLayout();
+        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+
+        imgPlaceholder=new FlexLayout();
+        imgPlaceholder.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+        imgPlaceholder.getStyle().set("margin-top","auto");
+        Resource res=context.getResource(Application.GENERIC_INDEX_ICON);
+        byte[] imageData;
+        try {
+            imageData = Files.readAllBytes(Paths.get(res.getURI()));
+            imageData = utils.scaleImage(imageData, MAX_IMG_WIDTH, MAX_IMG_HEIGHT);
+            updateIcon(imageData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        buildCombo();
+        FlexLayout comboPanel = new FlexLayout();
+        comboPanel.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        comboPanel.getStyle().set("gap","1em");
+        comboPanel.add(imgPlaceholder, indexCombo);
 
         startDatePicker=new DatePicker("Start date");
         startDatePicker.setMaxWidth("10em");
         startDatePicker.setRequired(true);
+
+        amountFld = new NumberField("Amount");
+        amountFld.setWidth("6em");
+        leverageFld=new IntegerField("Leverage");
+        leverageFld.setWidth("6em");
+        stopLossFld= new NumberField("SL");
+        stopLossFld.setWidth("6em");
+        takeProfitFld= new NumberField("TP");
+        takeProfitFld.setWidth("6em");
+        FlexLayout amountsLayout = new FlexLayout();
+        amountsLayout.getStyle().set("gap","1em");
+        amountsLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        amountsLayout.add(amountFld, leverageFld, stopLossFld, takeProfitFld);
+
+        lengthRadioGroup = new RadioButtonGroup<>();
+        lengthRadioGroup.setLabel("Simulation length");
+        lengthRadioGroup.setItems("Fixed", "Variable");
+        lengthRadioGroup.addValueChangeListener(event -> {
+            if (event.getValue() != null) {
+                numberOfDays.setVisible(event.getValue().equals("Fixed"));
+            }
+        });
 
         numberOfDays = new IntegerField("Number of days");
         numberOfDays.setLabel("Number of days");
         numberOfDays.setHasControls(true);
         numberOfDays.setMin(2);
 
-        FlexLayout layout = new FlexLayout();
-        layout.getStyle().set("gap","1em");
-        layout.setFlexDirection(FlexLayout.FlexDirection.ROW);
-        layout.add(startDatePicker, numberOfDays);
+        FlexLayout lengthLayout = new FlexLayout();
+        lengthLayout.getStyle().set("gap","1em");
+        lengthLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        lengthLayout.add(lengthRadioGroup, numberOfDays);
 
-        body.add(layout);
+        layout.add(comboPanel, startDatePicker, amountsLayout, lengthLayout);
 
-
-
-
-
-
-
-
-
-
-//        indexFld.setItems(IndexCategories.values());
-//        indexFld.setTextRenderer(new ItemLabelGenerator<IndexCategories>() {
-//            @Override
-//            public String apply(IndexCategories item) {
-//                return item.getDescription();
-//            }
-//        });
-//
-//
-////        Component imgComp= buildImage();
-//
-//        //Component body = new Text("You have unsaved changes that will be discarded if you navigate away.");
-//
-//        symbolFld = new TextField();
-//        symbolFld.setLabel("Symbol");
-//
-//        nameFld = new TextField();
-//        nameFld.setLabel("Name");
-//
-//        categoryFld = new Select<IndexCategories>();
-//        categoryFld.setLabel("Category");
-//        categoryFld.setItems(IndexCategories.values());
-//        categoryFld.setTextRenderer(new ItemLabelGenerator<IndexCategories>() {
-//            @Override
-//            public String apply(IndexCategories item) {
-//                return item.getDescription();
-//            }
-//        });
-//
-//        buySpreadFld = new NumberField();
-//        buySpreadFld.setLabel("Buy spread %");
-//
-//        Div divSell = new Div();
-//        divSell.addClassName("overnight-box");
-//        ovnSellDayFld = new NumberField();
-//        ovnSellDayFld.setLabel("Sell, per day, $");
-//        ovnSellWEFld = new NumberField();
-//        ovnSellWEFld.setLabel("Sell, weekend, $");
-//        divSell.add(ovnSellDayFld, ovnSellWEFld);
-//
-//        Div divBuy = new Div();
-//        divBuy.addClassName("overnight-box");
-//        ovnBuyDayFld = new NumberField();
-//        ovnBuyDayFld.setLabel("Buy, per day, $");
-//        ovnBuyWEFld = new NumberField();
-//        ovnBuyWEFld.setLabel("Buy, weekend, $");
-//        divBuy.add(ovnBuyDayFld, ovnBuyWEFld);
-//
-//        body.add(symbolFld, nameFld, categoryFld, buySpreadFld, divSell, divBuy);
-        return body;
+        return layout;
     }
+
+    private Component buildPage2(){
+
+        FlexLayout layout = new FlexLayout();
+        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+
+        Component amplitudePanel = buildAmplitudePanel();
+        Component avgDaysPanel = buildAvgDaysPanel();
+
+        layout.add(amplitudePanel, avgDaysPanel);
+
+        return layout;
+    }
+
+    private Component buildAmplitudePanel(){
+        FlexLayout layout = new FlexLayout();
+        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+
+        amplitudeFld = new IntegerField("Amplitude %");
+
+        amplitudeMinFld = new IntegerField("Amplitude min %");
+        amplitudeMaxFld = new IntegerField("Amplitude max %");
+        amplitudeStepsFld = new IntegerField("# of steps");
+        FlexLayout amplitudeLayout = new FlexLayout();
+        amplitudeLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        amplitudeLayout.getStyle().set("gap","1em");
+        amplitudeLayout.add(amplitudeMinFld, amplitudeMaxFld, amplitudeStepsFld);
+        amplitudeLayout.setVisible(false);
+
+        permutateAmplitudeCheckbox = new Checkbox();
+        permutateAmplitudeCheckbox.setLabel("Permutate amplitude");
+        permutateAmplitudeCheckbox.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>>) event -> {
+            boolean checked = event.getValue();
+            amplitudeFld.setVisible(!checked);
+            amplitudeLayout.setVisible(checked);
+        });
+
+        layout.add(amplitudeFld, amplitudeLayout, permutateAmplitudeCheckbox);
+
+        return layout;
+    }
+
+    private Component buildAvgDaysPanel(){
+
+        FlexLayout layout = new FlexLayout();
+        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+
+        avgDaysFld = new IntegerField("days lookback");
+        avgDaysMinFld = new IntegerField("days lookback min");
+        avgDaysMaxFld = new IntegerField("days lookback max");
+        avgDaysStepsFld = new IntegerField("# of steps");
+        FlexLayout avgDaysLayout = new FlexLayout();
+        avgDaysLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        avgDaysLayout.getStyle().set("gap","1em");
+        avgDaysLayout.add(avgDaysMinFld, avgDaysMaxFld, avgDaysStepsFld);
+        avgDaysLayout.setVisible(false);
+
+        permutateAvgDaysCheckbox = new Checkbox();
+        permutateAvgDaysCheckbox.setLabel("Permutate days lookback");
+        permutateAvgDaysCheckbox.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>>) event -> {
+            boolean checked = event.getValue();
+            avgDaysFld.setVisible(!checked);
+            avgDaysLayout.setVisible(checked);
+        });
+
+        layout.add(avgDaysFld, avgDaysLayout, permutateAvgDaysCheckbox);
+
+        return layout;
+
+    }
+
+
 
 
     private void buildCombo() {
@@ -263,14 +357,10 @@ public class PermutationDialog extends Dialog {
 
         // create a renderer for the items in the combo list
         Renderer<MarketIndex> listItemRenderer = new ComponentRenderer<>(item -> {
-
-
-
             Div divSymbol = new Div();
             divSymbol.setText(item.getSymbol());
             divSymbol.getStyle().set("font-weight", "bold");
             Div divName = new Div();
-//            divName.add(new Text(item.getName()));
             divName.setText(item.getName());
             divName.setMaxHeight("0.6em");
             divName.getStyle().set("font-size", "60%");
@@ -278,7 +368,6 @@ public class PermutationDialog extends Dialog {
             texts.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
             texts.add(divSymbol, divName);
             texts.getStyle().set("margin-left", "0.5em");
-
 
             Image image = utils.byteArrayToImage(item.getImage());
             image.setWidth("2em");
@@ -288,14 +377,12 @@ public class PermutationDialog extends Dialog {
             wrapper.setFlexDirection(FlexLayout.FlexDirection.ROW);
             wrapper.add(image, texts);
 
-//            text.getStyle().set("margin-left", "0.5em");
-//            wrapper.add(image, text);
-
             return wrapper;
         });
 
         indexCombo = new ComboBox<>();
         indexCombo.setLabel("Index");
+        indexCombo.setWidth("14em");
         indexCombo.setDataProvider(dataProvider);
         indexCombo.setRenderer(listItemRenderer);
         indexCombo.setItemLabelGenerator(MarketIndex::getSymbol);
@@ -325,25 +412,6 @@ public class PermutationDialog extends Dialog {
         return btnLayout;
     }
 
-
-    private Component buildImage() {
-        //symbolImage = new Image("images/logo.png", "Image");
-
-        //Div imageDiv = new Div();
-        //imageDiv.add();
-        //byte[] imageBytes = new byte[];
-
-        //StreamResource resource = new StreamResource("icons/icon.png", () -> new ByteArrayInputStream(imageBytes));
-        //Image image = new Image(resource, "dummy image");
-        //add(image);
-
-//        Image image = new Image("https://dummyimage.com/600x400/000/fff", "DummyImage");
-//        add(image);
-
-
-        //return symbolImage;
-        return null;
-    }
 
     /**
      * Build a new model or update the current model from the data displayed in the dialog
@@ -385,11 +453,4 @@ public class PermutationDialog extends Dialog {
     }
 
 
-    private Double getDouble(NumberField field) {
-        Double d = field.getValue();
-        if (d != null) {
-            return d;
-        }
-        return 0d;
-    }
 }

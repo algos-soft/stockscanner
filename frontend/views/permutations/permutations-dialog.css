@@ -1,14 +1,15 @@
-.indexes-dialog {
+.dialog {
   display: flex;
   flex-direction: column;
   padding: 0px;
+  height: 100%;
 }
 
-.indexes-dialog img {
+.dialog img {
   border-radius: 10%;
 }
 
-.indexes-dialog .header {
+.dialog .header {
     /*background: gray;*/
     display: flex;
     flex-direction: row;
@@ -18,14 +19,15 @@
     gap: 0.3em;
 }
 
-.indexes-dialog .body {
+.dialog .body {
     /*background: yellow;*/
     display: flex;
     flex-direction: column;
+    height: 100%;
     margin-top: 1em;
 }
 
-.indexes-dialog .footer {
+.dialog .footer {
     /*background: blue;*/
     display: flex;
     flex-direction: row;
@@ -33,12 +35,6 @@
     align-items:center;
     /*width: 100%*/
     justify-content:  flex-end ;
-    gap: 1em;
-}
-
-.indexes-dialog .overnight-box {
-    display: flex;
-    flex-direction: row;
     gap: 1em;
 }
 
