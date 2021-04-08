@@ -1,8 +1,7 @@
 package com.algos.stockscanner.views.indexes;
 
-import com.algos.stockscanner.data.entity.FrequencyTypes;
-import com.algos.stockscanner.data.entity.IndexCategories;
-import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.enums.FrequencyTypes;
+import com.algos.stockscanner.data.enums.IndexCategories;
 import com.vaadin.flow.component.html.Image;
 
 import java.time.LocalDate;

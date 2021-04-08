@@ -6,9 +6,7 @@ import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
@@ -42,14 +40,27 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
 
 
 
-    public List<MarketIndex> fetch(int offset, int limit) {
-        Pageable pageable = new OffsetBasedPageRequest(offset, limit);
-        Page<MarketIndex> page = repository.findAll(pageable);
+    public List<MarketIndex> fetch(int offset, int limit, Example<MarketIndex> example, Sort sort) {
+
+        // default sort - by symbol
+        if(sort==null){
+            sort = Sort.by("symbol");
+        }
+
+        Pageable pageable = new OffsetBasedPageRequest(offset, limit, sort);
+
+        Page page;
+        if(example!=null){
+            page = repository.findAll(example, pageable);
+        }else{
+            page = repository.findAll(pageable);
+        }
+
         return page.toList();
     }
 
-    public int count() {
-        return (int)repository.count();
+    public int count(Example<MarketIndex> example) {
+        return (int)repository.count(example);
     }
 
     @Override

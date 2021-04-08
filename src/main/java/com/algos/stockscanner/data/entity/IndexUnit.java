@@ -9,26 +9,26 @@ import java.time.LocalDateTime;
 @Table(indexes = @Index(columnList = "dateTime"))
 public class IndexUnit extends AbstractEntity {
 
-    private float open;
-    private float close;
+    private Float open=0f;
+    private Float close=0f;
     private LocalDateTime dateTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private MarketIndex index;
 
-    public float getOpen() {
+    public Float getOpen() {
         return open;
     }
 
-    public void setOpen(float open) {
+    public void setOpen(Float open) {
         this.open = open;
     }
 
-    public float getClose() {
+    public Float getClose() {
         return close;
     }
 
-    public void setClose(float close) {
+    public void setClose(Float close) {
         this.close = close;
     }
 
@@ -47,5 +47,4 @@ public class IndexUnit extends AbstractEntity {
     public void setIndex(MarketIndex index) {
         this.index = index;
     }
-
 }

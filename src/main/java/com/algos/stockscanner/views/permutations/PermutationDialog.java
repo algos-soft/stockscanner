@@ -1,12 +1,9 @@
 package com.algos.stockscanner.views.permutations;
 
-import com.algos.stockscanner.beans.HttpClient;
 import com.algos.stockscanner.beans.Utils;
-import com.algos.stockscanner.data.entity.IndexCategories;
+import com.algos.stockscanner.data.enums.IndexCategories;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.algos.stockscanner.views.indexes.IndexModel;
-import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -20,26 +17,22 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.claspina.confirmdialog.ButtonOption;
-import org.claspina.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.data.renderer.Renderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -222,22 +215,24 @@ public class PermutationDialog extends Dialog {
 
     private void buildCombo() {
 
-        DataProvider<MarketIndex, String> dataProvider;
-        dataProvider = DataProvider.fromFilteringCallbacks(fetchCallback -> {
-            int offset = fetchCallback.getOffset();
-            int limit = fetchCallback.getLimit();
-            return marketIndexService.fetch(offset, limit).stream();
+        // create a DataProvider with filtering callbacks
+        MarketIndex exampleItem = new MarketIndex();
+        ExampleMatcher matcher = ExampleMatcher.matchingAny().withMatcher("symbol", ExampleMatcher.GenericPropertyMatchers.startsWith().ignoreCase());
+        Example<MarketIndex> example = Example.of(exampleItem, matcher);
+        DataProvider<MarketIndex, String> dataProvider = DataProvider.fromFilteringCallbacks(fetchCallback -> {
+            AtomicReference<String> filter=new AtomicReference<>();
+            fetchCallback.getFilter().ifPresent( x -> filter.set(x));
+            exampleItem.setSymbol(filter.get());
+            return marketIndexService.fetch(fetchCallback.getOffset(), fetchCallback.getLimit(), example, null).stream();
         }, countCallback -> {
-            return marketIndexService.count();
+            AtomicReference<String> filter=new AtomicReference<>();
+            countCallback.getFilter().ifPresent( x -> filter.set(x));
+            exampleItem.setSymbol(filter.get());
+            return marketIndexService.count(example);
         });
 
-        indexCombo = new ComboBox<>();
-        indexCombo.setLabel("Index");
-        indexCombo.setDataProvider(dataProvider);
-        indexCombo.setRequired(true);
-
-
-        indexCombo.setRenderer(new ComponentRenderer<>(item -> {
+        // create a renderer for the items in the combo list
+        Renderer<MarketIndex> listItemRenderer = new ComponentRenderer<>(item -> {
             Div text = new Div();
             text.setText(item.getSymbol());
 
@@ -249,8 +244,13 @@ public class PermutationDialog extends Dialog {
             text.getStyle().set("margin-left", "0.5em");
             wrapper.add(image, text);
             return wrapper;
-        }));
+        });
 
+        indexCombo = new ComboBox<>();
+        indexCombo.setLabel("Index");
+        indexCombo.setDataProvider(dataProvider);
+        indexCombo.setRenderer(listItemRenderer);
+        indexCombo.setRequired(true);
 
     }
 

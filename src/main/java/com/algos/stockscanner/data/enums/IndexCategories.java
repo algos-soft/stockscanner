@@ -1,4 +1,4 @@
-package com.algos.stockscanner.data.entity;
+package com.algos.stockscanner.data.enums;
 
 import java.util.Optional;
 

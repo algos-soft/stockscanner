@@ -16,22 +16,22 @@ public class Simulation extends AbstractEntity {
 
     private LocalDate startTs;  // timestamp of first point scanned
     private LocalDate endTs;  // timestamp of last point scanned
-    private float initialAmount;  // initial amount
-    private int leverage;
-    private float amplitude;    // amplitude of the oscillation max/min, in percent
-    private float balancing;  // balancing of amplitude between up and down phases: 0 = 50% up /50% down, 1 = 100% up, -1=100% down
+    private Float initialAmount=0f;  // initial amount
+    private Integer leverage=0;
+    private Float amplitude=0f;    // amplitude of the oscillation max/min, in percent
+    private Float balancing=0f;  // balancing of amplitude between up and down phases: 0 = 50% up /50% down, 1 = 100% up, -1=100% down
 
     // ---- consolidated data
-    private float finalAmount;  // amount at the end of the simulation
-    private float totSpread;    // total amount of buy spreads paid
-    private float totCommission;    // total amount of commission paid
-    private int numBuy;    // number of buy orders
-    private int numSell;    // number of sell orders
-    private int plPercent;  // profit/loss percentage
-    private int numPointsScanned; // number of points scanned
-    private int maxPointsHold;  // maximum number of points holding a position
-    private int minPointsHold;  // minimum number of points holding a position
-    private int totPointsHold;    // total points in holding position
+    private Float finalAmount=0f;  // amount at the end of the simulation
+    private Float totSpread=0f;    // total amount of buy spreads paid
+    private Float totCommission=0f;    // total amount of commission paid
+    private Integer numBuy=0;    // number of buy orders
+    private Integer numSell=0;    // number of sell orders
+    private Integer plPercent=0;  // profit/loss percentage
+    private Integer numPointsScanned=0; // number of points scanned
+    private Integer maxPointsHold=0;  // maximum number of points holding a position
+    private Integer minPointsHold=0;  // minimum number of points holding a position
+    private Integer totPointsHold=0;    // total points in holding position
 
 
     public MarketIndex getMarketIndex() {
@@ -45,124 +45,128 @@ public class Simulation extends AbstractEntity {
     public LocalDate getStartTs() {
         return startTs;
     }
+
     public void setStartTs(LocalDate startTs) {
         this.startTs = startTs;
     }
+
     public LocalDate getEndTs() {
         return endTs;
     }
+
     public void setEndTs(LocalDate endTs) {
         this.endTs = endTs;
     }
-    public float getInitialAmount() {
+
+    public Float getInitialAmount() {
         return initialAmount;
     }
-    public void setInitialAmount(float amount) {
-        this.initialAmount = amount;
+
+    public void setInitialAmount(Float initialAmount) {
+        this.initialAmount = initialAmount;
     }
-    public int getLeverage() {
+
+    public Integer getLeverage() {
         return leverage;
     }
-    public void setLeverage(int leverage) {
+
+    public void setLeverage(Integer leverage) {
         this.leverage = leverage;
     }
 
-    public float getAmplitude() {
+    public Float getAmplitude() {
         return amplitude;
     }
 
-    public void setAmplitude(float amplitude) {
+    public void setAmplitude(Float amplitude) {
         this.amplitude = amplitude;
     }
 
-    public float getBalancing() {
+    public Float getBalancing() {
         return balancing;
     }
-    public void setBalancing(float balancing) {
+
+    public void setBalancing(Float balancing) {
         this.balancing = balancing;
     }
 
-
-
-
-
-    public float getFinalAmount() {
+    public Float getFinalAmount() {
         return finalAmount;
     }
 
-    public void setFinalAmount(float finalAmount) {
+    public void setFinalAmount(Float finalAmount) {
         this.finalAmount = finalAmount;
     }
 
-    public float getTotSpread() {
+    public Float getTotSpread() {
         return totSpread;
     }
 
-    public void setTotSpread(float totSpread) {
+    public void setTotSpread(Float totSpread) {
         this.totSpread = totSpread;
     }
 
-    public float getTotCommission() {
+    public Float getTotCommission() {
         return totCommission;
     }
 
-    public void setTotCommission(float totCommission) {
+    public void setTotCommission(Float totCommission) {
         this.totCommission = totCommission;
     }
 
-    public int getNumBuy() {
+    public Integer getNumBuy() {
         return numBuy;
     }
 
-    public void setNumBuy(int numBuy) {
+    public void setNumBuy(Integer numBuy) {
         this.numBuy = numBuy;
     }
 
-    public int getNumSell() {
+    public Integer getNumSell() {
         return numSell;
     }
 
-    public void setNumSell(int numSell) {
+    public void setNumSell(Integer numSell) {
         this.numSell = numSell;
     }
 
-    public int getPlPercent() {
+    public Integer getPlPercent() {
         return plPercent;
     }
 
-    public void setPlPercent(int plPercent) {
+    public void setPlPercent(Integer plPercent) {
         this.plPercent = plPercent;
     }
 
-    public int getNumPointsScanned() {
+    public Integer getNumPointsScanned() {
         return numPointsScanned;
     }
 
-    public void setNumPointsScanned(int numPointsScanned) {
+    public void setNumPointsScanned(Integer numPointsScanned) {
         this.numPointsScanned = numPointsScanned;
     }
 
-    public int getMaxPointsHold() {
+    public Integer getMaxPointsHold() {
         return maxPointsHold;
     }
 
-    public void setMaxPointsHold(int maxPointsHold) {
+    public void setMaxPointsHold(Integer maxPointsHold) {
         this.maxPointsHold = maxPointsHold;
     }
 
-    public int getMinPointsHold() {
+    public Integer getMinPointsHold() {
         return minPointsHold;
     }
 
-    public void setMinPointsHold(int minPointsHold) {
+    public void setMinPointsHold(Integer minPointsHold) {
         this.minPointsHold = minPointsHold;
     }
 
-    public int getTotPointsHold() {
+    public Integer getTotPointsHold() {
         return totPointsHold;
     }
 
-    public void setTotPointsHold(int totPointsHold) {
+    public void setTotPointsHold(Integer totPointsHold) {
         this.totPointsHold = totPointsHold;
     }
 }

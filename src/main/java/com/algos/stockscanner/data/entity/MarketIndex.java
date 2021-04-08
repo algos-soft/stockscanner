@@ -16,18 +16,19 @@ public class MarketIndex extends AbstractEntity {
     private String symbol;
     private String name;
     private String category;
-    private double BuySpreadPercent;
-    private double ovnSellDay;
-    private double ovnSellWe;
-    private double ovnBuyDay;
-    private double ovnBuyWe;
+    private Double buySpreadPercent=0d;
+    private Double ovnSellDay=0d;
+    private Double ovnSellWe=0d;
+    private Double ovnBuyDay=0d;
+    private Double ovnBuyWe=0d;
 
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IndexUnit> units = new ArrayList<>();
 
     private LocalDate unitsFrom;
     private LocalDate unitsTo;
-    private int numUnits;
+    private Integer numUnits=0;
+
     private String unitFrequency;
 
     public byte[] getImage() {
@@ -62,43 +63,43 @@ public class MarketIndex extends AbstractEntity {
         this.category = category;
     }
 
-    public double getBuySpreadPercent() {
-        return BuySpreadPercent;
+    public Double getBuySpreadPercent() {
+        return buySpreadPercent;
     }
 
-    public void setBuySpreadPercent(double buySpreadPercent) {
-        BuySpreadPercent = buySpreadPercent;
+    public void setBuySpreadPercent(Double buySpreadPercent) {
+        this.buySpreadPercent = buySpreadPercent;
     }
 
-    public double getOvnSellDay() {
+    public Double getOvnSellDay() {
         return ovnSellDay;
     }
 
-    public void setOvnSellDay(double ovnSellDay) {
+    public void setOvnSellDay(Double ovnSellDay) {
         this.ovnSellDay = ovnSellDay;
     }
 
-    public double getOvnSellWe() {
+    public Double getOvnSellWe() {
         return ovnSellWe;
     }
 
-    public void setOvnSellWe(double ovnSellWe) {
+    public void setOvnSellWe(Double ovnSellWe) {
         this.ovnSellWe = ovnSellWe;
     }
 
-    public double getOvnBuyDay() {
+    public Double getOvnBuyDay() {
         return ovnBuyDay;
     }
 
-    public void setOvnBuyDay(double ovnBuyDay) {
+    public void setOvnBuyDay(Double ovnBuyDay) {
         this.ovnBuyDay = ovnBuyDay;
     }
 
-    public double getOvnBuyWe() {
+    public Double getOvnBuyWe() {
         return ovnBuyWe;
     }
 
-    public void setOvnBuyWe(double ovnBuyWe) {
+    public void setOvnBuyWe(Double ovnBuyWe) {
         this.ovnBuyWe = ovnBuyWe;
     }
 
@@ -126,11 +127,11 @@ public class MarketIndex extends AbstractEntity {
         this.unitsTo = unitsTo;
     }
 
-    public int getNumUnits() {
+    public Integer getNumUnits() {
         return numUnits;
     }
 
-    public void setNumUnits(int numUnits) {
+    public void setNumUnits(Integer numUnits) {
         this.numUnits = numUnits;
     }
 

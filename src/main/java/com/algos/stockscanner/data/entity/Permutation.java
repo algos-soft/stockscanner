@@ -14,23 +14,24 @@ public class Permutation extends AbstractEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private MarketIndex marketIndex;
     private LocalDate startDate;  // start date
-    private int days;   // number of days
-    private float amount;  // amount invested
-    private int leverage;
+    private Integer days=0;   // number of days
+    private Float amount=0f;  // amount invested
+    private Integer leverage=1;
 
     // permutable properties
 
-    private float amplitude;
-    private boolean permutateAmpitude;
-    private float amplitudeMin;    // min amplitude, percent
-    private float amplitudeMax;    // max amplitude, percent
-    private int amplitudeSteps;    // how many steps
+    private Float amplitude=0f;
+    private Boolean permutateAmpitude=false;
+    private Float amplitudeMin=0f;    // min amplitude, percent
+    private Float amplitudeMax=0f;    // max amplitude, percent
+    private Integer amplitudeSteps=0;    // how many steps
 
-    private float balancing;
-    private boolean permutateBalancing;
-    private float balancingMin;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
-    private float balancingMax;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
-    private int balancingSteps;  // how many steps
+    private Float balancing=0f;
+    private Boolean permutateBalancing=false;
+    private Float balancingMin=0f;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
+    private Float balancingMax=0f;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
+    private Integer balancingSteps=0;  // how many steps
+
 
     public MarketIndex getMarketIndex() {
         return marketIndex;
@@ -48,107 +49,107 @@ public class Permutation extends AbstractEntity {
         this.startDate = startDate;
     }
 
-    public int getDays() {
+    public Integer getDays() {
         return days;
     }
 
-    public void setDays(int days) {
+    public void setDays(Integer days) {
         this.days = days;
     }
 
-    public float getAmount() {
+    public Float getAmount() {
         return amount;
     }
 
-    public void setAmount(float amount) {
+    public void setAmount(Float amount) {
         this.amount = amount;
     }
 
-    public int getLeverage() {
+    public Integer getLeverage() {
         return leverage;
     }
 
-    public void setLeverage(int leverage) {
+    public void setLeverage(Integer leverage) {
         this.leverage = leverage;
     }
 
-    public float getAmplitude() {
+    public Float getAmplitude() {
         return amplitude;
     }
 
-    public void setAmplitude(float amplitude) {
+    public void setAmplitude(Float amplitude) {
         this.amplitude = amplitude;
     }
 
-    public boolean isPermutateAmpitude() {
+    public Boolean getPermutateAmpitude() {
         return permutateAmpitude;
     }
 
-    public void setPermutateAmpitude(boolean permutateAmpitude) {
+    public void setPermutateAmpitude(Boolean permutateAmpitude) {
         this.permutateAmpitude = permutateAmpitude;
     }
 
-    public float getAmplitudeMin() {
+    public Float getAmplitudeMin() {
         return amplitudeMin;
     }
 
-    public void setAmplitudeMin(float amplitudeMin) {
+    public void setAmplitudeMin(Float amplitudeMin) {
         this.amplitudeMin = amplitudeMin;
     }
 
-    public float getAmplitudeMax() {
+    public Float getAmplitudeMax() {
         return amplitudeMax;
     }
 
-    public void setAmplitudeMax(float amplitudeMax) {
+    public void setAmplitudeMax(Float amplitudeMax) {
         this.amplitudeMax = amplitudeMax;
     }
 
-    public int getAmplitudeSteps() {
+    public Integer getAmplitudeSteps() {
         return amplitudeSteps;
     }
 
-    public void setAmplitudeSteps(int amplitudeSteps) {
+    public void setAmplitudeSteps(Integer amplitudeSteps) {
         this.amplitudeSteps = amplitudeSteps;
     }
 
-    public float getBalancing() {
+    public Float getBalancing() {
         return balancing;
     }
 
-    public void setBalancing(float balancing) {
+    public void setBalancing(Float balancing) {
         this.balancing = balancing;
     }
 
-    public boolean isPermutateBalancing() {
+    public Boolean getPermutateBalancing() {
         return permutateBalancing;
     }
 
-    public void setPermutateBalancing(boolean permutateBalancing) {
+    public void setPermutateBalancing(Boolean permutateBalancing) {
         this.permutateBalancing = permutateBalancing;
     }
 
-    public float getBalancingMin() {
+    public Float getBalancingMin() {
         return balancingMin;
     }
 
-    public void setBalancingMin(float balancingMin) {
+    public void setBalancingMin(Float balancingMin) {
         this.balancingMin = balancingMin;
     }
 
-    public float getBalancingMax() {
+    public Float getBalancingMax() {
         return balancingMax;
     }
 
-    public void setBalancingMax(float balancingMax) {
+    public void setBalancingMax(Float balancingMax) {
         this.balancingMax = balancingMax;
     }
 
-    public int getBalancingSteps() {
+    public Integer getBalancingSteps() {
         return balancingSteps;
     }
 
-    public void setBalancingSteps(int balancingSteps) {
+    public void setBalancingSteps(Integer balancingSteps) {
         this.balancingSteps = balancingSteps;
     }
 }
