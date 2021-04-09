@@ -14,16 +14,16 @@ public class GeneratorModel {
     private String symbol;
     private LocalDate startDate;
     private int days;
-    private float amount;
-    private float stopLoss;
-    private float takeProfit;
+    private int amount;
+    private int stopLoss;
+    private int takeProfit;
     private int leverage;
     private boolean durationFixed;
 
-    private float amplitude;
+    private int amplitude;
     private boolean permutateAmpitude;
-    private float amplitudeMin;    // min amplitude, percent
-    private float amplitudeMax;    // max amplitude, percent
+    private int amplitudeMin;    // min amplitude, percent
+    private int amplitudeMax;    // max amplitude, percent
     private int amplitudeSteps;    // how many steps
 
     private int daysLookback;
@@ -72,27 +72,27 @@ public class GeneratorModel {
         this.days = days;
     }
 
-    public float getAmount() {
+    public int getAmount() {
         return amount;
     }
 
-    public void setAmount(float amount) {
+    public void setAmount(int amount) {
         this.amount = amount;
     }
 
-    public float getStopLoss() {
+    public int getStopLoss() {
         return stopLoss;
     }
 
-    public void setStopLoss(float stopLoss) {
+    public void setStopLoss(int stopLoss) {
         this.stopLoss = stopLoss;
     }
 
-    public float getTakeProfit() {
+    public int getTakeProfit() {
         return takeProfit;
     }
 
-    public void setTakeProfit(float takeProfit) {
+    public void setTakeProfit(int takeProfit) {
         this.takeProfit = takeProfit;
     }
 
@@ -112,11 +112,11 @@ public class GeneratorModel {
         this.durationFixed = durationFixed;
     }
 
-    public float getAmplitude() {
+    public int getAmplitude() {
         return amplitude;
     }
 
-    public void setAmplitude(float amplitude) {
+    public void setAmplitude(int amplitude) {
         this.amplitude = amplitude;
     }
 
@@ -128,19 +128,19 @@ public class GeneratorModel {
         this.permutateAmpitude = permutateAmpitude;
     }
 
-    public float getAmplitudeMin() {
+    public int getAmplitudeMin() {
         return amplitudeMin;
     }
 
-    public void setAmplitudeMin(float amplitudeMin) {
+    public void setAmplitudeMin(int amplitudeMin) {
         this.amplitudeMin = amplitudeMin;
     }
 
-    public float getAmplitudeMax() {
+    public int getAmplitudeMax() {
         return amplitudeMax;
     }
 
-    public void setAmplitudeMax(float amplitudeMax) {
+    public void setAmplitudeMax(int amplitudeMax) {
         this.amplitudeMax = amplitudeMax;
     }
 

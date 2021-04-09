@@ -124,9 +124,10 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         card.getThemeList().add("spacing-s");
 
         Component pan1=buildPan1(model);
+        Component pan2=buildPan2(model);
         Component action = buildActionCombo(model);
 
-        card.add(pan1, action);
+        card.add(pan1, pan2, action);
 
 
 //        VerticalLayout body = new VerticalLayout();
@@ -231,6 +232,39 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         return pan;
     }
 
+
+    private Component buildPan2(GeneratorModel model){
+        Pan pan = new Pan();
+
+        int amount = utils.toPrimitive(model.getAmount());
+        Span cAmount = new Span(format(amount));
+        cAmount.addClassName("amount");
+        int leverage = utils.toPrimitive(model.getLeverage());
+        Span cLeverage = new Span("X"+format(leverage));
+        cLeverage.addClassName("leverage");
+        HorizontalLayout row1 = new HorizontalLayout();
+        row1.add(cAmount, cLeverage);
+
+        int sl = utils.toPrimitive(model.getStopLoss());
+        Span cSL=new Span();
+        if(sl>0){
+            cSL.add("SL "+ format(sl)+"%");
+        }
+        int tp = utils.toPrimitive(model.getTakeProfit());
+        Span cTP=new Span();
+        if(tp>0){
+            cTP.add("TP "+format(tp)+"%");
+        }
+        HorizontalLayout row2 = new HorizontalLayout();
+        row2.addClassName("sltp");
+
+        row2.add(cSL, cTP);
+
+        pan.add(row1, row2);
+
+        return pan;
+    }
+
     /**
      * base for card panels
      */
@@ -239,6 +273,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
             setSpacing(false);
             setPadding(false);
             getThemeList().add("spacing-s");
+            addClassName("panel");
         }
     }
 
@@ -246,9 +281,16 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         if(d!=null){
             return d.format(DateTimeFormatter.ofPattern("dd MMM u"));
         }
-
         return null;
     }
+
+    private String format(Integer n){
+        if(n!=null){
+            return String.format("%,d", n);
+        }
+        return null;
+    }
+
 
     /**
      * Present an empty dialog to create a new item
@@ -346,17 +388,18 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         // edit an item
         account.getSubMenu().addItem("Edit generator", i -> {
 
-//            Optional<MarketIndex> entity = marketIndexService.get(model.getId());
-//
-//            IndexDialogConfirmListener listener = model1 -> {
-//                updateEntity(entity.get(), model1);
-//                marketIndexService.update(entity.get());
-//                grid.getDataProvider().refreshAll();
-//            };
-//
-//            IndexDialog dialog = context.getBean(IndexDialog.class, model, listener);
-//
-//            dialog.open();
+            Generator entity = generatorService.get(model.getId()).get();
+
+            GeneratorDialogConfirmListener listener = model1 -> {
+                updateEntity(entity, model1);
+                generatorService.update(entity);    // write db
+                generatorService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
+                grid.getDataProvider().refreshItem(model1); // refresh only this item
+            };
+
+            GeneratorDialog dialog = context.getBean(GeneratorDialog.class, model, listener);
+
+            dialog.open();
 
         });
 

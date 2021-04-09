@@ -11,6 +11,11 @@
   align-items: center;
 }
 
+.generators-view .panel {
+  border-right: 2px solid #ccc;
+}
+
+
 .generators-view .icon {
   height: 1.5em;
   border-radius: 10%;
@@ -32,6 +37,26 @@
   margin-right: var(--lumo-space-s);
   width: calc(var(--lumo-icon-size-s) * 0.8);
 }
+
+.generators-view .amount {
+  font-size: var(--lumo-font-size-xxl);
+  font-weight: bold;
+}
+
+.generators-view .leverage {
+  align-self: center;
+  font-size: var(--lumo-font-size-xs);
+  border: 2px solid #ccc;
+  padding-left:0.2em; /* this */
+  padding-right:0.2em; /* this */
+}
+
+.generators-view .sltp {
+  font-size: var(--lumo-font-size-xs);
+}
+
+
+
 
 
 

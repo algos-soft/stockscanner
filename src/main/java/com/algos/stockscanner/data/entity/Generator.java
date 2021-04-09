@@ -20,17 +20,17 @@ public class Generator extends AbstractEntity {
     private LocalDate startDate;  // start date
     private Boolean fixedDays;  // true for fixed number of days, false to go or until TP/SL or until end of index data
     private Integer days;   // number of days
-    private Float amount;  // amount invested
+    private Integer amount;  // amount invested
     private Integer leverage;
-    private Float stopLoss; // of the whole operation, not of the single shot
-    private Float takeProfit; // of the whole operation, not of the single shot
+    private Integer stopLoss; // of the whole operation, not of the single shot
+    private Integer takeProfit; // of the whole operation, not of the single shot
 
     // permutable properties
 
-    private Float amplitude;
+    private Integer amplitude;
     private Boolean amplitudePermutate;
-    private Float amplitudeMin;    // min amplitude, percent
-    private Float amplitudeMax;    // max amplitude, percent
+    private Integer amplitudeMin;    // min amplitude, percent
+    private Integer amplitudeMax;    // max amplitude, percent
     private Integer amplitudeSteps;    // how many steps
 
 //    private Float balancing;
@@ -93,11 +93,11 @@ public class Generator extends AbstractEntity {
         this.days = days;
     }
 
-    public Float getAmount() {
+    public Integer getAmount() {
         return amount;
     }
 
-    public void setAmount(Float amount) {
+    public void setAmount(Integer amount) {
         this.amount = amount;
     }
 
@@ -109,27 +109,27 @@ public class Generator extends AbstractEntity {
         this.leverage = leverage;
     }
 
-    public Float getStopLoss() {
+    public Integer getStopLoss() {
         return stopLoss;
     }
 
-    public void setStopLoss(Float stopLoss) {
+    public void setStopLoss(Integer stopLoss) {
         this.stopLoss = stopLoss;
     }
 
-    public Float getTakeProfit() {
+    public Integer getTakeProfit() {
         return takeProfit;
     }
 
-    public void setTakeProfit(Float takeProfit) {
+    public void setTakeProfit(Integer takeProfit) {
         this.takeProfit = takeProfit;
     }
 
-    public Float getAmplitude() {
+    public Integer getAmplitude() {
         return amplitude;
     }
 
-    public void setAmplitude(Float amplitude) {
+    public void setAmplitude(Integer amplitude) {
         this.amplitude = amplitude;
     }
 
@@ -141,19 +141,19 @@ public class Generator extends AbstractEntity {
         this.amplitudePermutate = amplitudePermutate;
     }
 
-    public Float getAmplitudeMin() {
+    public Integer getAmplitudeMin() {
         return amplitudeMin;
     }
 
-    public void setAmplitudeMin(Float amplitudeMin) {
+    public void setAmplitudeMin(Integer amplitudeMin) {
         this.amplitudeMin = amplitudeMin;
     }
 
-    public Float getAmplitudeMax() {
+    public Integer getAmplitudeMax() {
         return amplitudeMax;
     }
 
-    public void setAmplitudeMax(Float amplitudeMax) {
+    public void setAmplitudeMax(Integer amplitudeMax) {
         this.amplitudeMax = amplitudeMax;
     }
 

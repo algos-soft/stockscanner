@@ -284,15 +284,16 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         MenuItem account = menuBar.addItem("Actions...");
 
 
-        // edit an Index
+        // edit an item
         account.getSubMenu().addItem("Edit index", i -> {
 
-            Optional<MarketIndex> entity = marketIndexService.get(model.getId());
+            MarketIndex entity = marketIndexService.get(model.getId()).get();
 
             IndexDialogConfirmListener listener = model1 -> {
-                updateEntity(entity.get(), model1);
-                marketIndexService.update(entity.get());
-                grid.getDataProvider().refreshAll();
+                updateEntity(entity, model1);
+                marketIndexService.update(entity);   // write db
+                marketIndexService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
+                grid.getDataProvider().refreshItem(model1); // refresh only this item
             };
 
             IndexDialog dialog = context.getBean(IndexDialog.class, model, listener);

@@ -51,9 +51,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GeneratorDialog extends Dialog {
 
-//    private static final int MAX_IMG_WIDTH = 128;
-//    private static final int MAX_IMG_HEIGHT = 128;
-
     private static final String LABEL_FIXED = "Fixed";
     private static final String LABEL_VARIABLE = "Variable";
 
@@ -65,10 +62,10 @@ public class GeneratorDialog extends Dialog {
     private ComboBox<MarketIndex> indexCombo;
     private DatePicker startDatePicker;
 
-    private NumberField amountFld;
+    private IntegerField amountFld;
     private IntegerField leverageFld;
-    private NumberField stopLossFld;
-    private NumberField takeProfitFld;
+    private IntegerField stopLossFld;
+    private IntegerField takeProfitFld;
 
     private RadioButtonGroup<String> lengthRadioGroup;
     private IntegerField numberOfDays;
@@ -228,13 +225,13 @@ public class GeneratorDialog extends Dialog {
         startDatePicker.setMaxWidth("10em");
         startDatePicker.setRequired(true);
 
-        amountFld = new NumberField("Amount");
+        amountFld = new IntegerField("Amount");
         amountFld.setWidth("6em");
         leverageFld=new IntegerField("Leverage");
         leverageFld.setWidth("6em");
-        stopLossFld= new NumberField("SL");
+        stopLossFld= new IntegerField("SL");
         stopLossFld.setWidth("6em");
-        takeProfitFld= new NumberField("TP");
+        takeProfitFld= new IntegerField("TP");
         takeProfitFld.setWidth("6em");
         FlexLayout amountsLayout = new FlexLayout();
         amountsLayout.getStyle().set("gap","1em");
@@ -243,7 +240,7 @@ public class GeneratorDialog extends Dialog {
 
         lengthRadioGroup = new RadioButtonGroup<>();
         lengthRadioGroup.setLabel("Simulation length");
-        lengthRadioGroup.setItems(LABEL_FIXED, "Variable");
+        lengthRadioGroup.setItems(LABEL_FIXED, LABEL_VARIABLE);
         lengthRadioGroup.addValueChangeListener(event -> {
             if (event.getValue() != null) {
                 if(event.getValue().equals(LABEL_FIXED)){
@@ -453,14 +450,14 @@ public class GeneratorDialog extends Dialog {
         }
 
         model.setStartDate(startDatePicker.getValue());
-        model.setAmount((float) utils.toPrimitive(amountFld.getValue()));
+        model.setAmount(utils.toPrimitive(amountFld.getValue()));
         model.setLeverage(utils.toPrimitive(leverageFld.getValue()));
-        model.setStopLoss((float) utils.toPrimitive(stopLossFld.getValue()));
-        model.setTakeProfit((float) utils.toPrimitive(takeProfitFld.getValue()));
+        model.setStopLoss(utils.toPrimitive(stopLossFld.getValue()));
+        model.setTakeProfit(utils.toPrimitive(takeProfitFld.getValue()));
 
         String value=lengthRadioGroup.getValue();
-        if(value!=null && value.equals(LABEL_FIXED)){
-            model.setDurationFixed(true);
+        if(value!=null){
+            model.setDurationFixed(value.equals(LABEL_FIXED));
         }
 
         model.setDays(utils.toPrimitive(numberOfDays.getValue()));
@@ -482,17 +479,41 @@ public class GeneratorDialog extends Dialog {
 
 
     private void populateFromModel() {
-        //indexCombo.setValue(model.get);
-//        imageData=model.getImageData();
-//        updateIcon();
-//        symbolFld.setValue(model.getSymbol());
-//        nameFld.setValue(model.getName());
-//        categoryFld.setValue(model.getCategory());
-//        buySpreadFld.setValue(model.getBuySpreadPercent());
-//        ovnSellDayFld.setValue(model.getOvnSellDay());
-//        ovnSellWEFld.setValue(model.getOvnSellWe());
-//        ovnBuyDayFld.setValue(model.getOvnBuyDay());
-//        ovnBuyWEFld.setValue(model.getOvnBuyWe());
+
+        if(model.getSymbol()!=null){
+            try {
+                MarketIndex index=marketIndexService.findUniqueBySymbol(model.getSymbol());
+                indexCombo.setValue(index);
+                updateIcon(index.getImage());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        startDatePicker.setValue(model.getStartDate());
+        amountFld.setValue(utils.toPrimitive(model.getAmount()));
+        leverageFld.setValue(utils.toPrimitive(model.getLeverage()));
+        stopLossFld.setValue(utils.toPrimitive(model.getStopLoss()));
+        takeProfitFld.setValue(utils.toPrimitive(model.getTakeProfit()));
+        if(model.isDurationFixed()){
+            lengthRadioGroup.setValue(LABEL_FIXED);
+        }else{
+            lengthRadioGroup.setValue(LABEL_VARIABLE);
+        }
+        numberOfDays.setValue(utils.toPrimitive(model.getDays()));
+
+        amplitudeFld.setValue(utils.toPrimitive(model.getAmplitude()));
+        amplitudeMinFld.setValue(utils.toPrimitive(model.getAmplitudeMin()));
+        amplitudeMaxFld.setValue(utils.toPrimitive(model.getAmplitudeMax()));
+        amplitudeStepsFld.setValue(utils.toPrimitive(model.getAmplitudeSteps()));
+        permutateAmplitudeCheckbox.setValue(utils.toPrimitive(model.isPermutateAmpitude()));
+
+        avgDaysFld.setValue(utils.toPrimitive(model.getDaysLookback()));
+        avgDaysMinFld.setValue(utils.toPrimitive(model.getDaysLookbackMin()));
+        avgDaysMaxFld.setValue(utils.toPrimitive(model.getDaysLookbackMax()));
+        avgDaysStepsFld.setValue(utils.toPrimitive(model.getDaysLookbackSteps()));
+        permutateAvgDaysCheckbox.setValue(utils.toPrimitive(model.isPermutateDaysLookback()));
+
     }
 
 
