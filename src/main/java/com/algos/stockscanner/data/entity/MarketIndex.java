@@ -33,7 +33,7 @@ public class MarketIndex extends AbstractEntity {
     private List<IndexUnit> units = new ArrayList<>();
 
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Permutation> permutations = new ArrayList<>();
+    private List<Generator> generators = new ArrayList<>();
 
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Simulation> simulations = new ArrayList<>();

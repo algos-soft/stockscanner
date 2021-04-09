@@ -1,30 +1,25 @@
 package com.algos.stockscanner.data.service;
 
 import com.algos.stockscanner.beans.Utils;
+import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
-import com.algos.stockscanner.data.entity.Permutation;
-import com.algos.stockscanner.views.permutations.PermutationModel;
+import com.algos.stockscanner.views.generators.GeneratorModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
-import java.util.List;
-
 @Service
-public class PermutationService extends CrudService<Permutation, Integer> {
+public class GeneratorService extends CrudService<Generator, Integer> {
 
     @Autowired
     private Utils utils;
 
-    private PermutationRepository repository;
+    private GeneratorRepository repository;
 
-    public PermutationService(@Autowired PermutationRepository repository) {
+    public GeneratorService(@Autowired GeneratorRepository repository) {
         this.repository = repository;
     }
 
-//    public List<Permutation> findBySymbol (String symbol){
-//        return repository.findBySymbol(symbol);
-//    }
 
 //    public MarketIndex findUniqueBySymbol (String symbol) throws Exception {
 //        List<MarketIndex> list = repository.findBySymbol(symbol);
@@ -40,15 +35,32 @@ public class PermutationService extends CrudService<Permutation, Integer> {
 
 
     @Override
-    protected PermutationRepository getRepository() {
+    protected GeneratorRepository getRepository() {
         return repository;
     }
 
     /**
      * Copy data from Entity to Model
      * */
-    public void entityToModel(Permutation entity, PermutationModel model){
+    public void entityToModel(Generator entity, GeneratorModel model){
         model.setId(utils.toPrimitive(entity.getId()));
+        MarketIndex index = entity.getIndex();
+        String symbol;
+        byte[] imageData;
+        if(index!=null){
+            imageData=index.getImage();
+            symbol=index.getSymbol();
+        } else{
+            imageData=utils.getDefaultIndexIcon();
+            symbol="n.a.";
+        }
+        model.setSymbol(symbol);
+        model.setImage(utils.byteArrayToImage(imageData));
+
+        model.setAmount(utils.toPrimitive(entity.getAmount()));
+        model.setStartDate(entity.getStartDate());
+        model.setAmplitude(utils.toPrimitive(entity.getAmplitude()));
+
 
 //        model.setSymbol(entity.getSymbol());
 //        model.setName(entity.getName());

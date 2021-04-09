@@ -1,27 +1,30 @@
-package com.algos.stockscanner.views.permutations;
+package com.algos.stockscanner.views.generators;
 
 import com.algos.stockscanner.beans.Utils;
-import com.algos.stockscanner.data.entity.Permutation;
-import com.algos.stockscanner.data.service.PermutationService;
+import com.algos.stockscanner.data.entity.Generator;
+import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.service.GeneratorService;
+import com.algos.stockscanner.data.service.MarketIndexService;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.*;
 import com.algos.stockscanner.views.main.MainView;
-import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.component.dependency.CssImport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
@@ -30,16 +33,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Route(value = "permutations", layout = MainView.class)
+@Route(value = "generators", layout = MainView.class)
 @RouteAlias(value = "", layout = MainView.class)
-@PageTitle("Permutations")
-@CssImport("./views/permutations/permutations-view.css")
-public class PermutationsView extends Div {
+@PageTitle("Generators")
+@CssImport("./views/generators/generators-view.css")
+public class GeneratorsView extends Div implements AfterNavigationObserver  {
 
-    Grid<PermutationModel> grid = new Grid<>();
+    Grid<GeneratorModel> grid = new Grid<>();
 
     @Autowired
-    private PermutationService permutationService;
+    private GeneratorService generatorService;
+
+    @Autowired
+    private MarketIndexService marketIndexService;
 
     @Autowired
     private ApplicationContext context;
@@ -47,12 +53,12 @@ public class PermutationsView extends Div {
     @Autowired
     private Utils utils;
 
-    public PermutationsView() {
+    public GeneratorsView() {
     }
 
     @PostConstruct
     private void init() {
-        addClassName("permutations-view");
+        addClassName("generators-view");
         setSizeFull();
         grid.setHeight("100%");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
@@ -75,9 +81,17 @@ public class PermutationsView extends Div {
     }
 
 
+    /**
+     * Reload data when this view is displayed.
+     */
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        loadAll();
+    }
+
     private void customizeHeader(HorizontalLayout header){
 
-        Button addButton = new Button("Add Permutation",  new Icon(VaadinIcon.PLUS_CIRCLE));
+        Button addButton = new Button("New Generator",  new Icon(VaadinIcon.PLUS_CIRCLE));
         addButton.getStyle().set("margin-left","1em");
         addButton.getStyle().set("margin-right","1em");
         addButton.setIconAfterText(true);
@@ -90,21 +104,23 @@ public class PermutationsView extends Div {
 
 
 
-    private HorizontalLayout createCard(PermutationModel model) {
+    private HorizontalLayout createCard(GeneratorModel model) {
 
         HorizontalLayout card = new HorizontalLayout();
         card.addClassName("card");
         card.setSpacing(false);
         card.getThemeList().add("spacing-s");
 
-        VerticalLayout body = new VerticalLayout();
-        //body.addClassName("description");
-        body.setSpacing(false);
-        body.setPadding(false);
-        body.getThemeList().add("spacing-s");
+        card.add(buildPan1(model));
 
-        Span symbol = new Span(model.getSymbol());
-        symbol.addClassName("symbol");
+
+//        VerticalLayout body = new VerticalLayout();
+//        body.setSpacing(false);
+//        body.setPadding(false);
+//        body.getThemeList().add("spacing-s");
+
+//        Span symbol = new Span(model.getSymbol());
+//        symbol.addClassName("symbol");
 
 //        Span name = new Span(model.getName());
 //        name.addClassName("name");
@@ -146,14 +162,43 @@ public class PermutationsView extends Div {
 //        details.add(intervalIcon, intervalSpan, pointsIcon, pointsSpan, frequencyIcon, frequancySpan);
 
         //body.add(symbol, name, category, details);
-        body.add(symbol);
+//        body.add(symbol);
 
 //        Image image = model.getImage();
 //        Component action = buildActionCombo(model);
 
         //card.add(image, body, action);
-        card.add(body);
+//        card.add(body);
         return card;
+    }
+
+
+    private Component buildPan1(GeneratorModel model){
+        Pan pan = new Pan();
+        Image img = model.getImage();
+        if(img==null){
+            img = utils.byteArrayToImage(utils.getDefaultIndexIcon());
+        }
+        img.addClassName("icon");
+        Span symbol = new Span(model.getSymbol());
+        symbol.addClassName("symbol");
+        HorizontalLayout hl = new HorizontalLayout();
+        hl.add(img, symbol);
+        Span date = new Span(format(model.getStartDate()));
+        date.addClassName("date");
+        pan.add(hl, date);
+        return pan;
+    }
+
+    /**
+     * base for card panels
+     */
+    class Pan extends VerticalLayout{
+        public Pan() {
+            setSpacing(false);
+            setPadding(false);
+            getThemeList().add("spacing-s");
+        }
     }
 
     private String format(LocalDate d){
@@ -169,17 +214,17 @@ public class PermutationsView extends Div {
      */
     private void addNewItem(){
 
-        PermutationDialogConfirmListener listener =  new PermutationDialogConfirmListener() {
+        GeneratorDialogConfirmListener listener =  new GeneratorDialogConfirmListener() {
             @Override
-            public void onConfirm(PermutationModel model) {
-                Permutation entity = new Permutation();
+            public void onConfirm(GeneratorModel model) {
+                Generator entity = new Generator();
                 updateEntity(entity, model);
-                permutationService.update(entity);
+                generatorService.update(entity);
                 loadAll();
             }
         };
 
-        PermutationDialog dialog = context.getBean(PermutationDialog.class, listener);
+        GeneratorDialog dialog = context.getBean(GeneratorDialog.class, listener);
 
         dialog.open();
     }
@@ -187,31 +232,41 @@ public class PermutationsView extends Div {
     /**
      * Update entity from model
      */
-    private void updateEntity(Permutation entity, PermutationModel model){
-//        entity.setImage(model.getImageData());
-//        entity.setSymbol(model.getSymbol());
-//        entity.setName(model.getName());
-//
-//        IndexCategories category=model.getCategory();
-//        if(category!=null){
-//            entity.setCategory(category.getCode());
-//        }
-//
-//        entity.setBuySpreadPercent(model.getBuySpreadPercent());
-//        entity.setOvnBuyDay(model.getOvnBuyDay());
-//        entity.setOvnBuyWe(model.getOvnBuyWe());
-//        entity.setOvnSellDay(model.getOvnSellDay());
-//        entity.setOvnSellWe(model.getOvnSellWe());
+    private void updateEntity(Generator entity, GeneratorModel model){
+        String symbol = model.getSymbol();
+        MarketIndex index=null;
+        try {
+            index = marketIndexService.findUniqueBySymbol(symbol);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        entity.setIndex(index);
+
+        entity.setAmount(model.getAmount());
+        entity.setAmplitude(model.getAmplitude());
+        entity.setAmplitudeMax(model.getAmplitudeMax());
+        entity.setAmplitudeMin(model.getAmplitudeMin());
+        entity.setAmplitudePermutate(model.isPermutateAmpitude());
+        entity.setAmplitudeSteps(model.getAmplitudeSteps());
+        entity.setAvgDays(model.getDays());
+        entity.setAvgDaysMax(model.getDaysLookbackMax());
+        entity.setAvgDaysMin(model.getDaysLookbackMin());
+        entity.setAvgDaysPermutate(model.isPermutateDaysLookback());
+        entity.setFixedDays(model.isDurationFixed());
+        entity.setLeverage(model.getLeverage());
+        entity.setStartDate(model.getStartDate());
+        entity.setStopLoss(model.getStopLoss());
+        entity.setTakeProfit(model.getTakeProfit());
     }
 
     /**
      * Load all data in the grid
      */
     private void loadAll(){
-        List<PermutationModel> outList=new ArrayList<>();
+        List<GeneratorModel> outList=new ArrayList<>();
 
         Pageable p = Pageable.unpaged();
-        Page<Permutation> page = permutationService.list(p);
+        Page<Generator> page = generatorService.list(p);
 
         page.stream().forEach(e -> {
             outList.add(createModel(e));
@@ -224,9 +279,9 @@ public class PermutationsView extends Div {
     /**
      * Transform Entity to view Model
      */
-    private PermutationModel createModel(Permutation entity) {
-        PermutationModel m = new PermutationModel();
-        permutationService.entityToModel(entity, m);
+    private GeneratorModel createModel(Generator entity) {
+        GeneratorModel m = new GeneratorModel();
+        generatorService.entityToModel(entity, m);
         return m;
     }
 

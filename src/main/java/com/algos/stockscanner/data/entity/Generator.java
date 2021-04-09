@@ -8,10 +8,10 @@ import javax.persistence.ManyToOne;
 import java.time.LocalDate;
 
 @Entity
-public class Permutation extends AbstractEntity {
+public class Generator extends AbstractEntity {
 
     // fixed properties
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private MarketIndex index;
     private LocalDate startDate;  // start date
     private Boolean fixedDays;  // true for fixed number of days, false to go or until TP/SL or until end of index data

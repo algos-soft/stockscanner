@@ -1,6 +1,5 @@
-package com.algos.stockscanner.views.permutations;
+package com.algos.stockscanner.views.generators;
 
-import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
@@ -45,18 +44,21 @@ import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
- * Dialog to edit a Permutation
+ * Dialog to edit a Generator
  */
-@CssImport("./views/permutations/permutations-dialog.css")
+@CssImport("./views/generators/generators-dialog.css")
 @org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class PermutationDialog extends Dialog {
+public class GeneratorDialog extends Dialog {
 
-    private static final int MAX_IMG_WIDTH = 128;
-    private static final int MAX_IMG_HEIGHT = 128;
+//    private static final int MAX_IMG_WIDTH = 128;
+//    private static final int MAX_IMG_HEIGHT = 128;
 
-    private PermutationModel model;
-    private PermutationDialogConfirmListener confirmListener;
+    private static final String LABEL_FIXED = "Fixed";
+    private static final String LABEL_VARIABLE = "Variable";
+
+    private GeneratorModel model;
+    private GeneratorDialogConfirmListener confirmListener;
 
     private FlexLayout imgPlaceholder;
 
@@ -93,16 +95,16 @@ public class PermutationDialog extends Dialog {
     private MarketIndexService marketIndexService;
 
 
-    public PermutationDialog() {
-        this((PermutationDialogConfirmListener) null);
+    public GeneratorDialog() {
+        this((GeneratorDialogConfirmListener) null);
     }
 
-    public PermutationDialog(PermutationDialogConfirmListener confirmListener) {
-        this((PermutationModel) null, confirmListener);
+    public GeneratorDialog(GeneratorDialogConfirmListener confirmListener) {
+        this((GeneratorModel) null, confirmListener);
         this.model = model;
     }
 
-    public PermutationDialog(PermutationModel model, PermutationDialogConfirmListener confirmListener) {
+    public GeneratorDialog(GeneratorModel model, GeneratorDialogConfirmListener confirmListener) {
         this.model = model;
         this.confirmListener = confirmListener;
     }
@@ -141,11 +143,11 @@ public class PermutationDialog extends Dialog {
         header.addClassName("header");
 
         // load default icon
-        Resource res = context.getResource("images/rubik.jpg");
+        Resource res = context.getResource("images/generator.png");
         byte[] imageData = null;
         try {
             imageData = Files.readAllBytes(Paths.get(res.getURI()));
-            imageData = utils.scaleImage(imageData, MAX_IMG_WIDTH, MAX_IMG_HEIGHT);
+//            imageData = utils.scaleImage(imageData, MAX_IMG_WIDTH, MAX_IMG_HEIGHT);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -154,7 +156,7 @@ public class PermutationDialog extends Dialog {
         img.setWidth(2, Unit.EM);
         img.setHeight(2, Unit.EM);
 
-        Label title = new Label("Permutation");
+        Label title = new Label("Generator");
         header.add(img, title);
         return header;
     }
@@ -241,10 +243,16 @@ public class PermutationDialog extends Dialog {
 
         lengthRadioGroup = new RadioButtonGroup<>();
         lengthRadioGroup.setLabel("Simulation length");
-        lengthRadioGroup.setItems("Fixed", "Variable");
+        lengthRadioGroup.setItems(LABEL_FIXED, "Variable");
         lengthRadioGroup.addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                numberOfDays.setVisible(event.getValue().equals("Fixed"));
+                if(event.getValue().equals(LABEL_FIXED)){
+                    numberOfDays.setLabel("Fixed number of days");
+                    numberOfDays.setHelperText("The simulation will stop after this number of days");
+                }else{
+                    numberOfDays.setLabel("Max number of days");
+                    numberOfDays.setHelperText("(Optional) the simulation will not exceed this number of days");
+                }
             }
         });
 
@@ -252,6 +260,7 @@ public class PermutationDialog extends Dialog {
         numberOfDays.setLabel("Number of days");
         numberOfDays.setHasControls(true);
         numberOfDays.setMin(2);
+        numberOfDays.setWidth("10em");
 
         FlexLayout lengthLayout = new FlexLayout();
         lengthLayout.getStyle().set("gap","1em");
@@ -409,7 +418,7 @@ public class PermutationDialog extends Dialog {
         btnLayout.addClassName("footer");
 
         Button confirmButton = new Button("Confirm", event -> {
-            PermutationModel model = modelFromDialog();
+            GeneratorModel model = modelFromDialog();
             confirmListener.onConfirm(model);
             close();
         });
@@ -430,24 +439,44 @@ public class PermutationDialog extends Dialog {
     /**
      * Build a new model or update the current model from the data displayed in the dialog
      */
-    private PermutationModel modelFromDialog() {
-        PermutationModel model;
+    private GeneratorModel modelFromDialog() {
+        GeneratorModel model;
         if (this.model != null) {
             model = this.model;
         } else {
-            model = new PermutationModel();
+            model = new GeneratorModel();
         }
 
-//        model.setImageData(imageData);
-//        model.setImage(utils.byteArrayToImage(imageData));
-//        model.setSymbol(symbolFld.getValue());
-//        model.setName(nameFld.getValue());
-//        model.setCategory(categoryFld.getValue());
-//        model.setBuySpreadPercent(getDouble(buySpreadFld));
-//        model.setOvnSellDay(getDouble(ovnSellDayFld));
-//        model.setOvnSellWe(getDouble(ovnSellWEFld));
-//        model.setOvnBuyDay(getDouble(ovnBuyDayFld));
-//        model.setOvnBuyWe(getDouble(ovnBuyWEFld));
+        MarketIndex index = indexCombo.getValue();
+        if(index!=null){
+            model.setSymbol(index.getSymbol());
+        }
+
+        model.setStartDate(startDatePicker.getValue());
+        model.setAmount((float) utils.toPrimitive(amountFld.getValue()));
+        model.setLeverage(utils.toPrimitive(leverageFld.getValue()));
+        model.setStopLoss((float) utils.toPrimitive(stopLossFld.getValue()));
+        model.setTakeProfit((float) utils.toPrimitive(takeProfitFld.getValue()));
+
+        String value=lengthRadioGroup.getValue();
+        if(value!=null && value.equals(LABEL_FIXED)){
+            model.setDurationFixed(true);
+        }
+
+        model.setDays(utils.toPrimitive(numberOfDays.getValue()));
+
+        model.setAmplitude(utils.toPrimitive(amplitudeFld.getValue()));
+        model.setAmplitudeMin(utils.toPrimitive(amplitudeMinFld.getValue()));
+        model.setAmplitudeMax(utils.toPrimitive(amplitudeMaxFld.getValue()));
+        model.setAmplitudeSteps(utils.toPrimitive(amplitudeStepsFld.getValue()));
+        model.setPermutateAmpitude(permutateAmplitudeCheckbox.getValue());
+
+        model.setDaysLookback(utils.toPrimitive(avgDaysFld.getValue()));
+        model.setDaysLookbackMin(utils.toPrimitive(avgDaysMinFld.getValue()));
+        model.setDaysLookbackMax(utils.toPrimitive(avgDaysMaxFld.getValue()));
+        model.setDaysLookbackSteps(utils.toPrimitive(avgDaysStepsFld.getValue()));
+        model.setPermutateDaysLookback(permutateAvgDaysCheckbox.getValue());
+
         return model;
     }
 

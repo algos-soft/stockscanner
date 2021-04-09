@@ -102,7 +102,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             }
         });
 
-        Button addButton = new Button("Add Index",  new Icon(VaadinIcon.PLUS_CIRCLE));
+        Button addButton = new Button("New Index",  new Icon(VaadinIcon.PLUS_CIRCLE));
         addButton.getStyle().set("margin-left","1em");
         addButton.getStyle().set("margin-right","1em");
         addButton.setIconAfterText(true);

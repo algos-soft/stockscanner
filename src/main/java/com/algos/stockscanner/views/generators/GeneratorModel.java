@@ -1,19 +1,24 @@
-package com.algos.stockscanner.views.permutations;
+package com.algos.stockscanner.views.generators;
+
+import com.vaadin.flow.component.html.Image;
 
 import java.time.LocalDate;
 
 /***
- * Model of a Permutation for the View
+ * Model of a Generator for the View
  */
-public class PermutationModel {
+public class GeneratorModel {
 
     private int id;
-    private byte[] imageData;
+    private Image image;
     private String symbol;
     private LocalDate startDate;
     private int days;
     private float amount;
+    private float stopLoss;
+    private float takeProfit;
     private int leverage;
+    private boolean durationFixed;
 
     private float amplitude;
     private boolean permutateAmpitude;
@@ -21,11 +26,11 @@ public class PermutationModel {
     private float amplitudeMax;    // max amplitude, percent
     private int amplitudeSteps;    // how many steps
 
-    private float balancing;
-    private boolean permutateBalancing;
-    private float balancingMin;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
-    private float balancingMax;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
-    private int balancingSteps;  // how many steps
+    private int daysLookback;
+    private boolean permutateDaysLookback;
+    private int daysLookbackMin;
+    private int daysLookbackMax;
+    private int daysLookbackSteps;
 
     public int getId() {
         return id;
@@ -35,12 +40,12 @@ public class PermutationModel {
         this.id = id;
     }
 
-    public byte[] getImageData() {
-        return imageData;
+    public Image getImage() {
+        return image;
     }
 
-    public void setImageData(byte[] imageData) {
-        this.imageData = imageData;
+    public void setImage(Image image) {
+        this.image = image;
     }
 
     public String getSymbol() {
@@ -75,12 +80,36 @@ public class PermutationModel {
         this.amount = amount;
     }
 
+    public float getStopLoss() {
+        return stopLoss;
+    }
+
+    public void setStopLoss(float stopLoss) {
+        this.stopLoss = stopLoss;
+    }
+
+    public float getTakeProfit() {
+        return takeProfit;
+    }
+
+    public void setTakeProfit(float takeProfit) {
+        this.takeProfit = takeProfit;
+    }
+
     public int getLeverage() {
         return leverage;
     }
 
     public void setLeverage(int leverage) {
         this.leverage = leverage;
+    }
+
+    public boolean isDurationFixed() {
+        return durationFixed;
+    }
+
+    public void setDurationFixed(boolean durationFixed) {
+        this.durationFixed = durationFixed;
     }
 
     public float getAmplitude() {
@@ -123,43 +152,43 @@ public class PermutationModel {
         this.amplitudeSteps = amplitudeSteps;
     }
 
-    public float getBalancing() {
-        return balancing;
+    public int getDaysLookback() {
+        return daysLookback;
     }
 
-    public void setBalancing(float balancing) {
-        this.balancing = balancing;
+    public void setDaysLookback(int daysLookback) {
+        this.daysLookback = daysLookback;
     }
 
-    public boolean isPermutateBalancing() {
-        return permutateBalancing;
+    public boolean isPermutateDaysLookback() {
+        return permutateDaysLookback;
     }
 
-    public void setPermutateBalancing(boolean permutateBalancing) {
-        this.permutateBalancing = permutateBalancing;
+    public void setPermutateDaysLookback(boolean permutateDaysLookback) {
+        this.permutateDaysLookback = permutateDaysLookback;
     }
 
-    public float getBalancingMin() {
-        return balancingMin;
+    public int getDaysLookbackMin() {
+        return daysLookbackMin;
     }
 
-    public void setBalancingMin(float balancingMin) {
-        this.balancingMin = balancingMin;
+    public void setDaysLookbackMin(int daysLookbackMin) {
+        this.daysLookbackMin = daysLookbackMin;
     }
 
-    public float getBalancingMax() {
-        return balancingMax;
+    public int getDaysLookbackMax() {
+        return daysLookbackMax;
     }
 
-    public void setBalancingMax(float balancingMax) {
-        this.balancingMax = balancingMax;
+    public void setDaysLookbackMax(int daysLookbackMax) {
+        this.daysLookbackMax = daysLookbackMax;
     }
 
-    public int getBalancingSteps() {
-        return balancingSteps;
+    public int getDaysLookbackSteps() {
+        return daysLookbackSteps;
     }
 
-    public void setBalancingSteps(int balancingSteps) {
-        this.balancingSteps = balancingSteps;
+    public void setDaysLookbackSteps(int daysLookbackSteps) {
+        this.daysLookbackSteps = daysLookbackSteps;
     }
 }
