@@ -1,7 +1,6 @@
 package com.algos.stockscanner.views.indexes;
 
 import com.algos.stockscanner.Application;
-import com.algos.stockscanner.beans.HttpClient;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.enums.IndexCategories;
 import com.vaadin.flow.component.*;
@@ -15,8 +14,6 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +36,6 @@ import java.nio.file.Paths;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class IndexDialog extends Dialog {
 
-    private static final int MAX_IMG_WIDTH=128;
-    private static final int MAX_IMG_HEIGHT=128;
-
     private IndexModel model;
     private IndexDialogConfirmListener confirmListener;
 
@@ -61,8 +55,6 @@ public class IndexDialog extends Dialog {
     @Autowired
     private Utils utils;
 
-    @Autowired
-    private HttpClient httpClient;
 
     @Autowired
     private ApplicationContext context;
@@ -119,14 +111,8 @@ public class IndexDialog extends Dialog {
         });
 
         // load default icon
-        Resource res=context.getResource(Application.GENERIC_INDEX_ICON);
-        try {
-            imageData = Files.readAllBytes(Paths.get(res.getURI()));
-            imageData = utils.scaleImage(imageData, MAX_IMG_WIDTH, MAX_IMG_HEIGHT);
-            updateIcon();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        imageData=utils.getDefaultIndexIcon();
+        updateIcon();
 
         Label title = new Label("Index");
         header.add(imgPlaceholder, title);
@@ -145,14 +131,6 @@ public class IndexDialog extends Dialog {
     }
 
 
-    private byte[] getBytes(String url) throws IOException {
-        Request request = new Request.Builder().url(url).build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            return response.body().bytes();
-        }
-
-    }
 
     /**
      * Ask for an URL in a dialog and change the index icon
@@ -171,8 +149,7 @@ public class IndexDialog extends Dialog {
             dialog.close();
             String url = tf.getValue();
             try {
-                imageData = getBytes(url);
-                imageData = utils.scaleImage(imageData, MAX_IMG_WIDTH, MAX_IMG_HEIGHT);
+                imageData = utils.getIconFromUrl(url);
                 updateIcon();
             }catch (Exception e){
                 e.printStackTrace();

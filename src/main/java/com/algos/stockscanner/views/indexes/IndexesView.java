@@ -181,6 +181,8 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         IronIcon pointsIcon = new IronIcon("vaadin", "ellipsis-dots-h");
         Span pointsSpan = new Span(String.format("%,d", model.getNumUnits()));
         pointsSpan.addClassName("points");
+        pointsIcon.setVisible(model.getNumUnits()>0);
+        pointsSpan.setVisible(model.getNumUnits()>0);
 
         IronIcon frequencyIcon = new IronIcon("vaadin", "clock");
         String frequencyDesc=null;
@@ -188,9 +190,12 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         if (frequencyType!=null){
             frequencyDesc=frequencyType.getDescription();
         }
-        Span frequancySpan = new Span(frequencyDesc);
-        frequancySpan.addClassName("frequency");
-        details.add(intervalIcon, intervalSpan, pointsIcon, pointsSpan, frequencyIcon, frequancySpan);
+        Span frequencySpan = new Span(frequencyDesc);
+        frequencySpan.addClassName("frequency");
+        frequencyIcon.setVisible(model.getNumUnits()>0);
+        pointsSpan.setVisible(model.getNumUnits()>0);
+
+        details.add(intervalIcon, intervalSpan, pointsIcon, pointsSpan, frequencyIcon, frequencySpan);
 
         body.add(symbol, name, category, details);
 

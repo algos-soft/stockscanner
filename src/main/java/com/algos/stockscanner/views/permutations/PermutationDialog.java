@@ -161,10 +161,16 @@ public class PermutationDialog extends Dialog {
 
     /**
      * Updates the icon in the header based on the current byte array
+     * <p>
+     * null image data restores the default icon
+     *
      */
     private void updateIcon(byte[] imageData) {
-        Image img = utils.byteArrayToImage(imageData);
         imgPlaceholder.removeAll();
+        if(imageData==null){
+            imageData=utils.getDefaultIndexIcon();
+        }
+        Image img = utils.byteArrayToImage(imageData);
         img.setWidth(3f, Unit.EM);
         img.setHeight(3f, Unit.EM);
         imgPlaceholder.add(img);
@@ -208,15 +214,8 @@ public class PermutationDialog extends Dialog {
         imgPlaceholder=new FlexLayout();
         imgPlaceholder.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
         imgPlaceholder.getStyle().set("margin-top","auto");
-        Resource res=context.getResource(Application.GENERIC_INDEX_ICON);
-        byte[] imageData;
-        try {
-            imageData = Files.readAllBytes(Paths.get(res.getURI()));
-            imageData = utils.scaleImage(imageData, MAX_IMG_WIDTH, MAX_IMG_HEIGHT);
-            updateIcon(imageData);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        byte[] imageData=utils.getDefaultIndexIcon();
+        updateIcon(imageData);
         buildCombo();
         FlexLayout comboPanel = new FlexLayout();
         comboPanel.setFlexDirection(FlexLayout.FlexDirection.ROW);
@@ -370,6 +369,8 @@ public class PermutationDialog extends Dialog {
             texts.getStyle().set("margin-left", "0.5em");
 
             Image image = utils.byteArrayToImage(item.getImage());
+            image.getStyle().set("border-radius","10%");
+
             image.setWidth("2em");
             image.setHeight("2em");
 
@@ -387,6 +388,17 @@ public class PermutationDialog extends Dialog {
         indexCombo.setRenderer(listItemRenderer);
         indexCombo.setItemLabelGenerator(MarketIndex::getSymbol);
         indexCombo.setRequired(true);
+
+        indexCombo.addValueChangeListener(event -> {
+            MarketIndex index = event.getValue();
+            byte[] imageData=null;
+            if (index!=null){
+                imageData=index.getImage();
+            }
+            updateIcon(imageData);
+        });
+
+
 
     }
 
@@ -411,6 +423,8 @@ public class PermutationDialog extends Dialog {
 
         return btnLayout;
     }
+
+
 
 
     /**

@@ -1,14 +1,20 @@
 package com.algos.stockscanner.beans;
 
 
+import com.algos.stockscanner.Application;
 import com.vaadin.flow.component.Component;
 //import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.io.Resource;
 
 import javax.imageio.ImageIO;
 //import java.awt.*;
@@ -17,12 +23,21 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 @org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class Utils {
+
+    @Autowired
+    private HttpClient httpClient;
+
+    @Autowired
+    private ApplicationContext context;
+
 
     /**
      * Find a child component by id
@@ -116,6 +131,34 @@ public class Utils {
         }else{
             return 0;
         }
+    }
+
+    public byte[] getBytesFromUrl(String url) throws IOException {
+        Request request = new Request.Builder().url(url).build();
+        try (Response response = httpClient.newCall(request).execute()) {
+            return response.body().bytes();
+        }
+    }
+
+    public byte[] getIconFromUrl(String url) throws IOException {
+        byte[] imageData = getBytesFromUrl(url);
+        imageData = scaleImage(imageData, Application.STORED_ICON_WIDTH, Application.STORED_ICON_HEIGHT);
+        return imageData;
+    }
+
+    /**
+     * @return the data of the default index icon
+     */
+    public byte[] getDefaultIndexIcon(){
+        Resource res=context.getResource(Application.GENERIC_INDEX_ICON);
+        byte[] imageData=null;
+        try {
+            imageData = Files.readAllBytes(Paths.get(res.getURI()));
+            imageData = scaleImage(imageData, Application.STORED_ICON_WIDTH, Application.STORED_ICON_HEIGHT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return imageData;
     }
 
 

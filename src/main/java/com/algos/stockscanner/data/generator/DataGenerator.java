@@ -34,6 +34,8 @@ public class DataGenerator {
     @Autowired
     private ApplicationContext context;
 
+    @Autowired
+    private Utils utils;
 
     @Bean
     public CommandLineRunner loadData(SimulationRepository simulationRepository) {
@@ -61,7 +63,7 @@ public class DataGenerator {
 //            simulationRepositoryGenerator.setData(Simulation::setNum_buy, DataType.NUMBER_UP_TO_100);
 //            simulationRepositoryGenerator.setData(Simulation::setNum_sell, DataType.NUMBER_UP_TO_100);
 //            simulationRepositoryGenerator.setData(Simulation::setPl_percent, DataType.NUMBER_UP_TO_100);
-            simulationRepository.saveAll(simulationRepositoryGenerator.create(2000, seed));
+            simulationRepository.saveAll(simulationRepositoryGenerator.create(200, seed));
 
 
             generateMarketIndexes();
@@ -76,83 +78,76 @@ public class DataGenerator {
 
         logger.info("... generating MarketIndex entities...");
 
-
-        Resource res=context.getResource(Application.GENERIC_INDEX_ICON);
-        byte[] imageData = new byte[0];
-        try {
-            imageData = Files.readAllBytes(Paths.get(res.getURI()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
         MarketIndex index;
 
         index = new MarketIndex();
         index.setSymbol("TSLA");
         index.setName("Tesla");
+        index.setImage(retrieveImage("https://etoro-cdn.etorostatic.com/market-avatars/tsla/150x150.png"));
         index.setCategory("STOCK");
-        index.setImage(imageData);
         marketIndexService.update(index);
 
         index = new MarketIndex();
         index.setSymbol("MSFT");
         index.setName("Microsoft");
+        index.setImage(retrieveImage("https://etoro-cdn.etorostatic.com/market-avatars/msft/150x150.png"));
         index.setCategory("STOCK");
-        index.setImage(imageData);
         marketIndexService.update(index);
 
         index = new MarketIndex();
         index.setSymbol("IBM");
         index.setName("Ibm");
+        index.setImage(retrieveImage("https://etoro-cdn.etorostatic.com/market-avatars/ibm/150x150.png"));
         index.setCategory("STOCK");
-        index.setImage(imageData);
         marketIndexService.update(index);
 
         index = new MarketIndex();
         index.setSymbol("AAPL");
         index.setName("Apple");
+        index.setImage(retrieveImage("https://etoro-cdn.etorostatic.com/market-avatars/aapl/150x150.png"));
         index.setCategory("STOCK");
-        index.setImage(imageData);
         marketIndexService.update(index);
 
         index = new MarketIndex();
         index.setSymbol("MRK");
         index.setName("Merck");
+        index.setImage(retrieveImage("https://etoro-cdn.etorostatic.com/market-avatars/mrk/150x150.png"));
         index.setCategory("STOCK");
-        index.setImage(imageData);
         marketIndexService.update(index);
 
         index = new MarketIndex();
         index.setSymbol("NFLX");
         index.setName("Netflix");
+        index.setImage(retrieveImage("https://etoro-cdn.etorostatic.com/market-avatars/nflx/150x150.png"));
         index.setCategory("STOCK");
-        index.setImage(imageData);
         marketIndexService.update(index);
 
         index = new MarketIndex();
         index.setSymbol("NKE");
         index.setName("Nike");
+        index.setImage(retrieveImage("https://etoro-cdn.etorostatic.com/market-avatars/nke/150x150.png"));
         index.setCategory("STOCK");
-        index.setImage(imageData);
         marketIndexService.update(index);
 
         index = new MarketIndex();
         index.setSymbol("MARA");
         index.setName("Marathon Patent Group Inc");
+        index.setImage(retrieveImage("https://etoro-cdn.etorostatic.com/market-avatars/6244/150x150.png"));
         index.setCategory("STOCK");
-        index.setImage(imageData);
         marketIndexService.update(index);
-
-
-
-
-
-
-
 
         logger.info("Generated MarketIndex entities");
 
+    }
+
+    private byte[] retrieveImage(String url){
+        byte[] imageData = new byte[0];
+        try {
+            imageData = utils.getIconFromUrl(url);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return imageData;
     }
 
 }
