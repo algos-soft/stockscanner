@@ -75,6 +75,7 @@
 
 .indexes-view .details {
   margin-top: var(--lumo-space-xs);
+  align-items: center;
 }
 
 
