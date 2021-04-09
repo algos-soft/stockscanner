@@ -42,10 +42,12 @@
 .indexes-view .name {
   font-size: var(--lumo-font-size-s);
   margin-right: var(--lumo-space-s);
+  margin-top: 0px;
 }
 
 .indexes-view .category {
-  font-size: var(--lumo-font-size-xs);
+  font-size: calc(var(--lumo-font-size-xxs)*0.9);
+  margin-top: 0px;
 }
 
 .indexes-view .date {
@@ -70,6 +72,11 @@
   margin-right: var(--lumo-space-s);
   width: calc(var(--lumo-icon-size-s) * 0.8);
 }
+
+.indexes-view .details {
+  margin-top: var(--lumo-space-xs);
+}
+
 
 .indexes-view .interval,
 .indexes-view .points,

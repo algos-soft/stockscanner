@@ -21,6 +21,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -166,7 +167,9 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
 
-        Div details = new Div();
+        FlexLayout details = new FlexLayout();
+        details.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        details.addClassName("details");
 
         IronIcon intervalIcon = new IronIcon("vaadin", "calendar-o");
         String text;
