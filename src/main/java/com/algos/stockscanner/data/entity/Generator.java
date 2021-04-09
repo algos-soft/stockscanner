@@ -6,9 +6,13 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 public class Generator extends AbstractEntity {
+
+    private LocalDateTime created;
+    private LocalDateTime modified;
 
     // fixed properties
     @ManyToOne(fetch = FetchType.EAGER)
@@ -41,6 +45,21 @@ public class Generator extends AbstractEntity {
     private Integer avgDaysMax;
     private Integer avgDaysSteps;   // must be divisor of maxAvgDays-minAvgDays
 
+    public LocalDateTime getCreated() {
+        return created;
+    }
+
+    public void setCreated(LocalDateTime created) {
+        this.created = created;
+    }
+
+    public LocalDateTime getModified() {
+        return modified;
+    }
+
+    public void setModified(LocalDateTime modified) {
+        this.modified = modified;
+    }
 
     public MarketIndex getIndex() {
         return index;

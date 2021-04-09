@@ -133,6 +133,15 @@ public class Utils {
         }
     }
 
+    public boolean toPrimitive(Boolean wrapper){
+        if(wrapper!=null){
+            return wrapper.booleanValue();
+        }else{
+            return false;
+        }
+    }
+
+
     public byte[] getBytesFromUrl(String url) throws IOException {
         Request request = new Request.Builder().url(url).build();
         try (Response response = httpClient.newCall(request).execute()) {

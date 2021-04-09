@@ -57,38 +57,26 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         model.setSymbol(symbol);
         model.setImage(utils.byteArrayToImage(imageData));
 
-        model.setAmount(utils.toPrimitive(entity.getAmount()));
         model.setStartDate(entity.getStartDate());
+        model.setAmount(utils.toPrimitive(entity.getAmount()));
+        model.setLeverage(utils.toPrimitive(entity.getLeverage()));
+        model.setStopLoss(utils.toPrimitive(entity.getStopLoss()));
+        model.setTakeProfit(utils.toPrimitive(entity.getTakeProfit()));
+        model.setDurationFixed(utils.toPrimitive(entity.getFixedDays()));
+        model.setDays(utils.toPrimitive(entity.getDays()));
+
         model.setAmplitude(utils.toPrimitive(entity.getAmplitude()));
+        model.setAmplitudeMin(utils.toPrimitive(entity.getAmplitudeMin()));
+        model.setAmplitudeMax(utils.toPrimitive(entity.getAmplitudeMax()));
+        model.setAmplitudeSteps(utils.toPrimitive(entity.getAmplitudeSteps()));
+        model.setPermutateAmpitude(utils.toPrimitive(entity.getAmplitudePermutate()));
 
+        model.setDaysLookback(utils.toPrimitive(entity.getAvgDays()));
+        model.setDaysLookbackMin(utils.toPrimitive(entity.getAvgDaysMin()));
+        model.setDaysLookbackMax(utils.toPrimitive(entity.getAvgDaysMax()));
+        model.setDaysLookbackSteps(utils.toPrimitive(entity.getAvgDaysSteps()));
+        model.setPermutateDaysLookback(utils.toPrimitive(entity.getAvgDaysPermutate()));
 
-//        model.setSymbol(entity.getSymbol());
-//        model.setName(entity.getName());
-//
-//        String categoryCode=entity.getCategory();
-//        Optional<IndexCategories> oCategory= IndexCategories.getItem(categoryCode);
-//        if(oCategory.isPresent()){
-//            model.setCategory(oCategory.get());
-//        }
-//
-//        model.setImageData(entity.getImage());
-//        model.setImage(utils.byteArrayToImage(entity.getImage()));
-//        model.setSymbol(entity.getSymbol());
-//        model.setBuySpreadPercent(entity.getBuySpreadPercent());
-//        model.setOvnBuyDay(entity.getOvnBuyDay());
-//        model.setOvnBuyWe(entity.getOvnBuyWe());
-//        model.setOvnSellDay(entity.getOvnSellDay());
-//        model.setOvnSellWe(entity.getOvnSellWe());
-//
-//        model.setUnitsFrom(entity.getUnitsFrom());
-//        model.setUnitsTo(entity.getUnitsTo());
-//        model.setNumUnits(entity.getNumUnits());
-//
-//        String frequencyCode=entity.getUnitFrequency();
-//        Optional<FrequencyTypes> oFrequency= FrequencyTypes.getItem(frequencyCode);
-//        if(oFrequency.isPresent()){
-//            model.setUnitFrequency(oFrequency.get());
-//        }
 
     }
 
