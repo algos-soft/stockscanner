@@ -10,10 +10,12 @@ import java.time.LocalDate;
 public class GeneratorModel {
 
     private int id;
+    private int number;
     private Image image;
     private String symbol;
     private LocalDate startDate;
     private int days;
+    private int spans;
     private int amount;
     private int stopLoss;
     private int takeProfit;
@@ -38,6 +40,14 @@ public class GeneratorModel {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
     }
 
     public Image getImage() {
@@ -70,6 +80,14 @@ public class GeneratorModel {
 
     public void setDays(int days) {
         this.days = days;
+    }
+
+    public int getSpans() {
+        return spans;
+    }
+
+    public void setSpans(int spans) {
+        this.spans = spans;
     }
 
     public int getAmount() {

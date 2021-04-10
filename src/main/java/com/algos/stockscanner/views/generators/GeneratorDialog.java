@@ -69,6 +69,7 @@ public class GeneratorDialog extends Dialog {
 
     private RadioButtonGroup<String> lengthRadioGroup;
     private IntegerField numberOfDays;
+    private IntegerField numberOfSpans;
 
     private Checkbox permutateAmplitudeCheckbox;
     private IntegerField amplitudeFld;
@@ -110,7 +111,7 @@ public class GeneratorDialog extends Dialog {
     @PostConstruct
     private void init() {
         setWidth("30em");
-        setHeight("35em");
+        setHeight("40em");
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
         add(buildContent());
@@ -259,12 +260,19 @@ public class GeneratorDialog extends Dialog {
         numberOfDays.setMin(2);
         numberOfDays.setWidth("10em");
 
+        numberOfSpans = new IntegerField("Number of spans");
+        numberOfSpans.setLabel("Number of spans");
+        numberOfSpans.setHasControls(true);
+        numberOfSpans.setMin(1);
+        numberOfSpans.setWidth("10em");
+        numberOfSpans.setHelperText("Number of repetitions, each starting when the previous ended");
+
         FlexLayout lengthLayout = new FlexLayout();
         lengthLayout.getStyle().set("gap","1em");
         lengthLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
-        lengthLayout.add(lengthRadioGroup, numberOfDays);
+        lengthLayout.add(numberOfDays, numberOfSpans);
 
-        layout.add(comboPanel, startDatePicker, amountsLayout, lengthLayout);
+        layout.add(comboPanel, startDatePicker, amountsLayout, lengthRadioGroup, lengthLayout);
 
         return layout;
     }
@@ -461,6 +469,7 @@ public class GeneratorDialog extends Dialog {
         }
 
         model.setDays(utils.toPrimitive(numberOfDays.getValue()));
+        model.setSpans(utils.toPrimitive(numberOfSpans.getValue()));
 
         model.setAmplitude(utils.toPrimitive(amplitudeFld.getValue()));
         model.setAmplitudeMin(utils.toPrimitive(amplitudeMinFld.getValue()));
@@ -501,6 +510,7 @@ public class GeneratorDialog extends Dialog {
             lengthRadioGroup.setValue(LABEL_VARIABLE);
         }
         numberOfDays.setValue(utils.toPrimitive(model.getDays()));
+        numberOfSpans.setValue(utils.toPrimitive(model.getSpans()));
 
         amplitudeFld.setValue(utils.toPrimitive(model.getAmplitude()));
         amplitudeMinFld.setValue(utils.toPrimitive(model.getAmplitudeMin()));

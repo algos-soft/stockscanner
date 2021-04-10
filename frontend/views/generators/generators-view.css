@@ -15,6 +15,11 @@
   border-right: 2px solid #ccc;
 }
 
+.generators-view .number {
+  font-size: var(--lumo-font-size-l);
+  font-weight: bold;
+  margin-left: 0px;
+}
 
 .generators-view .icon {
   height: 1.5em;
@@ -27,14 +32,15 @@
   font-weight: bold;
 }
 
-.generators-view .date {
+.generators-view .startdate, .period, .spans, .amplitude, .lookback {
   font-size: var(--lumo-font-size-s);
 }
+
 
 .generators-view iron-icon {
   color: var(--lumo-tertiary-text-color);
   height: calc(var(--lumo-icon-size-s) * 0.8);
-  margin-right: var(--lumo-space-s);
+  margin-right: var(--lumo-space-xs);
   width: calc(var(--lumo-icon-size-s) * 0.8);
 }
 
@@ -54,6 +60,13 @@
 .generators-view .sltp {
   font-size: var(--lumo-font-size-xs);
 }
+
+.generators-view .tagRow {
+  align-items: center;
+}
+
+
+
 
 
 

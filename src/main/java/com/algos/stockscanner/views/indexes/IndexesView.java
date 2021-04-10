@@ -171,7 +171,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         details.setFlexDirection(FlexLayout.FlexDirection.ROW);
         details.addClassName("details");
 
-        IronIcon intervalIcon = new IronIcon("vaadin", "calendar-o");
+        IronIcon intervalIcon = new IronIcon("vaadin", "line-chart");
         String text;
         if(model.getNumUnits()>0){
             text=format(model.getUnitsFrom())+" -> "+format(model.getUnitsTo());

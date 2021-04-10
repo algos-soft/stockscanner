@@ -5,10 +5,6 @@ import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.algos.stockscanner.services.MarketService;
-import com.algos.stockscanner.views.indexes.IndexDialog;
-import com.algos.stockscanner.views.indexes.IndexDialogConfirmListener;
-import com.algos.stockscanner.views.indexes.IndexModel;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
@@ -16,30 +12,26 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.*;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.server.Command;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,10 +116,12 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         card.getThemeList().add("spacing-s");
 
         Component pan1=buildPan1(model);
-        Component pan2=buildPan2(model);
+        Component pan2= buildPan2(model);
+        Component pan3= buildPan3(model);
+        Component pan4= buildPan4(model);
         Component action = buildActionCombo(model);
 
-        card.add(pan1, pan2, action);
+        card.add(pan1, pan2, pan3, pan4, action);
 
 
 //        VerticalLayout body = new VerticalLayout();
@@ -190,7 +184,17 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
 
 
     private Component buildPan1(GeneratorModel model){
-        Pan pan = new Pan();
+
+        IronIcon tagIcon = new IronIcon("vaadin", "tag");
+
+        int number = utils.toPrimitive(model.getNumber());
+        Span sNumber = new Span(""+number);
+        sNumber.addClassName("number");
+
+        HorizontalLayout row1 = new HorizontalLayout();
+        row1.addClassName("tagRow");
+        row1.add(tagIcon, sNumber);
+
         Image img = model.getImage();
         if(img==null){
             img = utils.byteArrayToImage(utils.getDefaultIndexIcon());
@@ -202,39 +206,13 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         HorizontalLayout hl = new HorizontalLayout();
         hl.add(img, symbol);
 
-        IronIcon calendar = new IronIcon("vaadin", "calendar-o");
-        String sDate;
-        if(model.getStartDate()!=null){
-            sDate=format(model.getStartDate());
-        }else{
-            sDate="n.a.";
-        }
-        Span spanDate = new Span(calendar, new Text(sDate));
-        spanDate.addClassName("date");
-
-        String period;
-        IronIcon durationIcon = new IronIcon("vaadin", "clock");
-        if(model.isDurationFixed()){
-            period=model.getDays()+" days fixed";
-        }else{
-            if(model.getDays()>0){
-                period="max "+model.getDays()+" days";
-            }else{
-                period="unlimited";
-            }
-        }
-        Span spanPeriod = new Span(durationIcon, new Text(period));
-        spanPeriod.addClassName("date");
-
-
-
-        pan.add(hl, spanDate, spanPeriod);
+        Pan pan = new Pan();
+        pan.add(row1, hl);
         return pan;
     }
 
 
     private Component buildPan2(GeneratorModel model){
-        Pan pan = new Pan();
 
         int amount = utils.toPrimitive(model.getAmount());
         Span cAmount = new Span(format(amount));
@@ -257,12 +235,83 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         }
         HorizontalLayout row2 = new HorizontalLayout();
         row2.addClassName("sltp");
-
         row2.add(cSL, cTP);
 
+        Pan pan = new Pan();
         pan.add(row1, row2);
 
         return pan;
+    }
+
+
+    private Component buildPan3(GeneratorModel model){
+
+        IronIcon calendar = new IronIcon("vaadin", "flag-checkered");
+        String sDate;
+        if(model.getStartDate()!=null){
+            sDate=format(model.getStartDate());
+        }else{
+            sDate="n.a.";
+        }
+        Span spanDate = new Span(calendar, new Text(sDate));
+        spanDate.addClassName("startdate");
+
+        String period;
+        IronIcon durationIcon = new IronIcon("vaadin", "clock");
+        if(model.isDurationFixed()){
+            period=model.getDays()+" days fixed";
+        }else{
+            if(model.getDays()>0){
+                period="max "+model.getDays()+" days";
+            }else{
+                period="unlimited";
+            }
+        }
+        Span spanPeriod = new Span(durationIcon, new Text(period));
+        spanPeriod.addClassName("period");
+
+        String sSpan;
+        IronIcon spanIcon = new IronIcon("vaadin", "refresh");
+        if(model.getSpans()>1){
+            sSpan=model.getSpans()+" spans";
+        }else{
+            sSpan="single span";
+        }
+        Span spanSpan = new Span(spanIcon, new Span(sSpan));
+        spanSpan.addClassName("spans");
+
+        Pan pan = new Pan();
+        pan.add(spanDate, spanPeriod, spanSpan);
+        return pan;
+    }
+
+
+    private Component buildPan4(GeneratorModel model){
+
+        IronIcon amplIcon = new IronIcon("vaadin", "arrows-long-v");
+        String sAmplitude;
+        if(model.isPermutateAmpitude()){
+            sAmplitude=model.getAmplitudeMin()+"% - "+model.getAmplitudeMax()+"%, in "+model.getAmplitudeSteps()+" steps";
+        }else{
+            sAmplitude=model.getAmplitude()+"%";
+        }
+        Span spanAmplitude = new Span(amplIcon, new Text(sAmplitude));
+        spanAmplitude.addClassName("amplitude");
+
+        IronIcon lookIcon = new IronIcon("vaadin", "glasses");
+        String sLook;
+        if(model.isPermutateDaysLookback()){
+            sLook=model.getDaysLookbackMin()+" - "+model.getDaysLookbackMax()+" days, in "+model.getDaysLookbackSteps()+" steps";
+        }else{
+            sLook=model.getDaysLookback()+" days";
+        }
+        Span spanLook = new Span(lookIcon, new Text(sLook));
+        spanLook.addClassName("lookback");
+
+        Pan pan = new Pan();
+        pan.add(spanAmplitude, spanLook);
+        return pan;
+
     }
 
     /**
@@ -302,50 +351,19 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
             public void onConfirm(GeneratorModel model) {
                 Generator entity = new Generator();
                 generatorService.initEntity(entity);
-                updateEntity(entity, model);
+                generatorService.modelToEntity(model, entity);
                 generatorService.update(entity);
                 loadAll();
             }
         };
 
-        GeneratorDialog dialog = context.getBean(GeneratorDialog.class, listener);
+        GeneratorModel model = new GeneratorModel();
+        generatorService.initModel(model);  // set defaults
+        GeneratorDialog dialog = context.getBean(GeneratorDialog.class, model, listener);
 
         dialog.open();
     }
 
-    /**
-     * Update entity from model
-     */
-    private void updateEntity(Generator entity, GeneratorModel model){
-        String symbol = model.getSymbol();
-        MarketIndex index=null;
-        try {
-            index = marketIndexService.findUniqueBySymbol(symbol);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        entity.setIndex(index);
-
-        entity.setStartDate(model.getStartDate());
-        entity.setAmount(model.getAmount());
-        entity.setLeverage(model.getLeverage());
-        entity.setStopLoss(model.getStopLoss());
-        entity.setTakeProfit(model.getTakeProfit());
-        entity.setFixedDays(model.isDurationFixed());
-        entity.setDays(model.getDays());
-
-        entity.setAmplitude(model.getAmplitude());
-        entity.setAmplitudeMax(model.getAmplitudeMax());
-        entity.setAmplitudeMin(model.getAmplitudeMin());
-        entity.setAmplitudeSteps(model.getAmplitudeSteps());
-        entity.setAmplitudePermutate(model.isPermutateAmpitude());
-
-        entity.setAvgDays(model.getDaysLookback());
-        entity.setAvgDaysMax(model.getDaysLookbackMax());
-        entity.setAvgDaysMin(model.getDaysLookbackMin());
-        entity.setAvgDaysSteps(model.getDaysLookbackSteps());
-        entity.setAvgDaysPermutate(model.isPermutateDaysLookback());
-    }
 
     /**
      * Load all data in the grid
@@ -390,9 +408,9 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
             Generator entity = generatorService.get(model.getId()).get();
 
             GeneratorDialogConfirmListener listener = model1 -> {
-                updateEntity(entity, model1);
+                generatorService.modelToEntity(model, entity);
                 generatorService.update(entity);    // write db
-                generatorService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
+                generatorService.entityToModel(entity, model1); // from db back to model - to be sure the model reflects the changes happened on db
                 grid.getDataProvider().refreshItem(model1); // refresh only this item
             };
 

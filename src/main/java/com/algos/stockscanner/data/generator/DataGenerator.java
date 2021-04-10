@@ -65,8 +65,10 @@ public class DataGenerator {
 //            simulationRepositoryGenerator.setData(Simulation::setPl_percent, DataType.NUMBER_UP_TO_100);
             simulationRepository.saveAll(simulationRepositoryGenerator.create(200, seed));
 
+            if(marketIndexService.count()==0){
+                generateMarketIndexes();
+            }
 
-            generateMarketIndexes();
 
 
             logger.info("Generated demo data");

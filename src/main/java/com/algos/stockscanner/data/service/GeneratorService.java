@@ -18,6 +18,9 @@ public class GeneratorService extends CrudService<Generator, Integer> {
 
     private GeneratorRepository repository;
 
+    @Autowired
+    private MarketIndexService marketIndexService;
+
     public GeneratorService(@Autowired GeneratorRepository repository) {
         this.repository = repository;
     }
@@ -46,6 +49,8 @@ public class GeneratorService extends CrudService<Generator, Integer> {
      */
     public void entityToModel(Generator entity, GeneratorModel model) {
         model.setId(utils.toPrimitive(entity.getId()));
+        model.setNumber(utils.toPrimitive(entity.getNumber()));
+
         MarketIndex index = entity.getIndex();
         String symbol;
         byte[] imageData;
@@ -66,6 +71,7 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         model.setTakeProfit(utils.toPrimitive(entity.getTakeProfit()));
         model.setDurationFixed(utils.toPrimitive(entity.getFixedDays()));
         model.setDays(utils.toPrimitive(entity.getDays()));
+        model.setSpans(utils.toPrimitive(entity.getSpans()));
 
         model.setAmplitude(utils.toPrimitive(entity.getAmplitude()));
         model.setAmplitudeMin(utils.toPrimitive(entity.getAmplitudeMin()));
@@ -83,6 +89,45 @@ public class GeneratorService extends CrudService<Generator, Integer> {
     }
 
     /**
+     * Copy data from Model to Entity
+     */
+    public void modelToEntity(GeneratorModel model, Generator entity){
+
+        String symbol = model.getSymbol();
+        MarketIndex index=null;
+        try {
+            index = marketIndexService.findUniqueBySymbol(symbol);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        entity.setIndex(index);
+
+        entity.setStartDate(model.getStartDate());
+        entity.setAmount(model.getAmount());
+        entity.setLeverage(model.getLeverage());
+        entity.setStopLoss(model.getStopLoss());
+        entity.setTakeProfit(model.getTakeProfit());
+        entity.setFixedDays(model.isDurationFixed());
+        entity.setDays(model.getDays());
+        entity.setSpans(model.getSpans());
+
+        entity.setAmplitude(model.getAmplitude());
+        entity.setAmplitudeMax(model.getAmplitudeMax());
+        entity.setAmplitudeMin(model.getAmplitudeMin());
+        entity.setAmplitudeSteps(model.getAmplitudeSteps());
+        entity.setAmplitudePermutate(model.isPermutateAmpitude());
+
+        entity.setAvgDays(model.getDaysLookback());
+        entity.setAvgDaysMax(model.getDaysLookbackMax());
+        entity.setAvgDaysMin(model.getDaysLookbackMin());
+        entity.setAvgDaysSteps(model.getDaysLookbackSteps());
+        entity.setAvgDaysPermutate(model.isPermutateDaysLookback());
+
+    }
+
+
+
+    /**
      * Standard initialization of a new entity for the database.
      * <p>
      * Initialize with default values
@@ -93,7 +138,23 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         entity.setFixedDays(true);
         entity.setLeverage(1);
         entity.setNumber(calcNextNumber());
-        entity.setRepetitions(1);
+        entity.setSpans(1);
+    }
+
+
+    /**
+     * Standard initialization of a new model for the dialog.
+     * <p>
+     * Initialize with default values
+     */
+    public void initModel(GeneratorModel model) {
+        model.setDurationFixed(true);
+        model.setLeverage(1);
+        model.setDaysLookback(10);
+        model.setDays(30);
+        model.setSpans(1);
+        model.setAmplitude(10);
+        model.setAmount(1000);
     }
 
 

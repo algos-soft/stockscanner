@@ -24,7 +24,7 @@ public class Generator extends AbstractEntity {
     private LocalDate startDate;  // start date
     private Boolean fixedDays;  // true for fixed number of days, false to go or until TP/SL or until end of index data
     private Integer days;   // number of days
-    private Integer repetitions;   // number of times to repeat, starting from the end of the previous simulation
+    private Integer spans;   // number of times to repeat the simulation, starting from the end of the previous simulation
     private Integer amount;  // amount invested
     private Integer leverage;
     private Integer stopLoss; // of the whole operation, not of the single shot
@@ -106,12 +106,12 @@ public class Generator extends AbstractEntity {
         this.days = days;
     }
 
-    public Integer getRepetitions() {
-        return repetitions;
+    public Integer getSpans() {
+        return spans;
     }
 
-    public void setRepetitions(Integer repetitions) {
-        this.repetitions = repetitions;
+    public void setSpans(Integer spans) {
+        this.spans = spans;
     }
 
     public Integer getAmount() {
