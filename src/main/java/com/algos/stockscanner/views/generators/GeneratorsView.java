@@ -301,8 +301,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
             @Override
             public void onConfirm(GeneratorModel model) {
                 Generator entity = new Generator();
-                entity.setCreated(LocalDateTime.now());
-                entity.setModified(LocalDateTime.now());
+                generatorService.initEntity(entity);
                 updateEntity(entity, model);
                 generatorService.update(entity);
                 loadAll();

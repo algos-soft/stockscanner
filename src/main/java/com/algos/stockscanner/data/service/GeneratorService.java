@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
+import java.time.LocalDateTime;
+
 @Service
 public class GeneratorService extends CrudService<Generator, Integer> {
 
@@ -41,18 +43,18 @@ public class GeneratorService extends CrudService<Generator, Integer> {
 
     /**
      * Copy data from Entity to Model
-     * */
-    public void entityToModel(Generator entity, GeneratorModel model){
+     */
+    public void entityToModel(Generator entity, GeneratorModel model) {
         model.setId(utils.toPrimitive(entity.getId()));
         MarketIndex index = entity.getIndex();
         String symbol;
         byte[] imageData;
-        if(index!=null){
-            imageData=index.getImage();
-            symbol=index.getSymbol();
-        } else{
-            imageData=utils.getDefaultIndexIcon();
-            symbol="n.a.";
+        if (index != null) {
+            imageData = index.getImage();
+            symbol = index.getSymbol();
+        } else {
+            imageData = utils.getDefaultIndexIcon();
+            symbol = "n.a.";
         }
         model.setSymbol(symbol);
         model.setImage(utils.byteArrayToImage(imageData));
@@ -78,6 +80,31 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         model.setPermutateDaysLookback(utils.toPrimitive(entity.getAvgDaysPermutate()));
 
 
+    }
+
+    /**
+     * Standard initialization of a new entity for the database.
+     * <p>
+     * Initialize with default values
+     */
+    public void initEntity(Generator entity) {
+        entity.setCreated(LocalDateTime.now());
+        entity.setModified(LocalDateTime.now());
+        entity.setFixedDays(true);
+        entity.setLeverage(1);
+        entity.setNumber(calcNextNumber());
+        entity.setRepetitions(1);
+    }
+
+
+    private int calcNextNumber() {
+        int next = 1;
+        Generator lastByNumber = getRepository().findFirstByOrderByNumberDesc();
+        if (lastByNumber != null) {
+            int number = utils.toPrimitive(lastByNumber.getNumber());
+            next = number + 1;
+        }
+        return next;
     }
 
 }

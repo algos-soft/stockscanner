@@ -11,15 +11,20 @@ import java.time.LocalDateTime;
 @Entity
 public class Generator extends AbstractEntity {
 
+    // remember: never use primitives or initialize values in JPA entities!
+    // JPA relies on nulls in query by example
+
     private LocalDateTime created;
     private LocalDateTime modified;
 
     // fixed properties
+    private Integer number;   // human readable number of the Configurator
     @ManyToOne(fetch = FetchType.EAGER)
     private MarketIndex index;
     private LocalDate startDate;  // start date
     private Boolean fixedDays;  // true for fixed number of days, false to go or until TP/SL or until end of index data
     private Integer days;   // number of days
+    private Integer repetitions;   // number of times to repeat, starting from the end of the previous simulation
     private Integer amount;  // amount invested
     private Integer leverage;
     private Integer stopLoss; // of the whole operation, not of the single shot
@@ -44,6 +49,14 @@ public class Generator extends AbstractEntity {
     private Integer avgDaysMin;
     private Integer avgDaysMax;
     private Integer avgDaysSteps;   // must be divisor of maxAvgDays-minAvgDays
+
+    public Integer getNumber() {
+        return number;
+    }
+
+    public void setNumber(Integer number) {
+        this.number = number;
+    }
 
     public LocalDateTime getCreated() {
         return created;
@@ -91,6 +104,14 @@ public class Generator extends AbstractEntity {
 
     public void setDays(Integer days) {
         this.days = days;
+    }
+
+    public Integer getRepetitions() {
+        return repetitions;
+    }
+
+    public void setRepetitions(Integer repetitions) {
+        this.repetitions = repetitions;
     }
 
     public Integer getAmount() {
