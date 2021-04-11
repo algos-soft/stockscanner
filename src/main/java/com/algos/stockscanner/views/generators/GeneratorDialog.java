@@ -17,7 +17,10 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -222,6 +225,12 @@ public class GeneratorDialog extends Dialog {
         comboPanel.getStyle().set("gap","1em");
         comboPanel.add(imgPlaceholder, indexCombo);
 
+        HorizontalLayout row1=new HorizontalLayout();
+        IronIcon tagIcon = new IronIcon("vaadin", "tag");
+
+        Span sNumber = new Span(""+utils.toPrimitive(model.getNumber()));
+        row1.add(comboPanel, sNumber, tagIcon);
+
         startDatePicker=new DatePicker("Start date");
         startDatePicker.setMaxWidth("10em");
         startDatePicker.setRequired(true);
@@ -272,7 +281,7 @@ public class GeneratorDialog extends Dialog {
         lengthLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
         lengthLayout.add(numberOfDays, numberOfSpans);
 
-        layout.add(comboPanel, startDatePicker, amountsLayout, lengthRadioGroup, lengthLayout);
+        layout.add(row1, startDatePicker, amountsLayout, lengthRadioGroup, lengthLayout);
 
         return layout;
     }
