@@ -14,7 +14,8 @@
     display: flex;
     flex-direction: row;
     align-items: center ;
-    font-size: 130%;
+
+    font-size: var(--lumo-font-size-xl);
     font-weight: bold;
     gap: 0.3em;
 }
@@ -37,5 +38,15 @@
     justify-content:  flex-end ;
     gap: 1em;
 }
+
+.dialog .taglayout {
+    margin-left: auto;
+    margin-top: var(--lumo-space-xs);
+}
+.dialog .tagnumber {
+    margin-left: var(--lumo-space-xs);
+    font-weight: bold;
+}
+
 
 

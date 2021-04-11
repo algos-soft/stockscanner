@@ -225,11 +225,15 @@ public class GeneratorDialog extends Dialog {
         comboPanel.getStyle().set("gap","1em");
         comboPanel.add(imgPlaceholder, indexCombo);
 
-        HorizontalLayout row1=new HorizontalLayout();
         IronIcon tagIcon = new IronIcon("vaadin", "tag");
-
         Span sNumber = new Span(""+utils.toPrimitive(model.getNumber()));
-        row1.add(comboPanel, sNumber, tagIcon);
+        sNumber.addClassName("tagnumber");
+        HorizontalLayout tagLayout=new HorizontalLayout();
+        tagLayout.addClassName("taglayout");
+        tagLayout.add(tagIcon, sNumber);
+
+        HorizontalLayout row1=new HorizontalLayout();
+        row1.add(comboPanel, tagLayout);
 
         startDatePicker=new DatePicker("Start date");
         startDatePicker.setMaxWidth("10em");
