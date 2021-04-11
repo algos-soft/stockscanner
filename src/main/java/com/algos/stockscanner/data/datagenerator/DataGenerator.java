@@ -240,8 +240,20 @@ public class DataGenerator {
         sim.setLeverage(1);
         sim.setAmplitude(15f);
         sim.setInitialAmount(1000f);
-        sim.setFinalAmount(12000f);
+        sim.setFinalAmount(1200f);
         simulationService.update(sim);
+
+        sim = new Simulation();
+        sim.setGenerator(pickRandomGenerator(generators));
+        sim.setIndex(sim.getGenerator().getIndex());
+        sim.setStartTs(LocalDate.now().minusYears(2));
+        sim.setEndTs(sim.getStartTs().plusDays(40));
+        sim.setLeverage(1);
+        sim.setAmplitude(10f);
+        sim.setInitialAmount(1800f);
+        sim.setFinalAmount(1600f);
+        simulationService.update(sim);
+
 
         logger.info("Generated Simulation entities");
 

@@ -55,7 +55,7 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
 
         Pageable pageable = new OffsetBasedPageRequest(offset, limit, sort);
 
-        Page page;
+        Page<MarketIndex> page;
         if(example!=null){
             page = repository.findAll(example, pageable);
         }else{

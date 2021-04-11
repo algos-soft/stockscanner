@@ -8,6 +8,7 @@ import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,11 +32,19 @@ public class SimulationService extends CrudService<Simulation, Integer> {
     }
 
 
-    public List<SimulationModel> fetch(int offset, int limit, List<QuerySortOrder> orders) {
+    public List<SimulationModel> fetch(int offset, int limit, Example<Simulation> example, List<QuerySortOrder> orders) {
 
         Sort sort=buildSort(orders);
+
         Pageable pageable = new OffsetBasedPageRequest(offset, limit, sort);
-        Page<Simulation> page = repository.findAll(pageable);
+
+        Page<Simulation> page;
+        if(example!=null){
+            page = repository.findAll(example, pageable);
+        }else{
+            page = repository.findAll(pageable);
+        }
+
         List<SimulationModel> list = new ArrayList<>();
         for(Simulation entity : page.toList()){
             SimulationModel model = new SimulationModel();
@@ -70,6 +79,10 @@ public class SimulationService extends CrudService<Simulation, Integer> {
         }
 
         return Sort.by(sortOrders);
+    }
+
+    public int count(Example<Simulation> example) {
+        return (int)repository.count(example);
     }
 
     public int count() {

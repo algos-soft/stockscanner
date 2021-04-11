@@ -33,7 +33,7 @@ public class Simulation extends AbstractEntity {
     private Integer numBuy;    // number of buy positions opened
     private Integer numSell;    // number of sell positions opened
     private Float pl;  // profit/loss
-    private Integer plPercent;  // profit/loss percentage
+    private Float plPercent;  // profit/loss percentage
     private Integer numPointsScanned; // number of points scanned
     private Integer numPointsHold;  // total number of points while holding a position
     private Integer numPointsWait;  // total number of points points while not holding a position
@@ -152,11 +152,11 @@ public class Simulation extends AbstractEntity {
         this.pl = pl;
     }
 
-    public Integer getPlPercent() {
+    public Float getPlPercent() {
         return plPercent;
     }
 
-    public void setPlPercent(Integer plPercent) {
+    public void setPlPercent(Float plPercent) {
         this.plPercent = plPercent;
     }
 

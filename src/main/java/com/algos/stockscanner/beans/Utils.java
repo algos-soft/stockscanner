@@ -2,10 +2,18 @@ package com.algos.stockscanner.beans;
 
 
 import com.algos.stockscanner.Application;
+import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.service.MarketIndexService;
 import com.vaadin.flow.component.Component;
 //import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import okhttp3.Request;
@@ -15,6 +23,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 
 import javax.imageio.ImageIO;
 //import java.awt.*;
@@ -26,6 +36,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 @org.springframework.stereotype.Component
@@ -37,6 +48,9 @@ public class Utils {
 
     @Autowired
     private ApplicationContext context;
+
+    @Autowired
+    private MarketIndexService marketIndexService;
 
 
     /**
@@ -170,6 +184,61 @@ public class Utils {
         return imageData;
     }
 
+
+    public ComboBox<MarketIndex> buildIndexCombo() {
+
+        // create a DataProvider with filtering callbacks
+        MarketIndex exampleItem = new MarketIndex();
+        ExampleMatcher matcher = ExampleMatcher.matchingAny().withMatcher("symbol", ExampleMatcher.GenericPropertyMatchers.startsWith().ignoreCase());
+        Example<MarketIndex> example = Example.of(exampleItem, matcher);
+        DataProvider<MarketIndex, String> dataProvider = DataProvider.fromFilteringCallbacks(fetchCallback -> {
+            AtomicReference<String> filter=new AtomicReference<>();
+            fetchCallback.getFilter().ifPresent( x -> filter.set(x));
+            exampleItem.setSymbol(filter.get());
+            return marketIndexService.fetch(fetchCallback.getOffset(), fetchCallback.getLimit(), example, null).stream();
+        }, countCallback -> {
+            AtomicReference<String> filter=new AtomicReference<>();
+            countCallback.getFilter().ifPresent( x -> filter.set(x));
+            exampleItem.setSymbol(filter.get());
+            return marketIndexService.count(example);
+        });
+
+        // create a renderer for the items in the combo list
+        Renderer<MarketIndex> listItemRenderer = new ComponentRenderer<>(item -> {
+            Div divSymbol = new Div();
+            divSymbol.setText(item.getSymbol());
+            divSymbol.getStyle().set("font-weight", "bold");
+            Div divName = new Div();
+            divName.setText(item.getName());
+            divName.setMaxHeight("0.6em");
+            divName.getStyle().set("font-size", "60%");
+            FlexLayout texts = new FlexLayout();
+            texts.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+            texts.add(divSymbol, divName);
+            texts.getStyle().set("margin-left", "0.5em");
+
+            Image image = byteArrayToImage(item.getImage());
+            image.getStyle().set("border-radius","10%");
+
+            image.setWidth("2em");
+            image.setHeight("2em");
+
+            FlexLayout wrapper = new FlexLayout();
+            wrapper.setFlexDirection(FlexLayout.FlexDirection.ROW);
+            wrapper.add(image, texts);
+
+            return wrapper;
+        });
+
+        ComboBox<MarketIndex> indexCombo = new ComboBox<>();
+        indexCombo.setLabel("Index");
+        indexCombo.setWidth("14em");
+        indexCombo.setDataProvider(dataProvider);
+        indexCombo.setRenderer(listItemRenderer);
+        indexCombo.setItemLabelGenerator(MarketIndex::getSymbol);
+
+        return indexCombo;
+    }
 
 
 

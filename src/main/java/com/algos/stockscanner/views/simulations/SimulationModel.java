@@ -23,7 +23,7 @@ public class SimulationModel {
     private int numBuy;
     private int numSell;
     private float pl;
-    private int plPercent;
+    private float plPercent;
     private int numPointsScanned;
     private int numPointsHold;
     private int numPointsWait;
@@ -142,11 +142,11 @@ public class SimulationModel {
         this.pl = pl;
     }
 
-    public int getPlPercent() {
+    public float getPlPercent() {
         return plPercent;
     }
 
-    public void setPlPercent(int plPercent) {
+    public void setPlPercent(float plPercent) {
         this.plPercent = plPercent;
     }
 

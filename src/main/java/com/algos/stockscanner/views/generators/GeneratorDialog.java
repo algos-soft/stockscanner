@@ -365,57 +365,8 @@ public class GeneratorDialog extends Dialog {
 
     private void buildCombo() {
 
-        // create a DataProvider with filtering callbacks
-        MarketIndex exampleItem = new MarketIndex();
-        ExampleMatcher matcher = ExampleMatcher.matchingAny().withMatcher("symbol", ExampleMatcher.GenericPropertyMatchers.startsWith().ignoreCase());
-        Example<MarketIndex> example = Example.of(exampleItem, matcher);
-        DataProvider<MarketIndex, String> dataProvider = DataProvider.fromFilteringCallbacks(fetchCallback -> {
-            AtomicReference<String> filter=new AtomicReference<>();
-            fetchCallback.getFilter().ifPresent( x -> filter.set(x));
-            exampleItem.setSymbol(filter.get());
-            return marketIndexService.fetch(fetchCallback.getOffset(), fetchCallback.getLimit(), example, null).stream();
-        }, countCallback -> {
-            AtomicReference<String> filter=new AtomicReference<>();
-            countCallback.getFilter().ifPresent( x -> filter.set(x));
-            exampleItem.setSymbol(filter.get());
-            return marketIndexService.count(example);
-        });
-
-        // create a renderer for the items in the combo list
-        Renderer<MarketIndex> listItemRenderer = new ComponentRenderer<>(item -> {
-            Div divSymbol = new Div();
-            divSymbol.setText(item.getSymbol());
-            divSymbol.getStyle().set("font-weight", "bold");
-            Div divName = new Div();
-            divName.setText(item.getName());
-            divName.setMaxHeight("0.6em");
-            divName.getStyle().set("font-size", "60%");
-            FlexLayout texts = new FlexLayout();
-            texts.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
-            texts.add(divSymbol, divName);
-            texts.getStyle().set("margin-left", "0.5em");
-
-            Image image = utils.byteArrayToImage(item.getImage());
-            image.getStyle().set("border-radius","10%");
-
-            image.setWidth("2em");
-            image.setHeight("2em");
-
-            FlexLayout wrapper = new FlexLayout();
-            wrapper.setFlexDirection(FlexLayout.FlexDirection.ROW);
-            wrapper.add(image, texts);
-
-            return wrapper;
-        });
-
-        indexCombo = new ComboBox<>();
-        indexCombo.setLabel("Index");
-        indexCombo.setWidth("14em");
-        indexCombo.setDataProvider(dataProvider);
-        indexCombo.setRenderer(listItemRenderer);
-        indexCombo.setItemLabelGenerator(MarketIndex::getSymbol);
+        indexCombo=utils.buildIndexCombo();
         indexCombo.setRequired(true);
-
         indexCombo.addValueChangeListener(event -> {
             MarketIndex index = event.getValue();
             byte[] imageData=null;
@@ -425,7 +376,65 @@ public class GeneratorDialog extends Dialog {
             updateIcon(imageData);
         });
 
-
+//        // create a DataProvider with filtering callbacks
+//        MarketIndex exampleItem = new MarketIndex();
+//        ExampleMatcher matcher = ExampleMatcher.matchingAny().withMatcher("symbol", ExampleMatcher.GenericPropertyMatchers.startsWith().ignoreCase());
+//        Example<MarketIndex> example = Example.of(exampleItem, matcher);
+//        DataProvider<MarketIndex, String> dataProvider = DataProvider.fromFilteringCallbacks(fetchCallback -> {
+//            AtomicReference<String> filter=new AtomicReference<>();
+//            fetchCallback.getFilter().ifPresent( x -> filter.set(x));
+//            exampleItem.setSymbol(filter.get());
+//            return marketIndexService.fetch(fetchCallback.getOffset(), fetchCallback.getLimit(), example, null).stream();
+//        }, countCallback -> {
+//            AtomicReference<String> filter=new AtomicReference<>();
+//            countCallback.getFilter().ifPresent( x -> filter.set(x));
+//            exampleItem.setSymbol(filter.get());
+//            return marketIndexService.count(example);
+//        });
+//
+//        // create a renderer for the items in the combo list
+//        Renderer<MarketIndex> listItemRenderer = new ComponentRenderer<>(item -> {
+//            Div divSymbol = new Div();
+//            divSymbol.setText(item.getSymbol());
+//            divSymbol.getStyle().set("font-weight", "bold");
+//            Div divName = new Div();
+//            divName.setText(item.getName());
+//            divName.setMaxHeight("0.6em");
+//            divName.getStyle().set("font-size", "60%");
+//            FlexLayout texts = new FlexLayout();
+//            texts.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+//            texts.add(divSymbol, divName);
+//            texts.getStyle().set("margin-left", "0.5em");
+//
+//            Image image = utils.byteArrayToImage(item.getImage());
+//            image.getStyle().set("border-radius","10%");
+//
+//            image.setWidth("2em");
+//            image.setHeight("2em");
+//
+//            FlexLayout wrapper = new FlexLayout();
+//            wrapper.setFlexDirection(FlexLayout.FlexDirection.ROW);
+//            wrapper.add(image, texts);
+//
+//            return wrapper;
+//        });
+//
+//        indexCombo = new ComboBox<>();
+//        indexCombo.setLabel("Index");
+//        indexCombo.setWidth("14em");
+//        indexCombo.setDataProvider(dataProvider);
+//        indexCombo.setRenderer(listItemRenderer);
+//        indexCombo.setItemLabelGenerator(MarketIndex::getSymbol);
+//        indexCombo.setRequired(true);
+//
+//        indexCombo.addValueChangeListener(event -> {
+//            MarketIndex index = event.getValue();
+//            byte[] imageData=null;
+//            if (index!=null){
+//                imageData=index.getImage();
+//            }
+//            updateIcon(imageData);
+//        });
 
     }
 
