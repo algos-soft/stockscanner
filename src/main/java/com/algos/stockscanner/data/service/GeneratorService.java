@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class GeneratorService extends CrudService<Generator, Integer> {
@@ -168,4 +169,7 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         return next;
     }
 
+    public List<Generator> findAll() {
+        return repository.findAll();
+    }
 }

@@ -8,6 +8,8 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.crud.Crud;
+import com.vaadin.flow.component.crud.CrudGrid;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
@@ -33,6 +35,8 @@ import java.util.Optional;
 public class SimulationsView extends Div {
 
     private Grid<SimulationModel> grid;
+//private CrudGrid<SimulationModel> grid;
+//    private Crud<SimulationModel> grid;
 
     private TextField indexCode;
     private DatePicker startTs;
@@ -52,8 +56,8 @@ public class SimulationsView extends Div {
 
     private Simulation simulation;
 
-    private @Autowired
-    Utils utils;
+    @Autowired
+    private Utils utils;
 
     private @Autowired
     SimulationService simulationService;
@@ -68,6 +72,8 @@ public class SimulationsView extends Div {
         createGrid();
         add(grid);
 
+
+        Crud<Simulation> crud;
 
         // customize the header
         addAttachListener((ComponentEventListener<AttachEvent>) attachEvent -> {
@@ -96,21 +102,30 @@ public class SimulationsView extends Div {
             int offset = fetchCallback.getOffset();
             int limit = fetchCallback.getLimit();
             List<QuerySortOrder> sorts = fetchCallback.getSortOrders();
-            return simulationService.fetch(offset, limit, sorts)
-                    .stream();
+            return simulationService.fetch(offset, limit, sorts).stream();
         }, countCallback -> {
             return simulationService.count();
         });
 
-        grid = new Grid<>();
+        grid = new Grid();
+        //grid = new CrudGrid(Simulation.class, true);
+        //grid = new Crud(Simulation.class, true);
+        //grid = new Crud(Simulation.class, null);
+
         //grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         grid.setDataProvider(provider);
+        //grid.getF.set
 
-        grid.addColumn(SimulationModel::getId, "Id").setHeader("Id");
-        grid.addColumn(SimulationModel::getSymbol).setHeader("Symbol");
-        grid.addColumn(SimulationModel::getStartTs).setHeader("Start");
-        grid.addColumn(SimulationModel::getEndTs).setHeader("End");
+        grid.addColumn(SimulationModel::getNumGenerator, "generator.number").setHeader("#gen");
+        grid.addColumn(SimulationModel::getSymbol, "index.symbol").setHeader("symbol");
+        grid.addColumn(SimulationModel::getStartTs, "startTs").setHeader("start");
+        grid.addColumn(SimulationModel::getEndTs, "endTs").setHeader("end");
+        grid.addColumn(SimulationModel::getInitialAmount, "initialAmount").setHeader("initial amt");
+        grid.addColumn(SimulationModel::getLeverage, "leverage").setHeader("lev");
+        grid.addColumn(SimulationModel::getAmplitude, "amplitude").setHeader("amp");
+        grid.addColumn(SimulationModel::getFinalAmount, "finalAmount").setHeader("final amt");
+        grid.addColumn(SimulationModel::getPlPercent, "plPercent").setHeader("P/L%");
 
     }
 

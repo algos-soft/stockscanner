@@ -1,6 +1,8 @@
 package com.algos.stockscanner.data.service;
 
 import com.algos.stockscanner.beans.Utils;
+import com.algos.stockscanner.data.entity.Generator;
+import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.data.provider.QuerySortOrder;
@@ -12,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,13 +85,37 @@ public class SimulationService extends CrudService<Simulation, Integer> {
 
     /**
      * Copy data from Entity to View Model
-     * */
+     */
     private void entityToModel(Simulation entity, SimulationModel model){
         model.setId(utils.toPrimitive(entity.getId()));
 
         if(entity.getIndex()!=null){
-            model.setSymbol(entity.getIndex().getSymbol());
-            model.setImageData(entity.getIndex().getImage());
+            model.setId(entity.getId());
+            Generator gen = entity.getGenerator();
+            if(gen!=null){
+                model.setNumGenerator(utils.toPrimitive(gen.getNumber()));
+            }
+            MarketIndex index=entity.getIndex();
+            if(index!=null){
+                model.setSymbol(index.getSymbol());
+            }
+            model.setStartTs(entity.getStartTs());
+            model.setEndTs(entity.getEndTs());
+            model.setInitialAmount(utils.toPrimitive(entity.getInitialAmount()));
+            model.setLeverage(utils.toPrimitive(entity.getLeverage()));
+            model.setAmplitude(utils.toPrimitive(entity.getAmplitude()));
+            model.setFinalAmount(utils.toPrimitive(entity.getFinalAmount()));
+            model.setTotSpread(utils.toPrimitive(entity.getTotSpread()));
+            model.setTotCommission(utils.toPrimitive(entity.getTotCommission()));
+            model.setNumBuy(utils.toPrimitive(entity.getNumBuy()));
+            model.setNumSell(utils.toPrimitive(entity.getNumSell()));
+            model.setPl(utils.toPrimitive(entity.getPl()));
+            model.setPlPercent(utils.toPrimitive(entity.getPlPercent()));
+            model.setNumPointsScanned(utils.toPrimitive(entity.getNumPointsScanned()));
+            model.setNumPointsHold(utils.toPrimitive(entity.getNumPointsHold()));
+            model.setNumPointsWait(utils.toPrimitive(entity.getNumPointsWait()));
+            model.setMinPointsHold(utils.toPrimitive(entity.getMinPointsHold()));
+            model.setMaxPointsHold(utils.toPrimitive(entity.getMaxPointsHold()));
         }
 
     }

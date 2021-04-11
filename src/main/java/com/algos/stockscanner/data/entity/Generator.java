@@ -2,11 +2,11 @@ package com.algos.stockscanner.data.entity;
 
 import com.algos.stockscanner.data.AbstractEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Generator extends AbstractEntity {
@@ -14,13 +14,17 @@ public class Generator extends AbstractEntity {
     // remember: never use primitives or initialize values in JPA entities!
     // JPA relies on nulls in query by example
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    private MarketIndex index;
+
+    @OneToMany(mappedBy = "generator", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Simulation> simulations = new ArrayList<>();
+
     private LocalDateTime created;
     private LocalDateTime modified;
 
     // fixed properties
     private Integer number;   // human readable number of the Configurator
-    @ManyToOne(fetch = FetchType.EAGER)
-    private MarketIndex index;
     private LocalDate startDate;  // start date
     private Boolean fixedDays;  // true for fixed number of days, false to go or until TP/SL or until end of index data
     private Integer days;   // number of days

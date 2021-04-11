@@ -1,38 +1,44 @@
 package com.algos.stockscanner.data.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 import com.algos.stockscanner.data.AbstractEntity;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Simulation extends AbstractEntity {
 
     // --- parameters
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private MarketIndex index;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Generator generator;
+
+    @OneToMany(mappedBy = "simulation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SimulationItem> simulationItems = new ArrayList<>();
 
     private LocalDate startTs;  // timestamp of first point scanned
     private LocalDate endTs;  // timestamp of last point scanned
     private Float initialAmount;  // initial amount
     private Integer leverage;
     private Float amplitude;    // amplitude of the oscillation max/min, in percent
-    private Float balancing;  // balancing of amplitude between up and down phases: 0 = 50% up /50% down, 1 = 100% up, -1=100% down
 
     // ---- consolidated data
     private Float finalAmount;  // amount at the end of the simulation
     private Float totSpread;    // total amount of buy spreads paid
     private Float totCommission;    // total amount of commission paid
-    private Integer numBuy;    // number of buy orders
-    private Integer numSell;    // number of sell orders
+    private Integer numBuy;    // number of buy positions opened
+    private Integer numSell;    // number of sell positions opened
+    private Float pl;  // profit/loss
     private Integer plPercent;  // profit/loss percentage
     private Integer numPointsScanned; // number of points scanned
-    private Integer maxPointsHold;  // maximum number of points holding a position
-    private Integer minPointsHold;  // minimum number of points holding a position
-    private Integer totPointsHold;    // total points in holding position
-
+    private Integer numPointsHold;  // total number of points while holding a position
+    private Integer numPointsWait;  // total number of points points while not holding a position
+    private Integer minPointsHold;  // minimum number of consecutive points while holding a position
+    private Integer maxPointsHold;    // maximum number of consecutive points while holding a position
 
     public MarketIndex getIndex() {
         return index;
@@ -40,6 +46,22 @@ public class Simulation extends AbstractEntity {
 
     public void setIndex(MarketIndex index) {
         this.index = index;
+    }
+
+    public Generator getGenerator() {
+        return generator;
+    }
+
+    public void setGenerator(Generator generator) {
+        this.generator = generator;
+    }
+
+    public List<SimulationItem> getSimulationItems() {
+        return simulationItems;
+    }
+
+    public void setSimulationItems(List<SimulationItem> simulationItems) {
+        this.simulationItems = simulationItems;
     }
 
     public LocalDate getStartTs() {
@@ -82,14 +104,6 @@ public class Simulation extends AbstractEntity {
         this.amplitude = amplitude;
     }
 
-    public Float getBalancing() {
-        return balancing;
-    }
-
-    public void setBalancing(Float balancing) {
-        this.balancing = balancing;
-    }
-
     public Float getFinalAmount() {
         return finalAmount;
     }
@@ -130,6 +144,14 @@ public class Simulation extends AbstractEntity {
         this.numSell = numSell;
     }
 
+    public Float getPl() {
+        return pl;
+    }
+
+    public void setPl(Float pl) {
+        this.pl = pl;
+    }
+
     public Integer getPlPercent() {
         return plPercent;
     }
@@ -146,12 +168,20 @@ public class Simulation extends AbstractEntity {
         this.numPointsScanned = numPointsScanned;
     }
 
-    public Integer getMaxPointsHold() {
-        return maxPointsHold;
+    public Integer getNumPointsHold() {
+        return numPointsHold;
     }
 
-    public void setMaxPointsHold(Integer maxPointsHold) {
-        this.maxPointsHold = maxPointsHold;
+    public void setNumPointsHold(Integer numPointsHold) {
+        this.numPointsHold = numPointsHold;
+    }
+
+    public Integer getNumPointsWait() {
+        return numPointsWait;
+    }
+
+    public void setNumPointsWait(Integer numPointsWait) {
+        this.numPointsWait = numPointsWait;
     }
 
     public Integer getMinPointsHold() {
@@ -162,11 +192,11 @@ public class Simulation extends AbstractEntity {
         this.minPointsHold = minPointsHold;
     }
 
-    public Integer getTotPointsHold() {
-        return totPointsHold;
+    public Integer getMaxPointsHold() {
+        return maxPointsHold;
     }
 
-    public void setTotPointsHold(Integer totPointsHold) {
-        this.totPointsHold = totPointsHold;
+    public void setMaxPointsHold(Integer maxPointsHold) {
+        this.maxPointsHold = maxPointsHold;
     }
 }

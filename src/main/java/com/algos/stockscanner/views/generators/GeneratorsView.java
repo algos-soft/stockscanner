@@ -424,7 +424,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         account.getSubMenu().addItem("Delete generator", i -> {
 
             Button bConfirm = new Button();
-            ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete "+model.getSymbol()+"?")
+            ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete "+model.getNumber()+" - "+model.getSymbol()+"?")
                     .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
                     .withButton(bConfirm, ButtonOption.caption("Delete"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
 

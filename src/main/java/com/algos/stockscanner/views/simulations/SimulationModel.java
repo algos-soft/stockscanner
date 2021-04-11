@@ -8,24 +8,27 @@ import java.time.LocalDate;
 public class SimulationModel {
 
     private int id;
-    private byte[] imageData;
+
+    private int numGenerator;
     private String symbol;
+
     private LocalDate startTs;
     private LocalDate endTs;
     private float initialAmount;
     private int leverage;
     private float amplitude;
-    private float balancing;
     private float finalAmount;
     private float totSpread;
     private float totCommission;
     private int numBuy;
     private int numSell;
+    private float pl;
     private int plPercent;
     private int numPointsScanned;
-    private int maxPointsHold;
+    private int numPointsHold;
+    private int numPointsWait;
     private int minPointsHold;
-    private int totPointsHold;
+    private int maxPointsHold;
 
     public int getId() {
         return id;
@@ -35,12 +38,12 @@ public class SimulationModel {
         this.id = id;
     }
 
-    public byte[] getImageData() {
-        return imageData;
+    public int getNumGenerator() {
+        return numGenerator;
     }
 
-    public void setImageData(byte[] imageData) {
-        this.imageData = imageData;
+    public void setNumGenerator(int numGenerator) {
+        this.numGenerator = numGenerator;
     }
 
     public String getSymbol() {
@@ -91,14 +94,6 @@ public class SimulationModel {
         this.amplitude = amplitude;
     }
 
-    public float getBalancing() {
-        return balancing;
-    }
-
-    public void setBalancing(float balancing) {
-        this.balancing = balancing;
-    }
-
     public float getFinalAmount() {
         return finalAmount;
     }
@@ -139,6 +134,14 @@ public class SimulationModel {
         this.numSell = numSell;
     }
 
+    public float getPl() {
+        return pl;
+    }
+
+    public void setPl(float pl) {
+        this.pl = pl;
+    }
+
     public int getPlPercent() {
         return plPercent;
     }
@@ -155,12 +158,20 @@ public class SimulationModel {
         this.numPointsScanned = numPointsScanned;
     }
 
-    public int getMaxPointsHold() {
-        return maxPointsHold;
+    public int getNumPointsHold() {
+        return numPointsHold;
     }
 
-    public void setMaxPointsHold(int maxPointsHold) {
-        this.maxPointsHold = maxPointsHold;
+    public void setNumPointsHold(int numPointsHold) {
+        this.numPointsHold = numPointsHold;
+    }
+
+    public int getNumPointsWait() {
+        return numPointsWait;
+    }
+
+    public void setNumPointsWait(int numPointsWait) {
+        this.numPointsWait = numPointsWait;
     }
 
     public int getMinPointsHold() {
@@ -171,11 +182,11 @@ public class SimulationModel {
         this.minPointsHold = minPointsHold;
     }
 
-    public int getTotPointsHold() {
-        return totPointsHold;
+    public int getMaxPointsHold() {
+        return maxPointsHold;
     }
 
-    public void setTotPointsHold(int totPointsHold) {
-        this.totPointsHold = totPointsHold;
+    public void setMaxPointsHold(int maxPointsHold) {
+        this.maxPointsHold = maxPointsHold;
     }
 }

@@ -19,6 +19,7 @@
   font-size: var(--lumo-font-size-l);
   font-weight: bold;
   margin-left: 0px;
+  color: var(--lumo-tertiary-text-color);
 }
 
 .generators-view .icon {

@@ -109,6 +109,10 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
 
     }
 
+    public List<MarketIndex> findAll ()  {
+        return repository.findAll();
+    }
+
 
 
 }
