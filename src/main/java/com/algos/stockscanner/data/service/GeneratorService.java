@@ -3,12 +3,20 @@ package com.algos.stockscanner.data.service;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.views.generators.GeneratorModel;
+import com.algos.stockscanner.views.simulations.SimulationModel;
+import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -44,6 +52,43 @@ public class GeneratorService extends CrudService<Generator, Integer> {
     protected GeneratorRepository getRepository() {
         return repository;
     }
+
+
+
+    public List<GeneratorModel> fetch(int offset, int limit, Example<Generator> example, List<QuerySortOrder> orders) {
+
+        Sort sort=utils.buildSort(orders);
+
+        Pageable pageable = new OffsetBasedPageRequest(offset, limit, sort);
+
+        Page<Generator> page;
+        if(example!=null){
+            page = repository.findAll(example, pageable);
+        }else{
+            page = repository.findAll(pageable);
+        }
+
+        List<GeneratorModel> list = new ArrayList<>();
+        for(Generator entity : page.toList()){
+            GeneratorModel model = new GeneratorModel();
+            entityToModel(entity, model);
+            list.add(model);
+        }
+
+        return list;
+    }
+
+
+    public int count(Example<Generator> example) {
+        return (int)repository.count(example);
+    }
+
+    public int count() {
+        return (int)repository.count();
+    }
+
+
+
 
     /**
      * Copy data from Entity to Model

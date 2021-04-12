@@ -26,27 +26,12 @@
 }
 
 
-
 .simulations-view #button-layout {
   width: 100%;
   flex-wrap: wrap;
   background-color: var(--lumo-contrast-5pct);
   padding: var(--lumo-space-s) var(--lumo-space-l);
 }
-
-
-[part~="cell"] {
-   font-size: var(--lumo-font-size-xs);
-}
-
-
-/* style text in grid column headers */
-[part~="header-cell"] ::slotted(vaadin-grid-cell-content) {
-  font-size: var(--lumo-font-size-xs);
-  white-space: normal;
-  word-wrap: break-word
-}
-
 
 
 .simulations-view .databutton {

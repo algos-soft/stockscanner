@@ -34,7 +34,7 @@ public class SimulationService extends CrudService<Simulation, Integer> {
 
     public List<SimulationModel> fetch(int offset, int limit, Example<Simulation> example, List<QuerySortOrder> orders) {
 
-        Sort sort=buildSort(orders);
+        Sort sort=utils.buildSort(orders);
 
         Pageable pageable = new OffsetBasedPageRequest(offset, limit, sort);
 
@@ -55,31 +55,31 @@ public class SimulationService extends CrudService<Simulation, Integer> {
         return list;
     }
 
-    private Sort buildSort(List<QuerySortOrder> orders){
-
-        List<Sort.Order> sortOrders = new ArrayList<>();
-
-        for(QuerySortOrder order : orders){
-
-            SortDirection sortDirection = order.getDirection();
-            String sortProperty = order.getSorted();
-
-            Sort.Direction sDirection=null;
-            switch (sortDirection){
-                case ASCENDING:
-                    sDirection=Sort.Direction.ASC;
-                    break;
-                case DESCENDING:
-                    sDirection=Sort.Direction.DESC;
-                    break;
-            }
-
-            sortOrders.add(new Sort.Order(sDirection, sortProperty));
-
-        }
-
-        return Sort.by(sortOrders);
-    }
+//    private Sort buildSort(List<QuerySortOrder> orders){
+//
+//        List<Sort.Order> sortOrders = new ArrayList<>();
+//
+//        for(QuerySortOrder order : orders){
+//
+//            SortDirection sortDirection = order.getDirection();
+//            String sortProperty = order.getSorted();
+//
+//            Sort.Direction sDirection=null;
+//            switch (sortDirection){
+//                case ASCENDING:
+//                    sDirection=Sort.Direction.ASC;
+//                    break;
+//                case DESCENDING:
+//                    sDirection=Sort.Direction.DESC;
+//                    break;
+//            }
+//
+//            sortOrders.add(new Sort.Order(sDirection, sortProperty));
+//
+//        }
+//
+//        return Sort.by(sortOrders);
+//    }
 
     public int count(Example<Simulation> example) {
         return (int)repository.count(example);

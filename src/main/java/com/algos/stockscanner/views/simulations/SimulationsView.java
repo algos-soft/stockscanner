@@ -36,7 +36,8 @@ import java.util.Optional;
 
 @Route(value = "simulations", layout = MainView.class)
 @PageTitle("Simulations")
-@CssImport(value = "./views/simulations/simulations-view.css", themeFor = "vaadin-grid")
+@CssImport(value = "./views/simulations/simulations-view.css")
+@CssImport(value = "./views/simulations/simulations-grid.css", themeFor = "vaadin-grid")
 public class SimulationsView extends Div {
 
     private Grid<SimulationModel> grid;
@@ -78,16 +79,16 @@ public class SimulationsView extends Div {
                 Optional<HorizontalLayout> customArea = utils.findCustomArea(parent.get());
                 if (customArea.isPresent()) {
                     customArea.get().removeAll();
-                    customizeHeader(customArea.get());
+//                    customizeHeader(customArea.get());
                 }
             }
         });
+
 
     }
 
 
     private void customizeHeader(HorizontalLayout header) {
-        header.add(new Label("My custom content"));
     }
 
 

@@ -12,6 +12,8 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.server.InputStreamFactory;
@@ -25,6 +27,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Sort;
 
 import javax.imageio.ImageIO;
 //import java.awt.*;
@@ -35,6 +38,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
@@ -239,6 +244,34 @@ public class Utils {
 
         return indexCombo;
     }
+
+
+    public Sort buildSort(List<QuerySortOrder> orders){
+
+        List<Sort.Order> sortOrders = new ArrayList<>();
+
+        for(QuerySortOrder order : orders){
+
+            SortDirection sortDirection = order.getDirection();
+            String sortProperty = order.getSorted();
+
+            Sort.Direction sDirection=null;
+            switch (sortDirection){
+                case ASCENDING:
+                    sDirection=Sort.Direction.ASC;
+                    break;
+                case DESCENDING:
+                    sDirection=Sort.Direction.DESC;
+                    break;
+            }
+
+            sortOrders.add(new Sort.Order(sDirection, sortProperty));
+
+        }
+
+        return Sort.by(sortOrders);
+    }
+
 
 
 

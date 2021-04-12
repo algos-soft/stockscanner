@@ -3,10 +3,13 @@ package com.algos.stockscanner.views.generators;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -20,6 +23,10 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.router.*;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -27,6 +34,7 @@ import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -40,10 +48,16 @@ import java.util.Optional;
 @Route(value = "generators", layout = MainView.class)
 @RouteAlias(value = "", layout = MainView.class)
 @PageTitle("Generators")
-@CssImport("./views/generators/generators-view.css")
+@CssImport(value="./views/generators/generators-view.css")
+@CssImport(value="./views/generators/generators-grid.css", themeFor = "vaadin-grid")
 public class GeneratorsView extends Div implements AfterNavigationObserver  {
 
-    Grid<GeneratorModel> grid = new Grid<>();
+    private Grid<GeneratorModel> grid;
+
+    private String filtSymbol;
+
+    private Example<Generator> filter;
+
 
     @Autowired
     private GeneratorService generatorService;
@@ -62,12 +76,27 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
 
     @PostConstruct
     private void init() {
+
         addClassName("generators-view");
         setSizeFull();
-        grid.setHeight("100%");
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        grid.addComponentColumn(index -> createCard(index));
-        add(grid);
+
+//        grid = new Grid<>();
+//        grid.setHeight("100%");
+//        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
+//        grid.addComponentColumn(index -> createCard(index));
+        //add(grid);
+
+        filter=Example.of(new Generator());    // empty initial filter
+
+        createGrid();
+        Component filterPanel = createFilterPanel();
+
+        VerticalLayout layout = new VerticalLayout();
+        layout.getStyle().set("height","100%");
+        layout.add(filterPanel, grid);
+
+        add(layout);
+
 
         // customize the header
         addAttachListener((ComponentEventListener<AttachEvent>) attachEvent -> {
@@ -85,12 +114,13 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
 
+
+
     /**
      * Reload data when this view is displayed.
      */
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
-        loadAll();
     }
 
     private void customizeHeader(HorizontalLayout header){
@@ -104,6 +134,48 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         });
 
         header.add(addButton);
+    }
+
+
+    private void createGrid(){
+        grid = new Grid<>();
+        grid.setHeight("100%");
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
+        grid.addComponentColumn(index -> createCard(index));
+
+        CallbackDataProvider<GeneratorModel, Void> provider;
+        provider = DataProvider.fromCallbacks(fetchCallback -> {
+            int offset = fetchCallback.getOffset();
+            int limit = fetchCallback.getLimit();
+            List<QuerySortOrder> sorts = fetchCallback.getSortOrders();
+            return generatorService.fetch(offset, limit, filter, sorts).stream();
+        }, countCallback -> {
+            return generatorService.count(filter);
+        });
+
+        grid.setDataProvider(provider);
+
+
+    }
+
+    private Component createFilterPanel(){
+
+        ComboBox<MarketIndex> indexCombo = utils.buildIndexCombo();
+        indexCombo.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<ComboBox<MarketIndex>, MarketIndex>>() {
+            @Override
+            public void valueChanged(AbstractField.ComponentValueChangeEvent<ComboBox<MarketIndex>, MarketIndex> event) {
+                filtSymbol=null;
+                MarketIndex marketIndex = event.getValue();
+                if(marketIndex!=null){
+                    filtSymbol = marketIndex.getSymbol();
+                }
+                filter();
+            }
+        });
+
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.add(indexCombo);
+        return layout;
     }
 
 
@@ -123,62 +195,6 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
 
         card.add(pan1, pan2, pan3, pan4, action);
 
-
-//        VerticalLayout body = new VerticalLayout();
-//        body.setSpacing(false);
-//        body.setPadding(false);
-//        body.getThemeList().add("spacing-s");
-
-//        Span symbol = new Span(model.getSymbol());
-//        symbol.addClassName("symbol");
-
-//        Span name = new Span(model.getName());
-//        name.addClassName("name");
-
-//        String categoryDesc=null;
-//        IndexCategories indexCategory=model.getCategory();
-//        if (indexCategory!=null){
-//            categoryDesc=indexCategory.getDescription();
-//        }
-//        Span category = new Span(categoryDesc);
-//        category.addClassName("category");
-
-
-
-//        Div details = new Div();
-//
-//        IronIcon intervalIcon = new IronIcon("vaadin", "calendar-o");
-//        String text;
-//        if(model.getNumUnits()>0){
-//            text=format(model.getUnitsFrom())+" -> "+format(model.getUnitsTo());
-//        }else{
-//            text = "no data";
-//        }
-//        Span intervalSpan = new Span(text);
-//        intervalSpan.addClassName("interval");
-//
-//        IronIcon pointsIcon = new IronIcon("vaadin", "ellipsis-dots-h");
-//        Span pointsSpan = new Span(String.format("%,d", model.getNumUnits()));
-//        pointsSpan.addClassName("points");
-//
-//        IronIcon frequencyIcon = new IronIcon("vaadin", "clock");
-//        String frequencyDesc=null;
-//        FrequencyTypes frequencyType=model.getUnitFrequency();
-//        if (frequencyType!=null){
-//            frequencyDesc=frequencyType.getDescription();
-//        }
-//        Span frequancySpan = new Span(frequencyDesc);
-//        frequancySpan.addClassName("frequency");
-//        details.add(intervalIcon, intervalSpan, pointsIcon, pointsSpan, frequencyIcon, frequancySpan);
-
-        //body.add(symbol, name, category, details);
-//        body.add(symbol);
-
-//        Image image = model.getImage();
-//        Component action = buildActionCombo(model);
-
-        //card.add(image, body, action);
-//        card.add(body);
         return card;
     }
 
@@ -353,7 +369,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
                 generatorService.initEntity(entity);
                 generatorService.modelToEntity(model, entity);
                 generatorService.update(entity);
-                loadAll();
+                refreshGrid();
             }
         };
 
@@ -365,21 +381,6 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
 
-    /**
-     * Load all data in the grid
-     */
-    private void loadAll(){
-        List<GeneratorModel> outList=new ArrayList<>();
-
-        Pageable p = Pageable.unpaged();
-        Page<Generator> page = generatorService.list(p);
-
-        page.stream().forEach(e -> {
-            outList.add(createModel(e));
-        });
-
-        grid.setItems(outList);
-    }
 
 
     /**
@@ -435,7 +436,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
             bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
                 try {
                     generatorService.delete(model.getId());
-                    loadAll();
+                    refreshGrid();
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -450,6 +451,32 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
 
         return menuBar;
 
+    }
+
+
+
+    /**
+     * update the current filter
+     */
+    private void filter(){
+        Generator entity = new Generator();
+
+
+        if(filtSymbol!=null){
+            MarketIndex marketIndex = new MarketIndex();
+            marketIndex.setSymbol(filtSymbol);
+            entity.setIndex(marketIndex);
+        }
+
+        filter = Example.of(entity);
+
+        refreshGrid();
+
+    }
+
+    private void refreshGrid() {
+        grid.select(null);
+        grid.getDataProvider().refreshAll();
     }
 
 

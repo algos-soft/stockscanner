@@ -1,0 +1,4 @@
+[part~="cell"] ::slotted(vaadin-grid-cell-content) {
+   padding-left: var(--lumo-space-xs);
+   padding-right: var(--lumo-space-xs);
+}

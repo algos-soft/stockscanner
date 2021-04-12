@@ -1,0 +1,14 @@
+[part~="cell"] {
+   font-size: var(--lumo-font-size-xs);
+}
+
+
+/* style text in grid column headers */
+[part~="header-cell"] ::slotted(vaadin-grid-cell-content) {
+  font-size: var(--lumo-font-size-xs);
+  white-space: normal;
+  word-wrap: break-word
+}
+
+
+
