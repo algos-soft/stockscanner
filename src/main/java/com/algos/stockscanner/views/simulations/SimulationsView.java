@@ -146,11 +146,13 @@ public class SimulationsView extends Div {
         col=grid.addColumn(SimulationModel::getNumGenerator);
         col.setHeader("#gen");
         col.setSortProperty("generator.number");
+        col.setWidth("7em");
 
         // symbol
         col=grid.addColumn(SimulationModel::getSymbol);
-        col.setHeader("symbol");
+        col.setHeader("sym");
         col.setSortProperty("index.symbol");
+        col.setWidth("6em");
 
         // data button
         col = grid.addComponentColumn(item -> createDataButton(grid, item));
@@ -161,11 +163,13 @@ public class SimulationsView extends Div {
         col=grid.addColumn(new LocalDateRenderer<>(SimulationModel::getStartTs,DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
         col.setHeader("start");
         col.setSortProperty("startTs");
+        col.setWidth("8em");
 
         // end date
         col=grid.addColumn(new LocalDateRenderer<>(SimulationModel::getEndTs,DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
         col.setHeader("end");
         col.setSortProperty("endTs");
+        col.setWidth("8em");
 
         // initial amount
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getInitialAmount, "%,.2f",Locale.getDefault()));
@@ -176,6 +180,7 @@ public class SimulationsView extends Div {
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getLeverage, "%,d",Locale.getDefault()));
         col.setHeader("lev");
         col.setSortProperty("leverage");
+        col.setWidth("6em");
 
         // amplitude
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getAmplitude, "%,.2f",Locale.getDefault()));
