@@ -46,7 +46,7 @@
 }
 
 .generators-view .amount {
-  font-size: var(--lumo-font-size-xxl);
+  font-size: var(--lumo-font-size-xl);
   font-weight: bold;
 }
 

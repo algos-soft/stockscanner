@@ -91,16 +91,16 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
     private void customizeHeader(HorizontalLayout header){
-        ComboBox searchBox = new ComboBox();
-        searchBox.setPlaceholder("Search index");
-        searchBox.setAllowCustomValue(false);
-        searchBox.addValueChangeListener(event -> {
-            if (event.getValue() == null) {
-                //value.setText("No option selected");
-            } else {
-                //value.setText("Selected: " + event.getValue());
-            }
-        });
+//        ComboBox searchBox = new ComboBox();
+//        searchBox.setPlaceholder("Search index");
+//        searchBox.setAllowCustomValue(false);
+//        searchBox.addValueChangeListener(event -> {
+//            if (event.getValue() == null) {
+//                //value.setText("No option selected");
+//            } else {
+//                //value.setText("Selected: " + event.getValue());
+//            }
+//        });
 
         Button addButton = new Button("New Index",  new Icon(VaadinIcon.PLUS_CIRCLE));
         addButton.getStyle().set("margin-left","1em");
@@ -110,8 +110,11 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             addNewItem();
         });
 
-        header.add(searchBox);
+        header.getStyle().set("flex-direction","row-reverse");
+
+//        header.add(searchBox);
         header.add(addButton);
+
     }
 
 

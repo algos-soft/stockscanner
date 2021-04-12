@@ -125,6 +125,8 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
 
     private void customizeHeader(HorizontalLayout header){
 
+        header.getStyle().set("flex-direction","row-reverse");
+
         Button addButton = new Button("New Generator",  new Icon(VaadinIcon.PLUS_CIRCLE));
         addButton.getStyle().set("margin-left","1em");
         addButton.getStyle().set("margin-right","1em");
