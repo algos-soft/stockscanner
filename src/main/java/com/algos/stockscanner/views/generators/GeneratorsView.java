@@ -7,6 +7,7 @@ import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.data.service.SimulationService;
+import com.algos.stockscanner.runner.GeneratorMonitor;
 import com.algos.stockscanner.services.RunnerService;
 import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.component.*;
@@ -509,7 +510,9 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     private void run3(GeneratorModel model){
         Generator generator = generatorService.get(model.getId()).get();
         try {
-            runnerService.run(generator);
+            GeneratorMonitor monitor = runnerService.run(generator);
+            int a = 87;
+            int b=a;
         } catch (Exception e) {
             ConfirmDialog dialog = ConfirmDialog.createError()
                     .withCaption("The runner for Generator "+model.getNumber()+" returned an error")
