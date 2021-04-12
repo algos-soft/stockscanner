@@ -25,6 +25,8 @@
   flex-grow: 1;
 }
 
+
+
 .simulations-view #button-layout {
   width: 100%;
   flex-wrap: wrap;
@@ -35,4 +37,19 @@
 
 [part~="cell"] {
    font-size: var(--lumo-font-size-xs);
+}
+
+
+/* style text in grid column headers */
+[part~="header-cell"] ::slotted(vaadin-grid-cell-content) {
+  font-size: var(--lumo-font-size-xs);
+  white-space: normal;
+  word-wrap: break-word
+}
+
+
+
+.simulations-view .databutton {
+   font-size: var(--lumo-font-size-xs);
+   height: 2em;
 }

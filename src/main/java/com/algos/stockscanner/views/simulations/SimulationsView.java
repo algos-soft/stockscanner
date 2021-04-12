@@ -9,18 +9,14 @@ import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.crud.Crud;
-import com.vaadin.flow.component.crud.CrudGrid;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.QuerySortOrder;
@@ -141,6 +137,8 @@ public class SimulationsView extends Div {
         grid = new Grid();
 
         grid.setDataProvider(provider);
+        grid.setColumnReorderingAllowed(true);
+
 
         Grid.Column col;
 
@@ -154,6 +152,11 @@ public class SimulationsView extends Div {
         col.setHeader("symbol");
         col.setSortProperty("index.symbol");
 
+        // data button
+        col = grid.addComponentColumn(item -> createDataButton(grid, item));
+        col.setHeader("data");
+        col.setWidth("8em");
+
         // start date
         col=grid.addColumn(new LocalDateRenderer<>(SimulationModel::getStartTs,DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
         col.setHeader("start");
@@ -165,32 +168,90 @@ public class SimulationsView extends Div {
         col.setSortProperty("endTs");
 
         // initial amount
-        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getInitialAmount, "%.2f",Locale.getDefault()));
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getInitialAmount, "%,.2f",Locale.getDefault()));
         col.setHeader("initial amt");
         col.setSortProperty("initialAmount");
 
         // leverage
-        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getLeverage, "%d",Locale.getDefault()));
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getLeverage, "%,d",Locale.getDefault()));
         col.setHeader("lev");
         col.setSortProperty("leverage");
 
         // amplitude
-        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getAmplitude, "%.2f",Locale.getDefault()));
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getAmplitude, "%,.2f",Locale.getDefault()));
         col.setHeader("amp");
         col.setSortProperty("amplitude");
 
         // final amount
-        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getFinalAmount, "%.2f",Locale.getDefault()));
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getFinalAmount, "%,.2f",Locale.getDefault()));
         col.setHeader("final amt");
         col.setSortProperty("finalAmount");
 
-        // P/L percent
-        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getPlPercent, "%.2f%%",Locale.getDefault()));
+        // P/L
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getPl, "%,.2f",Locale.getDefault()));
         col.setHeader("P/L");
+        col.setSortProperty("pl");
+
+        // P/L percent
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getPlPercent, "%,.2f%%",Locale.getDefault()));
+        col.setHeader("P/L%");
         col.setSortProperty("plPercent");
 
-        //grid.addColumn(SimulationModel::getPlPercent, "plPercent").setHeader("P/L%");
+        // num buy
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumBuy, "%,d",Locale.getDefault()));
+        col.setHeader("# buy");
+        col.setSortProperty("numBuy");
 
+        // num buy
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumSell, "%,d",Locale.getDefault()));
+        col.setHeader("# sell");
+        col.setSortProperty("numSell");
+
+        // tot spread
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getTotSpread, "%,.2f",Locale.getDefault()));
+        col.setHeader("spread");
+        col.setSortProperty("totSpread");
+
+        // tot commission
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getTotCommission, "%,.2f",Locale.getDefault()));
+        col.setHeader("commission");
+        col.setSortProperty("totCommission");
+
+        // num points scanned
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsScanned, "%,d",Locale.getDefault()));
+        col.setHeader("pts scanned");
+        col.setSortProperty("numPointsScanned");
+
+        // num points hold
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsHold, "%,d",Locale.getDefault()));
+        col.setHeader("pts hold");
+        col.setSortProperty("numPointsHold");
+
+        // num points wait
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsWait, "%,d",Locale.getDefault()));
+        col.setHeader("pts wait");
+        col.setSortProperty("numPointsWait");
+
+        // min points hold
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getMinPointsHold, "%,d",Locale.getDefault()));
+        col.setHeader("min pts hold");
+        col.setSortProperty("minPointsHold");
+
+        // max points hold
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getMaxPointsHold, "%,d",Locale.getDefault()));
+        col.setHeader("max pts hold");
+        col.setSortProperty("maxPointsHold");
+
+
+    }
+
+
+    private Component createDataButton(Grid grid, SimulationModel item){
+        Button button = new Button("data", clickEvent -> {
+            Notification.show("id: "+item.getId()+" gen: "+item.getNumGenerator()+" "+item.getSymbol());
+        });
+        button.addClassName("databutton");
+        return button;
     }
 
 

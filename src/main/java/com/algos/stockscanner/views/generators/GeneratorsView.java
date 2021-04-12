@@ -402,6 +402,10 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         account.getSubMenu().addItem("Run generator", i -> {
         });
 
+        // show results
+        account.getSubMenu().addItem("Show results", i -> {
+        });
+
         // edit an item
         account.getSubMenu().addItem("Edit generator", i -> {
 
