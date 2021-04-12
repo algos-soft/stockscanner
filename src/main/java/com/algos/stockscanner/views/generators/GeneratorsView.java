@@ -6,6 +6,8 @@ import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.algos.stockscanner.data.service.SimulationService;
+import com.algos.stockscanner.services.RunnerService;
 import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -21,6 +23,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -64,6 +67,12 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
 
     @Autowired
     private MarketIndexService marketIndexService;
+
+    @Autowired
+    private SimulationService simulationService;
+
+    @Autowired
+    private RunnerService runnerService;
 
     @Autowired
     private ApplicationContext context;
@@ -401,8 +410,9 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         MenuItem account = menuBar.addItem("Actions...");
 
 
-        // edit an item
+        // run an item
         account.getSubMenu().addItem("Run generator", i -> {
+            run1(model);
         });
 
         // show results
@@ -453,6 +463,60 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
 
         return menuBar;
 
+    }
+
+    // run generator - phase 1
+    private void run1(GeneratorModel model){
+        // check if there are previous simulations that will be deleted
+        Generator generator = generatorService.get(model.getId()).get();
+        int count = simulationService.countBy(generator);
+        if(count>0){
+            Button bConfirm = new Button();
+            ConfirmDialog dialog = ConfirmDialog.create().withMessage(count+" previous simulations found, will be deleted.")
+                    .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
+                    .withButton(bConfirm, ButtonOption.caption("Continue"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
+            bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+                run3(model);
+            });
+
+            dialog.open();
+        } else {
+            run3(model);
+        }
+    }
+
+
+//    // run generator - phase 2
+//    private void run2(GeneratorModel model){
+//
+//        // check that index has data
+//        MarketIndex marketIndex = new MarketIndex();
+//        marketIndex.setSymbol(model.getSymbol());
+//        int count = marketIndexService.countDataPoints(marketIndex);
+//        if(count==0){
+//            ConfirmDialog dialog = ConfirmDialog.createError()
+//                    .withCaption("The index "+model.getSymbol()+" has no historic data")
+//                    .withMessage("Load data in the index first.")
+//                    .withCancelButton();
+//            dialog.open();
+//            return;
+//        } else {
+//            run3(model);
+//        }
+//
+//    }
+
+    private void run3(GeneratorModel model){
+        Generator generator = generatorService.get(model.getId()).get();
+        try {
+            runnerService.run(generator);
+        } catch (Exception e) {
+            ConfirmDialog dialog = ConfirmDialog.createError()
+                    .withCaption("The runner for Generator "+model.getNumber()+" returned an error")
+                    .withMessage(e.getMessage())
+                    .withCancelButton();
+            dialog.open();
+        }
     }
 
 

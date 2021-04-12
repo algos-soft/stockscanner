@@ -23,7 +23,7 @@
 }
 
 .generators-view .icon {
-  height: 1.5em;
+  height: 2em;
   border-radius: 10%;
 }
 
@@ -40,9 +40,9 @@
 
 .generators-view iron-icon {
   color: var(--lumo-tertiary-text-color);
-  height: calc(var(--lumo-icon-size-s) * 0.8);
+  height: calc(var(--lumo-icon-size-s)*0.8);
+  width: calc(var(--lumo-icon-size-s)*0.8);
   margin-right: var(--lumo-space-xs);
-  width: calc(var(--lumo-icon-size-s) * 0.8);
 }
 
 .generators-view .amount {

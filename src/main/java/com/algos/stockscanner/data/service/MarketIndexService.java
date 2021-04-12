@@ -22,11 +22,15 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
     @Autowired
     private Utils utils;
 
+    @Autowired
+    private IndexUnitService indexUnitService;
+
     private MarketIndexRepository repository;
 
     public MarketIndexService(@Autowired MarketIndexRepository repository) {
         this.repository = repository;
     }
+
 
     public List<MarketIndex> findBySymbol (String symbol){
         return repository.findBySymbol(symbol);
@@ -69,6 +73,16 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         return (int)repository.count(example);
     }
 
+
+    public List<MarketIndex> findAll ()  {
+        return repository.findAll();
+    }
+
+    public int countDataPoints(MarketIndex index){
+        return indexUnitService.countBy(index);
+    }
+
+
     @Override
     protected MarketIndexRepository getRepository() {
         return repository;
@@ -109,9 +123,6 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
 
     }
 
-    public List<MarketIndex> findAll ()  {
-        return repository.findAll();
-    }
 
 
 

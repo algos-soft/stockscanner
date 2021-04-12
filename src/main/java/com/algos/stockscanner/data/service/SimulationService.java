@@ -89,6 +89,14 @@ public class SimulationService extends CrudService<Simulation, Integer> {
         return (int)repository.count();
     }
 
+    public int countBy(Generator generator) {
+        Simulation entity = new Simulation();
+        entity.setGenerator(generator);
+        return (int)repository.count(Example.of(entity));
+    }
+
+
+
 
     @Override
     protected SimulationRepository getRepository() {
