@@ -11,10 +11,13 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.IronIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.spring.annotation.UIScope;
+import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
@@ -25,7 +28,10 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Runs a Generator in a separate thread
@@ -49,10 +55,16 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
 
     private Div imgPlaceholder;
 
+    private Exception exception;
+
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
 
     private boolean error;  // error during execution
     private boolean abort;  // user aborted
     private boolean completed;
+
 
     @Autowired
     private ApplicationContext context;
@@ -74,6 +86,12 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
         label.setId("label");
 
         imgPlaceholder = new Div();
+        imgPlaceholder.addClickListener(new ComponentEventListener<ClickEvent<Div>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Div> divClickEvent) {
+                infoClicked();
+            }
+        });
         setImage("RUN");
 
         progressBar = new ProgressBar();
@@ -87,8 +105,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
                 fireClosed();
             }else{
                 abort=true;
-                AbortedInfo info = new AbortedInfo();
-                fireAborted(info);
+                fireAborted();
             }
         });
 
@@ -100,34 +117,36 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
     }
 
     @Override
-    public Object call() throws Exception {
+    public Object call() {
 
         try {
 
+            startTime = LocalDateTime.now();
+
+            // here the business logic cycle, can throw exceptions
             for(int i=0; i<4; i++){
+
                 if(abort){
                     break;
                 }
 
                 setProgress(4,i+1);
-//                ProgressInfo info = new ProgressInfo();
-//                info.total=4;
-//                info.current=i;
-//                fireProgress(info);
                 Thread.sleep(1000);
 
                 if(i==2){
-                    throw new Exception("Eccezione");
+                    //throw new Exception("Eccezione");
                 }
 
             }
+            // end of business logic cycle
 
+            endTime=LocalDateTime.now();
 
             setCompleted();
 
-
         }catch (Exception e){
 
+            exception=e;
             error=true;
 
             ui.access((Command) () -> {
@@ -135,35 +154,68 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
             });
             setImage("ERR");
 
-//            ErrorInfo errorInfo=new ErrorInfo();
-//            errorInfo.exception=e;
-//            fireError(errorInfo);
-
         }
 
         return null;
     }
 
+    private void infoClicked(){
+        if(error){
+            ConfirmDialog dialog = ConfirmDialog.createError().withCaption("Error info").withMessage(exception.getMessage());
+            dialog.setCloseOnOutsideClick(true);
+            dialog.open();
+        }
+        if(completed){
+            Duration dur = Duration.between(startTime, endTime);
+            long millis = dur.toMillis();
 
+            String timeString=String.format("%02dh %02dm %02ds",
+                    TimeUnit.MILLISECONDS.toHours(millis),
+                    TimeUnit.MILLISECONDS.toMinutes(millis) -
+                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+                    TimeUnit.MILLISECONDS.toSeconds(millis) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+
+            ConfirmDialog dialog = ConfirmDialog.createInfo().withCaption("Success").withMessage("Generation completed successfully in "+timeString);
+            dialog.setCloseOnOutsideClick(true);
+            dialog.open();
+        }
+    }
+
+    /**
+     * Update the progress bar.
+     * <br>
+     * If total = 0 puts the bar in indeterminate mode
+     */
     private void setProgress(int total, int current){
+        Command command;
+        if(total>0){
+            command = (Command) () -> {
+                progressBar.setIndeterminate(false);
+                progressBar.setMax(total);
+                progressBar.setValue(current);
+                label.setText("["+generator.getNumber()+"] "+current+"/"+total);
+            };
+        }else{
+            command = (Command) () -> {
+                progressBar.setIndeterminate(true);
+                label.setText("["+generator.getNumber()+"] running...");
+            };
+        }
 
-        ui.access((Command) () -> {
-            progressBar.setMax(total);
-            progressBar.setValue(current);
-            label.setText(current+"/"+total);
-        });
+        ui.access(command);
+
     }
 
     private void setCompleted(){
         completed=true;
         ui.access((Command) () -> {
             button.setText("Close");
+            progressBar.setMax(1);
+            progressBar.setValue(1);
+            progressBar.setIndeterminate(false);
         });
         setImage("END");
-
-//        CompletedInfo info = new CompletedInfo();
-//        fireCompleted(info);
-
     }
 
 
@@ -197,16 +249,10 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
             imgPlaceholder.add(finalImage);
         });
 
-
     }
 
-
-
     public interface RunnerListener {
-        void onProgress(ProgressInfo info);
-        void onCompleted(CompletedInfo info);
-        void onError(ErrorInfo info);
-        void onAborted(AbortedInfo info);
+        void onAborted();
         void onClosed();
     }
 
@@ -214,27 +260,10 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
         this.RunnerListener = runnerListener;
     }
 
-    private void fireProgress(ProgressInfo info){
-        if(RunnerListener !=null){
-            RunnerListener.onProgress(info);
-        }
-    }
 
-    private void fireCompleted(CompletedInfo info){
+    private void fireAborted(){
         if(RunnerListener !=null){
-            RunnerListener.onCompleted(info);
-        }
-    }
-
-    private void fireError(ErrorInfo info){
-        if(RunnerListener !=null){
-            RunnerListener.onError(info);
-        }
-    }
-
-    private void fireAborted(AbortedInfo info){
-        if(RunnerListener !=null){
-            RunnerListener.onAborted(info);
+            RunnerListener.onAborted();
         }
     }
 
@@ -244,23 +273,6 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
         }
     }
 
-
-    public class ProgressInfo{
-        int total;
-        int current;
-    }
-
-    public class AbortedInfo{
-
-    }
-
-    public class ErrorInfo{
-        Exception exception;
-    }
-
-    public class CompletedInfo{
-
-    }
 
 
 }

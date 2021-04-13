@@ -21,7 +21,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -40,15 +39,18 @@ import org.springframework.data.domain.Example;
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Route(value = "generators", layout = MainView.class)
 @RouteAlias(value = "", layout = MainView.class)
 @PageTitle("Generators")
-@CssImport(value="./views/generators/generators-view.css")
-@CssImport(value="./views/generators/generators-grid.css", themeFor = "vaadin-grid")
-public class GeneratorsView extends Div implements AfterNavigationObserver  {
+@CssImport(value = "./views/generators/generators-view.css")
+@CssImport(value = "./views/generators/generators-grid.css", themeFor = "vaadin-grid")
+public class GeneratorsView extends Div implements AfterNavigationObserver {
+
+    private static final String RUNNERS_KEY = "runners";
 
     private Grid<GeneratorModel> grid;
 
@@ -86,13 +88,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         addClassName("generators-view");
         setSizeFull();
 
-//        grid = new Grid<>();
-//        grid.setHeight("100%");
-//        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-//        grid.addComponentColumn(index -> createCard(index));
-        //add(grid);
-
-        filter=Example.of(new Generator());    // empty initial filter
+        filter = Example.of(new Generator());    // empty initial filter
 
         createGrid();
         Component filterPanel = createFilterPanel();
@@ -100,8 +96,8 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         statusLayout = new HorizontalLayout();
 
         VerticalLayout layout = new VerticalLayout();
-        layout.getStyle().set("height","100%");
-        layout.add(filterPanel, grid,statusLayout);
+        layout.getStyle().set("height", "100%");
+        layout.add(filterPanel, grid, statusLayout);
 
         add(layout);
 
@@ -118,9 +114,14 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
             }
         });
 
+        // retrieve the runners from the context and put them in the UI
+        List<GeneratorRunner> runners = getContextRunners();
+        for (GeneratorRunner runner : runners) {
+            runner.getElement().removeFromTree();   // remove if attached to previous tree
+            addRunnerToUI(runner);
+        }
 
     }
-
 
 
     /**
@@ -130,13 +131,13 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     public void afterNavigation(AfterNavigationEvent event) {
     }
 
-    private void customizeHeader(HorizontalLayout header){
+    private void customizeHeader(HorizontalLayout header) {
 
-        header.getStyle().set("flex-direction","row-reverse");
+        header.getStyle().set("flex-direction", "row-reverse");
 
-        Button addButton = new Button("New Generator",  new Icon(VaadinIcon.PLUS_CIRCLE));
-        addButton.getStyle().set("margin-left","1em");
-        addButton.getStyle().set("margin-right","1em");
+        Button addButton = new Button("New Generator", new Icon(VaadinIcon.PLUS_CIRCLE));
+        addButton.getStyle().set("margin-left", "1em");
+        addButton.getStyle().set("margin-right", "1em");
         addButton.setIconAfterText(true);
         addButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
             addNewItem();
@@ -146,7 +147,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
 
-    private void createGrid(){
+    private void createGrid() {
         grid = new Grid<>();
         grid.setHeight("100%");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
@@ -167,15 +168,15 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
 
     }
 
-    private Component createFilterPanel(){
+    private Component createFilterPanel() {
 
         ComboBox<MarketIndex> indexCombo = utils.buildIndexCombo();
         indexCombo.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<ComboBox<MarketIndex>, MarketIndex>>() {
             @Override
             public void valueChanged(AbstractField.ComponentValueChangeEvent<ComboBox<MarketIndex>, MarketIndex> event) {
-                filtSymbol=null;
+                filtSymbol = null;
                 MarketIndex marketIndex = event.getValue();
-                if(marketIndex!=null){
+                if (marketIndex != null) {
                     filtSymbol = marketIndex.getSymbol();
                 }
                 filter();
@@ -188,7 +189,6 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
 
-
     private HorizontalLayout createCard(GeneratorModel model) {
 
         HorizontalLayout card = new HorizontalLayout();
@@ -196,10 +196,10 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         card.setSpacing(false);
         card.getThemeList().add("spacing-s");
 
-        Component pan1=buildPan1(model);
-        Component pan2= buildPan2(model);
-        Component pan3= buildPan3(model);
-        Component pan4= buildPan4(model);
+        Component pan1 = buildPan1(model);
+        Component pan2 = buildPan2(model);
+        Component pan3 = buildPan3(model);
+        Component pan4 = buildPan4(model);
         Component action = buildActionCombo(model);
 
         card.add(pan1, pan2, pan3, pan4, action);
@@ -208,12 +208,12 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
 
-    private Component buildPan1(GeneratorModel model){
+    private Component buildPan1(GeneratorModel model) {
 
         IronIcon tagIcon = new IronIcon("vaadin", "tag");
 
         int number = utils.toPrimitive(model.getNumber());
-        Span sNumber = new Span(""+number);
+        Span sNumber = new Span("" + number);
         sNumber.addClassName("number");
 
         HorizontalLayout row1 = new HorizontalLayout();
@@ -221,7 +221,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         row1.add(tagIcon, sNumber);
 
         Image img = model.getImage();
-        if(img==null){
+        if (img == null) {
             img = utils.byteArrayToImage(utils.getDefaultIndexIcon());
         }
         img.addClassName("icon");
@@ -237,26 +237,26 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
 
-    private Component buildPan2(GeneratorModel model){
+    private Component buildPan2(GeneratorModel model) {
 
         int amount = utils.toPrimitive(model.getAmount());
         Span cAmount = new Span(format(amount));
         cAmount.addClassName("amount");
         int leverage = utils.toPrimitive(model.getLeverage());
-        Span cLeverage = new Span("X"+format(leverage));
+        Span cLeverage = new Span("X" + format(leverage));
         cLeverage.addClassName("leverage");
         HorizontalLayout row1 = new HorizontalLayout();
         row1.add(cAmount, cLeverage);
 
         int sl = utils.toPrimitive(model.getStopLoss());
-        Span cSL=new Span();
-        if(sl>0){
-            cSL.add("SL "+ format(sl)+"%");
+        Span cSL = new Span();
+        if (sl > 0) {
+            cSL.add("SL " + format(sl) + "%");
         }
         int tp = utils.toPrimitive(model.getTakeProfit());
-        Span cTP=new Span();
-        if(tp>0){
-            cTP.add("TP "+format(tp)+"%");
+        Span cTP = new Span();
+        if (tp > 0) {
+            cTP.add("TP " + format(tp) + "%");
         }
         HorizontalLayout row2 = new HorizontalLayout();
         row2.addClassName("sltp");
@@ -269,27 +269,27 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
 
-    private Component buildPan3(GeneratorModel model){
+    private Component buildPan3(GeneratorModel model) {
 
         IronIcon calendar = new IronIcon("vaadin", "flag-checkered");
         String sDate;
-        if(model.getStartDate()!=null){
-            sDate=format(model.getStartDate());
-        }else{
-            sDate="n.a.";
+        if (model.getStartDate() != null) {
+            sDate = format(model.getStartDate());
+        } else {
+            sDate = "n.a.";
         }
         Span spanDate = new Span(calendar, new Text(sDate));
         spanDate.addClassName("startdate");
 
         String period;
         IronIcon durationIcon = new IronIcon("vaadin", "clock");
-        if(model.isDurationFixed()){
-            period=model.getDays()+" days fixed";
-        }else{
-            if(model.getDays()>0){
-                period="max "+model.getDays()+" days";
-            }else{
-                period="unlimited";
+        if (model.isDurationFixed()) {
+            period = model.getDays() + " days fixed";
+        } else {
+            if (model.getDays() > 0) {
+                period = "max " + model.getDays() + " days";
+            } else {
+                period = "unlimited";
             }
         }
         Span spanPeriod = new Span(durationIcon, new Text(period));
@@ -297,10 +297,10 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
 
         String sSpan;
         IronIcon spanIcon = new IronIcon("vaadin", "refresh");
-        if(model.getSpans()>1){
-            sSpan=model.getSpans()+" spans";
-        }else{
-            sSpan="single span";
+        if (model.getSpans() > 1) {
+            sSpan = model.getSpans() + " spans";
+        } else {
+            sSpan = "single span";
         }
         Span spanSpan = new Span(spanIcon, new Span(sSpan));
         spanSpan.addClassName("spans");
@@ -311,24 +311,24 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
 
-    private Component buildPan4(GeneratorModel model){
+    private Component buildPan4(GeneratorModel model) {
 
         IronIcon amplIcon = new IronIcon("vaadin", "arrows-long-v");
         String sAmplitude;
-        if(model.isPermutateAmpitude()){
-            sAmplitude=model.getAmplitudeMin()+"% - "+model.getAmplitudeMax()+"%, in "+model.getAmplitudeSteps()+" steps";
-        }else{
-            sAmplitude=model.getAmplitude()+"%";
+        if (model.isPermutateAmpitude()) {
+            sAmplitude = model.getAmplitudeMin() + "% - " + model.getAmplitudeMax() + "%, in " + model.getAmplitudeSteps() + " steps";
+        } else {
+            sAmplitude = model.getAmplitude() + "%";
         }
         Span spanAmplitude = new Span(amplIcon, new Text(sAmplitude));
         spanAmplitude.addClassName("amplitude");
 
         IronIcon lookIcon = new IronIcon("vaadin", "glasses");
         String sLook;
-        if(model.isPermutateDaysLookback()){
-            sLook=model.getDaysLookbackMin()+" - "+model.getDaysLookbackMax()+" days, in "+model.getDaysLookbackSteps()+" steps";
-        }else{
-            sLook=model.getDaysLookback()+" days";
+        if (model.isPermutateDaysLookback()) {
+            sLook = model.getDaysLookbackMin() + " - " + model.getDaysLookbackMax() + " days, in " + model.getDaysLookbackSteps() + " steps";
+        } else {
+            sLook = model.getDaysLookback() + " days";
         }
         Span spanLook = new Span(lookIcon, new Text(sLook));
         spanLook.addClassName("lookback");
@@ -342,7 +342,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     /**
      * base for card panels
      */
-    class Pan extends VerticalLayout{
+    class Pan extends VerticalLayout {
         public Pan() {
             setSpacing(false);
             setPadding(false);
@@ -351,15 +351,15 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         }
     }
 
-    private String format(LocalDate d){
-        if(d!=null){
+    private String format(LocalDate d) {
+        if (d != null) {
             return d.format(DateTimeFormatter.ofPattern("dd MMM u"));
         }
         return null;
     }
 
-    private String format(Integer n){
-        if(n!=null){
+    private String format(Integer n) {
+        if (n != null) {
             return String.format("%,d", n);
         }
         return null;
@@ -369,9 +369,9 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     /**
      * Present an empty dialog to create a new item
      */
-    private void addNewItem(){
+    private void addNewItem() {
 
-        GeneratorDialogConfirmListener listener =  new GeneratorDialogConfirmListener() {
+        GeneratorDialogConfirmListener listener = new GeneratorDialogConfirmListener() {
             @Override
             public void onConfirm(GeneratorModel model) {
                 Generator entity = new Generator();
@@ -390,8 +390,6 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
 
-
-
     /**
      * Transform Entity to view Model
      */
@@ -402,7 +400,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
 
-    private Component buildActionCombo(GeneratorModel model){
+    private Component buildActionCombo(GeneratorModel model) {
 
         MenuBar menuBar = new MenuBar();
         MenuItem account = menuBar.addItem("Actions...");
@@ -439,7 +437,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         account.getSubMenu().addItem("Delete generator", i -> {
 
             Button bConfirm = new Button();
-            ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete "+model.getNumber()+" - "+model.getSymbol()+"?")
+            ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete " + model.getNumber() + " - " + model.getSymbol() + "?")
                     .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
                     .withButton(bConfirm, ButtonOption.caption("Delete"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
 
@@ -447,7 +445,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
                 try {
                     generatorService.delete(model.getId());
                     refreshGrid();
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
@@ -464,13 +462,13 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
     // run generator - phase 1
-    private void run1(GeneratorModel model){
+    private void run1(GeneratorModel model) {
         // check if there are previous simulations that will be deleted
         Generator generator = generatorService.get(model.getId()).get();
         int count = simulationService.countBy(generator);
-        if(count>0){
+        if (count > 0) {
             Button bConfirm = new Button();
-            ConfirmDialog dialog = ConfirmDialog.create().withMessage(count+" previous simulations found, will be deleted.")
+            ConfirmDialog dialog = ConfirmDialog.create().withMessage(count + " previous simulations found, will be deleted.")
                     .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
                     .withButton(bConfirm, ButtonOption.caption("Continue"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
             bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
@@ -504,48 +502,18 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
 //
 //    }
 
-    private void run3(GeneratorModel model){
+    private void run3(GeneratorModel model) {
         Generator generator = generatorService.get(model.getId()).get();
         try {
+
             UI ui = UI.getCurrent();
             GeneratorRunner runner = runnerService.run(generator, ui);
-            runner.setRunnerListener(new GeneratorRunner.RunnerListener() {
-
-                @Override
-                public void onProgress(GeneratorRunner.ProgressInfo info) {
-
-                }
-
-                @Override
-                public void onCompleted(GeneratorRunner.CompletedInfo info) {
-                    ui.access((Command) () -> statusLayout.remove(runner));
-                }
-
-                @Override
-                public void onError(GeneratorRunner.ErrorInfo info) {
-
-                }
-
-                @Override
-                public void onAborted(GeneratorRunner.AbortedInfo info) {
-                    ui.access((Command) () -> {
-                        Notification.show("Aborted");
-                        statusLayout.remove(runner);
-                    });
-                }
-
-                @Override
-                public void onClosed() {
-                    ui.access((Command) () -> statusLayout.remove(runner));
-                }
-
-            });
-
-            statusLayout.add(runner);
+            addRunnerToUI(runner);
+            registerRunnerInContext(runner);
 
         } catch (Exception e) {
             ConfirmDialog dialog = ConfirmDialog.createError()
-                    .withCaption("The runner for Generator "+model.getNumber()+" returned an error")
+                    .withCaption("The runner for Generator " + model.getNumber() + " returned an error")
                     .withMessage(e.getMessage())
                     .withCancelButton();
             dialog.open();
@@ -553,15 +521,14 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
 
-
     /**
      * update the current filter
      */
-    private void filter(){
+    private void filter() {
         Generator entity = new Generator();
 
 
-        if(filtSymbol!=null){
+        if (filtSymbol != null) {
             MarketIndex marketIndex = new MarketIndex();
             marketIndex.setSymbol(filtSymbol);
             entity.setIndex(marketIndex);
@@ -579,6 +546,87 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     }
 
 
+    /**
+     * Add a GeneratorRunner to the UI and and attach the listeners
+     */
+    private void addRunnerToUI(GeneratorRunner runner) {
+
+        // add listener
+        runner.setRunnerListener(new GeneratorRunner.RunnerListener() {
+
+            UI ui = UI.getCurrent();
+
+            @Override
+            public void onAborted() {
+                removeRunnerFromUI(runner);
+                unregisterRunnerFromContext(runner);
+            }
+
+            @Override
+            public void onClosed() {
+                removeRunnerFromUI(runner);
+                unregisterRunnerFromContext(runner);
+            }
+
+        });
+
+        // add the runner to the status layout
+        statusLayout.add(runner);
+
+    }
+
+    /**
+     * Remove a GeneratorRunner from the UI panel
+     */
+    private void removeRunnerFromUI(GeneratorRunner runner) {
+        UI ui = UI.getCurrent();
+        ui.access((Command) () -> statusLayout.remove(runner));
+    }
+
+
+    /**
+     * Retrieve runners from Session Context
+     */
+    private List<GeneratorRunner> getContextRunners() {
+        UI ui = UI.getCurrent();
+        Object obj = ui.getSession().getAttribute(RUNNERS_KEY);
+        List<GeneratorRunner> runners;
+        if (obj == null) {
+            runners = new ArrayList<>();
+            ui.getSession().setAttribute(RUNNERS_KEY, runners);
+        } else {
+            runners = (ArrayList) obj;
+        }
+        return runners;
+    }
+
+
+    // add GeneratorRunner to Session context
+    private void registerRunnerInContext(GeneratorRunner runner){
+        UI ui = UI.getCurrent();
+        Object obj = ui.getSession().getAttribute(RUNNERS_KEY);
+        List<GeneratorRunner> runners;
+        if (obj == null) {
+            runners = new ArrayList<>();
+            ui.getSession().setAttribute(RUNNERS_KEY, runners);
+        } else {
+            runners = (ArrayList) obj;
+        }
+        runners.add(runner);
+    }
+
+
+    // remove GeneratorRunner from Session context
+    private void unregisterRunnerFromContext(GeneratorRunner runner){
+        UI ui = UI.getCurrent();
+        Object obj = ui.getSession().getAttribute(RUNNERS_KEY);
+        List<GeneratorRunner> runners;
+        if (obj != null) {
+            runners = (ArrayList) obj;
+            runners.remove(runner);
+        }
+
+    }
 
 
 }
