@@ -1,6 +1,8 @@
 package com.algos.stockscanner.runner;
 
 import com.algos.stockscanner.data.entity.Generator;
+import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.service.MarketIndexService;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
@@ -14,6 +16,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.server.Command;
 import org.claspina.confirmdialog.ConfirmDialog;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -54,6 +57,9 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
     private boolean abort;  // user aborted
     private boolean completed;
 
+    @Autowired
+    private MarketIndexService marketIndexService;
+
     public GeneratorRunner(Generator generator, UI ui) {
         this.generator=generator;
         this.ui=ui;
@@ -64,7 +70,8 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
         setId("main-layout");
 
-        label = new Label("Testo di prova");
+        label = new Label();
+
         label.setId("label");
 
         imgPlaceholder = new Div();
@@ -86,6 +93,8 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             }
         });
 
+        setProgress(0,0, null);   // initialize the progress status
+
         HorizontalLayout row2 = new HorizontalLayout();
         row2.add(imgPlaceholder, progressBar, button);
 
@@ -101,6 +110,11 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             startTime = LocalDateTime.now();
 
             // here the business logic cycle, can throw exceptions
+
+            // preliminary checks
+            preliminaryChecks();
+
+
             int cycles=10;
             for(int i=0; i<cycles; i++){
 
@@ -108,7 +122,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     break;
                 }
 
-                setProgress(cycles,i+1);
+                setProgress(cycles,i+1, null);
                 Thread.sleep(1000);
 
 //                if(i==2){
@@ -127,7 +141,10 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             exception=e;
             error=true;
 
-            ui.access((Command) () -> button.setText("Close"));
+            ui.access((Command) () -> {
+                button.setText("Close");
+                setProgress(1, 0, "Error");
+            });
             setImage("ERR");
 
         }
@@ -163,19 +180,29 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
      * <br>
      * If total = 0 puts the bar in indeterminate mode
      */
-    private void setProgress(int total, int current){
+    private void setProgress(int total, int current, String message){
         Command command;
         if(total>0){
             command = (Command) () -> {
                 progressBar.setIndeterminate(false);
                 progressBar.setMax(total);
                 progressBar.setValue(current);
-                label.setText("["+generator.getNumber()+"] "+current+"/"+total);
+                String text="["+generator.getNumber()+"]";
+                if(message!=null){
+                    label.setText(text+" "+message);
+                }else{
+                    label.setText(text+" "+current+"/"+total);
+                }
             };
         }else{
             command = (Command) () -> {
                 progressBar.setIndeterminate(true);
-                label.setText("["+generator.getNumber()+"] running...");
+                String text="["+generator.getNumber()+"]";
+                if(message!=null){
+                    label.setText(text+" "+message);
+                }else{
+                    label.setText(text+" running...");
+                }
             };
         }
 
@@ -247,6 +274,28 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
     private void fireClosed(){
         if(RunnerListener !=null){
             RunnerListener.onClosed();
+        }
+    }
+
+
+
+
+
+    void preliminaryChecks() throws Exception{
+
+        // check that a index is specified
+        MarketIndex marketIndex = generator.getIndex();
+        if(marketIndex==null){
+            throw new Exception("The Generator does not have a Market Index specified");
+        }
+
+        // check that index has data
+        MarketIndex probeIndex = new MarketIndex();
+        marketIndex.setSymbol(marketIndex.getSymbol());
+        int count = marketIndexService.countDataPoints(marketIndex);
+        if(count==0){
+            String msg = "The index "+marketIndex.getSymbol()+" has no historic data. Load data in the index first.";
+            throw new Exception(msg);
         }
     }
 
