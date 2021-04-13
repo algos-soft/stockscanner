@@ -10,6 +10,11 @@
    font-size: var(--lumo-font-size-xs);
 }
 
+#image{
+    height: 1.4em;
+    width: 1.4em;
+}
+
 #progress-bar{
     height: 0.8em;
     width: 4em;
