@@ -1,8 +1,10 @@
 package com.algos.stockscanner.runner;
 
+import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.google.common.collect.Lists;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
@@ -23,6 +25,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -59,6 +64,10 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
     @Autowired
     private MarketIndexService marketIndexService;
+
+    @Autowired
+    private Utils utils;
+
 
     public GeneratorRunner(Generator generator, UI ui) {
         this.generator=generator;
@@ -114,22 +123,54 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             // preliminary checks
             preliminaryChecks();
 
+            // cartesian list of permutable properties
+            List<Integer> amplitudes = getAmplitudesList();
+            Collections.sort(amplitudes);
+            List<Integer> lookbacks = getLookbacksList();
+            Collections.sort(lookbacks);
+            List<List<Integer>> cartesianList = Lists.cartesianProduct(amplitudes, lookbacks);
 
-            int cycles=10;
-            for(int i=0; i<cycles; i++){
+//            int p=0;
+            int s=0;
+            int numPerm=cartesianList.size();
+            int numSpans=generator.getSpans();
 
+            for(List<Integer> permutation : cartesianList){
                 if(abort){
                     break;
                 }
+//                p++;
+//                setProgress(cartesianList.size(),p, null);
 
-                setProgress(cycles,i+1, null);
-                Thread.sleep(1000);
+                int amplitude = permutation.get(0);
+                int lookback = permutation.get(1);
 
-//                if(i==2){
-//                    //throw new Exception("Eccezione");
-//                }
+                for(int nspan=0; nspan<numSpans;nspan++){
+                    if(abort){
+                        break;
+                    }
+                    s++;
+                    setProgress(numPerm*numSpans,s, null);
+
+                    Thread.sleep(100);
+
+                    int a = 87;
+                    int b=a;
+                }
+
 
             }
+
+
+//            int cycles=10;
+//            for(int i=0; i<cycles; i++){
+//                if(abort){
+//                    break;
+//                }
+//                setProgress(cycles,i+1, null);
+//                Thread.sleep(1000);
+//            }
+
             // end of business logic cycle
 
             endTime=LocalDateTime.now();
@@ -290,13 +331,151 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
         }
 
         // check that index has data
-        MarketIndex probeIndex = new MarketIndex();
         marketIndex.setSymbol(marketIndex.getSymbol());
         int count = marketIndexService.countDataPoints(marketIndex);
         if(count==0){
             String msg = "The index "+marketIndex.getSymbol()+" has no historic data. Load data in the index first.";
             throw new Exception(msg);
         }
+
+        // start date
+        if(generator.getStartDate()==null){
+            throw new Exception("Start date is not specified");
+        }
+
+        // amount
+        if(utils.toPrimitive(generator.getAmount())==0){
+            throw new Exception("Initial amount is not specified");
+        }
+
+        // leverage
+        if(utils.toPrimitive(generator.getLeverage())==0){
+            throw new Exception("Leverage is not specified");
+        }
+
+        // if fixed length, number of days is required
+        if(generator.getFixedDays()){
+            if(utils.toPrimitive(generator.getDays())==0){
+                throw new Exception("Fixed length but no numer of days specified");
+            }
+        }
+
+        // number of spans
+        if(utils.toPrimitive(generator.getSpans())==0){
+            throw new Exception("Number of spans is not specified");
+        }
+
+        // amplitude
+        if(utils.toPrimitive(generator.getAmplitudePermutate())){
+            int min=utils.toPrimitive(generator.getAmplitudeMin());
+            int max=utils.toPrimitive(generator.getAmplitudeMax());
+            int steps=utils.toPrimitive(generator.getAmplitudeSteps());
+
+            if(min<=0){
+                throw new Exception("Minimum amplitude is not specified");
+            }
+            if(max<=0){
+                throw new Exception("Maximum amplitude is not specified");
+            }
+            if(steps<=0){
+                throw new Exception("Amplitude step is not specified");
+            }
+            if(steps==1){
+                throw new Exception("Amplitude steps must be > 1");
+            }
+            if(!verifySteps(min, max, steps)){
+                throw new Exception("Amplitude: # of steps doesn't fit with min-max range");
+            }
+        }else{
+            if(utils.toPrimitive(generator.getAmplitude()==0)){
+                throw new Exception("Amplitude is not specified");
+            }
+        }
+
+        // lookback days
+        if(utils.toPrimitive(generator.getAvgDaysPermutate())){
+            int min=utils.toPrimitive(generator.getAvgDaysMin());
+            int max=utils.toPrimitive(generator.getAvgDaysMax());
+            int steps=utils.toPrimitive(generator.getAvgDaysSteps());
+
+            if(min<=0){
+                throw new Exception("Minimum lookback days are not specified");
+            }
+            if(max<=0){
+                throw new Exception("Maximum lookback days are not specified");
+            }
+            if(steps<=0){
+                throw new Exception("Lookback days step is not specified");
+            }
+            if(steps==1){
+                throw new Exception("Lookback steps must be > 1");
+            }
+            if(!verifySteps(min, max, steps)){
+                throw new Exception("Lookback days: # of steps doesn't fit with min-max range");
+            }
+        }else{
+            if(utils.toPrimitive(generator.getAvgDays()==0)){
+                throw new Exception("Lookback days are not specified");
+            }
+        }
+
+
+    }
+
+
+    private boolean verifySteps(int min, int max, int steps) {
+        int diff = max-min;
+        int rest = diff % (steps-1);
+        return rest==0;
+    }
+
+
+    private List<Integer> getAmplitudesList()throws Exception {
+
+        List<Integer> list = new ArrayList<>();
+
+        if(generator.getAmplitudePermutate()){
+            int min = utils.toPrimitive(generator.getAmplitudeMin());
+            int max = utils.toPrimitive(generator.getAmplitudeMax());
+            int steps = utils.toPrimitive(generator.getAmplitudeSteps());
+            list.addAll(rangeToList(min, max, steps));
+            return list;
+        }else{
+            list.add(utils.toPrimitive(generator.getAmplitude()));
+            return list;
+        }
+    }
+
+    private List<Integer> getLookbacksList()throws Exception {
+
+        List<Integer> list = new ArrayList<>();
+
+        if(generator.getAvgDaysPermutate()){
+            int min = utils.toPrimitive(generator.getAvgDaysMin());
+            int max = utils.toPrimitive(generator.getAvgDaysMax());
+            int steps = utils.toPrimitive(generator.getAvgDaysSteps());
+            list.addAll(rangeToList(min, max, steps));
+            return list;
+        }else{
+            list.add(utils.toPrimitive(generator.getAvgDays()));
+            return list;
+        }
+    }
+
+
+    private List<Integer> rangeToList(int max, int min, int steps) throws Exception {
+        List<Integer> list = new ArrayList<>();
+
+        double d =(max-min)/(steps-1);
+        if(d%1!=0){
+            throw new Exception("Internal error, wrong number of steps!");
+        }
+        int step = (int)d;
+        for(int i=0;i<steps;i++){
+            Integer integer = new Integer(min+(i*step));
+            list.add(integer);
+        }
+        return list;
     }
 
 

@@ -482,25 +482,6 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
     }
 
 
-//    // run generator - phase 2
-//    private void run2(GeneratorModel model){
-//
-//        // check that index has data
-//        MarketIndex marketIndex = new MarketIndex();
-//        marketIndex.setSymbol(model.getSymbol());
-//        int count = marketIndexService.countDataPoints(marketIndex);
-//        if(count==0){
-//            ConfirmDialog dialog = ConfirmDialog.createError()
-//                    .withCaption("The index "+model.getSymbol()+" has no historic data")
-//                    .withMessage("Load data in the index first.")
-//                    .withCancelButton();
-//            dialog.open();
-//            return;
-//        } else {
-//            run3(model);
-//        }
-//
-//    }
 
     private void run3(GeneratorModel model) {
         Generator generator = generatorService.get(model.getId()).get();
