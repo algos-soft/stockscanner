@@ -16,6 +16,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
@@ -25,6 +26,7 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -207,6 +209,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         Image image = model.getImage();
         Component action = buildActionCombo(model);
+//        Component action = buildActions(model);
 
         card.add(image, body, action);
         return card;
@@ -220,65 +223,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         return null;
     }
 
-
-
-
-
-//    private HorizontalLayout createCardOld(IndexModel model) {
-//
-//        HorizontalLayout card = new HorizontalLayout();
-//        card.addClassName("card");
-//        card.setSpacing(false);
-//        card.getThemeList().add("spacing-s");
-//
-//        Image image = model.getImage();
-//
-//        VerticalLayout body = new VerticalLayout();
-//        body.addClassName("description");
-//        body.setSpacing(false);
-//        body.setPadding(false);
-//
-//        HorizontalLayout header = new HorizontalLayout();
-//        header.addClassName("header");
-//        header.setSpacing(false);
-//        header.getThemeList().add("spacing-s");
-//
-//        Span symbol = new Span(model.getSymbol());
-//        symbol.addClassName("symbol");
-//
-//        Span name = new Span(model.getName());
-//        name.addClassName("name");
-//
-////        Span date = new Span(model.getDate());
-////        date.addClassName("date");
-////        header.add(symbol, name, date);
-//
-////        Span post = new Span(model.getPost());
-////        post.addClassName("post");
-//
-//        HorizontalLayout actions = new HorizontalLayout();
-//        actions.addClassName("actions");
-//        actions.setSpacing(false);
-//        actions.getThemeList().add("spacing-s");
-//
-////        IronIcon likeIcon = new IronIcon("vaadin", "heart");
-////        Span likes = new Span(model.getLikes());
-////        likes.addClassName("likes");
-////        IronIcon commentIcon = new IronIcon("vaadin", "comment");
-////        Span comments = new Span(model.getComments());
-////        comments.addClassName("comments");
-////        IronIcon shareIcon = new IronIcon("vaadin", "connect");
-////        Span shares = new Span(model.getShares());
-////        shares.addClassName("shares");
-//
-//        Component action = buildActionCombo(model);
-//
-////        actions.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
-////        body.add(header, post, actions);
-//
-//        card.add(image, body, action);
-//        return card;
-//    }
 
 
     private Component buildActionCombo(IndexModel model){
@@ -412,9 +356,92 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
     }
 
-    /**
-     * Update entity from model
-     */
+
+
+
+    private Component buildActions(IndexModel model){
+
+        Select<String> select = new Select<>();
+        select.setPlaceholder("Actions");
+        select.setItems("Edit index","Delete index","Download historic data");
+        select.getStyle().set("width","3em");
+        select.setEmptySelectionCaption("Test");
+//        select.add(new Label("Edit index"));
+//        select.add(new Label("Delete index"));
+//        select.add(new Label("Download historic data"));
+
+
+        select.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<String>, String>>() {
+            @Override
+            public void valueChanged(AbstractField.ComponentValueChangeEvent<Select<String>, String> event) {
+
+                String text = event.getValue();
+                select.setValue(null);
+
+                if(text!=null){
+
+                    switch (text){
+                        case "Edit index":
+
+                            MarketIndex entity = marketIndexService.get(model.getId()).get();
+
+                            IndexDialogConfirmListener listener = model1 -> {
+                                updateEntity(entity, model1);
+                                marketIndexService.update(entity);   // write db
+                                marketIndexService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
+                                grid.getDataProvider().refreshItem(model1); // refresh only this item
+                            };
+
+                            IndexDialog dialog = context.getBean(IndexDialog.class, model, listener);
+
+                            dialog.open();
+
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+
+            }
+        });
+
+//        select.setLabel("Name");
+//        select.setItems("Option one", "Option two");
+//
+//        Div value = new Div();
+//        value.setText("Select a value");
+//        select.addValueChangeListener(
+//                event -> value.setText("Selected: " + event.getValue()));
+//
+//
+//
+//        account.getSubMenu().addItem("Edit index", i -> {
+//
+//            MarketIndex entity = marketIndexService.get(model.getId()).get();
+//
+//            IndexDialogConfirmListener listener = model1 -> {
+//                updateEntity(entity, model1);
+//                marketIndexService.update(entity);   // write db
+//                marketIndexService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
+//                grid.getDataProvider().refreshItem(model1); // refresh only this item
+//            };
+//
+//            IndexDialog dialog = context.getBean(IndexDialog.class, model, listener);
+//
+//            dialog.open();
+//
+//        });
+
+
+        return select;
+
+     }
+
+
+        /**
+         * Update entity from model
+         */
     private void updateEntity(MarketIndex entity, IndexModel model){
         entity.setImage(model.getImageData());
         entity.setSymbol(model.getSymbol());

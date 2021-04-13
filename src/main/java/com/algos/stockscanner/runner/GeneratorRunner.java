@@ -124,13 +124,13 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
             startTime = LocalDateTime.now();
 
             // here the business logic cycle, can throw exceptions
-            for(int i=0; i<4; i++){
+            for(int i=0; i<10; i++){
 
                 if(abort){
                     break;
                 }
 
-                setProgress(4,i+1);
+                setProgress(10,i+1);
                 Thread.sleep(1000);
 
                 if(i==2){
