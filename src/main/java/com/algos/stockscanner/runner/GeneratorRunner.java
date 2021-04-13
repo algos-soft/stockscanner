@@ -1,6 +1,5 @@
 package com.algos.stockscanner.runner;
 
-import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -8,26 +7,17 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.IronIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.server.Command;
-import com.vaadin.flow.spring.annotation.UIScope;
 import org.claspina.confirmdialog.ConfirmDialog;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.Callable;
@@ -39,9 +29,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Scope("prototype")
 @CssImport(value="./views/runner/generator-runner.css")
-public class GeneratorRunner extends VerticalLayout implements Callable {
+public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
-    private Generator generator;
+    private final Generator generator;
 
     private RunnerListener RunnerListener;
 
@@ -51,7 +41,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
 
     private ProgressBar progressBar;
 
-    private UI ui;
+    private final UI ui;
 
     private Div imgPlaceholder;
 
@@ -60,17 +50,9 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-
     private boolean error;  // error during execution
     private boolean abort;  // user aborted
     private boolean completed;
-
-
-    @Autowired
-    private ApplicationContext context;
-
-    @Autowired
-    private Utils utils;
 
     public GeneratorRunner(Generator generator, UI ui) {
         this.generator=generator;
@@ -86,12 +68,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
         label.setId("label");
 
         imgPlaceholder = new Div();
-        imgPlaceholder.addClickListener(new ComponentEventListener<ClickEvent<Div>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Div> divClickEvent) {
-                infoClicked();
-            }
-        });
+        imgPlaceholder.addClickListener((ComponentEventListener<ClickEvent<Div>>) divClickEvent -> infoClicked());
         setImage("RUN");
 
         progressBar = new ProgressBar();
@@ -117,25 +94,26 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
     }
 
     @Override
-    public Object call() {
+    public Void call() {
 
         try {
 
             startTime = LocalDateTime.now();
 
             // here the business logic cycle, can throw exceptions
-            for(int i=0; i<10; i++){
+            int cycles=10;
+            for(int i=0; i<cycles; i++){
 
                 if(abort){
                     break;
                 }
 
-                setProgress(10,i+1);
+                setProgress(cycles,i+1);
                 Thread.sleep(1000);
 
-                if(i==2){
-                    //throw new Exception("Eccezione");
-                }
+//                if(i==2){
+//                    //throw new Exception("Eccezione");
+//                }
 
             }
             // end of business logic cycle
@@ -149,9 +127,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
             exception=e;
             error=true;
 
-            ui.access((Command) () -> {
-                button.setText("Close");
-            });
+            ui.access((Command) () -> button.setText("Close"));
             setImage("ERR");
 
         }
@@ -236,6 +212,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable {
                 break;
         }
 
+        assert image != null;
         image.setId("image");
         if(color!=null){
             image.getStyle().set("color",color);
