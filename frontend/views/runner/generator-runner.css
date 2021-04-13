@@ -1,0 +1,21 @@
+#main-layout {
+  border-style: solid;
+  border-radius: var(--lumo-space-s);
+  align-items: center;
+  border-width: thin;
+  padding: var(--lumo-space-s);
+}
+
+#label{
+   font-size: var(--lumo-font-size-xs);
+}
+
+#progress-bar{
+    height: 0.8em;
+    width: 4em;
+}
+
+#button{
+   font-size: var(--lumo-font-size-xs);
+   height: 1.8em;
+}

@@ -1,14 +1,14 @@
-package com.algos.stockscanner.services;
+package com.algos.stockscanner.runner;
 
 import com.algos.stockscanner.data.entity.Generator;
-
-import com.algos.stockscanner.runner.GeneratorMonitor;
-import com.algos.stockscanner.runner.GeneratorRunner;
+import com.vaadin.flow.component.UI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 public class RunnerService {
@@ -16,18 +16,25 @@ public class RunnerService {
     @Autowired
     private ApplicationContext context;
 
-    public GeneratorMonitor run(Generator generator) throws Exception {
+    public GeneratorRunner run(Generator generator, UI ui)  {
         int a = 87;
         int b= a;
 
 
-        GeneratorRunner runner = context.getBean(GeneratorRunner.class);
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-        Future<String> future = executorService.submit(runner);
-// some operations
-        GeneratorMonitor monitor = context.getBean(GeneratorMonitor.class);
 
-        String result = future.get();
+
+
+        GeneratorRunner runner = context.getBean(GeneratorRunner.class, generator, ui);
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        executorService.submit(runner);
+
+
+
+// some operations
+//        GeneratorMonitor monitor = context.getBean(GeneratorMonitor.class);
+
+
+        //String result = future.get(); // questo blocca
 
 
 
@@ -39,7 +46,7 @@ public class RunnerService {
 
         //throw new Exception("Not implemented.");
 
-        return monitor;
+        return runner;
     }
 
 

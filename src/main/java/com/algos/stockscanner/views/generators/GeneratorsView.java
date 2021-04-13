@@ -3,13 +3,11 @@ package com.algos.stockscanner.views.generators;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
-import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.data.service.SimulationService;
-import com.algos.stockscanner.runner.GeneratorMonitor;
-import com.algos.stockscanner.services.RunnerService;
-import com.algos.stockscanner.views.simulations.SimulationModel;
+import com.algos.stockscanner.runner.GeneratorRunner;
+import com.algos.stockscanner.runner.RunnerService;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -18,7 +16,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
@@ -27,25 +24,22 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.router.*;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.server.Command;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,6 +55,8 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     private String filtSymbol;
 
     private Example<Generator> filter;
+
+    private HorizontalLayout statusLayout;
 
 
     @Autowired
@@ -101,9 +97,11 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
         createGrid();
         Component filterPanel = createFilterPanel();
 
+        statusLayout = new HorizontalLayout();
+
         VerticalLayout layout = new VerticalLayout();
         layout.getStyle().set("height","100%");
-        layout.add(filterPanel, grid);
+        layout.add(filterPanel, grid,statusLayout);
 
         add(layout);
 
@@ -122,7 +120,6 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
 
 
     }
-
 
 
 
@@ -510,9 +507,42 @@ public class GeneratorsView extends Div implements AfterNavigationObserver  {
     private void run3(GeneratorModel model){
         Generator generator = generatorService.get(model.getId()).get();
         try {
-            GeneratorMonitor monitor = runnerService.run(generator);
-            int a = 87;
-            int b=a;
+            UI ui = UI.getCurrent();
+            GeneratorRunner runner = runnerService.run(generator, ui);
+            runner.setRunnerListener(new GeneratorRunner.RunnerListener() {
+
+                @Override
+                public void onProgress(GeneratorRunner.ProgressInfo info) {
+
+                }
+
+                @Override
+                public void onCompleted(GeneratorRunner.CompletedInfo info) {
+                    ui.access((Command) () -> statusLayout.remove(runner));
+                }
+
+                @Override
+                public void onError(GeneratorRunner.ErrorInfo info) {
+
+                }
+
+                @Override
+                public void onAborted(GeneratorRunner.AbortedInfo info) {
+                    ui.access((Command) () -> {
+                        Notification.show("Aborted");
+                        statusLayout.remove(runner);
+                    });
+                }
+
+                @Override
+                public void onClosed() {
+                    ui.access((Command) () -> statusLayout.remove(runner));
+                }
+
+            });
+
+            statusLayout.add(runner);
+
         } catch (Exception e) {
             ConfirmDialog dialog = ConfirmDialog.createError()
                     .withCaption("The runner for Generator "+model.getNumber()+" returned an error")
