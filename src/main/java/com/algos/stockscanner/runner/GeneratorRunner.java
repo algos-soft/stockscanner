@@ -163,7 +163,8 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     s++;
                     setProgress(numPerm*numSpans,s, null);
 
-                    StrategyParams params = new SurferStrategyParams();
+                    SurferStrategyParams params = new SurferStrategyParams();
+                    params.setIndex(generator.getIndex());
                     strategy=context.getBean(SurferStrategy.class, params);
                     strategy.execute();
 
@@ -188,7 +189,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
             setCompleted();
 
-        }catch (Exception e){
+        } catch (RunnerException e) {
 
             exception=e;
             error=true;
@@ -199,6 +200,8 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             });
             setImage("ERR");
 
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return null;
@@ -333,12 +336,12 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
 
 
-    void preliminaryChecks() throws Exception{
+    void preliminaryChecks() throws RunnerException{
 
         // check that a index is specified
         MarketIndex marketIndex = generator.getIndex();
         if(marketIndex==null){
-            throw new Exception("The Generator does not have a Market Index specified");
+            throw new RunnerException("The Generator does not have a Market Index specified");
         }
 
         // check that index has data
@@ -346,34 +349,34 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
         int count = marketIndexService.countDataPoints(marketIndex);
         if(count==0){
             String msg = "The index "+marketIndex.getSymbol()+" has no historic data. Download data for the index.";
-            throw new Exception(msg);
+            throw new RunnerException(msg);
         }
 
         // start date
         if(generator.getStartDate()==null){
-            throw new Exception("Start date is not specified");
+            throw new RunnerException("Start date is not specified");
         }
 
         // amount
         if(utils.toPrimitive(generator.getAmount())==0){
-            throw new Exception("Initial amount is not specified");
+            throw new RunnerException("Initial amount is not specified");
         }
 
         // leverage
         if(utils.toPrimitive(generator.getLeverage())==0){
-            throw new Exception("Leverage is not specified");
+            throw new RunnerException("Leverage is not specified");
         }
 
         // if fixed length, number of days is required
         if(generator.getFixedDays()){
             if(utils.toPrimitive(generator.getDays())==0){
-                throw new Exception("Fixed length but no number of days specified");
+                throw new RunnerException("Fixed length but no number of days specified");
             }
         }
 
         // number of spans
         if(utils.toPrimitive(generator.getSpans())==0){
-            throw new Exception("Number of spans is not specified");
+            throw new RunnerException("Number of spans is not specified");
         }
 
         // amplitude
@@ -383,23 +386,23 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             int steps=utils.toPrimitive(generator.getAmplitudeSteps());
 
             if(min<=0){
-                throw new Exception("Minimum amplitude is not specified");
+                throw new RunnerException("Minimum amplitude is not specified");
             }
             if(max<=0){
-                throw new Exception("Maximum amplitude is not specified");
+                throw new RunnerException("Maximum amplitude is not specified");
             }
             if(steps<=0){
-                throw new Exception("Amplitude step is not specified");
+                throw new RunnerException("Amplitude step is not specified");
             }
             if(steps==1){
-                throw new Exception("Amplitude steps must be > 1");
+                throw new RunnerException("Amplitude steps must be > 1");
             }
             if(!verifySteps(min, max, steps)){
-                throw new Exception("Amplitude: # of steps doesn't fit with min-max range");
+                throw new RunnerException("Amplitude: # of steps doesn't fit with min-max range");
             }
         }else{
             if(utils.toPrimitive(generator.getAmplitude()==0)){
-                throw new Exception("Amplitude is not specified");
+                throw new RunnerException("Amplitude is not specified");
             }
         }
 
@@ -410,23 +413,23 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             int steps=utils.toPrimitive(generator.getAvgDaysSteps());
 
             if(min<=0){
-                throw new Exception("Minimum lookback days are not specified");
+                throw new RunnerException("Minimum lookback days are not specified");
             }
             if(max<=0){
-                throw new Exception("Maximum lookback days are not specified");
+                throw new RunnerException("Maximum lookback days are not specified");
             }
             if(steps<=0){
-                throw new Exception("Lookback days step is not specified");
+                throw new RunnerException("Lookback days step is not specified");
             }
             if(steps==1){
-                throw new Exception("Lookback steps must be > 1");
+                throw new RunnerException("Lookback steps must be > 1");
             }
             if(!verifySteps(min, max, steps)){
-                throw new Exception("Lookback days: # of steps doesn't fit with min-max range");
+                throw new RunnerException("Lookback days: # of steps doesn't fit with min-max range");
             }
         }else{
             if(utils.toPrimitive(generator.getAvgDays()==0)){
-                throw new Exception("Lookback days are not specified");
+                throw new RunnerException("Lookback days are not specified");
             }
         }
 
