@@ -165,6 +165,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
                     SurferStrategyParams params = new SurferStrategyParams();
                     params.setIndex(generator.getIndex());
+                    params.setStartDate(generator.getStartDate());
                     strategy=context.getBean(SurferStrategy.class, params);
                     strategy.execute();
 
