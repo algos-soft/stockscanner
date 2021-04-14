@@ -1,5 +1,10 @@
 package com.algos.stockscanner.strategies;
 
 public interface Strategy {
-    public String getCode();
+    String getCode();
+
+    void execute() throws Exception;
+    void abort();
+    boolean isFinished();
+
 }

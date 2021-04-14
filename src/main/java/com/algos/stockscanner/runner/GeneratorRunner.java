@@ -4,6 +4,10 @@ import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.algos.stockscanner.strategies.Strategy;
+import com.algos.stockscanner.strategies.StrategyParams;
+import com.algos.stockscanner.strategies.SurferStrategy;
+import com.algos.stockscanner.strategies.SurferStrategyParams;
 import com.google.common.collect.Lists;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -19,6 +23,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.server.Command;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -62,11 +67,17 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
     private boolean abort;  // user aborted
     private boolean completed;
 
+    private Strategy strategy;
+
     @Autowired
     private MarketIndexService marketIndexService;
 
     @Autowired
     private Utils utils;
+
+    @Autowired
+    private ApplicationContext context;
+
 
 
     public GeneratorRunner(Generator generator, UI ui) {
@@ -98,6 +109,9 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                 fireClosed();
             }else{
                 abort=true;
+                if(strategy!=null){
+                    strategy.abort();
+                }
                 fireAborted();
             }
         });
@@ -130,7 +144,6 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             Collections.sort(lookbacks);
             List<List<Integer>> cartesianList = Lists.cartesianProduct(amplitudes, lookbacks);
 
-//            int p=0;
             int s=0;
             int numPerm=cartesianList.size();
             int numSpans=generator.getSpans();
@@ -139,8 +152,6 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                 if(abort){
                     break;
                 }
-//                p++;
-//                setProgress(cartesianList.size(),p, null);
 
                 int amplitude = permutation.get(0);
                 int lookback = permutation.get(1);
@@ -152,10 +163,10 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     s++;
                     setProgress(numPerm*numSpans,s, null);
 
-                    Thread.sleep(100);
+                    StrategyParams params = new SurferStrategyParams();
+                    strategy=context.getBean(SurferStrategy.class, params);
+                    strategy.execute();
 
-                    int a = 87;
-                    int b=a;
                 }
 
 
@@ -334,7 +345,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
         marketIndex.setSymbol(marketIndex.getSymbol());
         int count = marketIndexService.countDataPoints(marketIndex);
         if(count==0){
-            String msg = "The index "+marketIndex.getSymbol()+" has no historic data. Load data in the index first.";
+            String msg = "The index "+marketIndex.getSymbol()+" has no historic data. Download data for the index.";
             throw new Exception(msg);
         }
 
@@ -356,7 +367,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
         // if fixed length, number of days is required
         if(generator.getFixedDays()){
             if(utils.toPrimitive(generator.getDays())==0){
-                throw new Exception("Fixed length but no numer of days specified");
+                throw new Exception("Fixed length but no number of days specified");
             }
         }
 
