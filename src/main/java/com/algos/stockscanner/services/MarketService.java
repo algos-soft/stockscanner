@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -124,6 +126,7 @@ public class MarketService {
 
         // Iterate the new units and save them
         List<StockUnit> units = response.getStockUnits();
+        Collections.sort(units, Comparator.comparing(StockUnit::getDate));
         int j=0;
         LocalDateTime minDateTime=null;
         LocalDateTime maxDateTime=null;
