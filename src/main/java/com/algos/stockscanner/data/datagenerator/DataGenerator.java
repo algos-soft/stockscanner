@@ -167,22 +167,31 @@ public class DataGenerator {
         gen = new Generator();
         generatorService.initEntity(gen);
         gen.setIndex(pickRandomIndex(indexes));
-        gen.setStartDate(LocalDate.now());
+        gen.setStartDateLD(LocalDate.now());
         gen.setAmount(500);
+        gen.setDays(20);
+        gen.setAmplitude(10);
+        gen.setAvgDays(30);
         generatorService.update(gen);
 
         gen = new Generator();
         generatorService.initEntity(gen);
         gen.setIndex(pickRandomIndex(indexes));
-        gen.setStartDate(LocalDate.now());
+        gen.setStartDateLD(LocalDate.now());
         gen.setAmount(2000);
+        gen.setDays(15);
+        gen.setAmplitude(8);
+        gen.setAvgDays(20);
         generatorService.update(gen);
 
         gen = new Generator();
         generatorService.initEntity(gen);
         gen.setIndex(pickRandomIndex(indexes));
-        gen.setStartDate(LocalDate.now());
+        gen.setStartDateLD(LocalDate.now());
         gen.setAmount(800);
+        gen.setDays(24);
+        gen.setAmplitude(6);
+        gen.setAvgDays(40);
         generatorService.update(gen);
 
         logger.info("Generated Generator entities");
@@ -202,8 +211,8 @@ public class DataGenerator {
         sim = new Simulation();
         sim.setGenerator(pickRandomGenerator(generators));
         sim.setIndex(sim.getGenerator().getIndex());
-        sim.setStartTs(LocalDate.now().minusYears(1));
-        sim.setEndTs(sim.getStartTs().plusDays(30));
+        sim.setStartTsLDT(LocalDateTime.now().minusYears(1));
+        sim.setEndTsLDT(sim.getStartTsLDT().plusDays(30));
         sim.setLeverage(1);
         sim.setAmplitude(10f);
         sim.setInitialAmount(500f);
@@ -213,8 +222,8 @@ public class DataGenerator {
         sim = new Simulation();
         sim.setGenerator(pickRandomGenerator(generators));
         sim.setIndex(sim.getGenerator().getIndex());
-        sim.setStartTs(LocalDate.now().minusYears(1));
-        sim.setEndTs(sim.getStartTs().plusDays(20));
+        sim.setStartTsLDT(LocalDateTime.now().minusYears(1));
+        sim.setEndTsLDT(sim.getStartTsLDT().plusDays(20));
         sim.setLeverage(2);
         sim.setAmplitude(10f);
         sim.setInitialAmount(300f);
@@ -224,8 +233,8 @@ public class DataGenerator {
         sim = new Simulation();
         sim.setGenerator(pickRandomGenerator(generators));
         sim.setIndex(sim.getGenerator().getIndex());
-        sim.setStartTs(LocalDate.now().minusYears(1));
-        sim.setEndTs(sim.getStartTs().plusDays(45));
+        sim.setStartTsLDT(LocalDateTime.now().minusYears(1));
+        sim.setEndTsLDT(sim.getStartTsLDT().plusDays(45));
         sim.setLeverage(1);
         sim.setAmplitude(25f);
         sim.setInitialAmount(600f);
@@ -235,8 +244,8 @@ public class DataGenerator {
         sim = new Simulation();
         sim.setGenerator(pickRandomGenerator(generators));
         sim.setIndex(sim.getGenerator().getIndex());
-        sim.setStartTs(LocalDate.now().minusYears(1));
-        sim.setEndTs(sim.getStartTs().plusDays(20));
+        sim.setStartTsLDT(LocalDateTime.now().minusYears(1));
+        sim.setEndTsLDT(sim.getStartTsLDT().plusDays(20));
         sim.setLeverage(1);
         sim.setAmplitude(15f);
         sim.setInitialAmount(1000f);
@@ -246,8 +255,8 @@ public class DataGenerator {
         sim = new Simulation();
         sim.setGenerator(pickRandomGenerator(generators));
         sim.setIndex(sim.getGenerator().getIndex());
-        sim.setStartTs(LocalDate.now().minusYears(2));
-        sim.setEndTs(sim.getStartTs().plusDays(40));
+        sim.setStartTsLDT(LocalDateTime.now().minusYears(2));
+        sim.setEndTsLDT(sim.getStartTsLDT().plusDays(40));
         sim.setLeverage(1);
         sim.setAmplitude(10f);
         sim.setInitialAmount(1800f);

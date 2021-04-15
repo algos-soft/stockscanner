@@ -1,8 +1,9 @@
 package com.algos.stockscanner.strategies;
 
-import com.algos.stockscanner.data.entity.IndexUnit;
-import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.entity.*;
+import com.algos.stockscanner.data.enums.Terminations;
 import com.algos.stockscanner.data.service.IndexUnitService;
+import com.algos.stockscanner.data.service.SimulationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
@@ -28,11 +29,15 @@ public abstract class AbsStrategy implements Strategy {
 //    int unitId=0;
 
     // the reason why has terminated
-    String terminationCode;
+    Terminations termination;
 
 
     @Autowired
     IndexUnitService indexUnitService;
+
+    @Autowired
+    SimulationService simulationService;
+
 
     public AbsStrategy(StrategyParams params) {
         this.params=params;
@@ -40,8 +45,21 @@ public abstract class AbsStrategy implements Strategy {
 
     public void execute() throws Exception {
 
-        while(!isFinished()){
+        // create a new Simulation
+        Simulation simulation = new Simulation();
+        simulation.setGenerator(params.getGenerator());
+        simulation.setIndex(params.getIndex());
+        simulation.setStartTsLDT(params.getStartDate().atStartOfDay());
+        simulation.setAmplitude(params.getAmplitude());
+        //simulation.set(params.getAmplitude());
+        simulationService.update(simulation);
+
+
+        // you can exit this cycle only with a termination code assigned
+        do {
+
             if(abort){
+                termination=Terminations.ABORTED_BY_USER;
                 break;
             }
 
@@ -50,19 +68,32 @@ public abstract class AbsStrategy implements Strategy {
                 IndexUnit u = unitsPage.get(unitIndex);
                 this.unit=u;
 
+                Terminations term = isFinished();
+                if(term!=null){
+                    termination=term;
+                    break;
+                }
+
                 processUnit();
 
             }else{
-                terminationCode="NO_MORE_UNITS";
+                termination =Terminations.NO_MORE_DATA;
                 break;
             }
-
 
             //Thread.sleep(5);
             unitIndex++;
 
-        }
+        } while (true);
 
+        writeTermination();
+
+    }
+
+
+    private void writeTermination(){
+//        SimulationItem item = new SimulationItem();
+//        item.
     }
 
 
@@ -72,7 +103,7 @@ public abstract class AbsStrategy implements Strategy {
      */
     private boolean ensureUnitsAvailable(){
 
-        MarketIndex index = getParams().getIndex();
+        MarketIndex index = params.getIndex();
 
         if(unitIndex<unitsPage.size()){   // requested unit index is available
             return true;
@@ -89,7 +120,7 @@ public abstract class AbsStrategy implements Strategy {
                     return false;
                 }
             }else{  // no previous unit, it is the first time
-                LocalDate date = getParams().getStartDate();
+                LocalDate date = params.getStartDate();
                 int firstId = indexUnitService.findFirstIdOf(index, date);
                 unitsPage.clear();
                 if(firstId>0){
@@ -108,10 +139,5 @@ public abstract class AbsStrategy implements Strategy {
     public void abort() {
         abort=true;
     }
-
-    private StrategyParams getParams(){
-        return params;
-    }
-
 
 }

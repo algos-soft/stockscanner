@@ -1,6 +1,7 @@
 package com.algos.stockscanner.strategies;
 
 import com.algos.stockscanner.data.entity.IndexUnit;
+import com.algos.stockscanner.data.enums.Terminations;
 
 public interface Strategy {
     String getCode();
@@ -8,7 +9,7 @@ public interface Strategy {
     void execute() throws Exception;
     void abort();
     void processUnit() throws Exception;
-    boolean isFinished();
+    Terminations isFinished();
 
 
 }

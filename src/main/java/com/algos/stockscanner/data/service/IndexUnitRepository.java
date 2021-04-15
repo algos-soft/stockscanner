@@ -18,10 +18,10 @@ public interface IndexUnitRepository extends JpaRepository<IndexUnit, Integer> {
     long deleteByIndex (MarketIndex index);
 
     @Query("SELECT u FROM IndexUnit u where index=:index AND u.dateTime >= :dateTime ORDER BY u.id ASC")
-    List<IndexUnit> findAllByIndexWithDateTimeEqualOrAfter(@Param("index") MarketIndex index, @Param("dateTime") LocalDateTime dateTime);
+    List<IndexUnit> findAllByIndexWithDateTimeEqualOrAfter(@Param("index") MarketIndex index, @Param("dateTime") String dateTime);
 
     @Query("SELECT u FROM IndexUnit u where index=:index AND u.dateTime >= :dateTime ORDER BY u.id ASC")
-    List<IndexUnit> findAllByIndexWithDateTimeEqualOrAfter(@Param("index") MarketIndex index, @Param("dateTime") LocalDateTime dateTime, Pageable pageable);
+    List<IndexUnit> findAllByIndexWithDateTimeEqualOrAfter(@Param("index") MarketIndex index, @Param("dateTime") String dateTime, Pageable pageable);
 
     @Query("SELECT u FROM IndexUnit u where index=:index AND u.id >= :id ORDER BY u.id ASC")
     List<IndexUnit> findAllByIndexFromId(@Param("index") MarketIndex index, @Param("id") int id, Pageable pageable);

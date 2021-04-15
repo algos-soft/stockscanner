@@ -4,6 +4,7 @@ import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.enums.FrequencyTypes;
 import com.algos.stockscanner.data.enums.IndexCategories;
+import com.algos.stockscanner.utils.Du;
 import com.algos.stockscanner.views.indexes.IndexModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -111,8 +112,8 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         model.setOvnSellDay(utils.toPrimitive(entity.getOvnSellDay()));
         model.setOvnSellWe(utils.toPrimitive(entity.getOvnSellWe()));
 
-        model.setUnitsFrom(utils.toLocalDate(entity.getUnitsFrom()));
-        model.setUnitsTo(utils.toLocalDate(entity.getUnitsTo()));
+        model.setUnitsFrom(Du.toLocalDate(entity.getUnitsFrom()));
+        model.setUnitsTo(Du.toLocalDate(entity.getUnitsTo()));
         model.setNumUnits(utils.toPrimitive(entity.getNumUnits()));
 
         String frequencyCode=entity.getUnitFrequency();

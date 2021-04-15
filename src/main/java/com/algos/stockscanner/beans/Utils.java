@@ -51,7 +51,6 @@ import java.util.stream.Stream;
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class Utils {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/uuuu'T'HH:mm:ss");
 
 
     @Autowired
@@ -279,18 +278,5 @@ public class Utils {
     }
 
 
-    public LocalDateTime toLocalDateTime(String utcString) {
-        return LocalDateTime.parse(utcString, DATE_TIME_FORMATTER);
-    }
-
-    public LocalDate toLocalDate(String utcString) {
-        LocalDateTime localDateTime = toLocalDateTime(utcString);
-        return localDateTime.toLocalDate();
-    }
-
-
-    public String toUtcString(LocalDate localDate) {
-        return localDate.format(DATE_TIME_FORMATTER);
-    }
 
 }

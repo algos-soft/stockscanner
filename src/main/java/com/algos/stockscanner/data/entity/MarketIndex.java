@@ -2,6 +2,7 @@ package com.algos.stockscanner.data.entity;
 
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.AbstractEntity;
+import com.algos.stockscanner.utils.Du;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
@@ -12,6 +13,7 @@ import java.util.List;
 @Entity
 public class MarketIndex extends AbstractEntity {
 
+    @Transient
     @Autowired
     private Utils utils;
 
@@ -177,15 +179,15 @@ public class MarketIndex extends AbstractEntity {
     }
 
     public LocalDate getUnitsFromLD(){
-        return utils.toLocalDate(unitsFrom);
+        return Du.toLocalDate(unitsFrom);
     }
 
     public void setUnitsFromLD(LocalDate localDate) {
-        this.unitsFrom = utils.toUtcString(localDate);
+        this.unitsFrom = Du.toUtcString(localDate);
     }
 
     public void setUnitsToLD(LocalDate localDate) {
-        this.unitsTo = utils.toUtcString(localDate);
+        this.unitsTo = Du.toUtcString(localDate);
     }
 
 

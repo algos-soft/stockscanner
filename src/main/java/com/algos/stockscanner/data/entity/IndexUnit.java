@@ -1,6 +1,7 @@
 package com.algos.stockscanner.data.entity;
 
 import com.algos.stockscanner.data.AbstractEntity;
+import com.algos.stockscanner.utils.Du;
 
 import javax.persistence.*;
 import java.time.*;
@@ -11,12 +12,7 @@ public class IndexUnit extends AbstractEntity {
 
     private Float open;
     private Float close;
-
-//    @Column(columnDefinition = "TIMESTAMP")
-//    private LocalDateTime dateTime;
-
-    @Column(columnDefinition = "DATETIME")
-    private LocalDateTime dateTime;
+    private String dateTime;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,7 +34,7 @@ public class IndexUnit extends AbstractEntity {
         this.close = close;
     }
 
-    public LocalDateTime getDateTime() {
+    public String getDateTime() {
 //        ZonedDateTime ldtZoned = dateTime.atZone(ZoneId.systemDefault());
 //        ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
 //        LocalDateTime ldt = utcZoned.toLocalDateTime();
@@ -46,7 +42,7 @@ public class IndexUnit extends AbstractEntity {
         return dateTime;
     }
 
-    public void setDateTime(LocalDateTime dateTime) {
+    public void setDateTime(String dateTime) {
         this.dateTime = dateTime;
     }
 
@@ -74,4 +70,20 @@ public class IndexUnit extends AbstractEntity {
     public void setIndex(MarketIndex index) {
         this.index = index;
     }
+
+
+    // --------------
+
+    public LocalDateTime getDateTimeLDT() {
+//        ZonedDateTime ldtZoned = dateTime.atZone(ZoneId.systemDefault());
+//        ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
+//        LocalDateTime ldt = utcZoned.toLocalDateTime();
+//        return ldt;
+        return Du.toLocalDateTime(dateTime);
+    }
+
+    public void setDateTimeLDT(LocalDateTime dateTime) {
+        this.dateTime=Du.toUtcString(dateTime);
+    }
+
 }

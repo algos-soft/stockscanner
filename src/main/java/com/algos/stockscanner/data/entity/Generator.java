@@ -1,6 +1,10 @@
 package com.algos.stockscanner.data.entity;
 
+import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.AbstractEntity;
+import com.algos.stockscanner.utils.Du;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -25,7 +29,7 @@ public class Generator extends AbstractEntity {
 
     // fixed properties
     private Integer number;   // human readable number of the Configurator
-    private LocalDate startDate;  // start date
+    private String startDate;  // start date
     private Boolean fixedDays;  // true for fixed number of days, false to go or until TP/SL or until end of index data
     private Integer days;   // number of days
     private Integer spans;   // number of times to repeat the simulation, starting from the end of the previous simulation
@@ -86,11 +90,11 @@ public class Generator extends AbstractEntity {
         this.index = index;
     }
 
-    public LocalDate getStartDate() {
+    public String getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDate startDate) {
+    public void setStartDate(String startDate) {
         this.startDate = startDate;
     }
 
@@ -228,6 +232,16 @@ public class Generator extends AbstractEntity {
 
     public void setAvgDaysSteps(Integer avgDaysSteps) {
         this.avgDaysSteps = avgDaysSteps;
+    }
+
+
+    // --------------
+    public LocalDate getStartDateLD(){
+        return Du.toLocalDate(startDate);
+    }
+
+    public void setStartDateLD(LocalDate localDate) {
+        this.startDate = Du.toUtcString(localDate);
     }
 
 }

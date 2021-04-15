@@ -145,17 +145,17 @@ public class MarketService {
 
             // keep minDateTime and maxDateTime up to date
             if(minDateTime==null){
-                minDateTime=indexUnit.getDateTime();
+                minDateTime=indexUnit.getDateTimeLDT();
             }else{
-                if(indexUnit.getDateTime().isBefore(minDateTime)){
-                    minDateTime=indexUnit.getDateTime();
+                if(indexUnit.getDateTimeLDT().isBefore(minDateTime)){
+                    minDateTime=indexUnit.getDateTimeLDT();
                 }
             }
             if(maxDateTime==null){
-                maxDateTime=indexUnit.getDateTime();
+                maxDateTime=indexUnit.getDateTimeLDT();
             }else{
-                if(indexUnit.getDateTime().isAfter(maxDateTime)){
-                    maxDateTime=indexUnit.getDateTime();
+                if(indexUnit.getDateTimeLDT().isAfter(maxDateTime)){
+                    maxDateTime=indexUnit.getDateTimeLDT();
                 }
             }
 
@@ -194,7 +194,7 @@ public class MarketService {
 
         LocalDateTime dateTime = LocalDateTime.parse(unit.getDate(), fmt);
 
-        indexUnit.setDateTime(dateTime);
+        indexUnit.setDateTimeLDT(dateTime);
 
         return indexUnit;
     }

@@ -110,7 +110,7 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         model.setSymbol(symbol);
         model.setImage(utils.byteArrayToImage(imageData));
 
-        model.setStartDate(entity.getStartDate());
+        model.setStartDate(entity.getStartDateLD());
         model.setAmount(utils.toPrimitive(entity.getAmount()));
         model.setLeverage(utils.toPrimitive(entity.getLeverage()));
         model.setStopLoss(utils.toPrimitive(entity.getStopLoss()));
@@ -148,7 +148,7 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         }
         entity.setIndex(index);
 
-        entity.setStartDate(model.getStartDate());
+        entity.setStartDateLD(model.getStartDate());
         entity.setAmount(model.getAmount());
         entity.setLeverage(model.getLeverage());
         entity.setStopLoss(model.getStopLoss());

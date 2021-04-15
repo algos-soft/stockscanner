@@ -3,7 +3,10 @@ package com.algos.stockscanner.data.entity;
 import javax.persistence.*;
 
 import com.algos.stockscanner.data.AbstractEntity;
+import com.algos.stockscanner.utils.Du;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,11 +23,12 @@ public class Simulation extends AbstractEntity {
     @OneToMany(mappedBy = "simulation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SimulationItem> simulationItems = new ArrayList<>();
 
-    private LocalDate startTs;  // timestamp of first point scanned
-    private LocalDate endTs;  // timestamp of last point scanned
+    private String startTs;  // timestamp of first point scanned
+    private String endTs;  // timestamp of last point scanned
     private Float initialAmount;  // initial amount
     private Integer leverage;
     private Float amplitude;    // amplitude of the oscillation max/min, in percent
+    private int daysLookback;    // number of days to lookback to determine the avg price
 
     // ---- consolidated data
     private Float finalAmount;  // amount at the end of the simulation
@@ -64,19 +68,19 @@ public class Simulation extends AbstractEntity {
         this.simulationItems = simulationItems;
     }
 
-    public LocalDate getStartTs() {
+    public String getStartTs() {
         return startTs;
     }
 
-    public void setStartTs(LocalDate startTs) {
+    public void setStartTs(String startTs) {
         this.startTs = startTs;
     }
 
-    public LocalDate getEndTs() {
+    public String getEndTs() {
         return endTs;
     }
 
-    public void setEndTs(LocalDate endTs) {
+    public void setEndTs(String endTs) {
         this.endTs = endTs;
     }
 
@@ -102,6 +106,14 @@ public class Simulation extends AbstractEntity {
 
     public void setAmplitude(Float amplitude) {
         this.amplitude = amplitude;
+    }
+
+    public int getDaysLookback() {
+        return daysLookback;
+    }
+
+    public void setDaysLookback(int daysLookback) {
+        this.daysLookback = daysLookback;
     }
 
     public Float getFinalAmount() {
@@ -199,4 +211,23 @@ public class Simulation extends AbstractEntity {
     public void setMaxPointsHold(Integer maxPointsHold) {
         this.maxPointsHold = maxPointsHold;
     }
+
+    // ----------------
+
+    public LocalDateTime getStartTsLDT() {
+        return Du.toLocalDateTime(startTs);
+    }
+
+    public void setStartTsLDT(LocalDateTime startTs) {
+        this.startTs=Du.toUtcString(startTs);
+    }
+
+    public LocalDateTime getEndTsLDT() {
+        return Du.toLocalDateTime(endTs);
+    }
+
+    public void setEndTsLDT(LocalDateTime endTs) {
+        this.endTs=Du.toUtcString(endTs);
+    }
+
 }

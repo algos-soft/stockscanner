@@ -7,7 +7,6 @@ import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.strategies.Strategy;
 import com.algos.stockscanner.strategies.StrategyParams;
 import com.algos.stockscanner.strategies.SurferStrategy;
-import com.algos.stockscanner.strategies.SurferStrategyParams;
 import com.google.common.collect.Lists;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -163,9 +162,15 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     s++;
                     setProgress(numPerm*numSpans,s, null);
 
-                    SurferStrategyParams params = new SurferStrategyParams();
+                    StrategyParams params = new StrategyParams();
+                    params.setGenerator(generator);
                     params.setIndex(generator.getIndex());
-                    params.setStartDate(generator.getStartDate());
+                    params.setStartDate(generator.getStartDateLD());
+                    params.setEndDate(generator.getStartDateLD().plusDays(generator.getDays()-1));
+                    params.setFixedDays(generator.getFixedDays());
+                    params.setAmplitude(amplitude);
+                    params.setDaysLookback(lookback);
+
                     strategy=context.getBean(SurferStrategy.class, params);
                     strategy.execute();
 

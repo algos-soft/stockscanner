@@ -11,7 +11,7 @@ public class SimulationItem extends AbstractEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     private Simulation simulation;
 
-    private LocalDateTime timestamp;
+    private String timestamp;
 
     private String action;  // the action taken
 
@@ -20,5 +20,7 @@ public class SimulationItem extends AbstractEntity {
     private Float amount;
 
     private Float price;
+
+
 
 }

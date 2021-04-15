@@ -120,8 +120,8 @@ public class SimulationService extends CrudService<Simulation, Integer> {
             if(index!=null){
                 model.setSymbol(index.getSymbol());
             }
-            model.setStartTs(entity.getStartTs());
-            model.setEndTs(entity.getEndTs());
+            model.setStartTs(entity.getStartTsLDT().toLocalDate());
+            model.setEndTs(entity.getEndTsLDT().toLocalDate());
             model.setInitialAmount(utils.toPrimitive(entity.getInitialAmount()));
             model.setLeverage(utils.toPrimitive(entity.getLeverage()));
             model.setAmplitude(utils.toPrimitive(entity.getAmplitude()));
