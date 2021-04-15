@@ -1,6 +1,7 @@
 package com.algos.stockscanner.services;
 
 import com.algos.stockscanner.beans.HttpClient;
+import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.enums.FrequencyTypes;
 import com.algos.stockscanner.data.enums.IndexCategories;
 import com.algos.stockscanner.data.entity.IndexUnit;
@@ -53,6 +54,9 @@ public class MarketService {
 
     @Autowired
     private HttpClient httpClient;
+
+    @Autowired
+    private Utils utils;
 
     @Value("${alphavantage.api.key}")
     private String alphavantageApiKey;
@@ -158,8 +162,8 @@ public class MarketService {
         }
 
         // Consolidate the totals in the MarketIndex
-        marketIndex.setUnitsFrom(minDateTime.toLocalDate());
-        marketIndex.setUnitsTo(maxDateTime.toLocalDate());
+        marketIndex.setUnitsFrom(utils.toUtcString(minDateTime.toLocalDate()));
+        marketIndex.setUnitsTo(utils.toUtcString(maxDateTime.toLocalDate()));
         marketIndex.setNumUnits(units.size());
         marketIndex.setUnitFrequency(FrequencyTypes.DAILY.getCode());
         marketIndexService.update(marketIndex);
@@ -186,7 +190,7 @@ public class MarketService {
         indexUnit.setOpen((float)unit.getOpen());
         indexUnit.setClose((float)unit.getClose());
 
-        LocalDate date = LocalDate.parse(unit.getDate(), fmt);
+        //LocalDate date = LocalDate.parse(unit.getDate(), fmt);
 
         LocalDateTime dateTime = LocalDateTime.parse(unit.getDate(), fmt);
 

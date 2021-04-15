@@ -111,8 +111,8 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         model.setOvnSellDay(utils.toPrimitive(entity.getOvnSellDay()));
         model.setOvnSellWe(utils.toPrimitive(entity.getOvnSellWe()));
 
-        model.setUnitsFrom(entity.getUnitsFrom());
-        model.setUnitsTo(entity.getUnitsTo());
+        model.setUnitsFrom(utils.toLocalDate(entity.getUnitsFrom()));
+        model.setUnitsTo(utils.toLocalDate(entity.getUnitsTo()));
         model.setNumUnits(utils.toPrimitive(entity.getNumUnits()));
 
         String frequencyCode=entity.getUnitFrequency();

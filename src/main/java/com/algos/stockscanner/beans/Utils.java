@@ -38,6 +38,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +50,9 @@ import java.util.stream.Stream;
 @org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class Utils {
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/uuuu'T'HH:mm:ss");
+
 
     @Autowired
     private HttpClient httpClient;
@@ -273,6 +279,18 @@ public class Utils {
     }
 
 
+    public LocalDateTime toLocalDateTime(String utcString) {
+        return LocalDateTime.parse(utcString, DATE_TIME_FORMATTER);
+    }
 
+    public LocalDate toLocalDate(String utcString) {
+        LocalDateTime localDateTime = toLocalDateTime(utcString);
+        return localDateTime.toLocalDate();
+    }
+
+
+    public String toUtcString(LocalDate localDate) {
+        return localDate.format(DATE_TIME_FORMATTER);
+    }
 
 }

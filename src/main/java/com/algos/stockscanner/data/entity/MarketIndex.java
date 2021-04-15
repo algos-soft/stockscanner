@@ -1,6 +1,8 @@
 package com.algos.stockscanner.data.entity;
 
+import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.AbstractEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -10,6 +12,8 @@ import java.util.List;
 @Entity
 public class MarketIndex extends AbstractEntity {
 
+    @Autowired
+    private Utils utils;
 
     @Column(length=65535) // -> MySQL BLOB type
     private byte[] image;
@@ -23,8 +27,12 @@ public class MarketIndex extends AbstractEntity {
     private Double ovnBuyWe;
 
 
-    private LocalDate unitsFrom;
-    private LocalDate unitsTo;
+//    @Column(columnDefinition = "DATE")
+    private String unitsFrom;
+
+//    @Column(columnDefinition = "DATE")
+    private String unitsTo;
+
     private Integer numUnits;
 
     private String unitFrequency;
@@ -119,19 +127,36 @@ public class MarketIndex extends AbstractEntity {
         this.units = units;
     }
 
-    public LocalDate getUnitsFrom() {
+//    public LocalDate getUnitsFrom() {
+//        return unitsFrom;
+//    }
+
+//    public void setUnitsFrom(LocalDate unitsFrom) {
+//        this.unitsFrom = unitsFrom;
+//    }
+
+//    public LocalDate getUnitsTo() {
+//        return unitsTo;
+//    }
+
+//    public void setUnitsTo(LocalDate unitsTo) {
+//        this.unitsTo = unitsTo;
+//    }
+
+
+    public String getUnitsFrom() {
         return unitsFrom;
     }
 
-    public void setUnitsFrom(LocalDate unitsFrom) {
+    public void setUnitsFrom(String unitsFrom) {
         this.unitsFrom = unitsFrom;
     }
 
-    public LocalDate getUnitsTo() {
+    public String getUnitsTo() {
         return unitsTo;
     }
 
-    public void setUnitsTo(LocalDate unitsTo) {
+    public void setUnitsTo(String unitsTo) {
         this.unitsTo = unitsTo;
     }
 
@@ -150,4 +175,14 @@ public class MarketIndex extends AbstractEntity {
     public void setUnitFrequency(String unitFrequency) {
         this.unitFrequency = unitFrequency;
     }
+
+    public LocalDate getUnitsFromLD(){
+        return utils.toLocalDate(unitsFrom);
+    }
+
+    public void setUnitsFromLD(LocalDate localDate) {
+        this.unitsFrom = utils.toUtcString(localDate);
+    }
+
+
 }

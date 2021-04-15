@@ -5,6 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.vaadin.artur.helpers.LaunchUtil;
 
+import javax.annotation.PostConstruct;
+import java.util.TimeZone;
+
 /**
  * The entry point of the Spring Boot application.
  */
@@ -18,8 +21,16 @@ public class Application extends SpringBootServletInitializer {
     public static final int STORED_ICON_WIDTH=128;
     public static final int STORED_ICON_HEIGHT =128;
 
+    @PostConstruct
+    void started() {
+        // set JVM timezone as UTC
+        //TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
+
     public static void main(String[] args) {
         LaunchUtil.launchBrowserInDevelopmentMode(SpringApplication.run(Application.class, args));
     }
+
+
 
 }

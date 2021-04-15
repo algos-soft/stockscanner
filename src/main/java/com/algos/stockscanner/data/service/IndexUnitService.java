@@ -83,8 +83,11 @@ public class IndexUnitService extends CrudService<IndexUnit, Integer> {
 
     public int countBy(MarketIndex index) {
         IndexUnit entity = new IndexUnit();
-        entity.setIndex(index);
-        return (int) repository.count(Example.of(entity));
+        MarketIndex eIndex = new MarketIndex();
+        eIndex.setId(index.getId());
+        entity.setIndex(eIndex);
+        int count = (int) repository.count(Example.of(entity));
+        return count;
     }
 
 

@@ -346,7 +346,6 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
         }
 
         // check that index has data
-        marketIndex.setSymbol(marketIndex.getSymbol());
         int count = marketIndexService.countDataPoints(marketIndex);
         if(count==0){
             String msg = "The index "+marketIndex.getSymbol()+" has no historic data. Download data for the index.";
