@@ -162,8 +162,8 @@ public class MarketService {
         }
 
         // Consolidate the totals in the MarketIndex
-        marketIndex.setUnitsFrom(utils.toUtcString(minDateTime.toLocalDate()));
-        marketIndex.setUnitsTo(utils.toUtcString(maxDateTime.toLocalDate()));
+        marketIndex.setUnitsFromLD(minDateTime.toLocalDate());
+        marketIndex.setUnitsToLD(maxDateTime.toLocalDate());
         marketIndex.setNumUnits(units.size());
         marketIndex.setUnitFrequency(FrequencyTypes.DAILY.getCode());
         marketIndexService.update(marketIndex);
