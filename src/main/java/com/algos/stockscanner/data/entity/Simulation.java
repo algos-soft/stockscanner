@@ -21,7 +21,7 @@ public class Simulation extends AbstractEntity {
     private Generator generator;
 
     @OneToMany(mappedBy = "simulation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SimulationItem> simulationItems;
+    private List<SimulationItem> simulationItems=new ArrayList<>();
 
     private String startTs;  // timestamp of first point scanned
     private String endTs;  // timestamp of last point scanned
