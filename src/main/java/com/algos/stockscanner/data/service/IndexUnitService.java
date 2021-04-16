@@ -14,6 +14,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class IndexUnitService extends CrudService<IndexUnit, Integer> {
@@ -86,6 +87,25 @@ public class IndexUnitService extends CrudService<IndexUnit, Integer> {
         int count = (int) repository.count(Example.of(entity));
         return count;
     }
+
+
+    /**
+     * Return the average price in the specified period
+     */
+    public float getAveragePrice(MarketIndex index, LocalDateTime t1, LocalDateTime t2){
+        String st1 = Du.toUtcString(t1);
+        String st2 = Du.toUtcString(t2);
+        List<IndexUnit> units = repository.findAllByPeriod(index, st1, st2, Pageable.unpaged());
+        if(units.size()==0){
+            return 0;
+        }
+        AtomicReference<Float> totPrice= new AtomicReference<>((float) 0);
+        units.stream().forEach(e -> totPrice.updateAndGet(v -> (float) (v + e.getClose())));
+
+        float avg = totPrice.get() / units.size();
+        return avg;
+    }
+
 
 
     @Override

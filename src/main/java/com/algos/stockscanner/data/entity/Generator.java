@@ -40,7 +40,7 @@ public class Generator extends AbstractEntity {
 
     // permutable properties
 
-    private Integer amplitude;
+    private Integer amplitude;  // the difference in percent that can triggers a buy or a sell
     private Boolean amplitudePermutate;
     private Integer amplitudeMin;    // min amplitude, percent
     private Integer amplitudeMax;    // max amplitude, percent
