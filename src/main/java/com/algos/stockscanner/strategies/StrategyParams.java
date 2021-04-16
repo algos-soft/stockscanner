@@ -17,6 +17,14 @@ public class StrategyParams {
 
     private boolean fixedDays;
 
+    float initialAmount;
+
+    int leverage;
+
+    float sl;
+
+    float tp;
+
     private float amplitude;
 
     private int daysLookback;
@@ -59,6 +67,38 @@ public class StrategyParams {
 
     public void setFixedDays(boolean fixedDays) {
         this.fixedDays = fixedDays;
+    }
+
+    public float getInitialAmount() {
+        return initialAmount;
+    }
+
+    public void setInitialAmount(float initialAmount) {
+        this.initialAmount = initialAmount;
+    }
+
+    public int getLeverage() {
+        return leverage;
+    }
+
+    public void setLeverage(int leverage) {
+        this.leverage = leverage;
+    }
+
+    public float getSl() {
+        return sl;
+    }
+
+    public void setSl(float sl) {
+        this.sl = sl;
+    }
+
+    public float getTp() {
+        return tp;
+    }
+
+    public void setTp(float tp) {
+        this.tp = tp;
     }
 
     public float getAmplitude() {

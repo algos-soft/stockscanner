@@ -143,6 +143,12 @@ public class SimulationsView extends Div {
 
         Grid.Column col;
 
+        // id
+        col=grid.addColumn(SimulationModel::getId);
+        col.setHeader("#id");
+        col.setSortProperty("id");
+        col.setWidth("7em");
+
         // generator number
         col=grid.addColumn(SimulationModel::getNumGenerator);
         col.setHeader("#gen");

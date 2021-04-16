@@ -41,5 +41,12 @@ public class Du {
     }
 
 
+    public static LocalDate toLocalDate(LocalDateTime dateTime) {
+        if(dateTime==null){
+            return null;
+        }
+        return dateTime.toLocalDate();
+    }
+
 
 }

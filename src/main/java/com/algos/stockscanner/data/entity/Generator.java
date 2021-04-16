@@ -22,7 +22,7 @@ public class Generator extends AbstractEntity {
     private MarketIndex index;
 
     @OneToMany(mappedBy = "generator", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Simulation> simulations = new ArrayList<>();
+    private List<Simulation> simulations;
 
     private LocalDateTime created;
     private LocalDateTime modified;

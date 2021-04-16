@@ -21,14 +21,16 @@ public class Simulation extends AbstractEntity {
     private Generator generator;
 
     @OneToMany(mappedBy = "simulation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SimulationItem> simulationItems = new ArrayList<>();
+    private List<SimulationItem> simulationItems;
 
     private String startTs;  // timestamp of first point scanned
     private String endTs;  // timestamp of last point scanned
     private Float initialAmount;  // initial amount
     private Integer leverage;
+    private Float sl;
+    private Float tp;
     private Float amplitude;    // amplitude of the oscillation max/min, in percent
-    private int daysLookback;    // number of days to lookback to determine the avg price
+    private Integer daysLookback;    // number of days to lookback to determine the avg price
 
     // ---- consolidated data
     private Float finalAmount;  // amount at the end of the simulation
@@ -100,6 +102,22 @@ public class Simulation extends AbstractEntity {
         this.leverage = leverage;
     }
 
+    public Float getSl() {
+        return sl;
+    }
+
+    public void setSl(Float sl) {
+        this.sl = sl;
+    }
+
+    public Float getTp() {
+        return tp;
+    }
+
+    public void setTp(Float tp) {
+        this.tp = tp;
+    }
+
     public Float getAmplitude() {
         return amplitude;
     }
@@ -108,11 +126,12 @@ public class Simulation extends AbstractEntity {
         this.amplitude = amplitude;
     }
 
-    public int getDaysLookback() {
+
+    public Integer getDaysLookback() {
         return daysLookback;
     }
 
-    public void setDaysLookback(int daysLookback) {
+    public void setDaysLookback(Integer daysLookback) {
         this.daysLookback = daysLookback;
     }
 
@@ -218,6 +237,10 @@ public class Simulation extends AbstractEntity {
         return Du.toLocalDateTime(startTs);
     }
 
+    public LocalDate getStartTsLD() {
+        return Du.toLocalDate(getStartTsLDT());
+    }
+
     public void setStartTsLDT(LocalDateTime startTs) {
         this.startTs=Du.toUtcString(startTs);
     }
@@ -226,8 +249,13 @@ public class Simulation extends AbstractEntity {
         return Du.toLocalDateTime(endTs);
     }
 
+    public LocalDate getEndTsLD() {
+        return Du.toLocalDate(getEndTsLDT());
+    }
+
     public void setEndTsLDT(LocalDateTime endTs) {
         this.endTs=Du.toUtcString(endTs);
     }
+
 
 }

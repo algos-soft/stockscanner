@@ -40,13 +40,13 @@ public class MarketIndex extends AbstractEntity {
     private String unitFrequency;
 
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<IndexUnit> units = new ArrayList<>();
+    private List<IndexUnit> units;
 
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Generator> generators = new ArrayList<>();
+    private List<Generator> generators;
 
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Simulation> simulations = new ArrayList<>();
+    private List<Simulation> simulations;
 
 
     public byte[] getImage() {

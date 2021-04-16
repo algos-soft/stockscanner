@@ -167,6 +167,10 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     params.setIndex(generator.getIndex());
                     params.setStartDate(generator.getStartDateLD());
                     params.setEndDate(generator.getStartDateLD().plusDays(generator.getDays()-1));
+                    params.setInitialAmount(generator.getAmount());
+                    params.setLeverage(generator.getLeverage());
+                    params.setSl(generator.getStopLoss());
+                    params.setTp(generator.getTakeProfit());
                     params.setFixedDays(generator.getFixedDays());
                     params.setAmplitude(amplitude);
                     params.setDaysLookback(lookback);

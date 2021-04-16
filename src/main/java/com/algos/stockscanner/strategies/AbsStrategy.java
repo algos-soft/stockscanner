@@ -50,8 +50,12 @@ public abstract class AbsStrategy implements Strategy {
         simulation.setGenerator(params.getGenerator());
         simulation.setIndex(params.getIndex());
         simulation.setStartTsLDT(params.getStartDate().atStartOfDay());
+        simulation.setInitialAmount(params.getInitialAmount());
+        simulation.setLeverage(params.getLeverage());
+        simulation.setSl(params.getSl());
+        simulation.setTp(params.getTp());
         simulation.setAmplitude(params.getAmplitude());
-        //simulation.set(params.getAmplitude());
+        simulation.setDaysLookback(params.getDaysLookback());
         simulationService.update(simulation);
 
 
