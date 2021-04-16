@@ -34,6 +34,7 @@ public class Simulation extends AbstractEntity {
 
     // ---- consolidated data
     private Float finalAmount;  // amount at the end of the simulation
+    private String terminationCode; // why the simulation is terminated
     private Float totSpread;    // total amount of buy spreads paid
     private Float totCommission;    // total amount of commission paid
     private Integer numBuy;    // number of buy positions opened
@@ -141,6 +142,14 @@ public class Simulation extends AbstractEntity {
 
     public void setFinalAmount(Float finalAmount) {
         this.finalAmount = finalAmount;
+    }
+
+    public String getTerminationCode() {
+        return terminationCode;
+    }
+
+    public void setTerminationCode(String terminationCode) {
+        this.terminationCode = terminationCode;
     }
 
     public Float getTotSpread() {

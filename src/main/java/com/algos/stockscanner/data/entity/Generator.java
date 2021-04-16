@@ -21,7 +21,7 @@ public class Generator extends AbstractEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     private MarketIndex index;
 
-    @OneToMany(mappedBy = "generator", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "generator", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Simulation> simulations;
 
     private LocalDateTime created;
@@ -57,6 +57,10 @@ public class Generator extends AbstractEntity {
     private Integer avgDaysMin;
     private Integer avgDaysMax;
     private Integer avgDaysSteps;   // must be divisor of maxAvgDays-minAvgDays
+
+    public List<Simulation> getSimulations() {
+        return simulations;
+    }
 
     public Integer getNumber() {
         return number;

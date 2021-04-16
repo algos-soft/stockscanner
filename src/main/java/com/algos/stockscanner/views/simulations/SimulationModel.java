@@ -18,6 +18,7 @@ public class SimulationModel {
     private int leverage;
     private float amplitude;
     private float finalAmount;
+    private String terminationCode;
     private float totSpread;
     private float totCommission;
     private int numBuy;
@@ -100,6 +101,14 @@ public class SimulationModel {
 
     public void setFinalAmount(float finalAmount) {
         this.finalAmount = finalAmount;
+    }
+
+    public String getTerminationCode() {
+        return terminationCode;
+    }
+
+    public void setTerminationCode(String terminationCode) {
+        this.terminationCode = terminationCode;
     }
 
     public float getTotSpread() {

@@ -1,13 +1,10 @@
 package com.algos.stockscanner.strategies;
 
-import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
 
 import java.time.LocalDate;
 
 public class StrategyParams {
-
-    private Generator generator;
 
     private MarketIndex index;
 
@@ -28,14 +25,6 @@ public class StrategyParams {
     private float amplitude;
 
     private int daysLookback;
-
-    public Generator getGenerator() {
-        return generator;
-    }
-
-    public void setGenerator(Generator generator) {
-        this.generator = generator;
-    }
 
     public MarketIndex getIndex() {
         return index;

@@ -29,10 +29,8 @@ public class MarketIndex extends AbstractEntity {
     private Double ovnBuyWe;
 
 
-//    @Column(columnDefinition = "DATE")
     private String unitsFrom;
 
-//    @Column(columnDefinition = "DATE")
     private String unitsTo;
 
     private Integer numUnits;

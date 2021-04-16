@@ -126,6 +126,7 @@ public class SimulationService extends CrudService<Simulation, Integer> {
             model.setLeverage(utils.toPrimitive(entity.getLeverage()));
             model.setAmplitude(utils.toPrimitive(entity.getAmplitude()));
             model.setFinalAmount(utils.toPrimitive(entity.getFinalAmount()));
+            model.setTerminationCode(entity.getTerminationCode());
             model.setTotSpread(utils.toPrimitive(entity.getTotSpread()));
             model.setTotCommission(utils.toPrimitive(entity.getTotCommission()));
             model.setNumBuy(utils.toPrimitive(entity.getNumBuy()));
@@ -140,5 +141,9 @@ public class SimulationService extends CrudService<Simulation, Integer> {
         }
 
     }
+
+//    public void deleteByGenerator(Generator generator) {
+//        repository.deleteByGenerator(generator);
+//    }
 
 }

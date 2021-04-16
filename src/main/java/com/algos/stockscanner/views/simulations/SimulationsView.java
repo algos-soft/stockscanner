@@ -199,6 +199,11 @@ public class SimulationsView extends Div {
         col.setHeader("final amt");
         col.setSortProperty("finalAmount");
 
+        // termination
+        col=grid.addColumn(SimulationModel::getTerminationCode);
+        col.setHeader("term");
+        col.setSortProperty("terminationCode");
+
         // P/L
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getPl, "%,.2f",Locale.getDefault()));
         col.setHeader("P/L");

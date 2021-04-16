@@ -2,6 +2,7 @@ package com.algos.stockscanner.strategies;
 
 import com.algos.stockscanner.data.entity.*;
 import com.algos.stockscanner.data.enums.Terminations;
+import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.IndexUnitService;
 import com.algos.stockscanner.data.service.SimulationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +14,12 @@ import java.util.List;
 public abstract class AbsStrategy implements Strategy {
 
     private static final int PAGE_SIZE = 100;      // max units per page
+
     StrategyParams params;
+
     boolean abort=false;
+
+    Simulation simulation;
 
     // current page of units scanned
     List<IndexUnit> unitsPage=new ArrayList<>();
@@ -24,9 +29,6 @@ public abstract class AbsStrategy implements Strategy {
 
     // Currently scanned unit
     IndexUnit unit;
-
-    // Id of the currently scanned unit
-//    int unitId=0;
 
     // the reason why has terminated
     Terminations termination;
@@ -38,16 +40,19 @@ public abstract class AbsStrategy implements Strategy {
     @Autowired
     SimulationService simulationService;
 
+    @Autowired
+    GeneratorService generatorService;
 
     public AbsStrategy(StrategyParams params) {
         this.params=params;
     }
 
-    public void execute() throws Exception {
+    public Simulation execute() throws Exception {
+
+        //generator = generatorService.get(params.getGeneratorId()).get();
 
         // create a new Simulation
-        Simulation simulation = new Simulation();
-        simulation.setGenerator(params.getGenerator());
+        simulation = new Simulation();
         simulation.setIndex(params.getIndex());
         simulation.setStartTsLDT(params.getStartDate().atStartOfDay());
         simulation.setInitialAmount(params.getInitialAmount());
@@ -56,8 +61,6 @@ public abstract class AbsStrategy implements Strategy {
         simulation.setTp(params.getTp());
         simulation.setAmplitude(params.getAmplitude());
         simulation.setDaysLookback(params.getDaysLookback());
-        simulationService.update(simulation);
-
 
         // you can exit this cycle only with a termination code assigned
         do {
@@ -69,8 +72,7 @@ public abstract class AbsStrategy implements Strategy {
 
             if(ensureUnitsAvailable()){
 
-                IndexUnit u = unitsPage.get(unitIndex);
-                this.unit=u;
+                unit = unitsPage.get(unitIndex);
 
                 Terminations term = isFinished();
                 if(term!=null){
@@ -85,20 +87,18 @@ public abstract class AbsStrategy implements Strategy {
                 break;
             }
 
-            //Thread.sleep(5);
             unitIndex++;
 
         } while (true);
 
-        writeTermination();
+        // consolidate data in the simulation
+        simulation.setTerminationCode(termination.getCode());
+
+        return simulation;
 
     }
 
 
-    private void writeTermination(){
-//        SimulationItem item = new SimulationItem();
-//        item.
-    }
 
 
     /**
