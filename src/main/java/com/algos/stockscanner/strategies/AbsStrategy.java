@@ -40,7 +40,7 @@ public abstract class AbsStrategy implements Strategy {
     // the reason why has terminated
     Terminations termination;
 
-    float buyPrice;
+    float openPrice;
 
 
     @Autowired
@@ -181,9 +181,10 @@ public abstract class AbsStrategy implements Strategy {
 
         Decision decision = takeDecision();
         Actions action = decision.getAction();
-        //Reasons reason = decision.getReason();
+        Reasons reason = decision.getReason();
 
         switch (action) {
+
             case OPEN:
 
                 if(posOpen){
@@ -199,6 +200,8 @@ public abstract class AbsStrategy implements Strategy {
                         break;
                 }
                 posOpen =true;
+                openPrice = unit.getClose();
+
                 break;
 
             case CLOSE:
@@ -209,16 +212,14 @@ public abstract class AbsStrategy implements Strategy {
 
                 switch (decision.getActionType()){
                     case BUY:
-                        buy(reason);
-                        posOpen =false;
-                        break;
+                        throw new Exception("You can't close a position with a BUY");
                     case SELL:
                         sell(reason);
-                        posOpen =true;
                         break;
                 }
                 posOpen =false;
                 break;
+
             case STAY:
                 break;
         }
@@ -226,10 +227,6 @@ public abstract class AbsStrategy implements Strategy {
     }
 
     private void buy(Reasons reason){
-        //System.out.println("BUY - "+reason.getCode());
-
-        buyPrice=unit.getClose();
-
         SimulationItem item = new SimulationItem();
         item.setSimulation(simulation);
         item.setAction(ActionTypes.BUY.getCode());
@@ -239,8 +236,6 @@ public abstract class AbsStrategy implements Strategy {
     }
 
     private void sell(Reasons reason){
-        //System.out.println("SELL - "+reason.getCode());
-
         SimulationItem item = new SimulationItem();
         item.setSimulation(simulation);
         item.setAction(ActionTypes.SELL.getCode());

@@ -47,7 +47,7 @@ public class SurferStrategy extends AbsStrategy {
         // price against which to evaluate the delta
         float refPrice;
         if(posOpen){
-            refPrice=buyPrice;
+            refPrice = openPrice;
         }else{
             refPrice = avgBackPrice();
         }
