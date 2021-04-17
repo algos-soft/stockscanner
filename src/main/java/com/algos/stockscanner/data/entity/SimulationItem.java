@@ -3,7 +3,6 @@ package com.algos.stockscanner.data.entity;
 import com.algos.stockscanner.data.AbstractEntity;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 public class SimulationItem extends AbstractEntity {
@@ -13,13 +12,20 @@ public class SimulationItem extends AbstractEntity {
 
     private String timestamp;
 
-    private String action;  // the action taken
+    private String action;
 
-    private String reason;  // the reason tor the action
+    private String actionType;
 
-    private Float amount;
+    private String reason;
 
-    private Float price;
+    private Float avgBack;
+
+    private Float currPrice;
+
+    private Float deltaAmpl;
+
+    private Float currAmount;
+
 
     public Simulation getSimulation() {
         return simulation;
@@ -45,6 +51,14 @@ public class SimulationItem extends AbstractEntity {
         this.action = action;
     }
 
+    public String getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
+    }
+
     public String getReason() {
         return reason;
     }
@@ -53,19 +67,36 @@ public class SimulationItem extends AbstractEntity {
         this.reason = reason;
     }
 
-    public Float getAmount() {
-        return amount;
+    public Float getAvgBack() {
+        return avgBack;
     }
 
-    public void setAmount(Float amount) {
-        this.amount = amount;
+    public void setAvgBack(Float avgBack) {
+        this.avgBack = avgBack;
     }
 
-    public Float getPrice() {
-        return price;
+    public Float getCurrPrice() {
+        return currPrice;
     }
 
-    public void setPrice(Float price) {
-        this.price = price;
+    public void setCurrPrice(Float currPrice) {
+        this.currPrice = currPrice;
     }
+
+    public Float getDeltaAmpl() {
+        return deltaAmpl;
+    }
+
+    public void setDeltaAmpl(Float deltaAmpl) {
+        this.deltaAmpl = deltaAmpl;
+    }
+
+    public Float getCurrAmount() {
+        return currAmount;
+    }
+
+    public void setCurrAmount(Float currAmount) {
+        this.currAmount = currAmount;
+    }
+
 }

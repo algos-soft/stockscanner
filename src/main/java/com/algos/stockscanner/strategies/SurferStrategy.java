@@ -1,6 +1,7 @@
 package com.algos.stockscanner.strategies;
 
 import com.algos.stockscanner.beans.Utils;
+import com.algos.stockscanner.data.entity.SimulationItem;
 import com.algos.stockscanner.data.enums.*;
 import com.algos.stockscanner.data.enums.Actions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,10 @@ public class SurferStrategy extends AbsStrategy {
     boolean amplitudeExceeded;
 
     float previousPrice;
+
+    private boolean preAlertBuy;
+
+    private boolean preAlertSell;
 
     @Override
     public String getCode() {
@@ -40,8 +45,7 @@ public class SurferStrategy extends AbsStrategy {
     /**
      * Take a decision based on the current state
      */
-    @Override
-    public Decision takeDecision() {
+    private Decision takeDecisionOld() {
         Decision decision;
 
         // price against which to evaluate the delta
@@ -55,6 +59,19 @@ public class SurferStrategy extends AbsStrategy {
         float deltaPercent=deltaPercent(refPrice, unit.getClose());
 
         System.out.println(unit.getDateTime()+" "+ posOpen +" "+refPrice+" "+unit.getClose()+" "+deltaPercent+"%");
+
+        if(posOpen){    // position is open
+            switch (posType){
+                case BUY:
+                    decision = decideSell(deltaPercent);
+                    break;
+                case SELL:
+                    decision = decideBuy(deltaPercent);
+                    break;
+            }
+        } else {    // position is not opened
+
+        }
 
         if(Math.abs(deltaPercent)>simulation.getAmplitude()){
             if(deltaPercent>0){ // overvalued, try to sell
@@ -71,6 +88,138 @@ public class SurferStrategy extends AbsStrategy {
 
         return decision;
     }
+
+
+
+
+    @Override
+    public Decision decideIfOpenPosition() {
+        Decision decision;
+
+        float refPrice = avgBackPrice();
+        float deltaPercent=deltaPercent(refPrice, unit.getClose());
+
+        if(Math.abs(deltaPercent)>simulation.getAmplitude()){
+
+            if(deltaPercent>0){ // up above amplitude
+                if(!preAlertSell){
+                    preAlertSell=true;
+                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_SELL);
+                }else{
+                    if(unit.getClose()>previousPrice){   // still growing
+                        decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_UP);
+                    }else{  // curve inverted
+                        decision = new Decision(Actions.OPEN, ActionTypes.SELL, Reasons.ABOVE_THRESHOLD);
+                        preAlertSell=false;
+                    }
+                }
+
+            }else{   // down below amplitude
+                if(!preAlertBuy){
+                    preAlertBuy=true;
+                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_BUY);
+                }else{
+                    if(unit.getClose()<previousPrice){   // still going down
+                        decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_DOWN);
+                    }else{  // curve inverted
+                        decision = new Decision(Actions.OPEN, ActionTypes.BUY, Reasons.BELOW_THRESHOLD);
+                        preAlertBuy=false;
+                    }
+                }
+
+            }
+        }else{
+            decision = new Decision(Actions.STAY, null, Reasons.IN_BOUNDS);
+            preAlertSell=false;
+            preAlertBuy=false;
+        }
+
+        // enrich decision info
+        DecisionInfo info = decision.getDecisionInfo();
+        info.setRefPrice(refPrice);
+        info.setTimestamp(unit.getDateTime());
+        info.setCurrPrice(unit.getClose());
+        info.setDeltaAmpl(deltaPercent);
+
+        return decision;
+    }
+
+
+
+    /**
+     * we have an open position of type BUY and we have to decide if closing it
+     */
+    @Override
+    public Decision decideIfCloseBuyPosition() {
+        Decision decision;
+        float refPrice = openPrice;
+        float deltaPercent=deltaPercent(refPrice, unit.getClose());
+
+        if(deltaPercent>simulation.getAmplitude()){
+            if(!preAlertSell){
+                preAlertSell=true;
+                decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_SELL);
+            }else{
+                if(unit.getClose()>previousPrice){   // still growing
+                    decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_UP);
+                }else{  // curve inverted
+                    decision = new Decision(Actions.CLOSE, null, Reasons.ABOVE_THRESHOLD);
+                    preAlertSell=false;
+                }
+            }
+        }else{
+            decision = new Decision(Actions.STAY, null, Reasons.IN_BOUNDS);
+            preAlertSell=false;
+        }
+
+        // enrich decision info
+        DecisionInfo info = decision.getDecisionInfo();
+        info.setRefPrice(refPrice);
+        info.setTimestamp(unit.getDateTime());
+        info.setCurrPrice(unit.getClose());
+        info.setDeltaAmpl(deltaPercent);
+
+        return decision;
+    }
+
+
+    /**
+     * we have an open position of type SELL and we have to decide if closing it
+     */
+    @Override
+    public Decision decideIfCloseSellPosition() {
+        Decision decision;
+        float refPrice = openPrice;
+        float deltaPercent=deltaPercent(refPrice, unit.getClose());
+
+        if(deltaPercent < -simulation.getAmplitude()){
+            if(!preAlertSell){
+                preAlertSell=true;
+                decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_SELL);
+            }else{
+                if(unit.getClose()<previousPrice){   // still going down
+                    decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_DOWN);
+                }else{  // curve inverted
+                    decision = new Decision(Actions.CLOSE, null, Reasons.BELOW_THRESHOLD);
+                    preAlertSell=false;
+                }
+            }
+        }else{
+            decision = new Decision(Actions.STAY, null, Reasons.IN_BOUNDS);
+            preAlertSell=false;
+        }
+
+        // enrich decision info
+        DecisionInfo info = decision.getDecisionInfo();
+        info.setRefPrice(refPrice);
+        info.setTimestamp(unit.getDateTime());
+        info.setCurrPrice(unit.getClose());
+        info.setDeltaAmpl(deltaPercent);
+
+        return decision;
+    }
+
+
 
     /**
      * Take a decision when expecting to sell

@@ -24,7 +24,6 @@ public abstract class AbsStrategy implements Strategy {
 
     boolean abort=false;
 
-    boolean posOpen; //a position is open
 
     Simulation simulation;
 
@@ -40,7 +39,11 @@ public abstract class AbsStrategy implements Strategy {
     // the reason why has terminated
     Terminations termination;
 
-    float openPrice;
+    boolean posOpen; //a position is open
+
+    ActionTypes posType; // if open for buy or sell
+
+    float openPrice;    // opened at this price
 
 
     @Autowired
@@ -183,6 +186,8 @@ public abstract class AbsStrategy implements Strategy {
         Actions action = decision.getAction();
         Reasons reason = decision.getReason();
 
+        System.out.println(decision);
+
         switch (action) {
 
             case OPEN:
@@ -193,14 +198,12 @@ public abstract class AbsStrategy implements Strategy {
 
                 switch (decision.getActionType()){
                     case BUY:
-                        buy(reason);
+                        openBuy(reason);
                         break;
                     case SELL:
-                        sell(reason);
+                        openSell(reason);
                         break;
                 }
-                posOpen =true;
-                openPrice = unit.getClose();
 
                 break;
 
@@ -209,14 +212,7 @@ public abstract class AbsStrategy implements Strategy {
                 if(!posOpen){
                     throw new Exception("Position is already closed, you can't close it again");
                 }
-
-                switch (decision.getActionType()){
-                    case BUY:
-                        throw new Exception("You can't close a position with a BUY");
-                    case SELL:
-                        sell(reason);
-                        break;
-                }
+                closePosition(decision.getReason());
                 posOpen =false;
                 break;
 
@@ -226,22 +222,67 @@ public abstract class AbsStrategy implements Strategy {
 
     }
 
-    private void buy(Reasons reason){
+
+
+
+    /**
+     * Take a decision based on the current state
+     */
+    @Override
+    public Decision takeDecision() {
+        Decision decision=null;
+
+        if(posOpen){    // position is open
+            switch (posType){
+                case BUY:
+                    decision = decideIfCloseBuyPosition();
+                    break;
+                case SELL:
+                    decision = decideIfCloseSellPosition();
+                    break;
+            }
+        } else {    // position is not opened
+            decision = decideIfOpenPosition();
+        }
+
+        return decision;
+    }
+
+
+    private void openBuy(Reasons reason){
         SimulationItem item = new SimulationItem();
         item.setSimulation(simulation);
         item.setAction(ActionTypes.BUY.getCode());
         item.setTimestamp(unit.getDateTime());
         item.setReason(reason.getCode());
         simulation.getSimulationItems().add(item);
+
+        posOpen =true;
+        posType=ActionTypes.BUY;
+        openPrice = unit.getClose();
+
     }
 
-    private void sell(Reasons reason){
+    private void openSell(Reasons reason){
         SimulationItem item = new SimulationItem();
         item.setSimulation(simulation);
         item.setAction(ActionTypes.SELL.getCode());
         item.setTimestamp(unit.getDateTime());
         item.setReason(reason.getCode());
         simulation.getSimulationItems().add(item);
+
+        posOpen =true;
+        posType=ActionTypes.SELL;
+        openPrice = unit.getClose();
+
+    }
+
+    private void closePosition(Reasons reason){
+
+
+        posOpen =false;
+        posType=null;
+        openPrice=0;
     }
 
 

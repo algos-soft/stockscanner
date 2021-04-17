@@ -12,8 +12,13 @@ public interface Strategy {
 
     void processUnit() throws Exception;
 
-    Decision takeDecision();
-
     Terminations isFinished();
 
+    Decision takeDecision();
+
+    Decision decideIfCloseBuyPosition();
+
+    Decision decideIfCloseSellPosition();
+
+    Decision decideIfOpenPosition();
 }
