@@ -1,9 +1,8 @@
 package com.algos.stockscanner.strategies;
 
 import com.algos.stockscanner.beans.Utils;
+import com.algos.stockscanner.data.enums.*;
 import com.algos.stockscanner.data.enums.Actions;
-import com.algos.stockscanner.data.enums.Reasons;
-import com.algos.stockscanner.data.enums.Terminations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -42,46 +41,64 @@ public class SurferStrategy extends AbsStrategy {
      * Take a decision based on the current state
      */
     @Override
-    public ActionReason takeDecision() {
-        ActionReason actionReason;
+    public Decision takeDecision() {
+        Decision decision;
 
-        if(onHold){
-            actionReason = decideOnHold();
+        // price against which to evaluate the delta
+        float refPrice;
+        if(posOpen){
+            refPrice=buyPrice;
         }else{
-            actionReason = decideOnWait();
+            refPrice = avgBackPrice();
         }
 
-        return actionReason;
+        float deltaPercent=deltaPercent(refPrice, unit.getClose());
+
+        System.out.println(unit.getDateTime()+" "+ posOpen +" "+refPrice+" "+unit.getClose()+" "+deltaPercent+"%");
+
+        if(Math.abs(deltaPercent)>simulation.getAmplitude()){
+            if(deltaPercent>0){ // overvalued, try to sell
+                decision = decideSell(deltaPercent);
+            }else{  // undervalued, try to buy
+                decision = decideBuy(deltaPercent);
+            }
+        }else{
+            //amplitudeExceeded =false;
+            decision=new Decision(Actions.STAY, null, null);
+        }
+
+        System.out.println("    "+decision+" "+unit.getDateTime()+" "+refPrice+" "+unit.getClose()+" "+deltaPercent+"%");
+
+        return decision;
     }
 
     /**
-     * Take a decision when holding the assets
+     * Take a decision when expecting to sell
      */
-    private ActionReason decideOnHold(){
+    private Decision decideSell(float deltaPercent){
         Actions action;
+        ActionTypes actionType=null;
         Reasons reason=null;
 
         float currentPrice=unit.getClose();
-        float deltaPercent=deltaPercent(buyPrice, currentPrice);
         float amplitude = simulation.getAmplitude();
-
-        System.out.println("HOLDING - "+unit.getDateTime()+" "+currentPrice+" "+deltaPercent+"%");
 
         if(!amplitudeExceeded){
             if(deltaPercent>amplitude){
                 amplitudeExceeded =true;
             }
-            action=Actions.STAY;
+            action = Actions.STAY;
         }else{  // amplitude already exceeded
 
             if (deltaPercent < amplitude) {   // back under amplitude, continue
                 amplitudeExceeded =false;
-                action=Actions.STAY;
+                action = Actions.STAY;
             }else{  // still over amplitude, continue waiting until direction inverts
                 if(currentPrice>previousPrice){   // keeps growing
-                    action=Actions.STAY;
+                    action= Actions.STAY;
                 }else{  // curve inverted
-                    action=Actions.SELL;
+                    action = Actions.OPEN;
+                    actionType=ActionTypes.SELL;
                     reason=Reasons.ABOVE_THRESHOLD;
                 }
                 amplitudeExceeded =false;
@@ -89,38 +106,37 @@ public class SurferStrategy extends AbsStrategy {
 
         }
 
-        return new ActionReason(action, reason);
+        return new Decision(action, actionType, reason);
 
     }
 
     /**
-     * Take a decision when waiting to buy
+     * Take a decision when expecting to buy
      */
-    private ActionReason decideOnWait(){
+    private Decision decideBuy(float deltaPercent){
         Actions action;
+        ActionTypes actionType=null;
         Reasons reason=null;
 
         float currentPrice=unit.getClose();
-        float deltaPercent=deltaPercent(avgBackPrice(), currentPrice);
         float amplitude = simulation.getAmplitude();
-
-        System.out.println("WAITING - "+unit.getDateTime()+" "+currentPrice+" "+deltaPercent+"%");
 
         if(!amplitudeExceeded){
             if(deltaPercent<-amplitude){
                 amplitudeExceeded =true;
             }
-            action=Actions.STAY;
+            action= Actions.STAY;
         }else{  // amplitude already exceeded
 
             if (deltaPercent > -amplitude) {   // back under amplitude, continue
                 amplitudeExceeded =false;
-                action=Actions.STAY;
+                action= Actions.STAY;
             }else{  // still over amplitude, continue waiting until direction inverts
                 if(currentPrice<previousPrice){   // keeps going down
-                    action=Actions.STAY;
+                    action= Actions.STAY;
                 }else{  // curve inverted
-                    action=Actions.BUY;
+                    action= Actions.OPEN;
+                    actionType = ActionTypes.BUY;
                     reason=Reasons.BELOW_THRESHOLD;
                 }
                 amplitudeExceeded =false;
@@ -128,7 +144,7 @@ public class SurferStrategy extends AbsStrategy {
 
         }
 
-        return new ActionReason(action, reason);
+        return new Decision(action, actionType, reason);
 
     }
 

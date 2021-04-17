@@ -1,13 +1,12 @@
 package com.algos.stockscanner.data.enums;
 
-public enum Actions {
-    OPEN ("OPEN"),
-    CLOSE ("CLOSE"),
-    STAY("STAY");
+public enum ActionTypes {
+    BUY ("BUY"),
+    SELL ("SELL");
 
     String code;
 
-    Actions(String code) {
+    ActionTypes(String code) {
         this.code = code;
     }
 

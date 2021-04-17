@@ -1,6 +1,7 @@
 package com.algos.stockscanner.strategies;
 
 import com.algos.stockscanner.data.entity.*;
+import com.algos.stockscanner.data.enums.ActionTypes;
 import com.algos.stockscanner.data.enums.Actions;
 import com.algos.stockscanner.data.enums.Reasons;
 import com.algos.stockscanner.data.enums.Terminations;
@@ -10,7 +11,6 @@ import com.algos.stockscanner.data.service.SimulationItemService;
 import com.algos.stockscanner.data.service.SimulationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.swing.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public abstract class AbsStrategy implements Strategy {
 
     boolean abort=false;
 
-    boolean onHold; //holding the asset
+    boolean posOpen; //a position is open
 
     Simulation simulation;
 
@@ -179,18 +179,45 @@ public abstract class AbsStrategy implements Strategy {
         Thread.sleep(5);
         //System.out.println(unitIndex + " " + unit.getId() + " " + unit.getDateTime());
 
-        ActionReason ar = takeDecision();
-        Actions action = ar.getAction();
-        Reasons reason = ar.getReason();
+        Decision decision = takeDecision();
+        Actions action = decision.getAction();
+        //Reasons reason = decision.getReason();
 
         switch (action) {
-            case BUY:
-                buy(reason);
-                onHold=true;
+            case OPEN:
+
+                if(posOpen){
+                    throw new Exception("Position is already open, you can't open it again");
+                }
+
+                switch (decision.getActionType()){
+                    case BUY:
+                        buy(reason);
+                        break;
+                    case SELL:
+                        sell(reason);
+                        break;
+                }
+                posOpen =true;
                 break;
-            case SELL:
-                sell(reason);
-                onHold=false;
+
+            case CLOSE:
+
+                if(!posOpen){
+                    throw new Exception("Position is already closed, you can't close it again");
+                }
+
+                switch (decision.getActionType()){
+                    case BUY:
+                        buy(reason);
+                        posOpen =false;
+                        break;
+                    case SELL:
+                        sell(reason);
+                        posOpen =true;
+                        break;
+                }
+                posOpen =false;
                 break;
             case STAY:
                 break;
@@ -199,24 +226,24 @@ public abstract class AbsStrategy implements Strategy {
     }
 
     private void buy(Reasons reason){
-        System.out.println("BUY - "+reason.getCode());
+        //System.out.println("BUY - "+reason.getCode());
 
         buyPrice=unit.getClose();
 
         SimulationItem item = new SimulationItem();
         item.setSimulation(simulation);
-        item.setAction(Actions.BUY.getCode());
+        item.setAction(ActionTypes.BUY.getCode());
         item.setTimestamp(unit.getDateTime());
         item.setReason(reason.getCode());
         simulation.getSimulationItems().add(item);
     }
 
     private void sell(Reasons reason){
-        System.out.println("SELL - "+reason.getCode());
+        //System.out.println("SELL - "+reason.getCode());
 
         SimulationItem item = new SimulationItem();
         item.setSimulation(simulation);
-        item.setAction(Actions.SELL.getCode());
+        item.setAction(ActionTypes.SELL.getCode());
         item.setTimestamp(unit.getDateTime());
         item.setReason(reason.getCode());
         simulation.getSimulationItems().add(item);
