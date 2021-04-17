@@ -12,7 +12,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -24,7 +23,9 @@ import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Example;
 
 import javax.annotation.PostConstruct;
@@ -47,6 +48,9 @@ public class SimulationsView extends Div {
 
     @Autowired
     private SimulationService simulationService;
+
+    @Autowired
+    ApplicationContext context;
 
     private Integer filtNumGen;
     private String filtSymbol;
@@ -148,18 +152,21 @@ public class SimulationsView extends Div {
         col.setHeader("#id");
         col.setSortProperty("id");
         col.setWidth("7em");
+        col.setResizable(true);
 
         // generator number
         col=grid.addColumn(SimulationModel::getNumGenerator);
         col.setHeader("#gen");
         col.setSortProperty("generator.number");
         col.setWidth("7em");
+        col.setResizable(true);
 
         // symbol
         col=grid.addColumn(SimulationModel::getSymbol);
         col.setHeader("sym");
         col.setSortProperty("index.symbol");
         col.setWidth("6em");
+        col.setResizable(true);
 
         // data button
         col = grid.addComponentColumn(item -> createDataButton(grid, item));
@@ -171,101 +178,124 @@ public class SimulationsView extends Div {
         col.setHeader("start");
         col.setSortProperty("startTs");
         col.setWidth("8em");
+        col.setResizable(true);
 
         // end date
         col=grid.addColumn(new LocalDateRenderer<>(SimulationModel::getEndTs,DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
         col.setHeader("end");
         col.setSortProperty("endTs");
         col.setWidth("8em");
+        col.setResizable(true);
 
         // initial amount
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getInitialAmount, "%,.2f",Locale.getDefault()));
         col.setHeader("initial amt");
         col.setSortProperty("initialAmount");
+        col.setResizable(true);
 
         // leverage
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getLeverage, "%,d",Locale.getDefault()));
         col.setHeader("lev");
         col.setSortProperty("leverage");
         col.setWidth("6em");
+        col.setResizable(true);
 
         // amplitude
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getAmplitude, "%,.2f",Locale.getDefault()));
         col.setHeader("amp");
         col.setSortProperty("amplitude");
+        col.setResizable(true);
 
         // final amount
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getFinalAmount, "%,.2f",Locale.getDefault()));
         col.setHeader("final amt");
         col.setSortProperty("finalAmount");
+        col.setResizable(true);
 
         // termination
         col=grid.addColumn(SimulationModel::getTerminationCode);
         col.setHeader("term");
         col.setSortProperty("terminationCode");
+        col.setResizable(true);
 
         // P/L
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getPl, "%,.2f",Locale.getDefault()));
         col.setHeader("P/L");
         col.setSortProperty("pl");
+        col.setResizable(true);
 
         // P/L percent
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getPlPercent, "%,.2f%%",Locale.getDefault()));
         col.setHeader("P/L%");
         col.setSortProperty("plPercent");
+        col.setResizable(true);
 
         // num buy
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumBuy, "%,d",Locale.getDefault()));
         col.setHeader("# buy");
         col.setSortProperty("numBuy");
+        col.setResizable(true);
 
-        // num buy
+        // num sell
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumSell, "%,d",Locale.getDefault()));
         col.setHeader("# sell");
         col.setSortProperty("numSell");
+        col.setResizable(true);
 
         // tot spread
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getTotSpread, "%,.2f",Locale.getDefault()));
         col.setHeader("spread");
         col.setSortProperty("totSpread");
+        col.setResizable(true);
 
         // tot commission
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getTotCommission, "%,.2f",Locale.getDefault()));
         col.setHeader("commission");
         col.setSortProperty("totCommission");
+        col.setResizable(true);
 
         // num points scanned
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsScanned, "%,d",Locale.getDefault()));
         col.setHeader("pts scanned");
         col.setSortProperty("numPointsScanned");
+        col.setResizable(true);
 
         // num points hold
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsHold, "%,d",Locale.getDefault()));
         col.setHeader("pts hold");
         col.setSortProperty("numPointsHold");
+        col.setResizable(true);
 
         // num points wait
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsWait, "%,d",Locale.getDefault()));
         col.setHeader("pts wait");
         col.setSortProperty("numPointsWait");
+        col.setResizable(true);
 
         // min points hold
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getMinPointsHold, "%,d",Locale.getDefault()));
         col.setHeader("min pts hold");
         col.setSortProperty("minPointsHold");
+        col.setResizable(true);
 
         // max points hold
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getMaxPointsHold, "%,d",Locale.getDefault()));
         col.setHeader("max pts hold");
         col.setSortProperty("maxPointsHold");
-
+        col.setResizable(true);
 
     }
 
 
     private Component createDataButton(Grid grid, SimulationModel item){
         Button button = new Button("data", clickEvent -> {
-            Notification.show("id: "+item.getId()+" gen: "+item.getNumGenerator()+" "+item.getSymbol());
+            Simulation simulation = simulationService.get(item.getId()).get();
+            Component comp = context.getBean(SimulationDataViewer.class, simulation);
+            ConfirmDialog dialog = ConfirmDialog.create().withMessage(comp);
+            dialog.setWidth("100%");
+            dialog.setResizable(true);
+            dialog.setDraggable(true);
+            dialog.open();
         });
         button.addClassName("databutton");
         return button;

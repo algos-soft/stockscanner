@@ -1,8 +1,11 @@
 package com.algos.stockscanner.data.entity;
 
 import com.algos.stockscanner.data.AbstractEntity;
+import com.algos.stockscanner.utils.Du;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 public class SimulationItem extends AbstractEntity {
@@ -18,7 +21,7 @@ public class SimulationItem extends AbstractEntity {
 
     private String reason;
 
-    private Float avgBack;
+    private Float refPrice;
 
     private Float currPrice;
 
@@ -67,12 +70,12 @@ public class SimulationItem extends AbstractEntity {
         this.reason = reason;
     }
 
-    public Float getAvgBack() {
-        return avgBack;
+    public Float getRefPrice() {
+        return refPrice;
     }
 
-    public void setAvgBack(Float avgBack) {
-        this.avgBack = avgBack;
+    public void setRefPrice(Float refPrice) {
+        this.refPrice = refPrice;
     }
 
     public Float getCurrPrice() {
@@ -97,6 +100,17 @@ public class SimulationItem extends AbstractEntity {
 
     public void setCurrAmount(Float currAmount) {
         this.currAmount = currAmount;
+    }
+
+
+    // -------------------
+
+    public LocalDateTime getTimestampLDT(){
+        return Du.toLocalDateTime(timestamp);
+    }
+
+    public void setTimestampLDT(LocalDateTime localDateTime) {
+        this.timestamp = Du.toUtcString(localDateTime);
     }
 
 }

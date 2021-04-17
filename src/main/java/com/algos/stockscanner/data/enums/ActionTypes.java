@@ -13,4 +13,14 @@ public enum ActionTypes {
     public String getCode() {
         return code;
     }
+
+    public static ActionTypes get(String code) {
+        for(ActionTypes a : values()){
+            if(a.getCode().equals(code)){
+                return a;
+            }
+        }
+        return null;
+    }
+
 }

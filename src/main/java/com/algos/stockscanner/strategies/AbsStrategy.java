@@ -58,6 +58,9 @@ public abstract class AbsStrategy implements Strategy {
     @Autowired
     SimulationItemService simulationItemService;
 
+    @Autowired
+    StrategyService strategyService;
+
 
     public AbsStrategy(StrategyParams params) {
         this.params=params;
@@ -179,9 +182,6 @@ public abstract class AbsStrategy implements Strategy {
     @Override
     public void processUnit() throws Exception {
 
-        Thread.sleep(5);
-        //System.out.println(unitIndex + " " + unit.getId() + " " + unit.getDateTime());
-
         Decision decision = takeDecision();
         Actions action = decision.getAction();
         Reasons reason = decision.getReason();
@@ -198,10 +198,10 @@ public abstract class AbsStrategy implements Strategy {
 
                 switch (decision.getActionType()){
                     case BUY:
-                        openBuy(reason);
+                        openBuy();
                         break;
                     case SELL:
-                        openSell(reason);
+                        openSell();
                         break;
                 }
 
@@ -219,6 +219,9 @@ public abstract class AbsStrategy implements Strategy {
             case STAY:
                 break;
         }
+
+        SimulationItem item = strategyService.buildSimulationItem(simulation, decision, unit);
+        simulation.getSimulationItems().add(item);
 
     }
 
@@ -249,28 +252,14 @@ public abstract class AbsStrategy implements Strategy {
     }
 
 
-    private void openBuy(Reasons reason){
-        SimulationItem item = new SimulationItem();
-        item.setSimulation(simulation);
-        item.setAction(ActionTypes.BUY.getCode());
-        item.setTimestamp(unit.getDateTime());
-        item.setReason(reason.getCode());
-        simulation.getSimulationItems().add(item);
-
+    private void openBuy(){
         posOpen =true;
         posType=ActionTypes.BUY;
         openPrice = unit.getClose();
 
     }
 
-    private void openSell(Reasons reason){
-        SimulationItem item = new SimulationItem();
-        item.setSimulation(simulation);
-        item.setAction(ActionTypes.SELL.getCode());
-        item.setTimestamp(unit.getDateTime());
-        item.setReason(reason.getCode());
-        simulation.getSimulationItems().add(item);
-
+    private void openSell(){
         posOpen =true;
         posType=ActionTypes.SELL;
         openPrice = unit.getClose();
@@ -278,8 +267,6 @@ public abstract class AbsStrategy implements Strategy {
     }
 
     private void closePosition(Reasons reason){
-
-
         posOpen =false;
         posType=null;
         openPrice=0;
@@ -287,20 +274,9 @@ public abstract class AbsStrategy implements Strategy {
 
 
     /**
-     * delta percent between the first and the seconb number
-     */
-    float deltaPercent(float first, float second){
-        if(first==0){
-            return 0;
-        }
-        float deltaPercent = (second - first) * 100 / first;
-        return deltaPercent;
-    }
-
-    /**
      * Average price in the backlook period starting from the current unit time
      */
-    float avgBackPrice(){
+    public float avgBackPrice(){
         LocalDateTime t2 = unit.getDateTimeLDT();
         LocalDateTime t1 = t2.minusDays(simulation.getDaysLookback());
         float avg = indexUnitService.getAveragePrice(simulation.getIndex(), t1, t2);

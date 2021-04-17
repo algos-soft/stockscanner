@@ -56,7 +56,7 @@ public class SurferStrategy extends AbsStrategy {
             refPrice = avgBackPrice();
         }
 
-        float deltaPercent=deltaPercent(refPrice, unit.getClose());
+        float deltaPercent=strategyService.deltaPercent(refPrice, unit.getClose());
 
         System.out.println(unit.getDateTime()+" "+ posOpen +" "+refPrice+" "+unit.getClose()+" "+deltaPercent+"%");
 
@@ -97,7 +97,7 @@ public class SurferStrategy extends AbsStrategy {
         Decision decision;
 
         float refPrice = avgBackPrice();
-        float deltaPercent=deltaPercent(refPrice, unit.getClose());
+        float deltaPercent=strategyService.deltaPercent(refPrice, unit.getClose());
 
         if(Math.abs(deltaPercent)>simulation.getAmplitude()){
 
@@ -153,7 +153,7 @@ public class SurferStrategy extends AbsStrategy {
     public Decision decideIfCloseBuyPosition() {
         Decision decision;
         float refPrice = openPrice;
-        float deltaPercent=deltaPercent(refPrice, unit.getClose());
+        float deltaPercent=strategyService.deltaPercent(refPrice, unit.getClose());
 
         if(deltaPercent>simulation.getAmplitude()){
             if(!preAlertSell){
@@ -190,7 +190,7 @@ public class SurferStrategy extends AbsStrategy {
     public Decision decideIfCloseSellPosition() {
         Decision decision;
         float refPrice = openPrice;
-        float deltaPercent=deltaPercent(refPrice, unit.getClose());
+        float deltaPercent=strategyService.deltaPercent(refPrice, unit.getClose());
 
         if(deltaPercent < -simulation.getAmplitude()){
             if(!preAlertSell){

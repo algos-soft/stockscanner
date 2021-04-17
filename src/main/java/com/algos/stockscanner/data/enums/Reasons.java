@@ -18,4 +18,14 @@ public enum Reasons {
     public String getCode() {
         return code;
     }
+
+    public static Reasons get(String code) {
+        for(Reasons a : values()){
+            if(a.getCode().equals(code)){
+                return a;
+            }
+        }
+        return null;
+    }
+
 }
