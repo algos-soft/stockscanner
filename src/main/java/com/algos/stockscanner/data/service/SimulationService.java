@@ -6,7 +6,6 @@ import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import com.vaadin.flow.data.provider.SortDirection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,11 +131,11 @@ public class SimulationService extends CrudService<Simulation, Integer> {
             model.setNumSell(utils.toPrimitive(entity.getNumSell()));
             model.setPl(utils.toPrimitive(entity.getPl()));
             model.setPlPercent(utils.toPrimitive(entity.getPlPercent()));
-            model.setNumPointsScanned(utils.toPrimitive(entity.getNumPointsScanned()));
-            model.setNumPointsHold(utils.toPrimitive(entity.getNumPointsHold()));
-            model.setNumPointsWait(utils.toPrimitive(entity.getNumPointsWait()));
-            model.setMinPointsHold(utils.toPrimitive(entity.getMinPointsHold()));
-            model.setMaxPointsHold(utils.toPrimitive(entity.getMaxPointsHold()));
+            model.setNumPointsScanned(utils.toPrimitive(entity.getNumPointsTotal()));
+            model.setNumPointsHold(utils.toPrimitive(entity.getNumPointsOpen()));
+            model.setNumPointsWait(utils.toPrimitive(entity.getNumPointsClosed()));
+            model.setMinPointsHold(utils.toPrimitive(entity.getShortestPeriodOpen()));
+            model.setMaxPointsHold(utils.toPrimitive(entity.getLongestPeriodOpen()));
         }
 
     }

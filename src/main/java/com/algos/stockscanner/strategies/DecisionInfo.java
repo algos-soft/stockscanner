@@ -13,6 +13,8 @@ public class DecisionInfo {
 
     private Float deltaAmpl;
 
+    private Float currValue;
+
     public String getTimestamp() {
         return timestamp;
     }
@@ -45,6 +47,13 @@ public class DecisionInfo {
         this.deltaAmpl = deltaAmpl;
     }
 
+    public Float getCurrValue() {
+        return currValue;
+    }
+
+    public void setCurrValue(Float currValue) {
+        this.currValue = currValue;
+    }
 
     @Override
     public String toString() {
@@ -53,6 +62,7 @@ public class DecisionInfo {
                 ", refPrice=" + refPrice +
                 ", currPrice=" + currPrice +
                 ", deltaAmpl=" + deltaAmpl +
+                ", currValue=" + currValue +
                 '}';
     }
 }

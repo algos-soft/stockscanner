@@ -33,6 +33,15 @@ public abstract class AbsStrategy implements Strategy {
     // Index of the current unit in the units page, 0 for the first
     int unitIndex=0;
 
+    // total number of points scanned
+    int totPoints=0;
+
+    // total number of points with position open
+    int totPointsOpen=0;
+
+    // total number of points with position closed
+    int totPointsClosed=0;
+
     // Currently scanned unit
     IndexUnit unit;
 
@@ -44,8 +53,10 @@ public abstract class AbsStrategy implements Strategy {
     ActionTypes posType; // if open for buy or sell
 
     float openPrice;    // opened at this price
-
-    float currentAmount;
+    float openValue;    // value at last opening
+    float currValue;    // current value updated while position is open
+    float lastPrice;    // price at the previous point scanned
+    float lastValue;    // value at the previous point scanned
 
     @Autowired
     IndexUnitService indexUnitService;
@@ -80,8 +91,6 @@ public abstract class AbsStrategy implements Strategy {
         simulation.setAmplitude(params.getAmplitude());
         simulation.setDaysLookback(params.getDaysLookback());
 
-        currentAmount=params.getInitialAmount();
-
         // you can exit this cycle only with a termination code assigned
         do {
 
@@ -102,6 +111,7 @@ public abstract class AbsStrategy implements Strategy {
 
                 processUnit();
 
+
             }else{
                 termination =Terminations.NO_MORE_DATA;
                 break;
@@ -121,17 +131,6 @@ public abstract class AbsStrategy implements Strategy {
 
 
 
-    /***
-     * consolidate data in the simulation
-     */
-    private void consolidate(){
-        simulation.setTerminationCode(termination.getCode());
-        if(unit!=null){
-            simulation.setEndTsLDT(unit.getDateTimeLDT());
-        }else{
-            simulation.setEndTsLDT(simulation.getStartTsLDT());
-        }
-    }
 
 
 
@@ -199,12 +198,25 @@ public abstract class AbsStrategy implements Strategy {
 
                 switch (decision.getActionType()){
                     case BUY:
-                        openBuy();
+                        posType=ActionTypes.BUY;
                         break;
                     case SELL:
-                        openSell();
+                        posType=ActionTypes.SELL;
                         break;
                 }
+
+                openPrice = unit.getClose();
+
+
+
+                lastPrice=unit.getClose();
+                currValue=params.getInitialAmount();
+                lastValue=currValue;
+
+                totPointsOpen++;
+
+                updatePosition(decision.getDecisionInfo());
+                posOpen=true;
 
                 break;
 
@@ -213,16 +225,38 @@ public abstract class AbsStrategy implements Strategy {
                 if(!posOpen){
                     throw new Exception("Position is already closed, you can't close it again");
                 }
-                closePosition();
+                updatePosition(decision.getDecisionInfo());
+
+                totPointsOpen++;
+
                 posOpen =false;
                 break;
 
             case STAY:
+                if(posOpen){
+                    totPointsOpen++;
+                    updatePosition(decision.getDecisionInfo());
+                }else{
+                    totPointsClosed++;
+                }
                 break;
         }
 
+
+        // count scanned points by type
+        totPoints++;
+//        if(posOpen){
+//            totPointsOpen++;
+//        }else{
+//            totPointsClosed++;
+//        }
+
         SimulationItem item = strategyService.buildSimulationItem(simulation, decision, unit);
         simulation.getSimulationItems().add(item);
+
+        // save last price - at the end!
+        lastPrice=unit.getClose();
+        lastValue=currValue;
 
     }
 
@@ -253,38 +287,58 @@ public abstract class AbsStrategy implements Strategy {
     }
 
 
-    private void openBuy(){
-        posOpen =true;
-        posType=ActionTypes.BUY;
-        openPrice = unit.getClose();
+//    private void openBuy(){
+//        posType=ActionTypes.BUY;
+//    }
+//
+//    private void openSell(){
+//        posType=ActionTypes.SELL;
+//    }
+//
+//    private void closePosition(){
+//        posType=null;
+//        openPrice=0;
+//    }
 
-    }
-
-    private void openSell(){
-        posOpen =true;
-        posType=ActionTypes.SELL;
-        openPrice = unit.getClose();
-
-    }
-
-    private void closePosition(){
-
-        // update current amount
-        float deltaPricePercent = strategyService.deltaPercent(openPrice, unit.getClose());
-        float deltaValue = currentAmount*deltaPricePercent/100;
+    /**
+     * update current amount
+     */
+    private void updatePosition(DecisionInfo decisionInfo){
+        float deltaPricePercent = strategyService.deltaPercent(lastPrice, unit.getClose());
+        float deltaValue = lastValue*deltaPricePercent/100;
+        float applyValue=0;
         switch (posType){
             case BUY:
-                currentAmount=currentAmount+deltaValue;
+                applyValue=deltaValue;
                 break;
             case SELL:
-                currentAmount=currentAmount-deltaValue;
+                applyValue=-deltaValue;
                 break;
         }
+        currValue = currValue +applyValue;
 
-        posOpen =false;
-        posType=null;
-        openPrice=0;
+        decisionInfo.setCurrValue(currValue);
     }
+
+
+    /**
+     * consolidate data in the simulation
+     */
+    private void consolidate(){
+        simulation.setTerminationCode(termination.getCode());
+        if(unit!=null){
+            simulation.setEndTsLDT(unit.getDateTimeLDT());
+        }else{
+            simulation.setEndTsLDT(simulation.getStartTsLDT());
+        }
+        simulation.setFinalAmount(currValue);
+        simulation.setNumPointsTotal(totPoints);
+        simulation.setNumPointsOpen(totPointsOpen);
+        simulation.setNumPointsClosed(totPointsClosed);
+//        simulation.setShortestPeriodOpen();
+//        simulation.setLongestPeriodOpen();
+    }
+
 
 
 

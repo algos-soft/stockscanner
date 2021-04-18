@@ -41,11 +41,11 @@ public class Simulation extends AbstractEntity {
     private Integer numSell;    // number of sell positions opened
     private Float pl;  // profit/loss
     private Float plPercent;  // profit/loss percentage
-    private Integer numPointsScanned; // number of points scanned
-    private Integer numPointsHold;  // total number of points while holding a position
-    private Integer numPointsWait;  // total number of points points while not holding a position
-    private Integer minPointsHold;  // minimum number of consecutive points while holding a position
-    private Integer maxPointsHold;    // maximum number of consecutive points while holding a position
+    private Integer numPointsTotal; // total number of points scanned
+    private Integer numPointsOpen;  // number of points with position open
+    private Integer numPointsClosed;  // number of points with position closed
+    private Integer shortestPeriodOpen;  // minimum number of consecutive points with position open
+    private Integer longestPeriodOpen;    // maximum number of consecutive points with position open
 
     public MarketIndex getIndex() {
         return index;
@@ -200,44 +200,44 @@ public class Simulation extends AbstractEntity {
         this.plPercent = plPercent;
     }
 
-    public Integer getNumPointsScanned() {
-        return numPointsScanned;
+    public Integer getNumPointsTotal() {
+        return numPointsTotal;
     }
 
-    public void setNumPointsScanned(Integer numPointsScanned) {
-        this.numPointsScanned = numPointsScanned;
+    public void setNumPointsTotal(Integer numPointsTotal) {
+        this.numPointsTotal = numPointsTotal;
     }
 
-    public Integer getNumPointsHold() {
-        return numPointsHold;
+    public Integer getNumPointsOpen() {
+        return numPointsOpen;
     }
 
-    public void setNumPointsHold(Integer numPointsHold) {
-        this.numPointsHold = numPointsHold;
+    public void setNumPointsOpen(Integer numPointsOpen) {
+        this.numPointsOpen = numPointsOpen;
     }
 
-    public Integer getNumPointsWait() {
-        return numPointsWait;
+    public Integer getNumPointsClosed() {
+        return numPointsClosed;
     }
 
-    public void setNumPointsWait(Integer numPointsWait) {
-        this.numPointsWait = numPointsWait;
+    public void setNumPointsClosed(Integer numPointsClosed) {
+        this.numPointsClosed = numPointsClosed;
     }
 
-    public Integer getMinPointsHold() {
-        return minPointsHold;
+    public Integer getShortestPeriodOpen() {
+        return shortestPeriodOpen;
     }
 
-    public void setMinPointsHold(Integer minPointsHold) {
-        this.minPointsHold = minPointsHold;
+    public void setShortestPeriodOpen(Integer shortestPeriodOpen) {
+        this.shortestPeriodOpen = shortestPeriodOpen;
     }
 
-    public Integer getMaxPointsHold() {
-        return maxPointsHold;
+    public Integer getLongestPeriodOpen() {
+        return longestPeriodOpen;
     }
 
-    public void setMaxPointsHold(Integer maxPointsHold) {
-        this.maxPointsHold = maxPointsHold;
+    public void setLongestPeriodOpen(Integer longestPeriodOpen) {
+        this.longestPeriodOpen = longestPeriodOpen;
     }
 
     // ----------------

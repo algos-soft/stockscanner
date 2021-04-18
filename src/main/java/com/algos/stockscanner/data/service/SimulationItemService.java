@@ -9,7 +9,6 @@ import com.algos.stockscanner.views.simulations.SimulationItemModel;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
@@ -80,7 +79,7 @@ public class SimulationItemService extends CrudService<SimulationItem, Integer> 
         model.setRefPrice(utils.toPrimitive(entity.getRefPrice()));
         model.setCurrPrice(utils.toPrimitive(entity.getCurrPrice()));
         model.setDeltaAmpl(utils.toPrimitive(entity.getDeltaAmpl()));
-        model.setCurrAmount(utils.toPrimitive(entity.getCurrAmount()));
+        model.setCurrValue(utils.toPrimitive(entity.getCurrValue()));
 
     }
 

@@ -4,7 +4,6 @@ import com.algos.stockscanner.data.AbstractEntity;
 import com.algos.stockscanner.utils.Du;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -27,7 +26,7 @@ public class SimulationItem extends AbstractEntity {
 
     private Float deltaAmpl;
 
-    private Float currAmount;
+    private Float currValue;
 
 
     public Simulation getSimulation() {
@@ -94,12 +93,12 @@ public class SimulationItem extends AbstractEntity {
         this.deltaAmpl = deltaAmpl;
     }
 
-    public Float getCurrAmount() {
-        return currAmount;
+    public Float getCurrValue() {
+        return currValue;
     }
 
-    public void setCurrAmount(Float currAmount) {
-        this.currAmount = currAmount;
+    public void setCurrValue(Float currValue) {
+        this.currValue = currValue;
     }
 
 

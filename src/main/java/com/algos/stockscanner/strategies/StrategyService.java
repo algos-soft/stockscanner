@@ -3,7 +3,6 @@ package com.algos.stockscanner.strategies;
 import com.algos.stockscanner.data.entity.IndexUnit;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.entity.SimulationItem;
-import com.algos.stockscanner.data.enums.ActionTypes;
 import org.springframework.stereotype.Service;
 
 
@@ -50,7 +49,7 @@ public class StrategyService {
             item.setCurrPrice(info.getCurrPrice());
             item.setDeltaAmpl(info.getDeltaAmpl());
         }
-        item.setCurrAmount(0f);
+        item.setCurrValue(info.getCurrValue());
 
         return item;
     }

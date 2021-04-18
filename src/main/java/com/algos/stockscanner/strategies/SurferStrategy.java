@@ -42,55 +42,6 @@ public class SurferStrategy extends AbsStrategy {
     }
 
 
-    /**
-     * Take a decision based on the current state
-     */
-    private Decision takeDecisionOld() {
-        Decision decision;
-
-        // price against which to evaluate the delta
-        float refPrice;
-        if(posOpen){
-            refPrice = openPrice;
-        }else{
-            refPrice = avgBackPrice();
-        }
-
-        float deltaPercent=strategyService.deltaPercent(refPrice, unit.getClose());
-
-        System.out.println(unit.getDateTime()+" "+ posOpen +" "+refPrice+" "+unit.getClose()+" "+deltaPercent+"%");
-
-        if(posOpen){    // position is open
-            switch (posType){
-                case BUY:
-                    decision = decideSell(deltaPercent);
-                    break;
-                case SELL:
-                    decision = decideBuy(deltaPercent);
-                    break;
-            }
-        } else {    // position is not opened
-
-        }
-
-        if(Math.abs(deltaPercent)>simulation.getAmplitude()){
-            if(deltaPercent>0){ // overvalued, try to sell
-                decision = decideSell(deltaPercent);
-            }else{  // undervalued, try to buy
-                decision = decideBuy(deltaPercent);
-            }
-        }else{
-            //amplitudeExceeded =false;
-            decision=new Decision(Actions.STAY, null, null);
-        }
-
-        System.out.println("    "+decision+" "+unit.getDateTime()+" "+refPrice+" "+unit.getClose()+" "+deltaPercent+"%");
-
-        return decision;
-    }
-
-
-
 
     @Override
     public Decision decideIfOpenPosition() {

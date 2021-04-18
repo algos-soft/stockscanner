@@ -146,6 +146,13 @@ public class SimulationDataViewer extends VerticalLayout {
         //col.setWidth("7em");
         col.setResizable(true);
 
+        // curr value
+        col=grid.addColumn(SimulationItemModel::getCurrValue);
+        col.setHeader("value");
+        //col.setWidth("7em");
+        col.setResizable(true);
+
+
     }
 
 
