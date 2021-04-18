@@ -121,14 +121,11 @@ public class SimulationService extends CrudService<Simulation, Integer> {
             model.setStartTs(entity.getStartTsLD());
             model.setEndTs(entity.getEndTsLD());
             model.setInitialAmount(utils.toPrimitive(entity.getInitialAmount()));
-            model.setLeverage(utils.toPrimitive(entity.getLeverage()));
             model.setAmplitude(utils.toPrimitive(entity.getAmplitude()));
             model.setFinalAmount(utils.toPrimitive(entity.getFinalAmount()));
             model.setTerminationCode(entity.getTerminationCode());
             model.setTotSpread(utils.toPrimitive(entity.getTotSpread()));
             model.setTotCommission(utils.toPrimitive(entity.getTotCommission()));
-            model.setNumBuy(utils.toPrimitive(entity.getNumBuy()));
-            model.setNumSell(utils.toPrimitive(entity.getNumSell()));
             model.setPl(utils.toPrimitive(entity.getPl()));
             model.setPlPercent(utils.toPrimitive(entity.getPlPercent()));
             model.setNumPointsScanned(utils.toPrimitive(entity.getNumPointsTotal()));

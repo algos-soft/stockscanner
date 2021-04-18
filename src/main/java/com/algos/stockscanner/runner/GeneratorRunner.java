@@ -182,7 +182,6 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     params.setStartDate(generator.getStartDateLD());
                     params.setEndDate(generator.getStartDateLD().plusDays(generator.getDays() - 1));
                     params.setInitialAmount(generator.getAmount());
-                    params.setLeverage(generator.getLeverage());
                     params.setSl(generator.getStopLoss());
                     params.setTp(generator.getTakeProfit());
                     params.setFixedDays(generator.getFixedDays());
@@ -378,11 +377,6 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
         // amount
         if (utils.toPrimitive(generator.getAmount()) == 0) {
             throw new RunnerException("Initial amount is not specified");
-        }
-
-        // leverage
-        if (utils.toPrimitive(generator.getLeverage()) == 0) {
-            throw new RunnerException("Leverage is not specified");
         }
 
         // if fixed length, number of days is required

@@ -213,7 +213,6 @@ public class DataGenerator {
         sim.setIndex(sim.getGenerator().getIndex());
         sim.setStartTsLDT(LocalDateTime.now().minusYears(1));
         sim.setEndTsLDT(sim.getStartTsLDT().plusDays(30));
-        sim.setLeverage(1);
         sim.setAmplitude(10f);
         sim.setInitialAmount(500f);
         sim.setFinalAmount(550f);
@@ -224,7 +223,6 @@ public class DataGenerator {
         sim.setIndex(sim.getGenerator().getIndex());
         sim.setStartTsLDT(LocalDateTime.now().minusYears(1));
         sim.setEndTsLDT(sim.getStartTsLDT().plusDays(20));
-        sim.setLeverage(2);
         sim.setAmplitude(10f);
         sim.setInitialAmount(300f);
         sim.setFinalAmount(350f);
@@ -235,7 +233,6 @@ public class DataGenerator {
         sim.setIndex(sim.getGenerator().getIndex());
         sim.setStartTsLDT(LocalDateTime.now().minusYears(1));
         sim.setEndTsLDT(sim.getStartTsLDT().plusDays(45));
-        sim.setLeverage(1);
         sim.setAmplitude(25f);
         sim.setInitialAmount(600f);
         sim.setFinalAmount(550f);
@@ -246,7 +243,6 @@ public class DataGenerator {
         sim.setIndex(sim.getGenerator().getIndex());
         sim.setStartTsLDT(LocalDateTime.now().minusYears(1));
         sim.setEndTsLDT(sim.getStartTsLDT().plusDays(20));
-        sim.setLeverage(1);
         sim.setAmplitude(15f);
         sim.setInitialAmount(1000f);
         sim.setFinalAmount(1200f);
@@ -257,7 +253,6 @@ public class DataGenerator {
         sim.setIndex(sim.getGenerator().getIndex());
         sim.setStartTsLDT(LocalDateTime.now().minusYears(2));
         sim.setEndTsLDT(sim.getStartTsLDT().plusDays(40));
-        sim.setLeverage(1);
         sim.setAmplitude(10f);
         sim.setInitialAmount(1800f);
         sim.setFinalAmount(1600f);

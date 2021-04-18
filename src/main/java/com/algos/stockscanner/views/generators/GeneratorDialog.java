@@ -66,7 +66,6 @@ public class GeneratorDialog extends Dialog {
     private DatePicker startDatePicker;
 
     private IntegerField amountFld;
-    private IntegerField leverageFld;
     private IntegerField stopLossFld;
     private IntegerField takeProfitFld;
 
@@ -241,8 +240,6 @@ public class GeneratorDialog extends Dialog {
 
         amountFld = new IntegerField("Amount");
         amountFld.setWidth("6em");
-        leverageFld=new IntegerField("Leverage");
-        leverageFld.setWidth("6em");
         stopLossFld= new IntegerField("SL");
         stopLossFld.setWidth("6em");
         takeProfitFld= new IntegerField("TP");
@@ -250,7 +247,7 @@ public class GeneratorDialog extends Dialog {
         FlexLayout amountsLayout = new FlexLayout();
         amountsLayout.getStyle().set("gap","1em");
         amountsLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
-        amountsLayout.add(amountFld, leverageFld, stopLossFld, takeProfitFld);
+        amountsLayout.add(amountFld, stopLossFld, takeProfitFld);
 
         lengthRadioGroup = new RadioButtonGroup<>();
         lengthRadioGroup.setLabel("Simulation length");
@@ -481,7 +478,6 @@ public class GeneratorDialog extends Dialog {
 
         model.setStartDate(startDatePicker.getValue());
         model.setAmount(utils.toPrimitive(amountFld.getValue()));
-        model.setLeverage(utils.toPrimitive(leverageFld.getValue()));
         model.setStopLoss(utils.toPrimitive(stopLossFld.getValue()));
         model.setTakeProfit(utils.toPrimitive(takeProfitFld.getValue()));
 
@@ -523,7 +519,6 @@ public class GeneratorDialog extends Dialog {
 
         startDatePicker.setValue(model.getStartDate());
         amountFld.setValue(utils.toPrimitive(model.getAmount()));
-        leverageFld.setValue(utils.toPrimitive(model.getLeverage()));
         stopLossFld.setValue(utils.toPrimitive(model.getStopLoss()));
         takeProfitFld.setValue(utils.toPrimitive(model.getTakeProfit()));
         if(model.isDurationFixed()){

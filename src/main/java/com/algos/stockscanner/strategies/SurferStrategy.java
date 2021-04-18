@@ -19,8 +19,6 @@ public class SurferStrategy extends AbsStrategy {
 
     boolean amplitudeExceeded;
 
-    float previousPrice;
-
     private boolean preAlertBuy;
 
     private boolean preAlertSell;
@@ -33,14 +31,6 @@ public class SurferStrategy extends AbsStrategy {
     public SurferStrategy(StrategyParams params) {
         super(params);
     }
-
-
-    @Override
-    public void processUnit() throws Exception {
-        super.processUnit();
-        previousPrice=unit.getClose();
-    }
-
 
 
     @Override
@@ -57,7 +47,7 @@ public class SurferStrategy extends AbsStrategy {
                     preAlertSell=true;
                     decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_SELL);
                 }else{
-                    if(unit.getClose()>previousPrice){   // still growing
+                    if(unit.getClose()>lastPrice){   // still growing
                         decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_UP);
                     }else{  // curve inverted
                         decision = new Decision(Actions.OPEN, ActionTypes.SELL, Reasons.ABOVE_THRESHOLD);
@@ -70,7 +60,7 @@ public class SurferStrategy extends AbsStrategy {
                     preAlertBuy=true;
                     decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_BUY);
                 }else{
-                    if(unit.getClose()<previousPrice){   // still going down
+                    if(unit.getClose()<lastPrice){   // still going down
                         decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_DOWN);
                     }else{  // curve inverted
                         decision = new Decision(Actions.OPEN, ActionTypes.BUY, Reasons.BELOW_THRESHOLD);
@@ -111,7 +101,7 @@ public class SurferStrategy extends AbsStrategy {
                 preAlertSell=true;
                 decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_SELL);
             }else{
-                if(unit.getClose()>previousPrice){   // still growing
+                if(unit.getClose()>lastPrice){   // still growing
                     decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_UP);
                 }else{  // curve inverted
                     decision = new Decision(Actions.CLOSE, null, Reasons.ABOVE_THRESHOLD);
@@ -148,7 +138,7 @@ public class SurferStrategy extends AbsStrategy {
                 preAlertSell=true;
                 decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_SELL);
             }else{
-                if(unit.getClose()<previousPrice){   // still going down
+                if(unit.getClose()<lastPrice){   // still going down
                     decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_DOWN);
                 }else{  // curve inverted
                     decision = new Decision(Actions.CLOSE, null, Reasons.BELOW_THRESHOLD);
@@ -168,84 +158,6 @@ public class SurferStrategy extends AbsStrategy {
         info.setDeltaAmpl(deltaPercent);
 
         return decision;
-    }
-
-
-
-    /**
-     * Take a decision when expecting to sell
-     */
-    private Decision decideSell(float deltaPercent){
-        Actions action;
-        ActionTypes actionType=null;
-        Reasons reason=null;
-
-        float currentPrice=unit.getClose();
-        float amplitude = simulation.getAmplitude();
-
-        if(!amplitudeExceeded){
-            if(deltaPercent>amplitude){
-                amplitudeExceeded =true;
-            }
-            action = Actions.STAY;
-        }else{  // amplitude already exceeded
-
-            if (deltaPercent < amplitude) {   // back under amplitude, continue
-                amplitudeExceeded =false;
-                action = Actions.STAY;
-            }else{  // still over amplitude, continue waiting until direction inverts
-                if(currentPrice>previousPrice){   // keeps growing
-                    action= Actions.STAY;
-                }else{  // curve inverted
-                    action = Actions.OPEN;
-                    actionType=ActionTypes.SELL;
-                    reason=Reasons.ABOVE_THRESHOLD;
-                }
-                amplitudeExceeded =false;
-            }
-
-        }
-
-        return new Decision(action, actionType, reason);
-
-    }
-
-    /**
-     * Take a decision when expecting to buy
-     */
-    private Decision decideBuy(float deltaPercent){
-        Actions action;
-        ActionTypes actionType=null;
-        Reasons reason=null;
-
-        float currentPrice=unit.getClose();
-        float amplitude = simulation.getAmplitude();
-
-        if(!amplitudeExceeded){
-            if(deltaPercent<-amplitude){
-                amplitudeExceeded =true;
-            }
-            action= Actions.STAY;
-        }else{  // amplitude already exceeded
-
-            if (deltaPercent > -amplitude) {   // back under amplitude, continue
-                amplitudeExceeded =false;
-                action= Actions.STAY;
-            }else{  // still over amplitude, continue waiting until direction inverts
-                if(currentPrice<previousPrice){   // keeps going down
-                    action= Actions.STAY;
-                }else{  // curve inverted
-                    action= Actions.OPEN;
-                    actionType = ActionTypes.BUY;
-                    reason=Reasons.BELOW_THRESHOLD;
-                }
-                amplitudeExceeded =false;
-            }
-
-        }
-
-        return new Decision(action, actionType, reason);
-
     }
 
 

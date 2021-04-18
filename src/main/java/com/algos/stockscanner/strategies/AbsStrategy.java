@@ -53,10 +53,12 @@ public abstract class AbsStrategy implements Strategy {
     ActionTypes posType; // if open for buy or sell
 
     float openPrice;    // opened at this price
-    float openValue;    // value at last opening
+    float openValue;    // value of the position when opened
     float currValue;    // current value updated while position is open
     float lastPrice;    // price at the previous point scanned
     float lastValue;    // value at the previous point scanned
+    IndexUnit lastUnit; // previous index unit scanned
+    float totPl;        // total P/L of the simulation
 
     @Autowired
     IndexUnitService indexUnitService;
@@ -85,7 +87,6 @@ public abstract class AbsStrategy implements Strategy {
         simulation.setIndex(params.getIndex());
         simulation.setStartTsLDT(params.getStartDate().atStartOfDay());
         simulation.setInitialAmount(params.getInitialAmount());
-        simulation.setLeverage(params.getLeverage());
         simulation.setSl(params.getSl());
         simulation.setTp(params.getTp());
         simulation.setAmplitude(params.getAmplitude());
@@ -104,12 +105,40 @@ public abstract class AbsStrategy implements Strategy {
                 unit = unitsPage.get(unitIndex);
 
                 Terminations term = isFinished();
-                if(term!=null){
+                if(term==null){
+
+                    SimulationItem item = processUnit();
+                    simulation.getSimulationItems().add(item);
+
+                } else {
+
+                    // if we have an open position we must close it - we add an extra close line at the last timestamp
+                    if(posOpen){
+
+                        // reset to previous values, so everything behaves as in the previous line
+                        currValue=lastValue;
+                        unit=lastUnit;
+
+                        Reasons reason = strategyService.terminationToReason(term);
+                        Decision decision=new Decision(Actions.CLOSE, null, reason);
+                        DecisionInfo decisionInfo=new DecisionInfo();
+                        decisionInfo.setRefPrice(openPrice);
+                        decisionInfo.setCurrPrice(unit.getClose());
+                        decisionInfo.setDeltaAmpl(strategyService.deltaPercent(openPrice, unit.getClose()));
+                        decisionInfo.setTimestamp(unit.getDateTime());
+                        decision.setDecisionInfo(decisionInfo);
+
+                        closePosition(decisionInfo);
+
+                        SimulationItem item = strategyService.buildSimulationItem(simulation, decision, unit);
+                        simulation.getSimulationItems().add(item);
+
+                    }
+
                     termination=term;
                     break;
-                }
 
-                processUnit();
+                }
 
 
             }else{
@@ -180,11 +209,10 @@ public abstract class AbsStrategy implements Strategy {
 
 
     @Override
-    public void processUnit() throws Exception {
+    public SimulationItem processUnit() throws Exception {
 
         Decision decision = takeDecision();
         Actions action = decision.getAction();
-        Reasons reason = decision.getReason();
 
         System.out.println(decision);
 
@@ -205,19 +233,16 @@ public abstract class AbsStrategy implements Strategy {
                         break;
                 }
 
-                openPrice = unit.getClose();
-
-
-
-                lastPrice=unit.getClose();
-                currValue=params.getInitialAmount();
+                openPrice=unit.getClose();
+                lastPrice=openPrice;
+                openValue=params.getInitialAmount();
+                currValue=openValue;
                 lastValue=currValue;
 
-                totPointsOpen++;
-
                 updatePosition(decision.getDecisionInfo());
-                posOpen=true;
 
+                totPointsOpen++;
+                posOpen=true;
                 break;
 
             case CLOSE:
@@ -225,17 +250,21 @@ public abstract class AbsStrategy implements Strategy {
                 if(!posOpen){
                     throw new Exception("Position is already closed, you can't close it again");
                 }
-                updatePosition(decision.getDecisionInfo());
 
-                totPointsOpen++;
+                closePosition(decision.getDecisionInfo());
+//                updatePosition(decision.getDecisionInfo());
+//                float pl = currValue-openValue; // P/L of this spread
+//                decision.getDecisionInfo().setPl(pl);
+//                totPl+=pl;  // increment tot P/L of the simulation
+//                posOpen =false;
 
-                posOpen =false;
+                totPointsClosed++;
                 break;
 
             case STAY:
                 if(posOpen){
-                    totPointsOpen++;
                     updatePosition(decision.getDecisionInfo());
+                    totPointsOpen++;
                 }else{
                     totPointsClosed++;
                 }
@@ -245,22 +274,27 @@ public abstract class AbsStrategy implements Strategy {
 
         // count scanned points by type
         totPoints++;
-//        if(posOpen){
-//            totPointsOpen++;
-//        }else{
-//            totPointsClosed++;
-//        }
 
-        SimulationItem item = strategyService.buildSimulationItem(simulation, decision, unit);
-        simulation.getSimulationItems().add(item);
+        // build the simulation item
+        SimulationItem simulationItem = strategyService.buildSimulationItem(simulation, decision, unit);
+//        simulation.getSimulationItems().add(item);
 
         // save last price - at the end!
         lastPrice=unit.getClose();
         lastValue=currValue;
+        lastUnit=unit;
+
+        return simulationItem;
 
     }
 
-
+    private void closePosition(DecisionInfo decisionInfo){
+        updatePosition(decisionInfo);
+        float pl = currValue-openValue; // P/L of this spread
+        decisionInfo.setPl(pl);
+        totPl+=pl;  // increment tot P/L of the simulation
+        posOpen =false;
+    }
 
 
     /**
@@ -332,6 +366,7 @@ public abstract class AbsStrategy implements Strategy {
             simulation.setEndTsLDT(simulation.getStartTsLDT());
         }
         simulation.setFinalAmount(currValue);
+        simulation.setPl(totPl);
         simulation.setNumPointsTotal(totPoints);
         simulation.setNumPointsOpen(totPointsOpen);
         simulation.setNumPointsClosed(totPointsClosed);

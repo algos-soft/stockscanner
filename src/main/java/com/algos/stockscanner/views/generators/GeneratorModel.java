@@ -19,7 +19,6 @@ public class GeneratorModel {
     private int amount;
     private int stopLoss;
     private int takeProfit;
-    private int leverage;
     private boolean durationFixed;
 
     private int amplitude;
@@ -112,14 +111,6 @@ public class GeneratorModel {
 
     public void setTakeProfit(int takeProfit) {
         this.takeProfit = takeProfit;
-    }
-
-    public int getLeverage() {
-        return leverage;
-    }
-
-    public void setLeverage(int leverage) {
-        this.leverage = leverage;
     }
 
     public boolean isDurationFixed() {

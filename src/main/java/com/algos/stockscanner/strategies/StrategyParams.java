@@ -16,8 +16,6 @@ public class StrategyParams {
 
     float initialAmount;
 
-    int leverage;
-
     float sl;
 
     float tp;
@@ -64,14 +62,6 @@ public class StrategyParams {
 
     public void setInitialAmount(float initialAmount) {
         this.initialAmount = initialAmount;
-    }
-
-    public int getLeverage() {
-        return leverage;
-    }
-
-    public void setLeverage(int leverage) {
-        this.leverage = leverage;
     }
 
     public float getSl() {

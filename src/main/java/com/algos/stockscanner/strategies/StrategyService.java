@@ -3,6 +3,8 @@ package com.algos.stockscanner.strategies;
 import com.algos.stockscanner.data.entity.IndexUnit;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.entity.SimulationItem;
+import com.algos.stockscanner.data.enums.Reasons;
+import com.algos.stockscanner.data.enums.Terminations;
 import org.springframework.stereotype.Service;
 
 
@@ -48,6 +50,7 @@ public class StrategyService {
             item.setRefPrice(info.getRefPrice());
             item.setCurrPrice(info.getCurrPrice());
             item.setDeltaAmpl(info.getDeltaAmpl());
+            item.setPl(info.getPl());
         }
         item.setCurrValue(info.getCurrValue());
 
@@ -55,5 +58,22 @@ public class StrategyService {
     }
 
 
-
+    public Reasons terminationToReason(Terminations term) {
+        Reasons reasons;
+        switch (term){
+            case ABORTED_BY_USER:
+                reasons=Reasons.ABORTED_BY_USER;
+                break;
+            case MAX_DAYS_REACHED:
+                reasons=Reasons.MAX_DAYS_REACHED;
+                break;
+            case NO_MORE_DATA:
+                reasons=Reasons.NO_MORE_DATA;
+                break;
+            default:
+                reasons=Reasons.UNKNOWN;
+                break;
+        }
+        return reasons;
+    }
 }

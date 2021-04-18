@@ -12,7 +12,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -147,12 +146,10 @@ public class SimulationsView extends Div {
 
         Grid.Column col;
 
-        // id
-        col=grid.addColumn(SimulationModel::getId);
-        col.setHeader("#id");
-        col.setSortProperty("id");
-        col.setWidth("7em");
-        col.setResizable(true);
+        // data button
+        col = grid.addComponentColumn(item -> createDataButton(grid, item));
+        col.setHeader("details");
+        col.setWidth("8em");
 
         // generator number
         col=grid.addColumn(SimulationModel::getNumGenerator);
@@ -168,10 +165,6 @@ public class SimulationsView extends Div {
         col.setWidth("6em");
         col.setResizable(true);
 
-        // data button
-        col = grid.addComponentColumn(item -> createDataButton(grid, item));
-        col.setHeader("data");
-        col.setWidth("8em");
 
         // start date
         col=grid.addColumn(new LocalDateRenderer<>(SimulationModel::getStartTs,DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
@@ -191,13 +184,6 @@ public class SimulationsView extends Div {
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getInitialAmount, "%,.2f",Locale.getDefault()));
         col.setHeader("initial amt");
         col.setSortProperty("initialAmount");
-        col.setResizable(true);
-
-        // leverage
-        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getLeverage, "%,d",Locale.getDefault()));
-        col.setHeader("lev");
-        col.setSortProperty("leverage");
-        col.setWidth("6em");
         col.setResizable(true);
 
         // amplitude
@@ -228,18 +214,6 @@ public class SimulationsView extends Div {
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getPlPercent, "%,.2f%%",Locale.getDefault()));
         col.setHeader("P/L%");
         col.setSortProperty("plPercent");
-        col.setResizable(true);
-
-        // num buy
-        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumBuy, "%,d",Locale.getDefault()));
-        col.setHeader("# buy");
-        col.setSortProperty("numBuy");
-        col.setResizable(true);
-
-        // num sell
-        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumSell, "%,d",Locale.getDefault()));
-        col.setHeader("# sell");
-        col.setSortProperty("numSell");
         col.setResizable(true);
 
         // tot spread

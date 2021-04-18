@@ -242,11 +242,8 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         int amount = utils.toPrimitive(model.getAmount());
         Span cAmount = new Span(format(amount));
         cAmount.addClassName("amount");
-        int leverage = utils.toPrimitive(model.getLeverage());
-        Span cLeverage = new Span("X" + format(leverage));
-        cLeverage.addClassName("leverage");
         HorizontalLayout row1 = new HorizontalLayout();
-        row1.add(cAmount, cLeverage);
+        row1.add(cAmount);
 
         int sl = utils.toPrimitive(model.getStopLoss());
         Span cSL = new Span();

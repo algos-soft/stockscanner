@@ -34,7 +34,6 @@ public class Generator extends AbstractEntity {
     private Integer days;   // number of days
     private Integer spans;   // number of times to repeat the simulation, starting from the end of the previous simulation
     private Integer amount;  // amount invested
-    private Integer leverage;
     private Integer stopLoss; // of the whole operation, not of the single shot
     private Integer takeProfit; // of the whole operation, not of the single shot
 
@@ -132,14 +131,6 @@ public class Generator extends AbstractEntity {
 
     public void setAmount(Integer amount) {
         this.amount = amount;
-    }
-
-    public Integer getLeverage() {
-        return leverage;
-    }
-
-    public void setLeverage(Integer leverage) {
-        this.leverage = leverage;
     }
 
     public Integer getStopLoss() {

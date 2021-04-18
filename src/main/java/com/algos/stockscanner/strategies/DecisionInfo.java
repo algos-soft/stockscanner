@@ -15,6 +15,8 @@ public class DecisionInfo {
 
     private Float currValue;
 
+    private float pl;
+
     public String getTimestamp() {
         return timestamp;
     }
@@ -55,6 +57,15 @@ public class DecisionInfo {
         this.currValue = currValue;
     }
 
+    public float getPl() {
+        return pl;
+    }
+
+    public void setPl(float pl) {
+        this.pl = pl;
+    }
+
+
     @Override
     public String toString() {
         return "DecisionInfo{" +
@@ -63,6 +74,7 @@ public class DecisionInfo {
                 ", currPrice=" + currPrice +
                 ", deltaAmpl=" + deltaAmpl +
                 ", currValue=" + currValue +
+                ", pl=" + pl +
                 '}';
     }
 }

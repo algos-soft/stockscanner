@@ -26,7 +26,6 @@ public class Simulation extends AbstractEntity {
     private String startTs;  // timestamp of first point scanned
     private String endTs;  // timestamp of last point scanned
     private Float initialAmount;  // initial amount
-    private Integer leverage;
     private Float sl;
     private Float tp;
     private Float amplitude;    // amplitude of the oscillation max/min, in percent
@@ -37,8 +36,6 @@ public class Simulation extends AbstractEntity {
     private String terminationCode; // why the simulation is terminated
     private Float totSpread;    // total amount of buy spreads paid
     private Float totCommission;    // total amount of commission paid
-    private Integer numBuy;    // number of buy positions opened
-    private Integer numSell;    // number of sell positions opened
     private Float pl;  // profit/loss
     private Float plPercent;  // profit/loss percentage
     private Integer numPointsTotal; // total number of points scanned
@@ -93,14 +90,6 @@ public class Simulation extends AbstractEntity {
 
     public void setInitialAmount(Float initialAmount) {
         this.initialAmount = initialAmount;
-    }
-
-    public Integer getLeverage() {
-        return leverage;
-    }
-
-    public void setLeverage(Integer leverage) {
-        this.leverage = leverage;
     }
 
     public Float getSl() {
@@ -166,22 +155,6 @@ public class Simulation extends AbstractEntity {
 
     public void setTotCommission(Float totCommission) {
         this.totCommission = totCommission;
-    }
-
-    public Integer getNumBuy() {
-        return numBuy;
-    }
-
-    public void setNumBuy(Integer numBuy) {
-        this.numBuy = numBuy;
-    }
-
-    public Integer getNumSell() {
-        return numSell;
-    }
-
-    public void setNumSell(Integer numSell) {
-        this.numSell = numSell;
     }
 
     public Float getPl() {

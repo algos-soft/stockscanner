@@ -112,7 +112,6 @@ public class GeneratorService extends CrudService<Generator, Integer> {
 
         model.setStartDate(entity.getStartDateLD());
         model.setAmount(utils.toPrimitive(entity.getAmount()));
-        model.setLeverage(utils.toPrimitive(entity.getLeverage()));
         model.setStopLoss(utils.toPrimitive(entity.getStopLoss()));
         model.setTakeProfit(utils.toPrimitive(entity.getTakeProfit()));
         model.setDurationFixed(utils.toPrimitive(entity.getFixedDays()));
@@ -150,7 +149,6 @@ public class GeneratorService extends CrudService<Generator, Integer> {
 
         entity.setStartDateLD(model.getStartDate());
         entity.setAmount(model.getAmount());
-        entity.setLeverage(model.getLeverage());
         entity.setStopLoss(model.getStopLoss());
         entity.setTakeProfit(model.getTakeProfit());
         entity.setFixedDays(model.isDurationFixed());
@@ -182,7 +180,6 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         entity.setCreated(LocalDateTime.now());
         entity.setModified(LocalDateTime.now());
         entity.setFixedDays(true);
-        entity.setLeverage(1);
         entity.setNumber(calcNextNumber());
         entity.setSpans(1);
     }
@@ -195,7 +192,6 @@ public class GeneratorService extends CrudService<Generator, Integer> {
      */
     public void initModel(GeneratorModel model) {
         model.setDurationFixed(true);
-        model.setLeverage(1);
         model.setDaysLookback(10);
         model.setDays(30);
         model.setSpans(1);

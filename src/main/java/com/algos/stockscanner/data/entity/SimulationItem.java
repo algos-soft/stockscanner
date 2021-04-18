@@ -28,6 +28,8 @@ public class SimulationItem extends AbstractEntity {
 
     private Float currValue;
 
+    private Float pl;
+
 
     public Simulation getSimulation() {
         return simulation;
@@ -101,8 +103,16 @@ public class SimulationItem extends AbstractEntity {
         this.currValue = currValue;
     }
 
+    public Float getPl() {
+        return pl;
+    }
 
-    // -------------------
+    public void setPl(Float pl) {
+        this.pl = pl;
+    }
+
+
+// -------------------
 
     public LocalDateTime getTimestampLDT(){
         return Du.toLocalDateTime(timestamp);

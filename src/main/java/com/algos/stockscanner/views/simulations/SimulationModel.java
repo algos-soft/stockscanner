@@ -15,14 +15,11 @@ public class SimulationModel {
     private LocalDate startTs;
     private LocalDate endTs;
     private float initialAmount;
-    private int leverage;
     private float amplitude;
     private float finalAmount;
     private String terminationCode;
     private float totSpread;
     private float totCommission;
-    private int numBuy;
-    private int numSell;
     private float pl;
     private float plPercent;
     private int numPointsScanned;
@@ -79,14 +76,6 @@ public class SimulationModel {
         this.initialAmount = initialAmount;
     }
 
-    public int getLeverage() {
-        return leverage;
-    }
-
-    public void setLeverage(int leverage) {
-        this.leverage = leverage;
-    }
-
     public float getAmplitude() {
         return amplitude;
     }
@@ -125,22 +114,6 @@ public class SimulationModel {
 
     public void setTotCommission(float totCommission) {
         this.totCommission = totCommission;
-    }
-
-    public int getNumBuy() {
-        return numBuy;
-    }
-
-    public void setNumBuy(int numBuy) {
-        this.numBuy = numBuy;
-    }
-
-    public int getNumSell() {
-        return numSell;
-    }
-
-    public void setNumSell(int numSell) {
-        this.numSell = numSell;
     }
 
     public float getPl() {

@@ -21,6 +21,7 @@ public class SimulationItemModel {
     private float currPrice;
     private float deltaAmpl;
     private float currValue;
+    private float pl;
 
     public int getId() {
         return id;
@@ -92,5 +93,13 @@ public class SimulationItemModel {
 
     public void setCurrValue(float currValue) {
         this.currValue = currValue;
+    }
+
+    public float getPl() {
+        return pl;
+    }
+
+    public void setPl(float pl) {
+        this.pl = pl;
     }
 }
