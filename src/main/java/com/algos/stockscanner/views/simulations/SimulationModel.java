@@ -16,6 +16,7 @@ public class SimulationModel {
     private LocalDate endTs;
     private float initialAmount;
     private float amplitude;
+    private int daysLookback;
     private float finalAmount;
     private String terminationCode;
     private float totSpread;
@@ -82,6 +83,14 @@ public class SimulationModel {
 
     public void setAmplitude(float amplitude) {
         this.amplitude = amplitude;
+    }
+
+    public int getDaysLookback() {
+        return daysLookback;
+    }
+
+    public void setDaysLookback(int daysLookback) {
+        this.daysLookback = daysLookback;
     }
 
     public float getFinalAmount() {

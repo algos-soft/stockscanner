@@ -192,6 +192,12 @@ public class SimulationsView extends Div {
         col.setSortProperty("amplitude");
         col.setResizable(true);
 
+        // days lookback
+        col=grid.addColumn(SimulationModel::getDaysLookback);
+        col.setHeader("days back");
+        col.setSortProperty("daysLookback");
+        col.setResizable(true);
+
         // final amount
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getFinalAmount, "%,.2f",Locale.getDefault()));
         col.setHeader("final amt");
