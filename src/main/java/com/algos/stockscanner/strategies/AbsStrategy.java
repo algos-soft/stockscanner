@@ -45,6 +45,7 @@ public abstract class AbsStrategy implements Strategy {
 
     float openPrice;    // opened at this price
 
+    float currentAmount;
 
     @Autowired
     IndexUnitService indexUnitService;
@@ -68,8 +69,6 @@ public abstract class AbsStrategy implements Strategy {
 
     public Simulation execute() throws Exception {
 
-        //generator = generatorService.get(params.getGeneratorId()).get();
-
         // create a new Simulation
         simulation = new Simulation();
         simulation.setIndex(params.getIndex());
@@ -80,6 +79,8 @@ public abstract class AbsStrategy implements Strategy {
         simulation.setTp(params.getTp());
         simulation.setAmplitude(params.getAmplitude());
         simulation.setDaysLookback(params.getDaysLookback());
+
+        currentAmount=params.getInitialAmount();
 
         // you can exit this cycle only with a termination code assigned
         do {
@@ -212,7 +213,7 @@ public abstract class AbsStrategy implements Strategy {
                 if(!posOpen){
                     throw new Exception("Position is already closed, you can't close it again");
                 }
-                closePosition(decision.getReason());
+                closePosition();
                 posOpen =false;
                 break;
 
@@ -266,11 +267,25 @@ public abstract class AbsStrategy implements Strategy {
 
     }
 
-    private void closePosition(Reasons reason){
+    private void closePosition(){
+
+        // update current amount
+        float deltaPricePercent = strategyService.deltaPercent(openPrice, unit.getClose());
+        float deltaValue = currentAmount*deltaPricePercent/100;
+        switch (posType){
+            case BUY:
+                currentAmount=currentAmount+deltaValue;
+                break;
+            case SELL:
+                currentAmount=currentAmount-deltaValue;
+                break;
+        }
+
         posOpen =false;
         posType=null;
         openPrice=0;
     }
+
 
 
     /**

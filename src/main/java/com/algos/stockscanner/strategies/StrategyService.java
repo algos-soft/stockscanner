@@ -22,6 +22,13 @@ public class StrategyService {
         return deltaPercent;
     }
 
+    /**
+     * return the value with the given percentage applied
+     */
+    public float applyPercent(float value, float percent){
+        return value+(value/100*percent);
+    }
+
 
     public SimulationItem buildSimulationItem(Simulation simulation, Decision decision, IndexUnit unit){
 
