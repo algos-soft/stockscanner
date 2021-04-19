@@ -80,9 +80,9 @@ public class DataGenerator {
                 generateGenerators();
             }
 
-            if (simulationService.count() == 0) {
-                generateSimulations();
-            }
+//            if (simulationService.count() == 0) {
+//                generateSimulations();
+//            }
 
             logger.info("Generated demo data");
         };
@@ -215,7 +215,6 @@ public class DataGenerator {
         sim.setEndTsLDT(sim.getStartTsLDT().plusDays(30));
         sim.setAmplitude(10f);
         sim.setInitialAmount(500f);
-        sim.setFinalAmount(550f);
         simulationService.update(sim);
 
         sim = new Simulation();
@@ -225,7 +224,6 @@ public class DataGenerator {
         sim.setEndTsLDT(sim.getStartTsLDT().plusDays(20));
         sim.setAmplitude(10f);
         sim.setInitialAmount(300f);
-        sim.setFinalAmount(350f);
         simulationService.update(sim);
 
         sim = new Simulation();
@@ -235,7 +233,6 @@ public class DataGenerator {
         sim.setEndTsLDT(sim.getStartTsLDT().plusDays(45));
         sim.setAmplitude(25f);
         sim.setInitialAmount(600f);
-        sim.setFinalAmount(550f);
         simulationService.update(sim);
 
         sim = new Simulation();
@@ -245,7 +242,6 @@ public class DataGenerator {
         sim.setEndTsLDT(sim.getStartTsLDT().plusDays(20));
         sim.setAmplitude(15f);
         sim.setInitialAmount(1000f);
-        sim.setFinalAmount(1200f);
         simulationService.update(sim);
 
         sim = new Simulation();
@@ -255,7 +251,6 @@ public class DataGenerator {
         sim.setEndTsLDT(sim.getStartTsLDT().plusDays(40));
         sim.setAmplitude(10f);
         sim.setInitialAmount(1800f);
-        sim.setFinalAmount(1600f);
         simulationService.update(sim);
 
 

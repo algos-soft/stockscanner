@@ -12,6 +12,9 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -20,8 +23,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -38,7 +40,7 @@ import java.util.Optional;
 @PageTitle("Simulations")
 @CssImport(value = "./views/simulations/simulations-view.css")
 @CssImport(value = "./views/simulations/simulations-grid.css", themeFor = "vaadin-grid")
-public class SimulationsView extends Div {
+public class SimulationsView extends Div implements HasUrlParameter<String>, AfterNavigationObserver {
 
     private Grid<SimulationModel> grid;
 
@@ -54,6 +56,9 @@ public class SimulationsView extends Div {
     private Integer filtNumGen;
     private String filtSymbol;
     private Example<Simulation> filter;
+    private Integer generatorNumParam;
+
+    private IntegerField generatorNumberFld;
 
     public SimulationsView() {
     }
@@ -91,19 +96,34 @@ public class SimulationsView extends Div {
     }
 
 
+
+    @Override
+    public void setParameter(BeforeEvent event,  @OptionalParameter String parameter) {
+        if(parameter!=null){
+            generatorNumParam =Integer.parseInt(parameter);
+        }
+    }
+
+    @Override
+    public void afterNavigation(  AfterNavigationEvent event) {
+        // filter by generator passed as param
+        if(generatorNumParam!=null){
+            generatorNumberFld.setValue(generatorNumParam);
+        }
+    }
+
+
+
     private void customizeHeader(HorizontalLayout header) {
     }
 
 
     private Component createFilterPanel(){
 
-        IntegerField generatorNumberFld = new IntegerField("#gen ");
-        generatorNumberFld.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<IntegerField, Integer>>() {
-            @Override
-            public void valueChanged(AbstractField.ComponentValueChangeEvent<IntegerField, Integer> event) {
-                filtNumGen=event.getValue();
-                filter();
-            }
+        generatorNumberFld = new IntegerField("#gen ");
+        generatorNumberFld.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<IntegerField, Integer>>) event -> {
+            filtNumGen=event.getValue();
+            filter();
         });
 
 
@@ -149,35 +169,32 @@ public class SimulationsView extends Div {
         // data button
         col = grid.addComponentColumn(item -> createDataButton(grid, item));
         col.setHeader("details");
-        col.setWidth("8em");
 
         // generator number
         col=grid.addColumn(SimulationModel::getNumGenerator);
         col.setHeader("#gen");
         col.setSortProperty("generator.number");
-        col.setWidth("7em");
+        col.setWidth("5em");
         col.setResizable(true);
 
         // symbol
-        col=grid.addColumn(SimulationModel::getSymbol);
+        col = grid.addComponentColumn(item -> createSymbolComponent(grid, item));
         col.setHeader("sym");
         col.setSortProperty("index.symbol");
-        col.setWidth("6em");
         col.setResizable(true);
-
 
         // start date
         col=grid.addColumn(new LocalDateRenderer<>(SimulationModel::getStartTs,DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
         col.setHeader("start");
         col.setSortProperty("startTs");
-        col.setWidth("8em");
+        col.setWidth("6em");
         col.setResizable(true);
 
         // end date
         col=grid.addColumn(new LocalDateRenderer<>(SimulationModel::getEndTs,DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
         col.setHeader("end");
         col.setSortProperty("endTs");
-        col.setWidth("8em");
+        col.setWidth("6em");
         col.setResizable(true);
 
         // initial amount
@@ -189,78 +206,84 @@ public class SimulationsView extends Div {
         // amplitude
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getAmplitude, "%,.2f",Locale.getDefault()));
         col.setHeader("amp");
+        col.setWidth("5em");
         col.setSortProperty("amplitude");
         col.setResizable(true);
 
         // days lookback
         col=grid.addColumn(SimulationModel::getDaysLookback);
         col.setHeader("days back");
+        col.setWidth("5em");
         col.setSortProperty("daysLookback");
-        col.setResizable(true);
-
-        // final amount
-        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getFinalAmount, "%,.2f",Locale.getDefault()));
-        col.setHeader("final amt");
-        col.setSortProperty("finalAmount");
         col.setResizable(true);
 
         // termination
         col=grid.addColumn(SimulationModel::getTerminationCode);
         col.setHeader("term");
+        col.setWidth("11em");
         col.setSortProperty("terminationCode");
         col.setResizable(true);
 
         // P/L
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getPl, "%,.2f",Locale.getDefault()));
         col.setHeader("P/L");
+        col.setWidth("5em");
         col.setSortProperty("pl");
         col.setResizable(true);
 
         // P/L percent
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getPlPercent, "%,.2f%%",Locale.getDefault()));
         col.setHeader("P/L%");
+        col.setWidth("5em");
         col.setSortProperty("plPercent");
         col.setResizable(true);
 
         // tot spread
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getTotSpread, "%,.2f",Locale.getDefault()));
         col.setHeader("spread");
+        col.setWidth("5em");
         col.setSortProperty("totSpread");
         col.setResizable(true);
 
         // tot commission
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getTotCommission, "%,.2f",Locale.getDefault()));
         col.setHeader("commission");
+        col.setWidth("5em");
         col.setSortProperty("totCommission");
         col.setResizable(true);
 
         // num points scanned
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsScanned, "%,d",Locale.getDefault()));
         col.setHeader("pts scanned");
+        col.setWidth("5em");
         col.setSortProperty("numPointsScanned");
         col.setResizable(true);
 
         // num points opened
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsHold, "%,d",Locale.getDefault()));
         col.setHeader("pts in open");
+        col.setWidth("5em");
         col.setSortProperty("numPointsHold");
         col.setResizable(true);
 
         // num points closed
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsWait, "%,d",Locale.getDefault()));
         col.setHeader("pts in close");
+        col.setWidth("5em");
         col.setSortProperty("numPointsWait");
         col.setResizable(true);
 
-        // min points hold
+        // min series open
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getMinPointsHold, "%,d",Locale.getDefault()));
         col.setHeader("min series open");
+        col.setWidth("5em");
         col.setSortProperty("minPointsHold");
         col.setResizable(true);
 
-        // max points hold
+        // max series open
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getMaxPointsHold, "%,d",Locale.getDefault()));
         col.setHeader("max series open");
+        col.setWidth("5em");
         col.setSortProperty("maxPointsHold");
         col.setResizable(true);
 
@@ -279,6 +302,19 @@ public class SimulationsView extends Div {
         });
         button.addClassName("databutton");
         return button;
+    }
+
+
+    private Component createSymbolComponent(Grid grid, SimulationModel item){
+        Image img = item.getImage();
+        img.setWidth("1.4em");
+        img.getStyle().set("border-radius","10%");
+        Span name = new Span(item.getSymbol());
+        name.getStyle().set("margin-left","0.4em");
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setAlignItems(FlexComponent.Alignment.CENTER);
+        layout.add(img, name);
+        return layout;
     }
 
 

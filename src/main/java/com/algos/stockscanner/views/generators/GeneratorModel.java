@@ -17,8 +17,8 @@ public class GeneratorModel {
     private int days;
     private int spans;
     private int amount;
-    private int stopLoss;
-    private int takeProfit;
+    private int stopLoss; // of a single span, in percent
+    private int takeProfit; // of a single span, in percent
     private boolean durationFixed;
 
     private int amplitude;

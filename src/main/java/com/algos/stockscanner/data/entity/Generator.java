@@ -34,8 +34,8 @@ public class Generator extends AbstractEntity {
     private Integer days;   // number of days
     private Integer spans;   // number of times to repeat the simulation, starting from the end of the previous simulation
     private Integer amount;  // amount invested
-    private Integer stopLoss; // of the whole operation, not of the single shot
-    private Integer takeProfit; // of the whole operation, not of the single shot
+    private Integer stopLoss; // applied to each open/close cycle inside a span, in percent
+    private Integer takeProfit;  // applied to each open/close cycle inside a span, in percent
 
     // permutable properties
 
@@ -44,12 +44,6 @@ public class Generator extends AbstractEntity {
     private Integer amplitudeMin;    // min amplitude, percent
     private Integer amplitudeMax;    // max amplitude, percent
     private Integer amplitudeSteps;    // how many steps
-
-//    private Float balancing;
-//    private Boolean permutateBalancing;
-//    private Float balancingMin;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
-//    private Float balancingMax;  // 0 = 50% up /50% down, 1 = 100% up, -1=100% down
-//    private Integer balancingSteps;  // how many steps
 
     private Integer avgDays;    // number of days taken in account to calculate the starting average value
     private Boolean avgDaysPermutate;

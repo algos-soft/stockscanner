@@ -8,6 +8,7 @@ import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.data.service.SimulationService;
 import com.algos.stockscanner.runner.GeneratorRunner;
 import com.algos.stockscanner.runner.RunnerService;
+import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -410,6 +411,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
         // show results
         account.getSubMenu().addItem("Show results", i -> {
+            UI.getCurrent().navigate(SimulationsView.class, ""+model.getNumber());
         });
 
         // edit an item

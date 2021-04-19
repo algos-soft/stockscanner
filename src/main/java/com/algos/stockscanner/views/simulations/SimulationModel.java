@@ -1,5 +1,7 @@
 package com.algos.stockscanner.views.simulations;
 
+import com.vaadin.flow.component.html.Image;
+
 import java.time.LocalDate;
 
 /***
@@ -17,7 +19,6 @@ public class SimulationModel {
     private float initialAmount;
     private float amplitude;
     private int daysLookback;
-    private float finalAmount;
     private String terminationCode;
     private float totSpread;
     private float totCommission;
@@ -28,6 +29,8 @@ public class SimulationModel {
     private int numPointsWait;
     private int minPointsHold;
     private int maxPointsHold;
+    private Image image;
+
 
     public int getId() {
         return id;
@@ -91,14 +94,6 @@ public class SimulationModel {
 
     public void setDaysLookback(int daysLookback) {
         this.daysLookback = daysLookback;
-    }
-
-    public float getFinalAmount() {
-        return finalAmount;
-    }
-
-    public void setFinalAmount(float finalAmount) {
-        this.finalAmount = finalAmount;
     }
 
     public String getTerminationCode() {
@@ -179,5 +174,13 @@ public class SimulationModel {
 
     public void setMaxPointsHold(int maxPointsHold) {
         this.maxPointsHold = maxPointsHold;
+    }
+
+    public Image getImage() {
+        return image;
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
     }
 }

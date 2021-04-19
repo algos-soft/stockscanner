@@ -16,9 +16,9 @@ public class StrategyParams {
 
     float initialAmount;
 
-    float sl;
+    int sl;
 
-    float tp;
+    int tp;
 
     private float amplitude;
 
@@ -64,19 +64,19 @@ public class StrategyParams {
         this.initialAmount = initialAmount;
     }
 
-    public float getSl() {
+    public int getSl() {
         return sl;
     }
 
-    public void setSl(float sl) {
+    public void setSl(int sl) {
         this.sl = sl;
     }
 
-    public float getTp() {
+    public int getTp() {
         return tp;
     }
 
-    public void setTp(float tp) {
+    public void setTp(int tp) {
         this.tp = tp;
     }
 

@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -167,9 +168,17 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                 int amplitude = permutation.get(0);
                 int lookback = permutation.get(1);
 
+                LocalDate startDate=generator.getStartDateLD();
+                Simulation simulation=null;
+
                 for (int nspan = 0; nspan < numSpans; nspan++) {
                     if (abort) {
                         break;
+                    }
+
+                    // start new span the day after the previous span ended
+                    if(nspan>0){
+                        startDate=simulation.getEndTsLDT().toLocalDate().plusDays(1);
                     }
 
                     // update progress
@@ -179,18 +188,25 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     // prepare params
                     StrategyParams params = new StrategyParams();
                     params.setIndex(generator.getIndex());
-                    params.setStartDate(generator.getStartDateLD());
-                    params.setEndDate(generator.getStartDateLD().plusDays(generator.getDays() - 1));
+                    params.setStartDate(startDate);
+                    params.setFixedDays(generator.getFixedDays());
+                    LocalDate endDate=params.getStartDate().plusDays(generator.getDays() - 1);
+                    if(generator.getFixedDays()){   // Fixd length
+                        params.setEndDate(endDate);
+                    }else{  // Variable length
+                        if(generator.getDays()>0){
+                            params.setEndDate(endDate);
+                        }
+                    }
                     params.setInitialAmount(generator.getAmount());
                     params.setSl(generator.getStopLoss());
                     params.setTp(generator.getTakeProfit());
-                    params.setFixedDays(generator.getFixedDays());
                     params.setAmplitude(amplitude);
                     params.setDaysLookback(lookback);
 
                     // run the strategy and retrieve a Simulation
                     strategy = context.getBean(SurferStrategy.class, params);
-                    Simulation simulation=strategy.execute();
+                    simulation=strategy.execute();
 
                     // assign the Simulation to the Generator and save
                     if(simulation!=null){

@@ -113,7 +113,7 @@ public class GeneratorDialog extends Dialog {
     @PostConstruct
     private void init() {
         setWidth("30em");
-        setHeight("40em");
+        setHeight("42em");
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
         add(buildContent());
@@ -240,10 +240,16 @@ public class GeneratorDialog extends Dialog {
 
         amountFld = new IntegerField("Amount");
         amountFld.setWidth("6em");
-        stopLossFld= new IntegerField("SL");
+
+        stopLossFld= new IntegerField("SL%");
         stopLossFld.setWidth("6em");
-        takeProfitFld= new IntegerField("TP");
+        stopLossFld.setHelperText("for each cycle");
+
+        takeProfitFld= new IntegerField("TP%");
         takeProfitFld.setWidth("6em");
+        takeProfitFld.setHelperText("for each cycle");
+        //takeProfitFld.getElement().setAttribute("tooltip", "for each cycle");
+
         FlexLayout amountsLayout = new FlexLayout();
         amountsLayout.getStyle().set("gap","1em");
         amountsLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);

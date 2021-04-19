@@ -26,13 +26,12 @@ public class Simulation extends AbstractEntity {
     private String startTs;  // timestamp of first point scanned
     private String endTs;  // timestamp of last point scanned
     private Float initialAmount;  // initial amount
-    private Float sl;
-    private Float tp;
+    private Integer sl;
+    private Integer tp;
     private Float amplitude;    // amplitude of the oscillation max/min, in percent
     private Integer daysLookback;    // number of days to lookback to determine the avg price
 
     // ---- consolidated data
-    private Float finalAmount;  // amount at the end of the simulation
     private String terminationCode; // why the simulation is terminated
     private Float totSpread;    // total amount of buy spreads paid
     private Float totCommission;    // total amount of commission paid
@@ -92,19 +91,19 @@ public class Simulation extends AbstractEntity {
         this.initialAmount = initialAmount;
     }
 
-    public Float getSl() {
+    public Integer getSl() {
         return sl;
     }
 
-    public void setSl(Float sl) {
+    public void setSl(Integer sl) {
         this.sl = sl;
     }
 
-    public Float getTp() {
+    public Integer getTp() {
         return tp;
     }
 
-    public void setTp(Float tp) {
+    public void setTp(Integer tp) {
         this.tp = tp;
     }
 
@@ -123,14 +122,6 @@ public class Simulation extends AbstractEntity {
 
     public void setDaysLookback(Integer daysLookback) {
         this.daysLookback = daysLookback;
-    }
-
-    public Float getFinalAmount() {
-        return finalAmount;
-    }
-
-    public void setFinalAmount(Float finalAmount) {
-        this.finalAmount = finalAmount;
     }
 
     public String getTerminationCode() {

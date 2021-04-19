@@ -5,6 +5,7 @@ import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.views.simulations.SimulationModel;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -123,7 +124,6 @@ public class SimulationService extends CrudService<Simulation, Integer> {
             model.setInitialAmount(utils.toPrimitive(entity.getInitialAmount()));
             model.setAmplitude(utils.toPrimitive(entity.getAmplitude()));
             model.setDaysLookback(utils.toPrimitive(entity.getDaysLookback()));
-            model.setFinalAmount(utils.toPrimitive(entity.getFinalAmount()));
             model.setTerminationCode(entity.getTerminationCode());
             model.setTotSpread(utils.toPrimitive(entity.getTotSpread()));
             model.setTotCommission(utils.toPrimitive(entity.getTotCommission()));
@@ -134,6 +134,11 @@ public class SimulationService extends CrudService<Simulation, Integer> {
             model.setNumPointsWait(utils.toPrimitive(entity.getNumPointsClosed()));
             model.setMinPointsHold(utils.toPrimitive(entity.getShortestPeriodOpen()));
             model.setMaxPointsHold(utils.toPrimitive(entity.getLongestPeriodOpen()));
+
+            byte[] imageData = entity.getIndex().getImage();
+            Image image = utils.byteArrayToImage(imageData);
+            model.setImage(image);
+
         }
 
     }

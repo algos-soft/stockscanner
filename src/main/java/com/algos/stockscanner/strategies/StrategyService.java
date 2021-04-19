@@ -58,22 +58,4 @@ public class StrategyService {
     }
 
 
-    public Reasons terminationToReason(Terminations term) {
-        Reasons reasons;
-        switch (term){
-            case ABORTED_BY_USER:
-                reasons=Reasons.ABORTED_BY_USER;
-                break;
-            case MAX_DAYS_REACHED:
-                reasons=Reasons.MAX_DAYS_REACHED;
-                break;
-            case NO_MORE_DATA:
-                reasons=Reasons.NO_MORE_DATA;
-                break;
-            default:
-                reasons=Reasons.UNKNOWN;
-                break;
-        }
-        return reasons;
-    }
 }

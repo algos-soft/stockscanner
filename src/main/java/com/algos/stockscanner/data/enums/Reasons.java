@@ -9,9 +9,12 @@ public enum Reasons {
     PRE_ALERT_BUY("PRE_ALERT_BUY"),
     IN_BOUNDS("IN_BOUNDS"),
 
+    // declare here equivalents of Terminations items, with same codes
     ABORTED_BY_USER("IN_BOUNDS"),
     MAX_DAYS_REACHED("MAX_DAYS_REACHED"),
     NO_MORE_DATA("NO_MORE_DATA"),
+    STOP_LOSS_REACHED ("STOP_LOSS_REACHED"),
+    TAKE_PROFIT_REACHED ("TAKE_PROFIT_REACHED"),
 
     UNKNOWN("UNKNOWN");
 

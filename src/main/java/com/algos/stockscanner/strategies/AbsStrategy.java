@@ -114,37 +114,22 @@ public abstract class AbsStrategy implements Strategy {
 
                 } else {
 
-                    // if we have an open position we must close it - we add an extra close line at the last timestamp
-                    if(posOpen){
-
-                        // reset to previous values, so everything behaves as in the previous line
-                        currValue=lastValue;
-                        unit=lastUnit;
-
-                        Reasons reason = strategyService.terminationToReason(term);
-                        Decision decision=new Decision(Actions.CLOSE, null, reason);
-                        DecisionInfo decisionInfo=new DecisionInfo();
-                        decisionInfo.setRefPrice(openPrice);
-                        decisionInfo.setCurrPrice(unit.getClose());
-                        decisionInfo.setDeltaAmpl(strategyService.deltaPercent(openPrice, unit.getClose()));
-                        decisionInfo.setTimestamp(unit.getDateTime());
-                        decision.setDecisionInfo(decisionInfo);
-
-                        closePosition(decisionInfo);
-
-                        SimulationItem item = strategyService.buildSimulationItem(simulation, decision, unit);
-                        simulation.getSimulationItems().add(item);
-
-                    }
 
                     termination=term;
+                    if(posOpen){
+                        forceCloseCurrentSimulation(termination);
+                    }
                     break;
 
                 }
 
 
             }else{
+
                 termination =Terminations.NO_MORE_DATA;
+                if(posOpen){
+                    forceCloseCurrentSimulation(termination);
+                }
                 break;
             }
 
@@ -156,6 +141,28 @@ public abstract class AbsStrategy implements Strategy {
         consolidate();
 
         return simulation;
+
+    }
+
+    // if we have an open position we must close it - we add an extra close line at the last timestamp
+    private void forceCloseCurrentSimulation(Terminations term){
+        // reset to previous values, so everything behaves as in the previous line
+        currValue=lastValue;
+        unit=lastUnit;
+
+        Reasons reason = Reasons.get(term.getCode());;
+        Decision decision=new Decision(Actions.CLOSE, null, reason);
+        DecisionInfo decisionInfo=new DecisionInfo();
+        decisionInfo.setRefPrice(openPrice);
+        decisionInfo.setCurrPrice(unit.getClose());
+        decisionInfo.setDeltaAmpl(strategyService.deltaPercent(openPrice, unit.getClose()));
+        decisionInfo.setTimestamp(unit.getDateTime());
+        decision.setDecisionInfo(decisionInfo);
+
+        closePosition(decisionInfo);
+
+        SimulationItem item = strategyService.buildSimulationItem(simulation, decision, unit);
+        simulation.getSimulationItems().add(item);
 
     }
 
@@ -367,8 +374,8 @@ public abstract class AbsStrategy implements Strategy {
         }else{
             simulation.setEndTsLDT(simulation.getStartTsLDT());
         }
-        simulation.setFinalAmount(currValue);
         simulation.setPl(totPl);
+        simulation.setPlPercent(strategyService.deltaPercent(simulation.getInitialAmount(), simulation.getInitialAmount()+totPl));
         simulation.setNumPointsTotal(totPoints);
         simulation.setNumPointsOpen(totPointsOpen);
         simulation.setNumPointsClosed(totPointsClosed);
