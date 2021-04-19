@@ -13,6 +13,8 @@ public class DecisionInfo {
 
     private Float deltaAmpl;
 
+    private Float spreadAmt;
+
     private Float currValue;
 
     private float pl;
@@ -49,6 +51,14 @@ public class DecisionInfo {
         this.deltaAmpl = deltaAmpl;
     }
 
+    public Float getSpreadAmt() {
+        return spreadAmt;
+    }
+
+    public void setSpreadAmt(Float spreadAmt) {
+        this.spreadAmt = spreadAmt;
+    }
+
     public Float getCurrValue() {
         return currValue;
     }
@@ -73,6 +83,7 @@ public class DecisionInfo {
                 ", refPrice=" + refPrice +
                 ", currPrice=" + currPrice +
                 ", deltaAmpl=" + deltaAmpl +
+                ", spreadAmt=" + spreadAmt +
                 ", currValue=" + currValue +
                 ", pl=" + pl +
                 '}';

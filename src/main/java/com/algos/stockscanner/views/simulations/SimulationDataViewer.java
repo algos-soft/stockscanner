@@ -108,56 +108,67 @@ public class SimulationDataViewer extends VerticalLayout {
         // timestamp
         col=grid.addColumn(new LocalDateTimeRenderer<>(SimulationItemModel::getTimestamp, DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
         col.setHeader("timestamp");
-        //col.setWidth("3em");
+        col.setWidth("5em");
         col.setResizable(true);
 
         // action
         col=grid.addColumn(SimulationItemModel::getAction);
         col.setHeader("action");
-        //col.setWidth("3em");
+        col.setWidth("4em");
         col.setResizable(true);
 
         // action type
         col=grid.addColumn(SimulationItemModel::getActionType);
         col.setHeader("type");
-        //col.setWidth("7em");
+        col.setWidth("4em");
         col.setResizable(true);
 
         // reason
         col=grid.addColumn(SimulationItemModel::getReason);
         col.setHeader("reason");
-        //col.setWidth("7em");
-        //col.setAutoWidth(true);
+        col.setWidth("12em");
         col.setResizable(true);
 
         // ref price
         col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getRefPrice, "%,.2f",Locale.getDefault()));
         col.setHeader("ref price");
-        //col.setWidth("7em");
+        col.setWidth("4em");
         col.setResizable(true);
 
         // curr price
         col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getCurrPrice, "%,.2f",Locale.getDefault()));
         col.setHeader("curr price");
-        //col.setWidth("7em");
+        col.setWidth("4em");
         col.setResizable(true);
 
         // delta ampl
         col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getDeltaAmpl, "%,.2f",Locale.getDefault()));
         col.setHeader("delta%");
-        //col.setWidth("7em");
+        col.setWidth("4em");
+        col.setResizable(true);
+
+        // spread amount
+        col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getSpreadAmt, "%,.2f",Locale.getDefault()));
+        col.setHeader("spread");
+        col.setWidth("4em");
+        col.setResizable(true);
+
+        // commission amount
+        col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getCommissionAmt, "%,.2f",Locale.getDefault()));
+        col.setHeader("commission");
+        col.setWidth("4em");
         col.setResizable(true);
 
         // curr value
         col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getCurrValue, "%,.2f",Locale.getDefault()));
         col.setHeader("value");
-        //col.setWidth("7em");
+        col.setWidth("4em");
         col.setResizable(true);
 
         // P/L
         col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getPl, "%,.2f",Locale.getDefault()));
         col.setHeader("P/L");
-        //col.setWidth("7em");
+        col.setWidth("4em");
         col.setResizable(true);
 
 

@@ -9,14 +9,12 @@ import com.algos.stockscanner.services.MarketService;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
@@ -441,7 +439,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             entity.setCategory(category.getCode());
         }
 
-        entity.setBuySpreadPercent(model.getBuySpreadPercent());
+        entity.setSpreadPercent(model.getSpreadPercent());
         entity.setOvnBuyDay(model.getOvnBuyDay());
         entity.setOvnBuyWe(model.getOvnBuyWe());
         entity.setOvnSellDay(model.getOvnSellDay());

@@ -30,6 +30,14 @@ public class StrategyService {
         return value+(value/100*percent);
     }
 
+    /**
+     * return the percentage of a value
+     */
+    public float calcPercent(float value, float percent){
+        return value/100*percent;
+    }
+
+
 
     public SimulationItem buildSimulationItem(Simulation simulation, Decision decision, IndexUnit unit){
 
@@ -51,6 +59,7 @@ public class StrategyService {
             item.setCurrPrice(info.getCurrPrice());
             item.setDeltaAmpl(info.getDeltaAmpl());
             item.setPl(info.getPl());
+            item.setSpreadAmt(info.getSpreadAmt());
         }
         item.setCurrValue(info.getCurrValue());
 

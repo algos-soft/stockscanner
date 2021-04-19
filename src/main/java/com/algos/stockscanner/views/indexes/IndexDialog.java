@@ -1,6 +1,5 @@
 package com.algos.stockscanner.views.indexes;
 
-import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.enums.IndexCategories;
 import com.vaadin.flow.component.*;
@@ -12,6 +11,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import org.claspina.confirmdialog.ButtonOption;
@@ -20,12 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.io.Resource;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 
 /**
@@ -43,7 +42,7 @@ public class IndexDialog extends Dialog {
     private TextField symbolFld;
     private TextField nameFld;
     private Select<IndexCategories> categoryFld;
-    private NumberField buySpreadFld;
+    private BigDecimalField buySpreadFld;
 
     private NumberField ovnSellDayFld;
     private NumberField ovnSellWEFld;
@@ -188,7 +187,7 @@ public class IndexDialog extends Dialog {
             }
         });
 
-        buySpreadFld = new NumberField();
+        buySpreadFld = new BigDecimalField();
         buySpreadFld.setLabel("Buy spread %");
 
         Div divSell = new Div();
@@ -268,11 +267,11 @@ public class IndexDialog extends Dialog {
         model.setSymbol(symbolFld.getValue());
         model.setName(nameFld.getValue());
         model.setCategory(categoryFld.getValue());
-        model.setBuySpreadPercent(getDouble(buySpreadFld));
-        model.setOvnSellDay(getDouble(ovnSellDayFld));
-        model.setOvnSellWe(getDouble(ovnSellWEFld));
-        model.setOvnBuyDay(getDouble(ovnBuyDayFld));
-        model.setOvnBuyWe(getDouble(ovnBuyWEFld));
+        model.setSpreadPercent(utils.toPrimitiveFloat(buySpreadFld.getValue()));
+        model.setOvnSellDay(getFloat(ovnSellDayFld));
+        model.setOvnSellWe(getFloat(ovnSellWEFld));
+        model.setOvnBuyDay(getFloat(ovnBuyDayFld));
+        model.setOvnBuyWe(getFloat(ovnBuyWEFld));
         return model;
     }
 
@@ -283,19 +282,25 @@ public class IndexDialog extends Dialog {
         symbolFld.setValue(model.getSymbol());
         nameFld.setValue(model.getName());
         categoryFld.setValue(model.getCategory());
-        buySpreadFld.setValue(model.getBuySpreadPercent());
-        ovnSellDayFld.setValue(model.getOvnSellDay());
-        ovnSellWEFld.setValue(model.getOvnSellWe());
-        ovnBuyDayFld.setValue(model.getOvnBuyDay());
-        ovnBuyWEFld.setValue(model.getOvnBuyWe());
+        buySpreadFld.setValue(getBigDecimal(model.getSpreadPercent()));
+        ovnSellDayFld.setValue(new Double(model.getOvnSellDay()));
+        ovnSellWEFld.setValue(new Double(model.getOvnSellWe()));
+        ovnBuyDayFld.setValue(new Double(model.getOvnBuyDay()));
+        ovnBuyWEFld.setValue(new Double(model.getOvnBuyWe()));
     }
 
 
-    private Double getDouble(NumberField field){
-        Double d = field.getValue();
+    private Float getFloat(NumberField field){
+        Double d=field.getValue();
         if(d!=null){
-            return d;
+            return d.floatValue();
         }
-        return 0d;
+        return 0f;
     }
+
+    private BigDecimal getBigDecimal(float f){
+        return new BigDecimal(f).round(new MathContext(2, RoundingMode.HALF_UP));
+    }
+
+
 }

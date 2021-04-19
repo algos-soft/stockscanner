@@ -36,6 +36,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -164,6 +167,15 @@ public class Utils {
             return false;
         }
     }
+
+    public float toPrimitiveFloat(BigDecimal wrapper){
+        if(wrapper!=null){
+            return wrapper.floatValue();
+        }else{
+            return 0;
+        }
+    }
+
 
 
     public byte[] getBytesFromUrl(String url) throws IOException {

@@ -186,8 +186,9 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     setProgress(numPerm * numSpans, s, null);
 
                     // prepare params
+                    MarketIndex index=generator.getIndex();
                     StrategyParams params = new StrategyParams();
-                    params.setIndex(generator.getIndex());
+                    params.setIndex(index);
                     params.setStartDate(startDate);
                     params.setFixedDays(generator.getFixedDays());
                     LocalDate endDate=params.getStartDate().plusDays(generator.getDays() - 1);
@@ -198,10 +199,11 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                             params.setEndDate(endDate);
                         }
                     }
-                    params.setInitialAmount(generator.getAmount());
-                    params.setSl(generator.getStopLoss());
-                    params.setTp(generator.getTakeProfit());
+                    params.setInitialAmount(utils.toPrimitive(generator.getAmount()));
+                    params.setSl(utils.toPrimitive(generator.getStopLoss()));
+                    params.setTp(utils.toPrimitive(generator.getTakeProfit()));
                     params.setAmplitude(amplitude);
+                    params.setSpreadPercent(utils.toPrimitive(index.getSpreadPercent()));
                     params.setDaysLookback(lookback);
 
                     // run the strategy and retrieve a Simulation

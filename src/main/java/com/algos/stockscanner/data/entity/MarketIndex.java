@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,11 +21,11 @@ public class MarketIndex extends AbstractEntity {
     private String symbol;
     private String name;
     private String category;
-    private Double buySpreadPercent;
-    private Double ovnSellDay;
-    private Double ovnSellWe;
-    private Double ovnBuyDay;
-    private Double ovnBuyWe;
+    private Float spreadPercent;
+    private Float ovnSellDay;
+    private Float ovnSellWe;
+    private Float ovnBuyDay;
+    private Float ovnBuyWe;
 
 
     private String unitsFrom;
@@ -79,43 +78,43 @@ public class MarketIndex extends AbstractEntity {
         this.category = category;
     }
 
-    public Double getBuySpreadPercent() {
-        return buySpreadPercent;
+    public Float getSpreadPercent() {
+        return spreadPercent;
     }
 
-    public void setBuySpreadPercent(Double buySpreadPercent) {
-        this.buySpreadPercent = buySpreadPercent;
+    public void setSpreadPercent(Float spreadPercent) {
+        this.spreadPercent = spreadPercent;
     }
 
-    public Double getOvnSellDay() {
+    public Float getOvnSellDay() {
         return ovnSellDay;
     }
 
-    public void setOvnSellDay(Double ovnSellDay) {
+    public void setOvnSellDay(Float ovnSellDay) {
         this.ovnSellDay = ovnSellDay;
     }
 
-    public Double getOvnSellWe() {
+    public Float getOvnSellWe() {
         return ovnSellWe;
     }
 
-    public void setOvnSellWe(Double ovnSellWe) {
+    public void setOvnSellWe(Float ovnSellWe) {
         this.ovnSellWe = ovnSellWe;
     }
 
-    public Double getOvnBuyDay() {
+    public Float getOvnBuyDay() {
         return ovnBuyDay;
     }
 
-    public void setOvnBuyDay(Double ovnBuyDay) {
+    public void setOvnBuyDay(Float ovnBuyDay) {
         this.ovnBuyDay = ovnBuyDay;
     }
 
-    public Double getOvnBuyWe() {
+    public Float getOvnBuyWe() {
         return ovnBuyWe;
     }
 
-    public void setOvnBuyWe(Double ovnBuyWe) {
+    public void setOvnBuyWe(Float ovnBuyWe) {
         this.ovnBuyWe = ovnBuyWe;
     }
 

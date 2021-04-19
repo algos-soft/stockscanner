@@ -20,6 +20,8 @@ public class SimulationItemModel {
     private float refPrice;
     private float currPrice;
     private float deltaAmpl;
+    private float spreadAmt;
+    private float commissionAmt;
     private float currValue;
     private float pl;
 
@@ -85,6 +87,22 @@ public class SimulationItemModel {
 
     public void setDeltaAmpl(float deltaAmpl) {
         this.deltaAmpl = deltaAmpl;
+    }
+
+    public float getSpreadAmt() {
+        return spreadAmt;
+    }
+
+    public void setSpreadAmt(float spreadAmt) {
+        this.spreadAmt = spreadAmt;
+    }
+
+    public float getCommissionAmt() {
+        return commissionAmt;
+    }
+
+    public void setCommissionAmt(float commissionAmt) {
+        this.commissionAmt = commissionAmt;
     }
 
     public float getCurrValue() {

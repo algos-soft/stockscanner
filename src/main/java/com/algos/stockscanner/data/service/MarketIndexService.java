@@ -106,7 +106,7 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         model.setImage(utils.byteArrayToImage(entity.getImage()));
         model.setSymbol(entity.getSymbol());
 
-        model.setBuySpreadPercent(utils.toPrimitive(entity.getBuySpreadPercent()));
+        model.setSpreadPercent(utils.toPrimitive(entity.getSpreadPercent()));
         model.setOvnBuyDay(utils.toPrimitive(entity.getOvnBuyDay()));
         model.setOvnBuyWe(utils.toPrimitive(entity.getOvnBuyWe()));
         model.setOvnSellDay(utils.toPrimitive(entity.getOvnSellDay()));

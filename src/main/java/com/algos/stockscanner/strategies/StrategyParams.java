@@ -22,6 +22,8 @@ public class StrategyParams {
 
     private float amplitude;
 
+    private float spreadPercent;
+
     private int daysLookback;
 
     public MarketIndex getIndex() {
@@ -86,6 +88,14 @@ public class StrategyParams {
 
     public void setAmplitude(float amplitude) {
         this.amplitude = amplitude;
+    }
+
+    public float getSpreadPercent() {
+        return spreadPercent;
+    }
+
+    public void setSpreadPercent(float spreadPercent) {
+        this.spreadPercent = spreadPercent;
     }
 
     public int getDaysLookback() {

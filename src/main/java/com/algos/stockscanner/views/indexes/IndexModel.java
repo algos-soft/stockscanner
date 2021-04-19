@@ -18,11 +18,11 @@ public class IndexModel {
     private String symbol;
     private String name;
     private IndexCategories category;
-    private double BuySpreadPercent;
-    private double ovnSellDay;
-    private double ovnSellWe;
-    private double ovnBuyDay;
-    private double ovnBuyWe;
+    private float spreadPercent;
+    private float ovnSellDay;
+    private float ovnSellWe;
+    private float ovnBuyDay;
+    private float ovnBuyWe;
 
     private LocalDate unitsFrom;
     private LocalDate unitsTo;
@@ -72,43 +72,43 @@ public class IndexModel {
         this.category = category;
     }
 
-    public double getBuySpreadPercent() {
-        return BuySpreadPercent;
+    public float getSpreadPercent() {
+        return spreadPercent;
     }
 
-    public void setBuySpreadPercent(double buySpreadPercent) {
-        BuySpreadPercent = buySpreadPercent;
+    public void setSpreadPercent(float spreadPercent) {
+        this.spreadPercent = spreadPercent;
     }
 
-    public double getOvnSellDay() {
+    public float getOvnSellDay() {
         return ovnSellDay;
     }
 
-    public void setOvnSellDay(double ovnSellDay) {
+    public void setOvnSellDay(float ovnSellDay) {
         this.ovnSellDay = ovnSellDay;
     }
 
-    public double getOvnSellWe() {
+    public float getOvnSellWe() {
         return ovnSellWe;
     }
 
-    public void setOvnSellWe(double ovnSellWe) {
+    public void setOvnSellWe(float ovnSellWe) {
         this.ovnSellWe = ovnSellWe;
     }
 
-    public double getOvnBuyDay() {
+    public float getOvnBuyDay() {
         return ovnBuyDay;
     }
 
-    public void setOvnBuyDay(double ovnBuyDay) {
+    public void setOvnBuyDay(float ovnBuyDay) {
         this.ovnBuyDay = ovnBuyDay;
     }
 
-    public double getOvnBuyWe() {
+    public float getOvnBuyWe() {
         return ovnBuyWe;
     }
 
-    public void setOvnBuyWe(double ovnBuyWe) {
+    public void setOvnBuyWe(float ovnBuyWe) {
         this.ovnBuyWe = ovnBuyWe;
     }
 

@@ -26,6 +26,10 @@ public class SimulationItem extends AbstractEntity {
 
     private Float deltaAmpl;
 
+    private Float spreadAmt;
+
+    private Float commissionAmt;
+
     private Float currValue;
 
     private Float pl;
@@ -93,6 +97,22 @@ public class SimulationItem extends AbstractEntity {
 
     public void setDeltaAmpl(Float deltaAmpl) {
         this.deltaAmpl = deltaAmpl;
+    }
+
+    public Float getSpreadAmt() {
+        return spreadAmt;
+    }
+
+    public void setSpreadAmt(Float spreadAmt) {
+        this.spreadAmt = spreadAmt;
+    }
+
+    public Float getCommissionAmt() {
+        return commissionAmt;
+    }
+
+    public void setCommissionAmt(Float commissionAmt) {
+        this.commissionAmt = commissionAmt;
     }
 
     public Float getCurrValue() {

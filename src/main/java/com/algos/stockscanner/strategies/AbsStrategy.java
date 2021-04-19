@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -113,7 +112,6 @@ public abstract class AbsStrategy implements Strategy {
                     simulation.getSimulationItems().add(item);
 
                 } else {
-
 
                     termination=term;
                     if(posOpen){
@@ -248,6 +246,11 @@ public abstract class AbsStrategy implements Strategy {
                 currValue=openValue;
                 lastValue=currValue;
 
+                // if buy, apply spread at open
+                if(posType==ActionTypes.BUY){
+                    applySpread(decision.getDecisionInfo());
+                }
+
                 updatePosition(decision.getDecisionInfo());
 
                 totPointsOpen++;
@@ -260,12 +263,12 @@ public abstract class AbsStrategy implements Strategy {
                     throw new Exception("Position is already closed, you can't close it again");
                 }
 
+                // if sell, apply spread at close
+                if(posType==ActionTypes.SELL){
+                    applySpread(decision.getDecisionInfo());
+                }
+
                 closePosition(decision.getDecisionInfo());
-//                updatePosition(decision.getDecisionInfo());
-//                float pl = currValue-openValue; // P/L of this spread
-//                decision.getDecisionInfo().setPl(pl);
-//                totPl+=pl;  // increment tot P/L of the simulation
-//                posOpen =false;
 
                 totPointsClosed++;
                 break;
@@ -286,7 +289,6 @@ public abstract class AbsStrategy implements Strategy {
 
         // build the simulation item
         SimulationItem simulationItem = strategyService.buildSimulationItem(simulation, decision, unit);
-//        simulation.getSimulationItems().add(item);
 
         // save last price - at the end!
         lastPrice=unit.getClose();
@@ -295,6 +297,12 @@ public abstract class AbsStrategy implements Strategy {
 
         return simulationItem;
 
+    }
+
+    private void applySpread(DecisionInfo decisionInfo){
+        float spreadAmt = -strategyService.calcPercent(currValue,params.getSpreadPercent());
+        currValue=currValue+spreadAmt;
+        decisionInfo.setSpreadAmt(spreadAmt);
     }
 
     private void closePosition(DecisionInfo decisionInfo){
