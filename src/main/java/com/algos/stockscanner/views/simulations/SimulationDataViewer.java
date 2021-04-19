@@ -17,6 +17,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
+import com.vaadin.flow.data.renderer.NumberRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -30,6 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Shows simulation data
@@ -115,7 +117,7 @@ public class SimulationDataViewer extends VerticalLayout {
         //col.setWidth("3em");
         col.setResizable(true);
 
-        // action
+        // action type
         col=grid.addColumn(SimulationItemModel::getActionType);
         col.setHeader("type");
         //col.setWidth("7em");
@@ -129,32 +131,32 @@ public class SimulationDataViewer extends VerticalLayout {
         col.setResizable(true);
 
         // ref price
-        col=grid.addColumn(SimulationItemModel::getRefPrice);
+        col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getRefPrice, "%,.2f",Locale.getDefault()));
         col.setHeader("ref price");
         //col.setWidth("7em");
         col.setResizable(true);
 
         // curr price
-        col=grid.addColumn(SimulationItemModel::getCurrPrice);
+        col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getCurrPrice, "%,.2f",Locale.getDefault()));
         col.setHeader("curr price");
         //col.setWidth("7em");
         col.setResizable(true);
 
         // delta ampl
-        col=grid.addColumn(SimulationItemModel::getDeltaAmpl);
+        col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getDeltaAmpl, "%,.2f",Locale.getDefault()));
         col.setHeader("delta%");
         //col.setWidth("7em");
         col.setResizable(true);
 
         // curr value
-        col=grid.addColumn(SimulationItemModel::getCurrValue);
+        col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getCurrValue, "%,.2f",Locale.getDefault()));
         col.setHeader("value");
         //col.setWidth("7em");
         col.setResizable(true);
 
         // P/L
-        col=grid.addColumn(SimulationItemModel::getPl);
-        col.setHeader("value");
+        col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getPl, "%,.2f",Locale.getDefault()));
+        col.setHeader("P/L");
         //col.setWidth("7em");
         col.setResizable(true);
 

@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class AbsStrategy implements Strategy {
@@ -370,11 +372,51 @@ public abstract class AbsStrategy implements Strategy {
         simulation.setNumPointsTotal(totPoints);
         simulation.setNumPointsOpen(totPointsOpen);
         simulation.setNumPointsClosed(totPointsClosed);
-//        simulation.setShortestPeriodOpen();
-//        simulation.setLongestPeriodOpen();
+
+        TwoIntegers result=calcShortLongPeriods();
+        simulation.setShortestPeriodOpen(result.getI1());
+        simulation.setLongestPeriodOpen(result.getI2());
     }
 
 
+    /**
+     * @return the shortest and the longest period open
+     */
+    private TwoIntegers calcShortLongPeriods(){
+        int shortest=0;
+        int longest=0;
+        ArrayList<Integer> lengths = new ArrayList();
+        List<SimulationItem> simulationItems=simulation.getSimulationItems();
+        int counter=0;
+        boolean open=false;
+        for(SimulationItem item : simulationItems){
+            Actions action = Actions.get(item.getAction());
+            switch (action){
+                case OPEN:
+                    open=true;
+                    counter=1;
+                    break;
+                case CLOSE:
+                    lengths.add(Integer.valueOf(counter));
+                    counter=0;
+                    open=false;
+                    break;
+                case STAY:
+                    if(open){
+                        counter++;
+                    }
+                    break;
+            }
+        }
+
+        if(lengths.size()>0){
+            Collections.sort(lengths);
+            shortest=lengths.get(0);
+            longest=lengths.get(lengths.size()-1);
+        }
+
+        return new TwoIntegers(shortest, longest);
+    }
 
 
     /**
@@ -385,6 +427,23 @@ public abstract class AbsStrategy implements Strategy {
         LocalDateTime t1 = t2.minusDays(simulation.getDaysLookback());
         float avg = indexUnitService.getAveragePrice(simulation.getIndex(), t1, t2);
         return avg;
+    }
+
+    class TwoIntegers{
+        public TwoIntegers(int i1, int i2) {
+            this.i1 = i1;
+            this.i2 = i2;
+        }
+        private int i1;
+        private int i2;
+
+        public int getI1() {
+            return i1;
+        }
+
+        public int getI2() {
+            return i2;
+        }
     }
 
 }

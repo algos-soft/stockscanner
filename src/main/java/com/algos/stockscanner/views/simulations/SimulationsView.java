@@ -240,27 +240,27 @@ public class SimulationsView extends Div {
         col.setSortProperty("numPointsScanned");
         col.setResizable(true);
 
-        // num points hold
+        // num points opened
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsHold, "%,d",Locale.getDefault()));
-        col.setHeader("pts hold");
+        col.setHeader("pts in open");
         col.setSortProperty("numPointsHold");
         col.setResizable(true);
 
-        // num points wait
+        // num points closed
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsWait, "%,d",Locale.getDefault()));
-        col.setHeader("pts wait");
+        col.setHeader("pts in close");
         col.setSortProperty("numPointsWait");
         col.setResizable(true);
 
         // min points hold
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getMinPointsHold, "%,d",Locale.getDefault()));
-        col.setHeader("min pts hold");
+        col.setHeader("min series open");
         col.setSortProperty("minPointsHold");
         col.setResizable(true);
 
         // max points hold
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getMaxPointsHold, "%,d",Locale.getDefault()));
-        col.setHeader("max pts hold");
+        col.setHeader("max series open");
         col.setSortProperty("maxPointsHold");
         col.setResizable(true);
 
