@@ -88,6 +88,8 @@ public class SurferStrategy extends AbsStrategy {
 
     /**
      * we have an open position of type BUY and we have to decide if closing it
+     *
+     * WARNING, CURRENT VARIABLES ARE NOT YET UPDATED
      */
     @Override
     public Decision decideIfCloseBuyPosition() {
@@ -130,6 +132,8 @@ public class SurferStrategy extends AbsStrategy {
 
     /**
      * we have an open position of type SELL and we have to decide if closing it
+     *
+     * WARNING, CURRENT VARIABLES ARE NOT YET UPDATED
      */
     @Override
     public Decision decideIfCloseSellPosition() {
@@ -174,6 +178,8 @@ public class SurferStrategy extends AbsStrategy {
      * Check SL/TP condition
      *
      * @return the reason (SL/TP) or null if not in SL/TP condition
+     *
+     * WARNING, CURRENT VARIABLES ARE NOT YET UPDATED
      */
     private Reasons checkSlTp() {
 
@@ -181,7 +187,8 @@ public class SurferStrategy extends AbsStrategy {
         Integer slPercent = params.getSl();
         if (slPercent != null && slPercent > 0) {
             if (posOpen) {
-                float deltaPercent = strategyService.deltaPercent(openValue, currValue);
+                float valueNow = lastValue + calcDeltaValue();
+                float deltaPercent = strategyService.deltaPercent(openValue, valueNow);
                 if (deltaPercent < -slPercent) {
                     return Reasons.STOP_LOSS_REACHED;
                 }
@@ -192,7 +199,8 @@ public class SurferStrategy extends AbsStrategy {
         Integer tpPercent = params.getTp();
         if (tpPercent != null && tpPercent > 0) {
             if (posOpen) {
-                float deltaPercent = strategyService.deltaPercent(openValue, currValue);
+                float valueNow = lastValue + calcDeltaValue();
+                float deltaPercent = strategyService.deltaPercent(openValue, valueNow);
                 if (deltaPercent > tpPercent) {
                     return Reasons.TAKE_PROFIT_REACHED;
                 }

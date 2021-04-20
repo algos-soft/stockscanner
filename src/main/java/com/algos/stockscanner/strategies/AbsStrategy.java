@@ -301,7 +301,7 @@ public abstract class AbsStrategy implements Strategy {
 
     private void applySpread(DecisionInfo decisionInfo){
         float spreadAmt = -strategyService.calcPercent(currValue,params.getSpreadPercent());
-        currValue=currValue+spreadAmt;
+        currValue+=spreadAmt;
         decisionInfo.setSpreadAmt(spreadAmt);
     }
 
@@ -316,6 +316,10 @@ public abstract class AbsStrategy implements Strategy {
 
     /**
      * Take a decision based on the current state
+     *
+     * Warning: current price / value stored in variables has not been
+     * calculated yet, and it refers to the previous unit.
+     * If you need to evaluate actual values, use the values from the current unit instead.
      */
     @Override
     public Decision takeDecision() {
@@ -355,6 +359,15 @@ public abstract class AbsStrategy implements Strategy {
      * update current amount
      */
     private void updatePosition(DecisionInfo decisionInfo){
+        currValue = currValue + calcDeltaValue();
+        decisionInfo.setCurrValue(currValue);
+    }
+
+
+    /**
+     * Calculate value change based on previous value, and previous and current price.
+     */
+    float calcDeltaValue(){
         float deltaPricePercent = strategyService.deltaPercent(lastPrice, unit.getClose());
         float deltaValue = lastValue*deltaPricePercent/100;
         float applyValue=0;
@@ -366,9 +379,7 @@ public abstract class AbsStrategy implements Strategy {
                 applyValue=-deltaValue;
                 break;
         }
-        currValue = currValue +applyValue;
-
-        decisionInfo.setCurrValue(currValue);
+        return applyValue;
     }
 
 
