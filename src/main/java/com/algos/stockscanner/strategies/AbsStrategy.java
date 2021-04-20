@@ -248,7 +248,8 @@ public abstract class AbsStrategy implements Strategy {
 
                 // if buy, apply spread at open
                 if(posType==ActionTypes.BUY){
-                    applySpread(decision.getDecisionInfo());
+                    float spreadValue = applySpread();
+                    decision.getDecisionInfo().setSpreadAmt(spreadValue);
                 }
 
                 updatePosition(decision.getDecisionInfo());
@@ -265,7 +266,8 @@ public abstract class AbsStrategy implements Strategy {
 
                 // if sell, apply spread at close
                 if(posType==ActionTypes.SELL){
-                    applySpread(decision.getDecisionInfo());
+                    float spreadValue = applySpread();
+                    decision.getDecisionInfo().setSpreadAmt(spreadValue);
                 }
 
                 closePosition(decision.getDecisionInfo());
@@ -299,10 +301,15 @@ public abstract class AbsStrategy implements Strategy {
 
     }
 
-    private void applySpread(DecisionInfo decisionInfo){
+    /**
+     * reduces the current value by the value of the spread
+     *
+     * @return the value of the spread
+     */
+    private float applySpread(){
         float spreadAmt = -strategyService.calcPercent(currValue,params.getSpreadPercent());
         currValue+=spreadAmt;
-        decisionInfo.setSpreadAmt(spreadAmt);
+        return spreadAmt;
     }
 
     private void closePosition(DecisionInfo decisionInfo){
@@ -381,6 +388,7 @@ public abstract class AbsStrategy implements Strategy {
         }
         return applyValue;
     }
+
 
 
     /**
