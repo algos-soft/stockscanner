@@ -7,6 +7,7 @@ public enum Reasons {
     STILL_GOING_DOWN("STILL_GOING_DOWN"),
     PRE_ALERT_SELL("PRE_ALERT_SELL"),
     PRE_ALERT_BUY("PRE_ALERT_BUY"),
+    PRE_ALERT_CLOSE("PRE_ALERT_CLOSE"),
     IN_BOUNDS("IN_BOUNDS"),
 
     // declare here equivalents of Terminations items, with same codes

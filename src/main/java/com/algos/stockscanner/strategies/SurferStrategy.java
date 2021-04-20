@@ -102,7 +102,7 @@ public class SurferStrategy extends AbsStrategy {
             if (deltaPercent > simulation.getAmplitude()) {
                 if (!preAlertSell) {
                     preAlertSell = true;
-                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_SELL);
+                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_CLOSE);
                 } else {
                     if (unit.getClose() > lastPrice) {   // still growing
                         decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_UP);
@@ -146,7 +146,7 @@ public class SurferStrategy extends AbsStrategy {
             if (deltaPercent < -simulation.getAmplitude()) {
                 if (!preAlertSell) {
                     preAlertSell = true;
-                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_SELL);
+                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_CLOSE);
                 } else {
                     if (unit.getClose() < lastPrice) {   // still going down
                         decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_DOWN);
