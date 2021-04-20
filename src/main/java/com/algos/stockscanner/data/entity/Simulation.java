@@ -38,6 +38,7 @@ public class Simulation extends AbstractEntity {
     private Float pl;  // profit/loss
     private Float plPercent;  // profit/loss percentage
     private Integer numPointsTotal; // total number of points scanned
+    private Integer numOpenings;  // number of times a position has been opened
     private Integer numPointsOpen;  // number of points with position open
     private Integer numPointsClosed;  // number of points with position closed
     private Integer shortestPeriodOpen;  // minimum number of consecutive points with position open
@@ -178,6 +179,14 @@ public class Simulation extends AbstractEntity {
 
     public void setNumPointsOpen(Integer numPointsOpen) {
         this.numPointsOpen = numPointsOpen;
+    }
+
+    public Integer getNumOpenings() {
+        return numOpenings;
+    }
+
+    public void setNumOpenings(Integer numOpenings) {
+        this.numOpenings = numOpenings;
     }
 
     public Integer getNumPointsClosed() {

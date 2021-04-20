@@ -204,7 +204,7 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
         col.setResizable(true);
 
         // amplitude
-        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getAmplitude, "%,.2f",Locale.getDefault()));
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getAmplitude, "%,.0f",Locale.getDefault()));
         col.setHeader("amp");
         col.setWidth("5em");
         col.setSortProperty("amplitude");
@@ -257,6 +257,13 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
         col.setHeader("pts scanned");
         col.setWidth("5em");
         col.setSortProperty("numPointsScanned");
+        col.setResizable(true);
+
+        // num openings
+        col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumOpenings, "%,d",Locale.getDefault()));
+        col.setHeader("# pos opened");
+        col.setWidth("5em");
+        col.setSortProperty("numOpenings");
         col.setResizable(true);
 
         // num points opened

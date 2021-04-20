@@ -60,6 +60,7 @@ public abstract class AbsStrategy implements Strategy {
     float lastValue;    // value at the previous point scanned
     IndexUnit lastUnit; // previous index unit scanned
     float totPl;        // total P/L of the simulation
+    int totOpenings;    // total times a position has been opened
 
     @Autowired
     IndexUnitService indexUnitService;
@@ -256,6 +257,7 @@ public abstract class AbsStrategy implements Strategy {
 
                 totPointsOpen++;
                 posOpen=true;
+                totOpenings++;
                 break;
 
             case CLOSE:
@@ -404,6 +406,7 @@ public abstract class AbsStrategy implements Strategy {
         simulation.setPl(totPl);
         simulation.setPlPercent(strategyService.deltaPercent(simulation.getInitialAmount(), simulation.getInitialAmount()+totPl));
         simulation.setNumPointsTotal(totPoints);
+        simulation.setNumOpenings(totOpenings);
         simulation.setNumPointsOpen(totPointsOpen);
         simulation.setNumPointsClosed(totPointsClosed);
 

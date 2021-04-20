@@ -18,7 +18,9 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -99,9 +101,22 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
         setId("main-layout");
 
-        label = new Label();
+        Label emptyLabel = new Label(); // blank element, for alignment only
+        emptyLabel.getStyle().set("display","flex");
+        emptyLabel.getStyle().set("flex","1");
+        emptyLabel.getStyle().set("max-width","1em");
 
+        Icon closeIcon = VaadinIcon.CLOSE.create();
+        closeIcon.getStyle().set("display","flex");
+        closeIcon.getStyle().set("flex","1");
+        closeIcon.getStyle().set("max-width","1em");
+        closeIcon.getStyle().set("font-size", "0.8em");
+
+        label = new Label();
         label.setId("label");
+        label.getStyle().set("display","flex");
+        label.getStyle().set("flex","1");
+        label.getStyle().set("justify-content","center");
 
         imgPlaceholder = new Div();
         imgPlaceholder.addClickListener((ComponentEventListener<ClickEvent<Div>>) divClickEvent -> infoClicked());
@@ -127,10 +142,16 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
         setProgress(0, 0, null);   // initialize the progress status
 
+        HorizontalLayout row1 = new HorizontalLayout();
+        row1.setWidth("100%");
+        row1.setAlignItems(Alignment.CENTER);
+        row1.add(emptyLabel, label, closeIcon);
+
         HorizontalLayout row2 = new HorizontalLayout();
+        row2.setAlignItems(Alignment.CENTER);
         row2.add(imgPlaceholder, progressBar, button);
 
-        add(label, row2);
+        add(row1, row2);
 
     }
 

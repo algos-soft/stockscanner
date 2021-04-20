@@ -25,6 +25,7 @@ public class SimulationModel {
     private float pl;
     private float plPercent;
     private int numPointsScanned;
+    private int numOpenings;
     private int numPointsHold;
     private int numPointsWait;
     private int minPointsHold;
@@ -142,6 +143,14 @@ public class SimulationModel {
 
     public void setNumPointsScanned(int numPointsScanned) {
         this.numPointsScanned = numPointsScanned;
+    }
+
+    public int getNumOpenings() {
+        return numOpenings;
+    }
+
+    public void setNumOpenings(int numOpenings) {
+        this.numOpenings = numOpenings;
     }
 
     public int getNumPointsHold() {

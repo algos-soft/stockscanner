@@ -130,6 +130,7 @@ public class SimulationService extends CrudService<Simulation, Integer> {
             model.setPl(utils.toPrimitive(entity.getPl()));
             model.setPlPercent(utils.toPrimitive(entity.getPlPercent()));
             model.setNumPointsScanned(utils.toPrimitive(entity.getNumPointsTotal()));
+            model.setNumOpenings(utils.toPrimitive(entity.getNumOpenings()));
             model.setNumPointsHold(utils.toPrimitive(entity.getNumPointsOpen()));
             model.setNumPointsWait(utils.toPrimitive(entity.getNumPointsClosed()));
             model.setMinPointsHold(utils.toPrimitive(entity.getShortestPeriodOpen()));
