@@ -10,6 +10,7 @@ import com.algos.stockscanner.data.service.SimulationService;
 import com.algos.stockscanner.strategies.Strategy;
 import com.algos.stockscanner.strategies.StrategyParams;
 import com.algos.stockscanner.strategies.SurferStrategy;
+import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.google.common.collect.Lists;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -63,6 +64,8 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
     private Div imgPlaceholder;
 
+    private Icon closeIcon;
+
     private Exception exception;
 
     private LocalDateTime startTime;
@@ -101,16 +104,21 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
         setId("main-layout");
 
-        Label emptyLabel = new Label(); // blank element, for alignment only
+        Label emptyLabel = new Label(); // blank element, for alignment purpose only
         emptyLabel.getStyle().set("display","flex");
         emptyLabel.getStyle().set("flex","1");
         emptyLabel.getStyle().set("max-width","1em");
 
-        Icon closeIcon = VaadinIcon.CLOSE.create();
+        closeIcon = VaadinIcon.CLOSE.create();
         closeIcon.getStyle().set("display","flex");
         closeIcon.getStyle().set("flex","1");
         closeIcon.getStyle().set("max-width","1em");
         closeIcon.getStyle().set("font-size", "0.8em");
+        closeIcon.addClickListener((ComponentEventListener<ClickEvent<Icon>>) iconClickEvent -> {
+            if (completed || error) {
+                fireClosed();
+            }
+        });
 
         label = new Label();
         label.setId("label");
@@ -130,7 +138,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
         button.addClickListener((ComponentEventListener<ClickEvent<Button>>) event -> {
             if (completed || error) {
-                fireClosed();
+                showSimulations();
             } else {
                 abort = true;
                 if (strategy != null) {
@@ -254,8 +262,9 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             error = true;
 
             ui.access((Command) () -> {
-                button.setText("Close");
-                setProgress(1, 0, "Error");
+                closeIcon.getStyle().set("color","red");
+                button.setEnabled(false);
+                setProgress(1, 0, "Error - (!) for info");
             });
             setImage("ERR");
 
@@ -327,7 +336,8 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
     private void setCompleted() {
         completed = true;
         ui.access((Command) () -> {
-            button.setText("Close");
+            closeIcon.getStyle().set("color","red");
+            button.setText("Show");
             progressBar.setMax(1);
             progressBar.setValue(1);
             progressBar.setIndeterminate(false);
@@ -494,6 +504,10 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
         return rest == 0;
     }
 
+
+    private void showSimulations(){
+        UI.getCurrent().navigate(SimulationsView.class, ""+ generator.getNumber());
+    }
 
     private List<Integer> getAmplitudesList() throws Exception {
 
