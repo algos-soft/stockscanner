@@ -2,6 +2,7 @@ package com.algos.stockscanner.views.main;
 
 import java.util.Optional;
 
+import com.algos.stockscanner.views.admin.AdminView;
 import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -60,9 +61,10 @@ public class MainView extends AppLayout {
         customArea.setId("custom");
         customArea.setWidthFull();
 
-        customArea.add(new Label("custom1"));
-        customArea.add(new Label("pluto"));
-        customArea.add(new Label("paperino"));
+//        customArea.add(new Label("custom1"));
+//        customArea.add(new Label("pluto"));
+//        customArea.add(new Label("paperino"));
+
         customArea.getStyle().set("margin-left","1em");
         customArea.getStyle().set("margin-right","1em");
 
@@ -103,6 +105,7 @@ public class MainView extends AppLayout {
                 createTab("Generators", GeneratorsView.class),
                 createTab("Simulations", SimulationsView.class),
                 createTab("Indexes", IndexesView.class),
+                createTab("Admin", AdminView.class),
                 createTab("Settings", SettingsView.class),
                 createTab("About", AboutView.class)};
     }

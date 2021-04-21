@@ -90,7 +90,8 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
     }
 
     /**
-     * Copy data from Entity to Model*/
+     * Copy data from Entity to Model
+     */
     public void entityToModel(MarketIndex entity, IndexModel model){
         model.setId(entity.getId());
         model.setSymbol(entity.getSymbol());
