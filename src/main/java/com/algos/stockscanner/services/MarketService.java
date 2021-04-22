@@ -27,10 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -39,6 +41,9 @@ import java.util.*;
 
 @Service
 public class MarketService {
+
+    @Autowired
+    ResourceLoader resourceLoader;
 
     private static final DateTimeFormatter fmt = new DateTimeFormatterBuilder()
             .appendPattern("yyyy-MM-dd")
@@ -74,11 +79,33 @@ public class MarketService {
 
     private OkHttpClient okHttpClient;
 
+    private HashSet<String> eToroInstruments = new HashSet<String>();
+
 
     @PostConstruct
     private void init(){
+
         okHttpClient = new OkHttpClient();
+
+        loadEtoroInstruments();
+
     }
+
+
+    private void loadEtoroInstruments(){
+        //Resource resource = resourceLoader.getResource("etoro_instruments2.csv");
+        Resource resource = context.getResource("etoro_instruments.csv");
+        try {
+            File etoroInstrumentsFile=resource.getFile();
+            List<String> lines = Files.readAllLines(etoroInstrumentsFile.toPath());
+            for(String line : lines){
+                eToroInstruments.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
     /**
@@ -269,48 +296,52 @@ public class MarketService {
         for(IndexEntry entry : entries){
             i++;
 
-            IndexCategories category = IndexCategories.getItem(entry.getType()).get();
+            if(eToroInstruments.contains(entry.getSymbol())){
 
-            switch (category) {
-                case CRYPTO:
-                    break;
-                case EXCHANGE:
-                    break;
-                case FOREX:
-                    break;
-                case SECTOR:
-                    break;
-                case STOCK:
+                IndexCategories category = IndexCategories.getItem(entry.getType()).get();
 
-                    DownloadHandler finalDownloadHandler = downloadHandler;
-                    downloadListener.onDownloadProgress(i, entries.size(), entry.getSymbol());
+                switch (category) {
+                    case CRYPTO:
+                        break;
+                    case EXCHANGE:
+                        break;
+                    case FOREX:
+                        break;
+                    case SECTOR:
+                        break;
+                    case STOCK:
 
-                    FundamentalData fd = null;
+                        downloadListener.onDownloadProgress(i, entries.size(), entry.getSymbol());
+
+                        FundamentalData fd;
+                        try {
+                            fd = fetchFundamentalData(entry.getSymbol());
+                            syncIndex(fd);
+                        } catch (IOException e) {
+                            System.out.println("Fetch error - "+entry.getSymbol()+" skipped");
+                            e.printStackTrace();
+                        } catch (Exception e) {
+                            System.out.println("Sync error - "+entry.getSymbol()+" skipped");
+                            e.printStackTrace();
+                        }
+
+                        break;
+                    case TECH:
+                        break;
+                }
+
+                // going too fast can exceed API license limits
+                if(sleepMillis>0){
                     try {
-                        fd = fetchFundamentalData(entry.getSymbol());
-                        syncIndex(fd);
-                    } catch (IOException e) {
-                        System.out.println("Fetch error - "+entry.getSymbol()+" skipped");
-                        e.printStackTrace();
-                    } catch (Exception e) {
-                        System.out.println("Sync error - "+entry.getSymbol()+" skipped");
+                        Thread.sleep(sleepMillis);
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
-                    break;
-                case TECH:
-                    break;
-            }
-
-            // going too fast can exceed API license limits
-            if(sleepMillis>0){
-                try {
-                    Thread.sleep(sleepMillis);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
-            }
 
+            }else{
+                System.out.println(entry.getSymbol()+" skipped because not present on eToro");
+            }
 
         }
 
@@ -318,6 +349,8 @@ public class MarketService {
 
         return downloadHandler;
     }
+
+
 
 
     /**
@@ -333,12 +366,13 @@ public class MarketService {
         }
 
         MarketIndex index;
-        if(indexes.size()==0){  // does not exist
+        if(indexes.size()==0){  // does not exist in db
             index=new MarketIndex();
             index.setSymbol(fd.getSymbol());
             index.setName(fd.getName());
             index.setCategory(fd.getType().getCode());
-        }else{  // exists
+
+        }else{  // index exists in db
             index = indexes.get(0);
             if(fd.getName()!=null){
                 index.setName(fd.getName());
@@ -346,9 +380,20 @@ public class MarketService {
             if(fd.getType()!=null){
                 index.setCategory(fd.getType().getCode());
             }
+
         }
 
-        // add the icon if missing
+        updateIcon(index);
+        marketIndexService.update(index);
+
+    }
+
+
+    /**
+     * add the icon to an index if missing
+     */
+    private void updateIcon(MarketIndex index) throws IOException {
+
         if(index.getImage()==null){
             String url = "https://etoro-cdn.etorostatic.com/market-avatars/"+index.getSymbol().toLowerCase()+"/150x150.png";
             byte[] bytes = utils.getBytesFromUrl(url);
@@ -364,8 +409,6 @@ public class MarketService {
             }
         }
 
-        marketIndexService.update(index);
-
     }
 
 
@@ -378,10 +421,6 @@ public class MarketService {
     private FundamentalData fetchFundamentalData(String symbol) throws IOException {
         FundamentalData fundamentalData=null;
 
-        if(symbol.equals("MA")){
-            int a = 87;
-            int b=a;
-        }
         HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.alphavantage.co/query").newBuilder();
         urlBuilder.addQueryParameter("apikey", alphavantageApiKey);
         urlBuilder.addQueryParameter("function", "OVERVIEW");
@@ -409,10 +448,6 @@ public class MarketService {
 
         return fundamentalData;
     }
-
-
-
-
 
 
 

@@ -72,13 +72,13 @@ public class DataGenerator {
 ////            simulationRepositoryGenerator.setData(Simulation::setPl_percent, DataType.NUMBER_UP_TO_100);
 //            simulationRepository.saveAll(simulationRepositoryGenerator.create(200, seed));
 
-            if (marketIndexService.count() == 0) {
-                generateMarketIndexes();
-            }
+//            if (marketIndexService.count() == 0) {
+//                generateMarketIndexes();
+//            }
 
-            if (generatorService.count() == 0) {
-                generateGenerators();
-            }
+//            if (generatorService.count() == 0) {
+//                generateGenerators();
+//            }
 
 //            if (simulationService.count() == 0) {
 //                generateSimulations();
