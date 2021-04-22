@@ -1,6 +1,6 @@
 .admin-view {
   display: block;
-  margin: 0 auto;
+  margin: 0 0;
   max-width: 1024px;
   padding: 0 var(--lumo-space-l);
 }

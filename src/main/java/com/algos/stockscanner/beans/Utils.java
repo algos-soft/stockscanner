@@ -179,10 +179,14 @@ public class Utils {
 
 
     public byte[] getBytesFromUrl(String url) throws IOException {
+        byte[] bytes=null;
         Request request = new Request.Builder().url(url).build();
         try (Response response = httpClient.newCall(request).execute()) {
-            return response.body().bytes();
+            if(response.isSuccessful()){
+                bytes=response.body().bytes();
+            }
         }
+        return bytes;
     }
 
     public byte[] getIconFromUrl(String url) throws IOException {

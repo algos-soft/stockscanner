@@ -285,7 +285,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             // download data in a separate thread
             new Thread(() -> {
 
-                handler[0] =  marketService.download(model.getSymbol(), new MarketService.DownloadListener() {
+                handler[0] =  marketService.downloadIndexData(model.getSymbol(), new MarketService.DownloadListener() {
                     @Override
                     public void onDownloadCompleted() {
                         ui.access(new Command() {

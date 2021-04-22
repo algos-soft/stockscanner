@@ -1,5 +1,6 @@
 package com.algos.stockscanner.services;
 
+import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.HttpClient;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.enums.FrequencyTypes;
@@ -14,25 +15,32 @@ import com.crazzyghost.alphavantage.parameters.DataType;
 import com.crazzyghost.alphavantage.parameters.OutputSize;
 import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
 import com.crazzyghost.alphavantage.timeseries.response.TimeSeriesResponse;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import javax.annotation.PostConstruct;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class MarketService {
 
-    private  static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-    private  static final DateTimeFormatter fmt = new DateTimeFormatterBuilder()
+    private static final DateTimeFormatter fmt = new DateTimeFormatterBuilder()
             .appendPattern("yyyy-MM-dd")
             .optionalStart()
             .appendPattern(" HH:mm")
@@ -41,9 +49,12 @@ public class MarketService {
             .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
             .toFormatter();
 
+    private final Moshi moshi = new Moshi.Builder().build();
+    private final JsonAdapter<FDResponse> fdJsonAdapter = moshi.adapter(FDResponse.class);
 
-    //private final Moshi moshi = new Moshi.Builder().build();
 
+    @Autowired
+    private ApplicationContext context;
 
     @Autowired
     private MarketIndexService marketIndexService;
@@ -61,13 +72,21 @@ public class MarketService {
     @Value("${alphavantage.api.key}")
     private String alphavantageApiKey;
 
+    private OkHttpClient okHttpClient;
+
+
+    @PostConstruct
+    private void init(){
+        okHttpClient = new OkHttpClient();
+    }
+
 
     /**
      * Download market data for the given symbol and store it in the db
      */
-    public DownloadHandler download(String symbol, DownloadListener downloadListener) {
+    public DownloadHandler downloadIndexData(String symbol, DownloadListener downloadListener) {
 
-        DownloadHandler downloadHandler=null;
+        DownloadHandler downloadHandler = null;
 
         MarketIndex item;
         try {
@@ -79,26 +98,26 @@ public class MarketService {
 
         // retrieve the category
         java.util.Optional<IndexCategories> oCategory = IndexCategories.getItem(item.getCategory());
-        if(!oCategory.isPresent()){
-            downloadListener.onDownloadAborted(new Exception("Index "+symbol+" does not have a category."));
+        if (!oCategory.isPresent()) {
+            downloadListener.onDownloadAborted(new Exception("Index " + symbol + " does not have a category."));
             return null;
         }
-        IndexCategories category=oCategory.get();
+        IndexCategories category = oCategory.get();
 
         // switch on the category
-        String url=null;
-        switch (category){
-            case DIGITALCURRENCY:
+        String url = null;
+        switch (category) {
+            case CRYPTO:
                 break;
-            case EXCHANGERATE:
+            case EXCHANGE:
                 break;
-            case FOREXRATE:
+            case FOREX:
                 break;
-            case SECTORPERFORMANCE:
+            case SECTOR:
                 break;
-            case STOCKTIMESERIES:
+            case STOCK:
 
-                downloadHandler=new DownloadHandler();
+                downloadHandler = new DownloadHandler();
                 DownloadHandler finalDownloadHandler = downloadHandler;
 
                 downloadListener.onDownloadProgress(0, 0, "Requesting data");
@@ -109,12 +128,12 @@ public class MarketService {
                         .forSymbol(symbol)
                         .outputSize(OutputSize.FULL)
                         .dataType(DataType.JSON)
-                        .onSuccess(e->handleSuccess((TimeSeriesResponse)e, item, downloadListener, finalDownloadHandler))
-                        .onFailure(e->handleFailure(e, downloadListener))
+                        .onSuccess(e -> indexDataHandleSuccess((TimeSeriesResponse) e, item, downloadListener, finalDownloadHandler))
+                        .onFailure(e -> handleFailure(e, downloadListener))
                         .fetch();
 
                 break;
-            case TECHNICALINDICATOR:
+            case TECH:
                 break;
         }
 
@@ -122,40 +141,40 @@ public class MarketService {
 
     }
 
-    public void handleSuccess(TimeSeriesResponse response, MarketIndex marketIndex, DownloadListener downloadListener, DownloadHandler downloadHandler) {
+    public void indexDataHandleSuccess(TimeSeriesResponse response, MarketIndex marketIndex, DownloadListener downloadListener, DownloadHandler downloadHandler) {
 
         // delete all previous unit data
-        downloadListener.onDownloadProgress(0,0,"Deleting old data");
+        downloadListener.onDownloadProgress(0, 0, "Deleting old data");
         indexUnitService.deleteByIndex(marketIndex);
 
         // Iterate the new units and save them
         List<StockUnit> units = response.getStockUnits();
         Collections.sort(units, Comparator.comparing(StockUnit::getDate));
-        int j=0;
-        LocalDateTime minDateTime=null;
-        LocalDateTime maxDateTime=null;
-        for(StockUnit unit : units){
-            if (downloadHandler.isAbort()){
+        int j = 0;
+        LocalDateTime minDateTime = null;
+        LocalDateTime maxDateTime = null;
+        for (StockUnit unit : units) {
+            if (downloadHandler.isAbort()) {
                 downloadListener.onDownloadAborted(new Exception("Abort requested by client"));
                 return;
             }
             j++;
-            downloadListener.onDownloadProgress(j, units.size(),"Processing item");
+            downloadListener.onDownloadProgress(j, units.size(), "Processing item");
             IndexUnit indexUnit = saveItem(unit, marketIndex);
 
             // keep minDateTime and maxDateTime up to date
-            if(minDateTime==null){
-                minDateTime=indexUnit.getDateTimeLDT();
-            }else{
-                if(indexUnit.getDateTimeLDT().isBefore(minDateTime)){
-                    minDateTime=indexUnit.getDateTimeLDT();
+            if (minDateTime == null) {
+                minDateTime = indexUnit.getDateTimeLDT();
+            } else {
+                if (indexUnit.getDateTimeLDT().isBefore(minDateTime)) {
+                    minDateTime = indexUnit.getDateTimeLDT();
                 }
             }
-            if(maxDateTime==null){
-                maxDateTime=indexUnit.getDateTimeLDT();
-            }else{
-                if(indexUnit.getDateTimeLDT().isAfter(maxDateTime)){
-                    maxDateTime=indexUnit.getDateTimeLDT();
+            if (maxDateTime == null) {
+                maxDateTime = indexUnit.getDateTimeLDT();
+            } else {
+                if (indexUnit.getDateTimeLDT().isAfter(maxDateTime)) {
+                    maxDateTime = indexUnit.getDateTimeLDT();
                 }
             }
 
@@ -179,16 +198,16 @@ public class MarketService {
     }
 
 
-    private IndexUnit saveItem(StockUnit unit, MarketIndex marketIndex){
+    private IndexUnit saveItem(StockUnit unit, MarketIndex marketIndex) {
         IndexUnit indexUnit = createIndexUnit(unit);
         indexUnit.setIndex(marketIndex);
         return indexUnitService.update(indexUnit);
     }
 
-    private IndexUnit createIndexUnit(StockUnit unit){
+    private IndexUnit createIndexUnit(StockUnit unit) {
         IndexUnit indexUnit = new IndexUnit();
-        indexUnit.setOpen((float)unit.getOpen());
-        indexUnit.setClose((float)unit.getClose());
+        indexUnit.setOpen((float) unit.getOpen());
+        indexUnit.setClose((float) unit.getClose());
 
         //LocalDate date = LocalDate.parse(unit.getDate(), fmt);
 
@@ -200,14 +219,214 @@ public class MarketService {
     }
 
 
+    /**
+     * Download all the indexes declared in the resource file indexes.csv
+     * @param maxReqPerMinute max request per minute to the API, 0=unlimited
+     */
+    public DownloadHandler downloadIndexes(DownloadListener downloadListener, int maxReqPerMinute) {
+        DownloadHandler downloadHandler = null;
+        downloadHandler = new DownloadHandler();
+
+        // retrieve the list of indexes to download from resources
+        String filename="indexes.csv";
+        File indexesFile=null;
+
+        try {
+            Resource resource = context.getResource(filename);
+            indexesFile=resource.getFile();
+        } catch (IOException e) {
+            downloadListener.onDownloadAborted(new Exception("Resource file "+filename+" not found"));
+            e.printStackTrace();
+        }
+
+        // parse the file into a list of objects
+        List<IndexEntry> entries = new ArrayList<>();
+        try {
+            FileReader fileReader = new FileReader(indexesFile);
+            CSVReader reader = new CSVReader(fileReader);
+            List<String[]> list = reader.readAll();
+            for(String[] element : list){
+                if(element.length>=2){
+                    String symbol = element[0].trim();
+                    String type = element[1].trim();
+                    entries.add(new IndexEntry(symbol, type));
+                }else{
+                    throw new IOException("Invalid element "+element+" in "+filename);
+                }
+            }
+        } catch (IOException | CsvException e ) {
+            downloadListener.onDownloadAborted(new Exception("Malformed resource file "+filename));
+            e.printStackTrace();
+        }
+
+        int sleepMillis=0;
+        if(maxReqPerMinute>0){
+            sleepMillis=(int)(60f/(float)maxReqPerMinute*1000f);
+        }
+
+        // perform and process the requests to retrieve each symbol
+        int i=0;
+        for(IndexEntry entry : entries){
+            i++;
+
+            IndexCategories category = IndexCategories.getItem(entry.getType()).get();
+
+            switch (category) {
+                case CRYPTO:
+                    break;
+                case EXCHANGE:
+                    break;
+                case FOREX:
+                    break;
+                case SECTOR:
+                    break;
+                case STOCK:
+
+                    DownloadHandler finalDownloadHandler = downloadHandler;
+                    downloadListener.onDownloadProgress(i, entries.size(), entry.getSymbol());
+
+                    FundamentalData fd = null;
+                    try {
+                        fd = fetchFundamentalData(entry.getSymbol());
+                        syncIndex(fd);
+                    } catch (IOException e) {
+                        System.out.println("Fetch error - "+entry.getSymbol()+" skipped");
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        System.out.println("Sync error - "+entry.getSymbol()+" skipped");
+                        e.printStackTrace();
+                    }
+
+                    break;
+                case TECH:
+                    break;
+            }
+
+            // going too fast can exceed API license limits
+            if(sleepMillis>0){
+                try {
+                    Thread.sleep(sleepMillis);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+        }
+
+        downloadListener.onDownloadCompleted();
+
+        return downloadHandler;
+    }
+
+
+    /**
+     * Find an index in the database.
+     * If exists, update it
+     * If not, create it
+     */
+    private void syncIndex(FundamentalData fd) throws Exception {
+
+        List<MarketIndex> indexes = marketIndexService.findBySymbol(fd.getSymbol());
+        if(indexes.size()>1){
+            throw new Exception("Multiple instances ("+indexes.size()+") of symbol "+fd.getSymbol()+" present in the database.");
+        }
+
+        MarketIndex index;
+        if(indexes.size()==0){  // does not exist
+            index=new MarketIndex();
+            index.setSymbol(fd.getSymbol());
+            index.setName(fd.getName());
+            index.setCategory(fd.getType().getCode());
+        }else{  // exists
+            index = indexes.get(0);
+            if(fd.getName()!=null){
+                index.setName(fd.getName());
+            }
+            if(fd.getType()!=null){
+                index.setCategory(fd.getType().getCode());
+            }
+        }
+
+        // add the icon if missing
+        if(index.getImage()==null){
+            String url = "https://etoro-cdn.etorostatic.com/market-avatars/"+index.getSymbol().toLowerCase()+"/150x150.png";
+            byte[] bytes = utils.getBytesFromUrl(url);
+            if(bytes!=null){
+                if(bytes.length>0){
+                    byte[] scaled = utils.scaleImage(bytes, Application.STORED_ICON_WIDTH, Application.STORED_ICON_HEIGHT);
+                    index.setImage(scaled);
+                }
+            }else{  // Icon not found on etoro, symbol not managed on eToro or icon has a different name? Use standard icon.
+                bytes = utils.getDefaultIndexIcon();
+                byte[] scaled = utils.scaleImage(bytes, Application.STORED_ICON_WIDTH, Application.STORED_ICON_HEIGHT);
+                index.setImage(scaled);
+            }
+        }
+
+        marketIndexService.update(index);
+
+    }
+
+
+
+
+    /**
+     * Fetch fundamental data from the network
+     *
+     */
+    private FundamentalData fetchFundamentalData(String symbol) throws IOException {
+        FundamentalData fundamentalData=null;
+
+        if(symbol.equals("MA")){
+            int a = 87;
+            int b=a;
+        }
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.alphavantage.co/query").newBuilder();
+        urlBuilder.addQueryParameter("apikey", alphavantageApiKey);
+        urlBuilder.addQueryParameter("function", "OVERVIEW");
+        urlBuilder.addQueryParameter("symbol", symbol);
+
+        String url = urlBuilder.build().toString();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        Response response = okHttpClient.newCall(request).execute();
+        if(response.isSuccessful()){
+
+            FDResponse fdresp = fdJsonAdapter.fromJson(response.body().string());
+
+            if(fdresp.Symbol==null){
+                throw new IOException("malformed response, license limits reached?");
+            }
+
+            IndexCategories category = IndexCategories.getByAlphaVantageType(fdresp.AssetType);
+            fundamentalData=new FundamentalData(symbol, fdresp.Name, category);
+
+        }
+
+        return fundamentalData;
+    }
+
+
+
+
+
+
+
     public interface DownloadListener {
         void onDownloadCompleted();
-        void onDownloadAborted(Exception e);
-        void onDownloadProgress(int current, int total, String message);
-    };
 
-    public class DownloadHandler{
-        boolean abort=false;
+        void onDownloadAborted(Exception e);
+
+        void onDownloadProgress(int current, int total, String message);
+    }
+
+
+    public class DownloadHandler {
+        boolean abort = false;
 
         public boolean isAbort() {
             return abort;
@@ -216,7 +435,69 @@ public class MarketService {
         public void setAbort(boolean abort) {
             this.abort = abort;
         }
-    };
+    }
+
+
+    class IndexEntry{
+
+        public String symbol;
+
+        public String type;
+
+        public IndexEntry(String symbol, String type) {
+            this.symbol = symbol;
+            this.type = type;
+        }
+
+        public String getSymbol() {
+            return symbol;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        @Override
+        public String toString() {
+            return "IndexEntry{" +
+                    "symbol='" + symbol + '\'' +
+                    ", type='" + type + '\'' +
+                    '}';
+        }
+    }
+
+    class FundamentalData {
+        private String symbol;
+        private String name;
+        private IndexCategories type;
+
+        public FundamentalData(String symbol, String name, IndexCategories type) {
+            this.symbol = symbol;
+            this.name = name;
+            this.type = type;
+        }
+
+        public String getSymbol() {
+            return symbol;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public IndexCategories getType() {
+            return type;
+        }
+    }
+
+
+    static class FDResponse {
+        String Symbol;
+        String Name;
+        String AssetType;
+    }
+
+
 
 
 }

@@ -4,35 +4,34 @@ import java.util.Optional;
 
 public enum IndexCategories {
 
-    STOCKTIMESERIES ("STOCK","Stock"),
-    FOREXRATE ("FOREX","Forex"),
-    EXCHANGERATE ("EXCHANGE","Exchange Rate"),
-    DIGITALCURRENCY("CRYPTO","Digital Currency"),
-    TECHNICALINDICATOR("TECH","Technical Indicator"),
-    SECTORPERFORMANCE("SECTOR","Sector Performance");
+    STOCK("STOCK","Stock", "Common Stock"),
+    FOREX("FOREX","Forex", null),
+    EXCHANGE("EXCHANGE","Exchange Rate", null),
+    CRYPTO("CRYPTO","Digital Currency", null),
+    TECH("TECH","Technical Indicator", null),
+    SECTOR("SECTOR","Sector Performance", null);
 
     private String code;
     private String description;
+    private String alphaVantageType;    // how is returned by AlphaVantage API in Fundamentals Info
 
     public String getCode() {
         return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+
+    public String getAlphaVantageType() {
+        return alphaVantageType;
     }
 
-    IndexCategories(String code, String description) {
+    IndexCategories(String code, String description, String alphaVantageType) {
         this.code = code;
         this.description = description;
+        this.alphaVantageType = alphaVantageType;
     }
 
     public static Optional<IndexCategories> getItem(String categoryCode){
@@ -51,5 +50,18 @@ public enum IndexCategories {
             return Optional.of(category.get().getDescription());
         }
         return Optional.empty();
+    }
+
+    public static IndexCategories getByAlphaVantageType(String type){
+        for(IndexCategories cat : values()){
+            if(cat!=null){
+                if(cat.getAlphaVantageType()!=null){
+                    if(cat.getAlphaVantageType().equals(type)){
+                        return cat;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
