@@ -10,5 +10,20 @@
   word-wrap: break-word
 }
 
+.positive {
+  color: green;
+}
+
+.negative {
+  color: red;
+}
+
+.openclose {
+  font-weight: bold;
+}
+
+
+
+
 
 

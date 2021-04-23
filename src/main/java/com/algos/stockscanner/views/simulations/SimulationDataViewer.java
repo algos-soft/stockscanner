@@ -1,29 +1,25 @@
 package com.algos.stockscanner.views.simulations;
 
 import com.algos.stockscanner.beans.Utils;
-import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.entity.SimulationItem;
 import com.algos.stockscanner.data.enums.Actions;
 import com.algos.stockscanner.data.service.SimulationItemService;
-import com.algos.stockscanner.views.indexes.IndexModel;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -38,6 +34,7 @@ import java.util.Locale;
  */
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@CssImport(value = "./views/simulations/simulations-grid.css", themeFor = "vaadin-grid")
 public class SimulationDataViewer extends VerticalLayout {
     private Simulation simulation;
 
@@ -103,7 +100,7 @@ public class SimulationDataViewer extends VerticalLayout {
         grid.setColumnReorderingAllowed(true);
 
 
-        Grid.Column col;
+        Grid.Column<SimulationItemModel> col;
 
         // timestamp
         col=grid.addColumn(new LocalDateTimeRenderer<>(SimulationItemModel::getTimestamp, DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
@@ -116,12 +113,14 @@ public class SimulationDataViewer extends VerticalLayout {
         col.setHeader("action");
         col.setWidth("4em");
         col.setResizable(true);
+        col.setClassNameGenerator(item -> getOpenCloseStyle(item.getAction()));
 
         // action type
         col=grid.addColumn(SimulationItemModel::getActionType);
         col.setHeader("type");
         col.setWidth("4em");
         col.setResizable(true);
+        col.setClassNameGenerator(item -> getOpenCloseStyle(item.getAction()));
 
         // reason
         col=grid.addColumn(SimulationItemModel::getReason);
@@ -170,9 +169,39 @@ public class SimulationDataViewer extends VerticalLayout {
         col.setHeader("P/L");
         col.setWidth("4em");
         col.setResizable(true);
-
+        col.setClassNameGenerator(item -> getPLStyle(item.getPl()));
 
     }
+
+
+    /**
+     * return black, red, white styles based on signum
+     */
+    private String getPLStyle(float number){
+        String style="";
+        if(number!=0){
+            if(number>0){
+                style="positive";
+            }else{
+                style="negative";
+            }
+        }
+        return style;
+    }
+
+
+    /**
+     * return strong style for OPEN and CLOSE actions
+     */
+    private String getOpenCloseStyle(Actions action){
+        if(action.equals(Actions.OPEN) || action.equals(Actions.CLOSE)){
+            return "openclose";
+        }
+        return "";
+    }
+
+
+
 
 
     /**

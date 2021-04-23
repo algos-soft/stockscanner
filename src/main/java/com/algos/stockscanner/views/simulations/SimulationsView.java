@@ -164,7 +164,7 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
         grid.setColumnReorderingAllowed(true);
 
 
-        Grid.Column col;
+        Grid.Column<SimulationModel> col;
 
         // data button
         col = grid.addComponentColumn(item -> createDataButton(grid, item));
@@ -230,6 +230,7 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
         col.setWidth("5em");
         col.setSortProperty("pl");
         col.setResizable(true);
+        col.setClassNameGenerator(item -> getStyle(item.getPl()));
 
         // P/L percent
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getPlPercent, "%,.2f%%",Locale.getDefault()));
@@ -237,6 +238,7 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
         col.setWidth("5em");
         col.setSortProperty("plPercent");
         col.setResizable(true);
+        col.setClassNameGenerator(item -> getStyle(item.getPlPercent()));
 
         // tot spread
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getTotSpread, "%,.2f",Locale.getDefault()));
@@ -295,6 +297,23 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
         col.setResizable(true);
 
     }
+
+
+    /**
+     * return black, red, while styles based on signum
+     */
+    private String getStyle(float number){
+        String style="";
+        if(number!=0){
+            if(number>0){
+                style="positive";
+            }else{
+                style="negative";
+            }
+        }
+        return style;
+    }
+
 
 
     private Component createDataButton(Grid grid, SimulationModel item){
