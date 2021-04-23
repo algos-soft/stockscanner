@@ -94,8 +94,6 @@ public class MarketService {
 
     private void loadEtoroInstruments(){
 
-        //Resource resource = resourceLoader.getResource("etoro_instruments.csv");
-        //Resource resource = context.getResource("etoro_instruments.csv");
         String filename="config/etoro_instruments.csv";
         File etoroInstrumentsFile = new File(filename);
         if(!etoroInstrumentsFile.exists()){

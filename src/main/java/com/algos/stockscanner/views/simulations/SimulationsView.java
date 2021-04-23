@@ -11,6 +11,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
@@ -26,12 +27,14 @@ import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.StreamResource;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Example;
 
 import javax.annotation.PostConstruct;
+import java.io.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.List;
@@ -61,6 +64,10 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
     private Integer generatorNumParam;
 
     private IntegerField generatorNumberFld;
+
+    private Button anchorButton;
+
+    private InputStream excelInputStream;
 
     public SimulationsView() {
     }
@@ -94,9 +101,18 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
             }
         });
 
+        // Add to the UI an invisible button with anchor.
+        // This button is clicked programmatically on the client to download the file
+        // When this happens, the createResource() method is invoked which should
+        // return the resource to download in the form of an InputStream.
+        anchorButton = new Button();
+        anchorButton.getStyle().set("display", "none");
+        Anchor download = new Anchor(new StreamResource("simulations.xls", () -> excelInputStream), "");
+        download.getElement().setAttribute("download", true);
+        download.add(anchorButton);
+        add(download);
 
     }
-
 
 
     @Override
@@ -125,7 +141,9 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
         addButton.getStyle().set("margin-right", "1em");
         addButton.setIconAfterText(true);
         addButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
-            //addNewItem();
+            byte[] barray = simulationService.exportExcel();
+            excelInputStream = new ByteArrayInputStream(barray);
+            anchorButton.clickInClient();
         });
 
         header.add(addButton);

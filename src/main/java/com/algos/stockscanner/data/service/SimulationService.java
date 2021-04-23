@@ -7,6 +7,11 @@ import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -15,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,19 +39,19 @@ public class SimulationService extends CrudService<Simulation, Integer> {
 
     public List<SimulationModel> fetch(int offset, int limit, Example<Simulation> example, List<QuerySortOrder> orders) {
 
-        Sort sort=utils.buildSort(orders);
+        Sort sort = utils.buildSort(orders);
 
         Pageable pageable = new OffsetBasedPageRequest(offset, limit, sort);
 
         Page<Simulation> page;
-        if(example!=null){
+        if (example != null) {
             page = repository.findAll(example, pageable);
-        }else{
+        } else {
             page = repository.findAll(pageable);
         }
 
         List<SimulationModel> list = new ArrayList<>();
-        for(Simulation entity : page.toList()){
+        for (Simulation entity : page.toList()) {
             SimulationModel model = new SimulationModel();
             entityToModel(entity, model);
             list.add(model);
@@ -81,20 +87,18 @@ public class SimulationService extends CrudService<Simulation, Integer> {
 //    }
 
     public int count(Example<Simulation> example) {
-        return (int)repository.count(example);
+        return (int) repository.count(example);
     }
 
     public int count() {
-        return (int)repository.count();
+        return (int) repository.count();
     }
 
     public int countBy(Generator generator) {
         Simulation entity = new Simulation();
         entity.setGenerator(generator);
-        return (int)repository.count(Example.of(entity));
+        return (int) repository.count(Example.of(entity));
     }
-
-
 
 
     @Override
@@ -106,17 +110,17 @@ public class SimulationService extends CrudService<Simulation, Integer> {
     /**
      * Copy data from Entity to View Model
      */
-    private void entityToModel(Simulation entity, SimulationModel model){
+    private void entityToModel(Simulation entity, SimulationModel model) {
         model.setId(utils.toPrimitive(entity.getId()));
 
-        if(entity.getIndex()!=null){
+        if (entity.getIndex() != null) {
             model.setId(entity.getId());
             Generator gen = entity.getGenerator();
-            if(gen!=null){
+            if (gen != null) {
                 model.setNumGenerator(utils.toPrimitive(gen.getNumber()));
             }
-            MarketIndex index=entity.getIndex();
-            if(index!=null){
+            MarketIndex index = entity.getIndex();
+            if (index != null) {
                 model.setSymbol(index.getSymbol());
             }
             model.setStartTs(entity.getStartTsLD());
@@ -144,8 +148,43 @@ public class SimulationService extends CrudService<Simulation, Integer> {
 
     }
 
-//    public void deleteByGenerator(Generator generator) {
-//        repository.deleteByGenerator(generator);
-//    }
+
+    public byte[] exportExcel() {
+
+        Workbook wb = new HSSFWorkbook();  // or new XSSFWorkbook();
+        Sheet sheet1 = wb.createSheet("new sheet");
+
+        Object[][] bookData = {
+                {"Head First Java", "Kathy Serria", 79},
+                {"Effective Java", "Joshua Bloch", 36},
+                {"Clean Code", "Robert martin", 42},
+                {"Thinking in Java", "Bruce Eckel", 35},
+        };
+
+        int rowCount = 0;
+        for (Object[] aBook : bookData) {
+            Row row = sheet1.createRow(++rowCount);
+            int columnCount = 0;
+            for (Object field : aBook) {
+                Cell cell = row.createCell(++columnCount);
+                if (field instanceof String) {
+                    cell.setCellValue((String) field);
+                } else if (field instanceof Integer) {
+                    cell.setCellValue((Integer) field);
+                }
+            }
+        }
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            wb.write(bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return bos.toByteArray();
+
+    }
+
 
 }
