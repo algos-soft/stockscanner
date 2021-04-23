@@ -14,6 +14,8 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -87,7 +89,7 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
                 Optional<HorizontalLayout> customArea = utils.findCustomArea(parent.get());
                 if (customArea.isPresent()) {
                     customArea.get().removeAll();
-//                    customizeHeader(customArea.get());
+                    customizeHeader(customArea.get());
                 }
             }
         });
@@ -115,7 +117,20 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
 
 
     private void customizeHeader(HorizontalLayout header) {
+
+        header.getStyle().set("flex-direction", "row-reverse");
+
+        Button addButton = new Button("Export", new Icon(VaadinIcon.ARROW_CIRCLE_DOWN_O));
+        addButton.getStyle().set("margin-left", "1em");
+        addButton.getStyle().set("margin-right", "1em");
+        addButton.setIconAfterText(true);
+        addButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
+            //addNewItem();
+        });
+
+        header.add(addButton);
     }
+
 
 
     private Component createFilterPanel(){

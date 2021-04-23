@@ -9,6 +9,9 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -20,8 +23,14 @@ import com.vaadin.flow.server.Command;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Optional;
 
 @Route(value = "admin", layout = MainView.class)
 @PageTitle("Admin")
@@ -31,7 +40,6 @@ public class AdminView extends VerticalLayout {
     private static final String MARKET_INDEXES = "Market Indexes";
     private static final String GENERATOR = "Generator";
 
-    private Div placeholder;
     private Component marketIndexesComponent;
     private Component generatorComponent;
 
@@ -43,6 +51,9 @@ public class AdminView extends VerticalLayout {
     @Autowired
     private MarketService marketService;
 
+    @Autowired
+    private ApplicationContext context;
+
     public AdminView(AdminService adminService) {
         addClassName("admin-view");
     }
@@ -50,34 +61,59 @@ public class AdminView extends VerticalLayout {
     @PostConstruct
     private void init() {
 
-        Select<String> selector = new Select<>();
-        selector.setItems(MARKET_INDEXES, GENERATOR);
-        selector.setLabel("Topic");
-        selector.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<String>, String>>() {
-            @Override
-            public void valueChanged(AbstractField.ComponentValueChangeEvent<Select<String>, String> event) {
-                switch (event.getValue()) {
-                    case MARKET_INDEXES:
-                        placeholder.removeAll();
-                        if(marketIndexesComponent==null){
-                            marketIndexesComponent=buildMarketIndexesComponent();
-                        }
-                        placeholder.add(marketIndexesComponent);
-                        break;
-                    case GENERATOR:
-                        placeholder.removeAll();
-                        if(generatorComponent==null){
-                            generatorComponent=buildGeneratorComponent();
-                        }
-                        placeholder.add(generatorComponent);
-                        break;
+        // customize the header
+        addAttachListener((ComponentEventListener<AttachEvent>) attachEvent -> {
+            Optional<Component> parent = getParent();
+            if (parent.isPresent()) {
+                Optional<HorizontalLayout> customArea = utils.findCustomArea(parent.get());
+                if (customArea.isPresent()) {
+                    customArea.get().removeAll();
+                    customizeHeader(customArea.get());
                 }
             }
         });
 
-        placeholder = new Div();
-        add(selector, placeholder);
     }
+
+
+
+    private void customizeHeader(HorizontalLayout header) {
+
+        String bWidth="11em";
+
+        header.getStyle().set("flex-direction", "row-reverse");
+
+        Button button1 = new Button(MARKET_INDEXES, new Icon(VaadinIcon.LINE_BAR_CHART));
+        button1.getStyle().set("margin-left", "0.5em");
+        button1.getStyle().set("margin-right", "0.5em");
+        button1.getStyle().set("width", bWidth);
+        button1.setIconAfterText(true);
+        button1.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
+            removeAll();
+            if(marketIndexesComponent==null){
+                marketIndexesComponent=buildMarketIndexesComponent();
+            }
+            add(marketIndexesComponent);
+        });
+
+
+        Button button2 = new Button(GENERATOR, new Icon(VaadinIcon.COG_O));
+        button2.getStyle().set("margin-left", "0.5em");
+        button2.getStyle().set("margin-right", "0.5em");
+        button2.getStyle().set("width", bWidth);
+        button2.setIconAfterText(true);
+        button2.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
+            removeAll();
+            if(generatorComponent==null){
+                generatorComponent=buildGeneratorComponent();
+            }
+            add(generatorComponent);
+        });
+
+
+        header.add(button2, button1);
+    }
+
 
 
     private Component buildMarketIndexesComponent(){
