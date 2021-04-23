@@ -93,10 +93,17 @@ public class MarketService {
 
 
     private void loadEtoroInstruments(){
-        //Resource resource = resourceLoader.getResource("etoro_instruments2.csv");
-        Resource resource = context.getResource("etoro_instruments.csv");
+
+        //Resource resource = resourceLoader.getResource("etoro_instruments.csv");
+        //Resource resource = context.getResource("etoro_instruments.csv");
+        String filename="config/etoro_instruments.csv";
+        File etoroInstrumentsFile = new File(filename);
+        if(!etoroInstrumentsFile.exists()){
+            System.out.println("File "+filename+" not found. Can't load list of eToro instruments.");
+            return;
+        }
+
         try {
-            File etoroInstrumentsFile=resource.getFile();
             List<String> lines = Files.readAllLines(etoroInstrumentsFile.toPath());
             for(String line : lines){
                 eToroInstruments.add(line);
@@ -255,15 +262,11 @@ public class MarketService {
         downloadHandler = new DownloadHandler();
 
         // retrieve the list of indexes to download from resources
-        String filename="indexes.csv";
-        File indexesFile=null;
-
-        try {
-            Resource resource = context.getResource(filename);
-            indexesFile=resource.getFile();
-        } catch (IOException e) {
-            downloadListener.onDownloadAborted(new Exception("Resource file "+filename+" not found"));
-            e.printStackTrace();
+        String filename="config/indexes.csv";
+        File indexesFile = new File(filename);
+        if(!indexesFile.exists()){
+            System.out.println("File "+filename+" not found. Can't download indexes.");
+            return null;
         }
 
         // parse the file into a list of objects
