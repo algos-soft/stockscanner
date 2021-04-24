@@ -10,10 +10,7 @@ import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -167,8 +164,20 @@ public class SimulationService extends CrudService<Simulation, Integer> {
         Workbook wb = new HSSFWorkbook();
         String name = "Simulations";
         Sheet sheet = wb.createSheet(name);
+
+        // create header row
         row = sheet.createRow(rowCount);
-        populateExcelHeaderRow(row);
+
+        // style for header cells
+        CellStyle headerStyle = wb.createCellStyle();
+        Font font = wb.createFont();
+        font.setBold(true);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setFont(font);
+
+        // populate header row
+        populateExcelHeaderRow(row, headerStyle);
+
         rowCount++;
         for(SimulationModel simulation : simulations){
             row = sheet.createRow(rowCount);
@@ -176,6 +185,13 @@ public class SimulationService extends CrudService<Simulation, Integer> {
             rowCount++;
         }
 
+        // at the end autosize each column
+        int numColumns = sheet.getRow(0).getPhysicalNumberOfCells();
+        for(int i=0; i<numColumns; i++){
+            sheet.autoSizeColumn(i);
+        }
+
+        // write the workbook to a byte array to return
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             wb.write(bos);
@@ -187,17 +203,34 @@ public class SimulationService extends CrudService<Simulation, Integer> {
 
     }
 
-    private void populateExcelHeaderRow(Row row) {
+    private void populateExcelHeaderRow(Row row, CellStyle style) {
+
         Cell cell;
         int idx=0;
-        createCell(row, idx++, SimulationsView.H_NUMGEN);
-        createCell(row, idx++, SimulationsView.H_SYMBOL);
-        createCell(row, idx++, SimulationsView.H_START);
+        createCell(row, idx++, SimulationsView.H_NUMGEN, style);
+        createCell(row, idx++, SimulationsView.H_SYMBOL, style);
+        createCell(row, idx++, SimulationsView.H_START, style);
+        createCell(row, idx++, SimulationsView.H_END, style);
+        createCell(row, idx++, SimulationsView.H_INITIAL_AMT, style);
+        createCell(row, idx++, SimulationsView.H_AMPLITUDE, style);
+        createCell(row, idx++, SimulationsView.H_DAYS_BACK, style);
+        createCell(row, idx++, SimulationsView.H_TERMINATION_REASON, style);
+        createCell(row, idx++, SimulationsView.H_PL, style);
+        createCell(row, idx++, SimulationsView.H_PL_PERCENT, style);
+        createCell(row, idx++, SimulationsView.H_SPREAD, style);
+        createCell(row, idx++, SimulationsView.H_COMMISSION, style);
+        createCell(row, idx++, SimulationsView.H_POINTS_SCANNED, style);
+        createCell(row, idx++, SimulationsView.H_NUM_POSITIONS_OPENED, style);
+        createCell(row, idx++, SimulationsView.H_POINTS_IN_OPEN, style);
+        createCell(row, idx++, SimulationsView.H_POINTS_IN_CLOSE, style);
+        createCell(row, idx++, SimulationsView.H_MIN_SERIES_OPEN, style);
+        createCell(row, idx++, SimulationsView.H_MAX_SERIES_OPEN, style);
     }
 
-    private Cell createCell(Row row,  int idx, String value){
+    private Cell createCell(Row row,  int idx, String value, CellStyle style){
         Cell cell = row.createCell(idx++);
         cell.setCellValue(value);
+        cell.setCellStyle(style);
         return cell;
     }
 
