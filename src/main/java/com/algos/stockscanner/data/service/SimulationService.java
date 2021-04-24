@@ -4,6 +4,7 @@ import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
+import com.algos.stockscanner.utils.Du;
 import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.QuerySortOrder;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +61,9 @@ public class SimulationService extends CrudService<Simulation, Integer> {
 
         return list;
     }
+
+
+
 
 //    private Sort buildSort(List<QuerySortOrder> orders){
 //
@@ -149,30 +154,25 @@ public class SimulationService extends CrudService<Simulation, Integer> {
     }
 
 
-    public byte[] exportExcel() {
+    public byte[] exportExcel(Example<Simulation> filter, List<QuerySortOrder> orders) {
 
-        Workbook wb = new HSSFWorkbook();  // or new XSSFWorkbook();
-        Sheet sheet1 = wb.createSheet("new sheet");
-
-        Object[][] bookData = {
-                {"Head First Java", "Kathy Serria", 79},
-                {"Effective Java", "Joshua Bloch", 36},
-                {"Clean Code", "Robert martin", 42},
-                {"Thinking in Java", "Bruce Eckel", 35},
-        };
+        List<SimulationModel> simulations = fetch(0, count(filter), filter, orders);
+        if(simulations.size()==0){
+            return null;
+        }
 
         int rowCount = 0;
-        for (Object[] aBook : bookData) {
-            Row row = sheet1.createRow(++rowCount);
-            int columnCount = 0;
-            for (Object field : aBook) {
-                Cell cell = row.createCell(++columnCount);
-                if (field instanceof String) {
-                    cell.setCellValue((String) field);
-                } else if (field instanceof Integer) {
-                    cell.setCellValue((Integer) field);
-                }
-            }
+        Row row;
+        Workbook wb = new HSSFWorkbook();
+        String name = "Simulations";
+        Sheet sheet = wb.createSheet(name);
+        row = sheet.createRow(rowCount);
+        populateExcelHeaderRow(row);
+        rowCount++;
+        for(SimulationModel simulation : simulations){
+            row = sheet.createRow(rowCount);
+            populateExcelRow(row, simulation);
+            rowCount++;
         }
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -184,6 +184,26 @@ public class SimulationService extends CrudService<Simulation, Integer> {
 
         return bos.toByteArray();
 
+    }
+
+    private void populateExcelHeaderRow(Row row) {
+        Cell cell;
+        cell = row.createCell(0);
+        cell.setCellValue("#gen");
+        cell = row.createCell(1);
+        cell.setCellValue("symbol");
+        cell = row.createCell(2);
+        cell.setCellValue("start");
+    }
+
+    private void populateExcelRow(Row row, SimulationModel simulation) {
+        Cell cell;
+        cell = row.createCell(0);
+        cell.setCellValue(simulation.getNumGenerator());
+        cell = row.createCell(1);
+        cell.setCellValue(simulation.getSymbol());
+        cell = row.createCell(2);
+        cell.setCellValue(simulation.getStartTs());
     }
 
 

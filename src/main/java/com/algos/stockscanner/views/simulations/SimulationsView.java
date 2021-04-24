@@ -60,7 +60,8 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
 
     private Integer filtNumGen;
     private String filtSymbol;
-    private Example<Simulation> filter;
+    private Example<Simulation> filter; // current filter
+    private List<QuerySortOrder> order; // current order
     private Integer generatorNumParam;
 
     private IntegerField generatorNumberFld;
@@ -141,9 +142,11 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
         addButton.getStyle().set("margin-right", "1em");
         addButton.setIconAfterText(true);
         addButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
-            byte[] barray = simulationService.exportExcel();
-            excelInputStream = new ByteArrayInputStream(barray);
-            anchorButton.clickInClient();
+            byte[] barray = simulationService.exportExcel(filter, order);
+            if(barray!=null){
+                excelInputStream = new ByteArrayInputStream(barray);
+                anchorButton.clickInClient();
+            }
         });
 
         header.add(addButton);
@@ -185,8 +188,8 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
         provider = DataProvider.fromCallbacks(fetchCallback -> {
             int offset = fetchCallback.getOffset();
             int limit = fetchCallback.getLimit();
-            List<QuerySortOrder> sorts = fetchCallback.getSortOrders();
-            return simulationService.fetch(offset, limit, filter, sorts).stream();
+            order = fetchCallback.getSortOrders();
+            return simulationService.fetch(offset, limit, filter, order).stream();
         }, countCallback -> {
             return simulationService.count(filter);
         });
