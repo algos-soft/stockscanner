@@ -47,6 +47,27 @@ import java.util.Optional;
 @CssImport(value = "./views/simulations/simulations-grid.css", themeFor = "vaadin-grid")
 public class SimulationsView extends Div implements HasUrlParameter<String>, AfterNavigationObserver {
 
+    // table and export file headers
+    public static final String H_DETAILS="details";
+    public static final String H_NUMGEN="#gen";
+    public static final String H_SYMBOL="sym";
+    public static final String H_START="start";
+    public static final String H_END="end";
+    public static final String H_INITIAL_AMT="initial amt";
+    public static final String H_AMPLITUDE="amp";
+    public static final String H_DAYS_BACK="days back";
+    public static final String H_TERMINATION_REASON="term";
+    public static final String H_PL="P/L";
+    public static final String H_PL_PERCENT="P/L%";
+    public static final String H_SPREAD="spread";
+    public static final String H_COMMISSION="commission";
+    public static final String H_POINTS_SCANNED="pts scanned";
+    public static final String H_NUM_POSITIONS_OPENED="# pos opened";
+    public static final String H_POINTS_IN_OPEN="pts in open";
+    public static final String H_POINTS_IN_CLOSE ="pts in close";
+    public static final String H_MIN_SERIES_OPEN="min series open";
+    public static final String H_MAX_SERIES_OPEN="max series open";
+
     private Grid<SimulationModel> grid;
 
     @Autowired
@@ -204,65 +225,65 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
 
         // data button
         col = grid.addComponentColumn(item -> createDataButton(grid, item));
-        col.setHeader("details");
+        col.setHeader(H_DETAILS);
 
         // generator number
         col=grid.addColumn(SimulationModel::getNumGenerator);
-        col.setHeader("#gen");
+        col.setHeader(H_NUMGEN);
         col.setSortProperty("generator.number");
         col.setWidth("5em");
         col.setResizable(true);
 
         // symbol
         col = grid.addComponentColumn(item -> createSymbolComponent(grid, item));
-        col.setHeader("sym");
+        col.setHeader(H_SYMBOL);
         col.setSortProperty("index.symbol");
         col.setResizable(true);
 
         // start date
         col=grid.addColumn(new LocalDateRenderer<>(SimulationModel::getStartTs,DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
-        col.setHeader("start");
+        col.setHeader(H_START);
         col.setSortProperty("startTs");
         col.setWidth("6em");
         col.setResizable(true);
 
         // end date
         col=grid.addColumn(new LocalDateRenderer<>(SimulationModel::getEndTs,DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)));
-        col.setHeader("end");
+        col.setHeader(H_END);
         col.setSortProperty("endTs");
         col.setWidth("6em");
         col.setResizable(true);
 
         // initial amount
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getInitialAmount, "%,.2f",Locale.getDefault()));
-        col.setHeader("initial amt");
+        col.setHeader(H_INITIAL_AMT);
         col.setSortProperty("initialAmount");
         col.setResizable(true);
 
         // amplitude
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getAmplitude, "%,.0f",Locale.getDefault()));
-        col.setHeader("amp");
+        col.setHeader(H_AMPLITUDE);
         col.setWidth("5em");
         col.setSortProperty("amplitude");
         col.setResizable(true);
 
         // days lookback
         col=grid.addColumn(SimulationModel::getDaysLookback);
-        col.setHeader("days back");
+        col.setHeader(H_DAYS_BACK);
         col.setWidth("5em");
         col.setSortProperty("daysLookback");
         col.setResizable(true);
 
         // termination
         col=grid.addColumn(SimulationModel::getTerminationCode);
-        col.setHeader("term");
+        col.setHeader(H_TERMINATION_REASON);
         col.setWidth("11em");
         col.setSortProperty("terminationCode");
         col.setResizable(true);
 
         // P/L
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getPl, "%,.2f",Locale.getDefault()));
-        col.setHeader("P/L");
+        col.setHeader(H_PL);
         col.setWidth("5em");
         col.setSortProperty("pl");
         col.setResizable(true);
@@ -270,7 +291,7 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
 
         // P/L percent
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getPlPercent, "%,.2f%%",Locale.getDefault()));
-        col.setHeader("P/L%");
+        col.setHeader(H_PL_PERCENT);
         col.setWidth("5em");
         col.setSortProperty("plPercent");
         col.setResizable(true);
@@ -278,56 +299,56 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
 
         // tot spread
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getTotSpread, "%,.2f",Locale.getDefault()));
-        col.setHeader("spread");
+        col.setHeader(H_SPREAD);
         col.setWidth("5em");
         col.setSortProperty("totSpread");
         col.setResizable(true);
 
         // tot commission
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getTotCommission, "%,.2f",Locale.getDefault()));
-        col.setHeader("commission");
+        col.setHeader(H_COMMISSION);
         col.setWidth("5em");
         col.setSortProperty("totCommission");
         col.setResizable(true);
 
         // num points scanned
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsScanned, "%,d",Locale.getDefault()));
-        col.setHeader("pts scanned");
+        col.setHeader(H_POINTS_SCANNED);
         col.setWidth("5em");
         col.setSortProperty("numPointsScanned");
         col.setResizable(true);
 
         // num openings
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumOpenings, "%,d",Locale.getDefault()));
-        col.setHeader("# pos opened");
+        col.setHeader(H_NUM_POSITIONS_OPENED);
         col.setWidth("5em");
         col.setSortProperty("numOpenings");
         col.setResizable(true);
 
         // num points opened
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsHold, "%,d",Locale.getDefault()));
-        col.setHeader("pts in open");
+        col.setHeader(H_POINTS_IN_OPEN);
         col.setWidth("5em");
         col.setSortProperty("numPointsHold");
         col.setResizable(true);
 
         // num points closed
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getNumPointsWait, "%,d",Locale.getDefault()));
-        col.setHeader("pts in close");
+        col.setHeader(H_POINTS_IN_CLOSE);
         col.setWidth("5em");
         col.setSortProperty("numPointsWait");
         col.setResizable(true);
 
         // min series open
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getMinPointsHold, "%,d",Locale.getDefault()));
-        col.setHeader("min series open");
+        col.setHeader(H_MIN_SERIES_OPEN);
         col.setWidth("5em");
         col.setSortProperty("minPointsHold");
         col.setResizable(true);
 
         // max series open
         col=grid.addColumn(new NumberRenderer<>(SimulationModel::getMaxPointsHold, "%,d",Locale.getDefault()));
-        col.setHeader("max series open");
+        col.setHeader(H_MAX_SERIES_OPEN);
         col.setWidth("5em");
         col.setSortProperty("maxPointsHold");
         col.setResizable(true);

@@ -6,6 +6,7 @@ import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.utils.Du;
 import com.algos.stockscanner.views.simulations.SimulationModel;
+import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -188,12 +189,16 @@ public class SimulationService extends CrudService<Simulation, Integer> {
 
     private void populateExcelHeaderRow(Row row) {
         Cell cell;
-        cell = row.createCell(0);
-        cell.setCellValue("#gen");
-        cell = row.createCell(1);
-        cell.setCellValue("symbol");
-        cell = row.createCell(2);
-        cell.setCellValue("start");
+        int idx=0;
+        createCell(row, idx++, SimulationsView.H_NUMGEN);
+        createCell(row, idx++, SimulationsView.H_SYMBOL);
+        createCell(row, idx++, SimulationsView.H_START);
+    }
+
+    private Cell createCell(Row row,  int idx, String value){
+        Cell cell = row.createCell(idx++);
+        cell.setCellValue(value);
+        return cell;
     }
 
     private void populateExcelRow(Row row, SimulationModel simulation) {
