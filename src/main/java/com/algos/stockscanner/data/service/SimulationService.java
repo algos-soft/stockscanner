@@ -234,11 +234,24 @@ public class SimulationService extends CrudService<Simulation, Integer> {
      */
     private void populateExcelRow(Workbook wb, Row row, SimulationModel simulation) {
         int idx=0;
-        Cell cell;
         createCell(wb, row, idx++, simulation.getNumGenerator(), wb.createCellStyle());
         createCell(wb, row, idx++, simulation.getSymbol(), wb.createCellStyle());
         createCell(wb, row, idx++, simulation.getStartTs(), wb.createCellStyle());
-
+        createCell(wb, row, idx++, simulation.getEndTs(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getInitialAmount(), wb.createCellStyle());
+        createCell(wb, row, idx++, (int)simulation.getAmplitude(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getDaysLookback(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getTerminationCode(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getPl(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getPlPercent(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getTotSpread(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getTotCommission(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getNumPointsScanned(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getNumOpenings(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getNumPointsHold(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getNumPointsWait(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getMinPointsHold(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getMaxPointsHold(), wb.createCellStyle());
     }
 
 
@@ -254,10 +267,21 @@ public class SimulationService extends CrudService<Simulation, Integer> {
     }
 
     /**
-     * Create a Number cell
+     * Create a Number (float) cell
      */
     private Cell createCell(Workbook wb, Row row, int idx, float value, CellStyle style){
         Cell cell = createCell(row, idx, style);
+        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,###.#0;#,###.#0;;"));
+        cell.setCellValue(value);
+        return cell;
+    }
+
+    /**
+     * Create a Integer cell
+     */
+    private Cell createCell(Workbook wb, Row row, int idx, int value, CellStyle style){
+        Cell cell = createCell(row, idx, style);
+        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,###;#,###;;"));
         cell.setCellValue(value);
         return cell;
     }
@@ -292,12 +316,6 @@ public class SimulationService extends CrudService<Simulation, Integer> {
     private Cell createCell(Row row,  int idx){
         return row.createCell(idx++);
     }
-
-
-
-
-
-
 
 
 }
