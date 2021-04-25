@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
 import java.io.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -168,20 +169,14 @@ public class SimulationService extends CrudService<Simulation, Integer> {
         // create header row
         row = sheet.createRow(rowCount);
 
-        // style for header cells
-        CellStyle headerStyle = wb.createCellStyle();
-        Font font = wb.createFont();
-        font.setBold(true);
-        headerStyle.setAlignment(HorizontalAlignment.CENTER);
-        headerStyle.setFont(font);
 
         // populate header row
-        populateExcelHeaderRow(row, headerStyle);
+        populateExcelHeaderRow(wb, row);
 
         rowCount++;
         for(SimulationModel simulation : simulations){
             row = sheet.createRow(rowCount);
-            populateExcelRow(row, simulation);
+            populateExcelRow(wb, row, simulation);
             rowCount++;
         }
 
@@ -203,46 +198,106 @@ public class SimulationService extends CrudService<Simulation, Integer> {
 
     }
 
-    private void populateExcelHeaderRow(Row row, CellStyle style) {
+    private void populateExcelHeaderRow(Workbook wb, Row row) {
 
-        Cell cell;
+        // same style for all header cells
+        CellStyle style = wb.createCellStyle();
+        Font font = wb.createFont();
+        font.setBold(true);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setFont(font);
+
         int idx=0;
-        createCell(row, idx++, SimulationsView.H_NUMGEN, style);
-        createCell(row, idx++, SimulationsView.H_SYMBOL, style);
-        createCell(row, idx++, SimulationsView.H_START, style);
-        createCell(row, idx++, SimulationsView.H_END, style);
-        createCell(row, idx++, SimulationsView.H_INITIAL_AMT, style);
-        createCell(row, idx++, SimulationsView.H_AMPLITUDE, style);
-        createCell(row, idx++, SimulationsView.H_DAYS_BACK, style);
-        createCell(row, idx++, SimulationsView.H_TERMINATION_REASON, style);
-        createCell(row, idx++, SimulationsView.H_PL, style);
-        createCell(row, idx++, SimulationsView.H_PL_PERCENT, style);
-        createCell(row, idx++, SimulationsView.H_SPREAD, style);
-        createCell(row, idx++, SimulationsView.H_COMMISSION, style);
-        createCell(row, idx++, SimulationsView.H_POINTS_SCANNED, style);
-        createCell(row, idx++, SimulationsView.H_NUM_POSITIONS_OPENED, style);
-        createCell(row, idx++, SimulationsView.H_POINTS_IN_OPEN, style);
-        createCell(row, idx++, SimulationsView.H_POINTS_IN_CLOSE, style);
-        createCell(row, idx++, SimulationsView.H_MIN_SERIES_OPEN, style);
-        createCell(row, idx++, SimulationsView.H_MAX_SERIES_OPEN, style);
+        createCell(wb, row, idx++, SimulationsView.H_NUMGEN, style);
+        createCell(wb, row, idx++, SimulationsView.H_SYMBOL, style);
+        createCell(wb, row, idx++, SimulationsView.H_START, style);
+        createCell(wb, row, idx++, SimulationsView.H_END, style);
+        createCell(wb, row, idx++, SimulationsView.H_INITIAL_AMT, style);
+        createCell(wb, row, idx++, SimulationsView.H_AMPLITUDE, style);
+        createCell(wb, row, idx++, SimulationsView.H_DAYS_BACK, style);
+        createCell(wb, row, idx++, SimulationsView.H_TERMINATION_REASON, style);
+        createCell(wb, row, idx++, SimulationsView.H_PL, style);
+        createCell(wb, row, idx++, SimulationsView.H_PL_PERCENT, style);
+        createCell(wb, row, idx++, SimulationsView.H_SPREAD, style);
+        createCell(wb, row, idx++, SimulationsView.H_COMMISSION, style);
+        createCell(wb, row, idx++, SimulationsView.H_POINTS_SCANNED, style);
+        createCell(wb, row, idx++, SimulationsView.H_NUM_POSITIONS_OPENED, style);
+        createCell(wb, row, idx++, SimulationsView.H_POINTS_IN_OPEN, style);
+        createCell(wb, row, idx++, SimulationsView.H_POINTS_IN_CLOSE, style);
+        createCell(wb, row, idx++, SimulationsView.H_MIN_SERIES_OPEN, style);
+        createCell(wb, row, idx++, SimulationsView.H_MAX_SERIES_OPEN, style);
     }
 
-    private Cell createCell(Row row,  int idx, String value, CellStyle style){
-        Cell cell = row.createCell(idx++);
-        cell.setCellValue(value);
-        cell.setCellStyle(style);
+
+    /**
+     * Populates a row of the Excel with the cells created from a Simulation item
+     */
+    private void populateExcelRow(Workbook wb, Row row, SimulationModel simulation) {
+        int idx=0;
+        Cell cell;
+        createCell(wb, row, idx++, simulation.getNumGenerator(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getSymbol(), wb.createCellStyle());
+        createCell(wb, row, idx++, simulation.getStartTs(), wb.createCellStyle());
+
+    }
+
+
+    /**
+     * Create a String cell
+     */
+    private Cell createCell(Workbook wb, Row row,  int idx, String value, CellStyle style){
+        Cell cell = createCell(row, idx, style);
+        if(value!=null){
+            cell.setCellValue(value);
+        }
         return cell;
     }
 
-    private void populateExcelRow(Row row, SimulationModel simulation) {
-        Cell cell;
-        cell = row.createCell(0);
-        cell.setCellValue(simulation.getNumGenerator());
-        cell = row.createCell(1);
-        cell.setCellValue(simulation.getSymbol());
-        cell = row.createCell(2);
-        cell.setCellValue(simulation.getStartTs());
+    /**
+     * Create a Number cell
+     */
+    private Cell createCell(Workbook wb, Row row, int idx, float value, CellStyle style){
+        Cell cell = createCell(row, idx, style);
+        cell.setCellValue(value);
+        return cell;
     }
+
+    /**
+     * Create a Date cell
+     */
+    private Cell createCell(Workbook wb, Row row, int idx, LocalDate value, CellStyle style){
+        Cell cell = createCell(row, idx, style);
+        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("dd/mm/yyyy"));
+        if(value!=null){
+            cell.setCellValue(value);
+        }
+        return cell;
+    }
+
+
+    /**
+     * Create a single cell in a row with a Style
+     */
+    private Cell createCell(Row row,  int idx, CellStyle style){
+        Cell cell = createCell(row, idx++);
+        if(style!=null){
+            cell.setCellStyle(style);
+        }
+        return cell;
+    }
+
+    /**
+     * Create a single cell in a row
+     */
+    private Cell createCell(Row row,  int idx){
+        return row.createCell(idx++);
+    }
+
+
+
+
+
+
 
 
 }
