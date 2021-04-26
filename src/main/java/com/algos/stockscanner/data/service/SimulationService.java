@@ -271,7 +271,7 @@ public class SimulationService extends CrudService<Simulation, Integer> {
      */
     private Cell createCell(Workbook wb, Row row, int idx, float value, CellStyle style){
         Cell cell = createCell(row, idx, style);
-        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,###.#0;#,###.#0;;"));
+        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,##0.00;-#,##0.00;@"));
         cell.setCellValue(value);
         return cell;
     }
@@ -281,7 +281,7 @@ public class SimulationService extends CrudService<Simulation, Integer> {
      */
     private Cell createCell(Workbook wb, Row row, int idx, int value, CellStyle style){
         Cell cell = createCell(row, idx, style);
-        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,###;#,###;;"));
+        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,###;#,###;@"));
         cell.setCellValue(value);
         return cell;
     }
