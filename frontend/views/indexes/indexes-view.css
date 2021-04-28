@@ -86,3 +86,7 @@
   font-size: var(--lumo-font-size-xs);
   margin-right: var(--lumo-space-l);
 }
+
+.indexes-view .panel {
+  border-right: 2px solid #ccc;
+}

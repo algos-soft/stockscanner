@@ -6,6 +6,8 @@ import com.algos.stockscanner.data.enums.IndexCategories;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.services.MarketService;
+import com.algos.stockscanner.views.generators.GeneratorModel;
+import com.algos.stockscanner.views.generators.GeneratorsView;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -49,7 +51,7 @@ import java.util.Optional;
 @CssImport("./views/indexes/indexes-view.css")
 public class IndexesView extends Div implements AfterNavigationObserver {
 
-    Grid<IndexModel> grid = new Grid<>();
+    Grid<IndexModel> grid;
 
     @Autowired
     private  Utils utils;
@@ -70,11 +72,17 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
     @PostConstruct
     private void init(){
+
         addClassName("indexes-view");
         setSizeFull();
+
+        Grid.Column col;
+        grid = new Grid<>();
+//        grid.getStyle().set("background","yellow");
         grid.setHeight("100%");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        grid.addComponentColumn(index -> createCard(index));
+        col=grid.addComponentColumn(index -> createCard(index));
+//        col.setHeader("Colonna 1");
         add(grid);
 
         // customize the header
@@ -137,11 +145,95 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         card.setSpacing(false);
         card.getThemeList().add("spacing-s");
 
-        VerticalLayout body = new VerticalLayout();
-        //body.addClassName("description");
-        body.setSpacing(false);
-        body.setPadding(false);
-        body.getThemeList().add("spacing-s");
+        Component pan1 = buildPan1(model);
+        Component pan2 = buildPan2(model);
+        Component pan3 = buildPan3(model);
+        Component action = buildActionCombo(model);
+
+        card.add(pan1, pan2, pan3, action);
+
+
+
+
+
+//        VerticalLayout body = new VerticalLayout();
+//        //body.addClassName("description");
+//        body.setSpacing(false);
+//        body.setPadding(false);
+//        body.getThemeList().add("spacing-s");
+//
+//        Span symbol = new Span(model.getSymbol());
+//        symbol.addClassName("symbol");
+//
+//        Span name = new Span(model.getName());
+//        name.addClassName("name");
+//
+//        String categoryDesc=null;
+//        IndexCategories indexCategory=model.getCategory();
+//        if (indexCategory!=null){
+//            categoryDesc=indexCategory.getDescription();
+//        }
+//        Span category = new Span(categoryDesc);
+//        category.addClassName("category");
+
+
+
+//        FlexLayout details = new FlexLayout();
+//        details.setFlexDirection(FlexLayout.FlexDirection.ROW);
+//        details.addClassName("details");
+//
+//        IronIcon intervalIcon = new IronIcon("vaadin", "line-chart");
+//        String text;
+//        if(model.getNumUnits()>0){
+//            text=format(model.getUnitsFrom())+" -> "+format(model.getUnitsTo());
+//        }else{
+//            text = "no data";
+//        }
+//        Span intervalSpan = new Span(text);
+//        intervalSpan.addClassName("interval");
+//
+//        IronIcon pointsIcon = new IronIcon("vaadin", "ellipsis-dots-h");
+//        Span pointsSpan = new Span(String.format("%,d", model.getNumUnits()));
+//        pointsSpan.addClassName("points");
+//        pointsIcon.setVisible(model.getNumUnits()>0);
+//        pointsSpan.setVisible(model.getNumUnits()>0);
+//
+//        IronIcon frequencyIcon = new IronIcon("vaadin", "clock");
+//        String frequencyDesc=null;
+//        FrequencyTypes frequencyType=model.getUnitFrequency();
+//        if (frequencyType!=null){
+//            frequencyDesc=frequencyType.getDescription();
+//        }
+//        Span frequencySpan = new Span(frequencyDesc);
+//        frequencySpan.addClassName("frequency");
+//        frequencyIcon.setVisible(model.getNumUnits()>0);
+//        pointsSpan.setVisible(model.getNumUnits()>0);
+//
+//        details.add(intervalIcon, intervalSpan, pointsIcon, pointsSpan, frequencyIcon, frequencySpan);
+//
+////        body.add(symbol, name, category, details);
+//        body.add(details);
+//
+//        Image image = model.getImage();
+//        Component action = buildActionCombo(model);
+////        Component action = buildActions(model);
+//
+////        card.add(image, body, action);
+//
+//        card.add(body, action);
+        return card;
+    }
+
+
+
+    private Component buildPan1(IndexModel model) {
+        Pan pan = new Pan();
+        Image image = model.getImage();
+        pan.add(image);
+        return pan;
+    }
+
+    private Component buildPan2(IndexModel model) {
 
         Span symbol = new Span(model.getSymbol());
         symbol.addClassName("symbol");
@@ -157,7 +249,14 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         Span category = new Span(categoryDesc);
         category.addClassName("category");
 
+        Pan pan = new Pan();
+        pan.add(symbol, name, category);
 
+        return pan;
+    }
+
+
+    private Component buildPan3(IndexModel model) {
 
         FlexLayout details = new FlexLayout();
         details.setFlexDirection(FlexLayout.FlexDirection.ROW);
@@ -192,15 +291,13 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         details.add(intervalIcon, intervalSpan, pointsIcon, pointsSpan, frequencyIcon, frequencySpan);
 
-        body.add(symbol, name, category, details);
+        Pan pan = new Pan();
+        pan.add(details);
 
-        Image image = model.getImage();
-        Component action = buildActionCombo(model);
-//        Component action = buildActions(model);
-
-        card.add(image, body, action);
-        return card;
+        return pan;
     }
+
+
 
     private String format(LocalDate d){
         if(d!=null){
@@ -480,6 +577,19 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         IndexModel m = new IndexModel();
         marketIndexService.entityToModel(index, m);
         return m;
+    }
+
+
+    /**
+     * base for card panels
+     */
+    class Pan extends VerticalLayout {
+        public Pan() {
+            setSpacing(false);
+            setPadding(false);
+            getThemeList().add("spacing-s");
+            addClassName("panel");
+        }
     }
 
 
