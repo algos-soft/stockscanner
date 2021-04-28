@@ -3,6 +3,16 @@
   height: 100%;
 }
 
+.generators-view vaadin-grid {
+  height: 100%;
+  line-height: var(--lumo-line-height-m);
+}
+
+.generators-view vaadin-grid,
+.generators-view vaadin-grid-cell-content {
+  background-color: var(--lumo-contrast-10pct);
+}
+
 .generators-view .card {
   background-color: var(--lumo-base-color);
   border-radius: var(--lumo-border-radius);

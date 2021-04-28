@@ -152,75 +152,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         card.add(pan1, pan2, pan3, action);
 
-
-
-
-
-//        VerticalLayout body = new VerticalLayout();
-//        //body.addClassName("description");
-//        body.setSpacing(false);
-//        body.setPadding(false);
-//        body.getThemeList().add("spacing-s");
-//
-//        Span symbol = new Span(model.getSymbol());
-//        symbol.addClassName("symbol");
-//
-//        Span name = new Span(model.getName());
-//        name.addClassName("name");
-//
-//        String categoryDesc=null;
-//        IndexCategories indexCategory=model.getCategory();
-//        if (indexCategory!=null){
-//            categoryDesc=indexCategory.getDescription();
-//        }
-//        Span category = new Span(categoryDesc);
-//        category.addClassName("category");
-
-
-
-//        FlexLayout details = new FlexLayout();
-//        details.setFlexDirection(FlexLayout.FlexDirection.ROW);
-//        details.addClassName("details");
-//
-//        IronIcon intervalIcon = new IronIcon("vaadin", "line-chart");
-//        String text;
-//        if(model.getNumUnits()>0){
-//            text=format(model.getUnitsFrom())+" -> "+format(model.getUnitsTo());
-//        }else{
-//            text = "no data";
-//        }
-//        Span intervalSpan = new Span(text);
-//        intervalSpan.addClassName("interval");
-//
-//        IronIcon pointsIcon = new IronIcon("vaadin", "ellipsis-dots-h");
-//        Span pointsSpan = new Span(String.format("%,d", model.getNumUnits()));
-//        pointsSpan.addClassName("points");
-//        pointsIcon.setVisible(model.getNumUnits()>0);
-//        pointsSpan.setVisible(model.getNumUnits()>0);
-//
-//        IronIcon frequencyIcon = new IronIcon("vaadin", "clock");
-//        String frequencyDesc=null;
-//        FrequencyTypes frequencyType=model.getUnitFrequency();
-//        if (frequencyType!=null){
-//            frequencyDesc=frequencyType.getDescription();
-//        }
-//        Span frequencySpan = new Span(frequencyDesc);
-//        frequencySpan.addClassName("frequency");
-//        frequencyIcon.setVisible(model.getNumUnits()>0);
-//        pointsSpan.setVisible(model.getNumUnits()>0);
-//
-//        details.add(intervalIcon, intervalSpan, pointsIcon, pointsSpan, frequencyIcon, frequencySpan);
-//
-////        body.add(symbol, name, category, details);
-//        body.add(details);
-//
-//        Image image = model.getImage();
-//        Component action = buildActionCombo(model);
-////        Component action = buildActions(model);
-//
-////        card.add(image, body, action);
-//
-//        card.add(body, action);
         return card;
     }
 
@@ -230,6 +161,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         Pan pan = new Pan();
         Image image = model.getImage();
         pan.add(image);
+        pan.setMaxWidth("6em");
         return pan;
     }
 
@@ -250,6 +182,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         category.addClassName("category");
 
         Pan pan = new Pan();
+        pan.setMaxWidth("18em");
         pan.add(symbol, name, category);
 
         return pan;
@@ -258,9 +191,9 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
     private Component buildPan3(IndexModel model) {
 
-        FlexLayout details = new FlexLayout();
-        details.setFlexDirection(FlexLayout.FlexDirection.ROW);
-        details.addClassName("details");
+//        FlexLayout details = new FlexLayout();
+//        details.setFlexDirection(FlexLayout.FlexDirection.ROW);
+//        details.addClassName("details");
 
         IronIcon intervalIcon = new IronIcon("vaadin", "line-chart");
         String text;
@@ -271,12 +204,19 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         }
         Span intervalSpan = new Span(text);
         intervalSpan.addClassName("interval");
+        HorizontalLayout row1 = new HorizontalLayout();
+        row1.addClassName("details");
+        row1.add(intervalIcon, intervalSpan);
+
 
         IronIcon pointsIcon = new IronIcon("vaadin", "ellipsis-dots-h");
         Span pointsSpan = new Span(String.format("%,d", model.getNumUnits()));
         pointsSpan.addClassName("points");
-        pointsIcon.setVisible(model.getNumUnits()>0);
-        pointsSpan.setVisible(model.getNumUnits()>0);
+        HorizontalLayout row2 = new HorizontalLayout();
+        row2.addClassName("details");
+        row2.setVisible(model.getNumUnits()>0);
+        row2.add(pointsIcon, pointsSpan);
+
 
         IronIcon frequencyIcon = new IronIcon("vaadin", "clock");
         String frequencyDesc=null;
@@ -286,13 +226,13 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         }
         Span frequencySpan = new Span(frequencyDesc);
         frequencySpan.addClassName("frequency");
-        frequencyIcon.setVisible(model.getNumUnits()>0);
-        pointsSpan.setVisible(model.getNumUnits()>0);
-
-        details.add(intervalIcon, intervalSpan, pointsIcon, pointsSpan, frequencyIcon, frequencySpan);
+        HorizontalLayout row3 = new HorizontalLayout();
+        row3.addClassName("details");
+        row3.setVisible(model.getNumUnits()>0);
+        row3.add(frequencyIcon, frequencySpan);
 
         Pan pan = new Pan();
-        pan.add(details);
+        pan.add(row1, row2, row3);
 
         return pan;
     }
