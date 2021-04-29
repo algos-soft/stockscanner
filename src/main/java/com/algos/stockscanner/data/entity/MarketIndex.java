@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class MarketIndex extends AbstractEntity {
@@ -38,9 +39,6 @@ public class MarketIndex extends AbstractEntity {
 
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IndexUnit> units;
-
-    @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Generator> generators;
 
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Simulation> simulations;

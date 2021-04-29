@@ -191,10 +191,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
     private Component buildPan3(IndexModel model) {
 
-//        FlexLayout details = new FlexLayout();
-//        details.setFlexDirection(FlexLayout.FlexDirection.ROW);
-//        details.addClassName("details");
-
         IronIcon intervalIcon = new IronIcon("vaadin", "line-chart");
         String text;
         if(model.getNumUnits()>0){
