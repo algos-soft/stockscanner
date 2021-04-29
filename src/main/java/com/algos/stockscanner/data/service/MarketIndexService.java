@@ -126,6 +126,25 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
     }
 
 
+    /**
+     * Update entity from model
+     */
+    public void modelToEntity(IndexModel model, MarketIndex entity) {
+        entity.setImage(model.getImageData());
+        entity.setSymbol(model.getSymbol());
+        entity.setName(model.getName());
+
+        IndexCategories category = model.getCategory();
+        if (category != null) {
+            entity.setCategory(category.getCode());
+        }
+
+        entity.setSpreadPercent(model.getSpreadPercent());
+        entity.setOvnBuyDay(model.getOvnBuyDay());
+        entity.setOvnBuyWe(model.getOvnBuyWe());
+        entity.setOvnSellDay(model.getOvnSellDay());
+        entity.setOvnSellWe(model.getOvnSellWe());
+    }
 
 
 }

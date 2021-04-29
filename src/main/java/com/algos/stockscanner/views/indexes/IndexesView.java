@@ -54,7 +54,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     Grid<IndexModel> grid;
 
     @Autowired
-    private  Utils utils;
+    private Utils utils;
 
     @Autowired
     private MarketIndexService marketIndexService;
@@ -71,7 +71,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
     @PostConstruct
-    private void init(){
+    private void init() {
 
         addClassName("indexes-view");
         setSizeFull();
@@ -81,16 +81,16 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 //        grid.getStyle().set("background","yellow");
         grid.setHeight("100%");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        col=grid.addComponentColumn(index -> createCard(index));
+        col = grid.addComponentColumn(index -> createCard(index));
 //        col.setHeader("Colonna 1");
         add(grid);
 
         // customize the header
         addAttachListener((ComponentEventListener<AttachEvent>) attachEvent -> {
             Optional<Component> parent = getParent();
-            if(parent.isPresent()){
+            if (parent.isPresent()) {
                 Optional<HorizontalLayout> customArea = utils.findCustomArea(parent.get());
-                if(customArea.isPresent()){
+                if (customArea.isPresent()) {
                     customArea.get().removeAll();
                     customizeHeader(customArea.get());
                 }
@@ -98,17 +98,17 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         });
     }
 
-    private void customizeHeader(HorizontalLayout header){
+    private void customizeHeader(HorizontalLayout header) {
 
-        Button addButton = new Button("New Index",  new Icon(VaadinIcon.PLUS_CIRCLE));
-        addButton.getStyle().set("margin-left","1em");
-        addButton.getStyle().set("margin-right","1em");
+        Button addButton = new Button("New Index", new Icon(VaadinIcon.PLUS_CIRCLE));
+        addButton.getStyle().set("margin-left", "1em");
+        addButton.getStyle().set("margin-right", "1em");
         addButton.setIconAfterText(true);
         addButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
             addNewItem();
         });
 
-        header.getStyle().set("flex-direction","row-reverse");
+        header.getStyle().set("flex-direction", "row-reverse");
 
         header.add(addButton);
 
@@ -118,13 +118,13 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     /**
      * Present an empty dialog to create a new item
      */
-    private void addNewItem(){
+    private void addNewItem() {
 
-        IndexDialogConfirmListener listener =  new IndexDialogConfirmListener() {
+        IndexDialogConfirmListener listener = new IndexDialogConfirmListener() {
             @Override
             public void onConfirm(IndexModel model) {
                 MarketIndex entity = new MarketIndex();
-                updateEntity(entity, model);
+                marketIndexService.modelToEntity(model, entity);
                 marketIndexService.update(entity);
                 loadAll();
             }
@@ -134,8 +134,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         dialog.open();
     }
-
-
 
 
     private HorizontalLayout createCard(IndexModel model) {
@@ -156,7 +154,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
 
-
     private Component buildPan1(IndexModel model) {
         Pan pan = new Pan();
         Image image = model.getImage();
@@ -173,10 +170,10 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         Span name = new Span(model.getName());
         name.addClassName("name");
 
-        String categoryDesc=null;
-        IndexCategories indexCategory=model.getCategory();
-        if (indexCategory!=null){
-            categoryDesc=indexCategory.getDescription();
+        String categoryDesc = null;
+        IndexCategories indexCategory = model.getCategory();
+        if (indexCategory != null) {
+            categoryDesc = indexCategory.getDescription();
         }
         Span category = new Span(categoryDesc);
         category.addClassName("category");
@@ -193,9 +190,9 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         IronIcon intervalIcon = new IronIcon("vaadin", "line-chart");
         String text;
-        if(model.getNumUnits()>0){
-            text=format(model.getUnitsFrom())+" -> "+format(model.getUnitsTo());
-        }else{
+        if (model.getNumUnits() > 0) {
+            text = format(model.getUnitsFrom()) + " -> " + format(model.getUnitsTo());
+        } else {
             text = "no data";
         }
         Span intervalSpan = new Span(text);
@@ -210,21 +207,21 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         pointsSpan.addClassName("points");
         HorizontalLayout row2 = new HorizontalLayout();
         row2.addClassName("details");
-        row2.setVisible(model.getNumUnits()>0);
+        row2.setVisible(model.getNumUnits() > 0);
         row2.add(pointsIcon, pointsSpan);
 
 
         IronIcon frequencyIcon = new IronIcon("vaadin", "clock");
-        String frequencyDesc=null;
-        FrequencyTypes frequencyType=model.getUnitFrequency();
-        if (frequencyType!=null){
-            frequencyDesc=frequencyType.getDescription();
+        String frequencyDesc = null;
+        FrequencyTypes frequencyType = model.getUnitFrequency();
+        if (frequencyType != null) {
+            frequencyDesc = frequencyType.getDescription();
         }
         Span frequencySpan = new Span(frequencyDesc);
         frequencySpan.addClassName("frequency");
         HorizontalLayout row3 = new HorizontalLayout();
         row3.addClassName("details");
-        row3.setVisible(model.getNumUnits()>0);
+        row3.setVisible(model.getNumUnits() > 0);
         row3.add(frequencyIcon, frequencySpan);
 
         Pan pan = new Pan();
@@ -234,9 +231,8 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
 
-
-    private String format(LocalDate d){
-        if(d!=null){
+    private String format(LocalDate d) {
+        if (d != null) {
             return d.format(DateTimeFormatter.ofPattern("dd MMM u"));
         }
 
@@ -244,8 +240,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
 
-
-    private Component buildActionCombo(IndexModel model){
+    private Component buildActionCombo(IndexModel model) {
 
         MenuBar menuBar = new MenuBar();
         MenuItem account = menuBar.addItem("Actions...");
@@ -257,7 +252,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             MarketIndex entity = marketIndexService.get(model.getId()).get();
 
             IndexDialogConfirmListener listener = model1 -> {
-                updateEntity(entity, model1);
+                marketIndexService.modelToEntity(model1, entity);
                 marketIndexService.update(entity);   // write db
                 marketIndexService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
                 grid.getDataProvider().refreshItem(model1); // refresh only this item
@@ -273,7 +268,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         account.getSubMenu().addItem("Delete index", i -> {
 
             Button bConfirm = new Button();
-            ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete "+model.getSymbol()+"?")
+            ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete " + model.getSymbol() + "?")
                     .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
                     .withButton(bConfirm, ButtonOption.caption("Delete"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
 
@@ -281,7 +276,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                 try {
                     marketIndexService.delete(model.getId());
                     loadAll();
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
@@ -318,7 +313,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             // download data in a separate thread
             new Thread(() -> {
 
-                handler[0] =  marketService.downloadIndexData(model.getSymbol(), new MarketService.DownloadListener() {
+                handler[0] = marketService.downloadIndexData(model.getSymbol(), new MarketService.DownloadListener() {
                     @Override
                     public void onDownloadCompleted() {
                         ui.access(new Command() {
@@ -341,7 +336,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                             @Override
                             public void execute() {
                                 dialog.close();
-                                ConfirmDialog dialog1 = ConfirmDialog.createError().withMessage("Download failed: "+e.getMessage());
+                                ConfirmDialog dialog1 = ConfirmDialog.createError().withMessage("Download failed: " + e.getMessage());
                                 dialog1.open();
                             }
                         });
@@ -356,12 +351,12 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                             public void execute() {
                                 progressBar.setMax(total);
                                 progressBar.setValue(current);
-                                if(current==0){
+                                if (current == 0) {
                                     progressBar.setIndeterminate(true);
                                     text.setText(message);
-                                }else{
+                                } else {
                                     progressBar.setIndeterminate(false);
-                                    text.setText(message+": "+current+"/"+total);
+                                    text.setText(message + ": " + current + "/" + total);
                                 }
                             }
                         });
@@ -377,14 +372,12 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
 
-
-
-    private Component buildActions(IndexModel model){
+    private Component buildActions(IndexModel model) {
 
         Select<String> select = new Select<>();
         select.setPlaceholder("Actions");
-        select.setItems("Edit index","Delete index","Download historic data");
-        select.getStyle().set("width","3em");
+        select.setItems("Edit index", "Delete index", "Download historic data");
+        select.getStyle().set("width", "3em");
         select.setEmptySelectionCaption("Test");
 //        select.add(new Label("Edit index"));
 //        select.add(new Label("Delete index"));
@@ -398,15 +391,15 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                 String text = event.getValue();
                 select.setValue(null);
 
-                if(text!=null){
+                if (text != null) {
 
-                    switch (text){
+                    switch (text) {
                         case "Edit index":
 
                             MarketIndex entity = marketIndexService.get(model.getId()).get();
 
                             IndexDialogConfirmListener listener = model1 -> {
-                                updateEntity(entity, model1);
+                                marketIndexService.modelToEntity(model1, entity);
                                 marketIndexService.update(entity);   // write db
                                 marketIndexService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
                                 grid.getDataProvider().refreshItem(model1); // refresh only this item
@@ -456,28 +449,28 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         return select;
 
-     }
-
-
-        /**
-         * Update entity from model
-         */
-    private void updateEntity(MarketIndex entity, IndexModel model){
-        entity.setImage(model.getImageData());
-        entity.setSymbol(model.getSymbol());
-        entity.setName(model.getName());
-
-        IndexCategories category=model.getCategory();
-        if(category!=null){
-            entity.setCategory(category.getCode());
-        }
-
-        entity.setSpreadPercent(model.getSpreadPercent());
-        entity.setOvnBuyDay(model.getOvnBuyDay());
-        entity.setOvnBuyWe(model.getOvnBuyWe());
-        entity.setOvnSellDay(model.getOvnSellDay());
-        entity.setOvnSellWe(model.getOvnSellWe());
     }
+
+
+//    /**
+//     * Update entity from model
+//     */
+//    private void updateEntity(MarketIndex entity, IndexModel model) {
+//        entity.setImage(model.getImageData());
+//        entity.setSymbol(model.getSymbol());
+//        entity.setName(model.getName());
+//
+//        IndexCategories category = model.getCategory();
+//        if (category != null) {
+//            entity.setCategory(category.getCode());
+//        }
+//
+//        entity.setSpreadPercent(model.getSpreadPercent());
+//        entity.setOvnBuyDay(model.getOvnBuyDay());
+//        entity.setOvnBuyWe(model.getOvnBuyWe());
+//        entity.setOvnSellDay(model.getOvnSellDay());
+//        entity.setOvnSellWe(model.getOvnSellWe());
+//    }
 
 
     /**
@@ -492,8 +485,8 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     /**
      * Load all data in the grid
      */
-    private void loadAll(){
-        List<IndexModel> outList=new ArrayList<>();
+    private void loadAll() {
+        List<IndexModel> outList = new ArrayList<>();
 
         Pageable p = Pageable.unpaged();
         Page<MarketIndex> page = marketIndexService.list(p);
@@ -527,7 +520,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             addClassName("panel");
         }
     }
-
 
 
 }

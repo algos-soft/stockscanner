@@ -1,0 +1,20 @@
+.indexcomponent {
+}
+
+.indexcomponent .image {
+  width: 4em
+}
+
+.indexcomponent .symbol {
+    font-size: var(--lumo-font-size-s);
+}
+
+
+
+
+
+
+
+
+
+

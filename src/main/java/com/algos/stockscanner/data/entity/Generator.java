@@ -3,6 +3,8 @@ package com.algos.stockscanner.data.entity;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.AbstractEntity;
 import com.algos.stockscanner.utils.Du;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +27,8 @@ public class Generator extends AbstractEntity {
     @OneToMany(mappedBy = "generator", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Simulation> simulations;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
     @JoinTable(name = "generator_index")
     private List<MarketIndex> indexes;
 

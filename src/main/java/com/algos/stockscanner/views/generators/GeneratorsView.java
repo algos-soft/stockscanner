@@ -420,7 +420,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
             Generator entity = generatorService.get(model.getId()).get();
 
             GeneratorDialogConfirmListener listener = model1 -> {
-                generatorService.modelToEntity(model, entity);
+                generatorService.modelToEntity(model1, entity);
                 generatorService.update(entity);    // write db
                 generatorService.entityToModel(entity, model1); // from db back to model - to be sure the model reflects the changes happened on db
                 grid.getDataProvider().refreshItem(model1); // refresh only this item

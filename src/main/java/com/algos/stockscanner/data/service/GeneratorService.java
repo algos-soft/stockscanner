@@ -157,6 +157,12 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         }
         entity.setIndex(index);
 
+        entity.getIndexes().clear();
+        for(IndexModel iModel : model.getIndexes()){
+            MarketIndex iEntity = marketIndexService.get(iModel.getId()).get();
+            entity.getIndexes().add(iEntity);
+        }
+
         entity.setStartDateLD(model.getStartDate());
         entity.setAmount(model.getAmount());
         entity.setStopLoss(model.getStopLoss());
@@ -176,6 +182,8 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         entity.setAvgDaysMin(model.getDaysLookbackMin());
         entity.setAvgDaysSteps(model.getDaysLookbackSteps());
         entity.setAvgDaysPermutate(model.isPermutateDaysLookback());
+
+        entity.setIndexesPermutate(model.isPermutateIndexes());
 
     }
 

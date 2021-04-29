@@ -3,10 +3,8 @@ package com.algos.stockscanner.views.generators;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.Unit;
+import com.algos.stockscanner.views.indexes.IndexModel;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -21,29 +19,26 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.Renderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.criteria.CriteriaBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -62,7 +57,7 @@ public class GeneratorDialog extends Dialog {
 
     private FlexLayout imgPlaceholder;
 
-    private ComboBox<MarketIndex> indexCombo;
+    private ComboBox<MarketIndex> indexComboBox;
     private DatePicker startDatePicker;
 
     private IntegerField amountFld;
@@ -84,6 +79,10 @@ public class GeneratorDialog extends Dialog {
     private IntegerField avgDaysMinFld;
     private IntegerField avgDaysMaxFld;
     private IntegerField avgDaysStepsFld;
+
+    private Checkbox permutateIndexesCheckbox;
+    private IndexCombo indexCombo;
+    private IndexesPanel indexesPanel;
 
     @Autowired
     private Utils utils;
@@ -132,6 +131,23 @@ public class GeneratorDialog extends Dialog {
         Component body = buildBody();
         Component footer = buildFooter();
         layout.add(header, body, footer);
+
+
+        // PROVVISORIO!!
+        Button button = new Button("associate indexes");
+        button.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                List<MarketIndex> entities = marketIndexService.findAll();
+                for(MarketIndex entity : entities){
+                    IndexModel model = new IndexModel();
+                    marketIndexService.entityToModel(entity, model);
+                    IndexComponent indexComponent=context.getBean(IndexComponent.class, utils.toPrimitive(model.getId()), model.getImage(), model.getSymbol());
+                    indexesPanel.add(indexComponent);
+                }
+            }
+        });
+        layout.add(button);
 
         return layout;
 
@@ -222,7 +238,7 @@ public class GeneratorDialog extends Dialog {
         FlexLayout comboPanel = new FlexLayout();
         comboPanel.setFlexDirection(FlexLayout.FlexDirection.ROW);
         comboPanel.getStyle().set("gap","1em");
-        comboPanel.add(imgPlaceholder, indexCombo);
+        comboPanel.add(imgPlaceholder, indexComboBox);
 
         IronIcon tagIcon = new IronIcon("vaadin", "tag");
         Span sNumber = new Span(""+utils.toPrimitive(model.getNumber()));
@@ -295,28 +311,47 @@ public class GeneratorDialog extends Dialog {
 
     private Component buildPage2(){
 
-        FlexLayout layout = new FlexLayout();
-        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+        VerticalLayout layout = new VerticalLayout();
 
+        Component indexPanel = buildIndexPanel();
         Component amplitudePanel = buildAmplitudePanel();
         Component avgDaysPanel = buildAvgDaysPanel();
 
-        layout.add(amplitudePanel, avgDaysPanel);
+        layout.add(indexPanel, amplitudePanel, avgDaysPanel);
 
         return layout;
     }
 
+
+    private Component buildIndexPanel(){
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(false);
+        layout.setPadding(false);
+        indexCombo=context.getBean(IndexCombo.class);
+        indexesPanel=context.getBean(IndexesPanel.class);
+        permutateIndexesCheckbox = new Checkbox("Permutate indexes");
+        indexesPanel.setVisible(false);
+
+        permutateIndexesCheckbox.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>>) event -> {
+            boolean checked = event.getValue();
+            indexCombo.setVisible(!checked);
+            indexesPanel.setVisible(checked);
+        });
+
+        layout.add(indexCombo,indexesPanel,permutateIndexesCheckbox);
+        return layout;
+    }
+
+
     private Component buildAmplitudePanel(){
-        FlexLayout layout = new FlexLayout();
-        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+        VerticalLayout layout = new VerticalLayout();
 
         amplitudeFld = new IntegerField("Amplitude %");
 
         amplitudeMinFld = new IntegerField("Amplitude min %");
         amplitudeMaxFld = new IntegerField("Amplitude max %");
         amplitudeStepsFld = new IntegerField("# of steps");
-        FlexLayout amplitudeLayout = new FlexLayout();
-        amplitudeLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        HorizontalLayout amplitudeLayout = new HorizontalLayout();
         amplitudeLayout.getStyle().set("gap","1em");
         amplitudeLayout.add(amplitudeMinFld, amplitudeMaxFld, amplitudeStepsFld);
         amplitudeLayout.setVisible(false);
@@ -368,9 +403,9 @@ public class GeneratorDialog extends Dialog {
 
     private void buildCombo() {
 
-        indexCombo=utils.buildIndexCombo();
-        indexCombo.setRequired(true);
-        indexCombo.addValueChangeListener(event -> {
+        indexComboBox =utils.buildIndexCombo();
+        indexComboBox.setRequired(true);
+        indexComboBox.addValueChangeListener(event -> {
             MarketIndex index = event.getValue();
             byte[] imageData=null;
             if (index!=null){
@@ -378,66 +413,6 @@ public class GeneratorDialog extends Dialog {
             }
             updateIcon(imageData);
         });
-
-//        // create a DataProvider with filtering callbacks
-//        MarketIndex exampleItem = new MarketIndex();
-//        ExampleMatcher matcher = ExampleMatcher.matchingAny().withMatcher("symbol", ExampleMatcher.GenericPropertyMatchers.startsWith().ignoreCase());
-//        Example<MarketIndex> example = Example.of(exampleItem, matcher);
-//        DataProvider<MarketIndex, String> dataProvider = DataProvider.fromFilteringCallbacks(fetchCallback -> {
-//            AtomicReference<String> filter=new AtomicReference<>();
-//            fetchCallback.getFilter().ifPresent( x -> filter.set(x));
-//            exampleItem.setSymbol(filter.get());
-//            return marketIndexService.fetch(fetchCallback.getOffset(), fetchCallback.getLimit(), example, null).stream();
-//        }, countCallback -> {
-//            AtomicReference<String> filter=new AtomicReference<>();
-//            countCallback.getFilter().ifPresent( x -> filter.set(x));
-//            exampleItem.setSymbol(filter.get());
-//            return marketIndexService.count(example);
-//        });
-//
-//        // create a renderer for the items in the combo list
-//        Renderer<MarketIndex> listItemRenderer = new ComponentRenderer<>(item -> {
-//            Div divSymbol = new Div();
-//            divSymbol.setText(item.getSymbol());
-//            divSymbol.getStyle().set("font-weight", "bold");
-//            Div divName = new Div();
-//            divName.setText(item.getName());
-//            divName.setMaxHeight("0.6em");
-//            divName.getStyle().set("font-size", "60%");
-//            FlexLayout texts = new FlexLayout();
-//            texts.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
-//            texts.add(divSymbol, divName);
-//            texts.getStyle().set("margin-left", "0.5em");
-//
-//            Image image = utils.byteArrayToImage(item.getImage());
-//            image.getStyle().set("border-radius","10%");
-//
-//            image.setWidth("2em");
-//            image.setHeight("2em");
-//
-//            FlexLayout wrapper = new FlexLayout();
-//            wrapper.setFlexDirection(FlexLayout.FlexDirection.ROW);
-//            wrapper.add(image, texts);
-//
-//            return wrapper;
-//        });
-//
-//        indexCombo = new ComboBox<>();
-//        indexCombo.setLabel("Index");
-//        indexCombo.setWidth("14em");
-//        indexCombo.setDataProvider(dataProvider);
-//        indexCombo.setRenderer(listItemRenderer);
-//        indexCombo.setItemLabelGenerator(MarketIndex::getSymbol);
-//        indexCombo.setRequired(true);
-//
-//        indexCombo.addValueChangeListener(event -> {
-//            MarketIndex index = event.getValue();
-//            byte[] imageData=null;
-//            if (index!=null){
-//                imageData=index.getImage();
-//            }
-//            updateIcon(imageData);
-//        });
 
     }
 
@@ -470,6 +445,7 @@ public class GeneratorDialog extends Dialog {
      * Build a new model or update the current model from the data displayed in the dialog
      */
     private GeneratorModel modelFromDialog() {
+
         GeneratorModel model;
         if (this.model != null) {
             model = this.model;
@@ -477,9 +453,23 @@ public class GeneratorDialog extends Dialog {
             model = new GeneratorModel();
         }
 
-        MarketIndex index = indexCombo.getValue();
+        MarketIndex index = indexComboBox.getValue();
         if(index!=null){
             model.setSymbol(index.getSymbol());
+        }
+
+        // replace index model from Indexes panel contents
+        List<IndexComponent> indexComponents = indexesPanel.getIndexComponents();
+        model.getIndexes().clear();
+        for(IndexComponent indexComponent : indexComponents){
+            int indexId=indexComponent.getIndexId();
+            MarketIndex marketIndex;
+            if(indexId>0){
+                marketIndex=marketIndexService.get(indexId).get();
+                IndexModel indexModel = new IndexModel();
+                marketIndexService.entityToModel(marketIndex,indexModel);
+                model.getIndexes().add(indexModel);
+            }
         }
 
         model.setStartDate(startDatePicker.getValue());
@@ -507,6 +497,8 @@ public class GeneratorDialog extends Dialog {
         model.setDaysLookbackSteps(utils.toPrimitive(avgDaysStepsFld.getValue()));
         model.setPermutateDaysLookback(permutateAvgDaysCheckbox.getValue());
 
+        model.setPermutateIndexes(permutateIndexesCheckbox.getValue());
+
         return model;
     }
 
@@ -516,11 +508,17 @@ public class GeneratorDialog extends Dialog {
         if(model.getSymbol()!=null){
             try {
                 MarketIndex index=marketIndexService.findUniqueBySymbol(model.getSymbol());
-                indexCombo.setValue(index);
+                indexComboBox.setValue(index);
                 updateIcon(index.getImage());
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        indexesPanel.removeAll();
+        for(IndexModel iModel : model.getIndexes()){
+            IndexComponent indexComponent = context.getBean(IndexComponent.class, iModel.getId(), iModel.getImage(), iModel.getSymbol());
+            indexesPanel.add(indexComponent);
         }
 
         startDatePicker.setValue(model.getStartDate());
@@ -546,6 +544,8 @@ public class GeneratorDialog extends Dialog {
         avgDaysMaxFld.setValue(utils.toPrimitive(model.getDaysLookbackMax()));
         avgDaysStepsFld.setValue(utils.toPrimitive(model.getDaysLookbackSteps()));
         permutateAvgDaysCheckbox.setValue(utils.toPrimitive(model.isPermutateDaysLookback()));
+
+        permutateIndexesCheckbox.setValue(utils.toPrimitive(model.isPermutateIndexes()));
 
     }
 
