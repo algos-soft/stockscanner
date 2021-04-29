@@ -1,8 +1,11 @@
 package com.algos.stockscanner.views.generators;
 
+import com.algos.stockscanner.views.indexes.IndexModel;
 import com.vaadin.flow.component.html.Image;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 
 /***
  * Model of a Generator for the View
@@ -13,6 +16,9 @@ public class GeneratorModel {
     private int number;
     private Image image;
     private String symbol;
+
+    private List<IndexModel> indexes;
+
     private LocalDate startDate;
     private int days;
     private int spans;
@@ -33,6 +39,8 @@ public class GeneratorModel {
     private int daysLookbackMax;
     private int daysLookbackSteps;
 
+    private boolean permutateIndexes;
+
     public int getId() {
         return id;
     }
@@ -47,6 +55,14 @@ public class GeneratorModel {
 
     public void setNumber(int number) {
         this.number = number;
+    }
+
+    public List<IndexModel> getIndexes() {
+        return indexes;
+    }
+
+    public void setIndexes(List<IndexModel> indexes) {
+        this.indexes = indexes;
     }
 
     public Image getImage() {
@@ -199,5 +215,13 @@ public class GeneratorModel {
 
     public void setDaysLookbackSteps(int daysLookbackSteps) {
         this.daysLookbackSteps = daysLookbackSteps;
+    }
+
+    public boolean isPermutateIndexes() {
+        return permutateIndexes;
+    }
+
+    public void setPermutateIndexes(boolean permutateIndexes) {
+        this.permutateIndexes = permutateIndexes;
     }
 }

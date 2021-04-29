@@ -43,6 +43,8 @@ public class MarketIndex extends AbstractEntity {
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Simulation> simulations;
 
+    @ManyToMany(mappedBy = "indexes")
+    private Set<Generator> generators;
 
     public byte[] getImage() {
         return image;

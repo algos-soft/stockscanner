@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Generator extends AbstractEntity {
@@ -23,6 +24,10 @@ public class Generator extends AbstractEntity {
 
     @OneToMany(mappedBy = "generator", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Simulation> simulations;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "generator_index")
+    private List<MarketIndex> indexes;
 
     private LocalDateTime created;
     private LocalDateTime modified;
@@ -51,8 +56,15 @@ public class Generator extends AbstractEntity {
     private Integer avgDaysMax;
     private Integer avgDaysSteps;   // must be divisor of maxAvgDays-minAvgDays
 
+    private Boolean indexesPermutate;
+
+
     public List<Simulation> getSimulations() {
         return simulations;
+    }
+
+    public List<MarketIndex> getIndexes() {
+        return indexes;
     }
 
     public Integer getNumber() {
@@ -223,6 +235,13 @@ public class Generator extends AbstractEntity {
         this.avgDaysSteps = avgDaysSteps;
     }
 
+    public Boolean getIndexesPermutate() {
+        return indexesPermutate;
+    }
+
+    public void setIndexesPermutate(Boolean indexesPermutate) {
+        this.indexesPermutate = indexesPermutate;
+    }
 
     // --------------
     public LocalDate getStartDateLD(){

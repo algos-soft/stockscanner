@@ -5,6 +5,7 @@ import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.views.generators.GeneratorModel;
+import com.algos.stockscanner.views.indexes.IndexModel;
 import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,6 +111,14 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         model.setSymbol(symbol);
         model.setImage(utils.byteArrayToImage(imageData));
 
+        List<IndexModel> mIndexes = new ArrayList<>();
+        for(MarketIndex eIndex : entity.getIndexes()){
+            IndexModel mIndex = new IndexModel();
+            marketIndexService.entityToModel(eIndex, mIndex);
+            mIndexes.add(mIndex);
+        }
+        model.setIndexes(mIndexes);
+
         model.setStartDate(entity.getStartDateLD());
         model.setAmount(utils.toPrimitive(entity.getAmount()));
         model.setStopLoss(utils.toPrimitive(entity.getStopLoss()));
@@ -130,6 +139,7 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         model.setDaysLookbackSteps(utils.toPrimitive(entity.getAvgDaysSteps()));
         model.setPermutateDaysLookback(utils.toPrimitive(entity.getAvgDaysPermutate()));
 
+        model.setPermutateIndexes(utils.toPrimitive(entity.getIndexesPermutate()));
 
     }
 
