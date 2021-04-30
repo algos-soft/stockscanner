@@ -1,0 +1,31 @@
+.pickeritem {
+    border-style: solid;
+    border-width: thin;
+    padding: 0.4em;
+    padding-bottom: 0em;
+    border-radius: var(--lumo-border-radius);
+    max-width: max-content;
+    margin:5px;
+}
+
+
+.pickeritem .image {
+  border-radius: var(--lumo-border-radius);
+  width: 2em
+}
+
+.pickeritem .symbol {
+    width: 100%;
+    text-align: center;
+    font-size: 0.6em;
+}
+
+
+
+
+
+
+
+
+
+

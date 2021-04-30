@@ -8,7 +8,6 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -31,7 +30,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -55,9 +53,6 @@ public class GeneratorDialog extends Dialog {
     private GeneratorModel model;
     private GeneratorDialogConfirmListener confirmListener;
 
-    private FlexLayout imgPlaceholder;
-
-    private ComboBox<MarketIndex> indexComboBox;
     private DatePicker startDatePicker;
 
     private IntegerField amountFld;
@@ -177,22 +172,6 @@ public class GeneratorDialog extends Dialog {
         return header;
     }
 
-    /**
-     * Updates the icon in the header based on the current byte array
-     * <p>
-     * null image data restores the default icon
-     *
-     */
-    private void updateIcon(byte[] imageData) {
-        imgPlaceholder.removeAll();
-        if(imageData==null){
-            imageData=utils.getDefaultIndexIcon();
-        }
-        Image img = utils.byteArrayToImage(imageData);
-        img.setWidth(3f, Unit.EM);
-        img.setHeight(3f, Unit.EM);
-        imgPlaceholder.add(img);
-    }
 
 
     private Component buildBody() {
@@ -226,19 +205,8 @@ public class GeneratorDialog extends Dialog {
     }
 
     private Component buildPage1(){
-        FlexLayout layout = new FlexLayout();
-        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
 
-        imgPlaceholder=new FlexLayout();
-        imgPlaceholder.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
-        imgPlaceholder.getStyle().set("margin-top","auto");
-        byte[] imageData=utils.getDefaultIndexIcon();
-        updateIcon(imageData);
-        buildCombo();
-        FlexLayout comboPanel = new FlexLayout();
-        comboPanel.setFlexDirection(FlexLayout.FlexDirection.ROW);
-        comboPanel.getStyle().set("gap","1em");
-        comboPanel.add(imgPlaceholder, indexComboBox);
+        VerticalLayout layout = new VerticalLayout();
 
         IronIcon tagIcon = new IronIcon("vaadin", "tag");
         Span sNumber = new Span(""+utils.toPrimitive(model.getNumber()));
@@ -248,7 +216,7 @@ public class GeneratorDialog extends Dialog {
         tagLayout.add(tagIcon, sNumber);
 
         HorizontalLayout row1=new HorizontalLayout();
-        row1.add(comboPanel, tagLayout);
+        row1.add(tagLayout);
 
         startDatePicker=new DatePicker("Start date");
         startDatePicker.setMaxWidth("10em");
@@ -327,10 +295,34 @@ public class GeneratorDialog extends Dialog {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(false);
         layout.setPadding(false);
+
         indexCombo=context.getBean(IndexCombo.class);
         indexesPanel=context.getBean(IndexesPanel.class);
         permutateIndexesCheckbox = new Checkbox("Permutate indexes");
         indexesPanel.setVisible(false);
+
+        IndexPickerDialogConfirmListener listener = new IndexPickerDialogConfirmListener() {
+            @Override
+            public void onConfirm() {
+
+            }
+        };
+
+        // build a list of the ids of the indexes
+        List<IndexModel> indexes = model.getIndexes();
+        List<Integer> ids=new ArrayList<>();
+        for(IndexModel model : indexes){
+            ids.add(model.getId());
+        }
+
+        indexesPanel.addClickListener(new ComponentEventListener<ClickEvent<HorizontalLayout>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<HorizontalLayout> horizontalLayoutClickEvent) {
+                IndexesPickerDialog dialog = context.getBean(IndexesPickerDialog.class, listener, ids);
+                dialog.open();
+            }
+        });
+
 
         permutateIndexesCheckbox.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>>) event -> {
             boolean checked = event.getValue();
@@ -407,22 +399,6 @@ public class GeneratorDialog extends Dialog {
 
 
 
-    private void buildCombo() {
-
-        indexComboBox =utils.buildIndexCombo();
-        indexComboBox.setRequired(true);
-        indexComboBox.addValueChangeListener(event -> {
-            MarketIndex index = event.getValue();
-            byte[] imageData=null;
-            if (index!=null){
-                imageData=index.getImage();
-            }
-            updateIcon(imageData);
-        });
-
-    }
-
-
     private Component buildFooter() {
 
         Div btnLayout = new Div();
@@ -459,7 +435,7 @@ public class GeneratorDialog extends Dialog {
             model = new GeneratorModel();
         }
 
-        MarketIndex index = indexComboBox.getValue();
+        MarketIndex index = indexCombo.getValue();
         if(index!=null){
             model.setSymbol(index.getSymbol());
         }
@@ -514,8 +490,7 @@ public class GeneratorDialog extends Dialog {
         if(model.getSymbol()!=null){
             try {
                 MarketIndex index=marketIndexService.findUniqueBySymbol(model.getSymbol());
-                indexComboBox.setValue(index);
-                updateIcon(index.getImage());
+                indexCombo.setValue(index);
             } catch (Exception e) {
                 e.printStackTrace();
             }
