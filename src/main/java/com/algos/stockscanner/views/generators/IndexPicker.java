@@ -19,7 +19,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Component to display all the available indexes
@@ -41,6 +44,8 @@ public class IndexPicker extends HorizontalLayout {
 
     private List<Integer> selectedIds;
 
+    private Map<PickerItem, Boolean> pickersMap;
+
     public IndexPicker(List<Integer> selectedIds) {
         this.selectedIds=selectedIds;
     }
@@ -49,6 +54,8 @@ public class IndexPicker extends HorizontalLayout {
     private void init(){
         setSpacing(false);
         setPadding(true);
+
+        pickersMap=new HashMap<>();
 
         addClassName("indexpicker");
         populateBody();
@@ -65,40 +72,58 @@ public class IndexPicker extends HorizontalLayout {
                 @Override
                 public void onComponentEvent(ClickEvent<VerticalLayout> event) {
                     FlexComponent fComp=event.getSource();
-                    if(isHighlighted(fComp)){
-                        dim(fComp);
+                    PickerItem item = (PickerItem)fComp;
+                    if(isHighlighted(item)){
+                        dim(item);
+                        pickersMap.put(item, false);
                     }else{
-                        highlight(fComp);
+                        highlight(item);
+                        pickersMap.put(item, true);
                     }
                 }
             });
 
+            boolean selected=false;
             if(selectedIds.contains(model.getId())){
                 highlight(comp);
+                selected=true;
             }
 
             add(comp);
+            pickersMap.put(comp, selected);
+
         }
     }
 
-    private void highlight(FlexComponent item){
+    private void highlight(PickerItem item){
         Style style = item.getStyle();
         style.set("background","#d8952a");
         style.set("filter","invert(100%)");
     }
 
-    private void dim(FlexComponent item){
+    private void dim(PickerItem item){
         Style style = item.getStyle();
         style.remove("background");
         style.remove("filter");
     }
 
-    private boolean isHighlighted(FlexComponent item){
+    private boolean isHighlighted(PickerItem item){
         Style style = item.getStyle();
         String value = style.get("filter");
         return value!=null;
     }
 
 
+    public List<Integer> getSelectedIds() {
+        List<Integer> selectedIds=new ArrayList<>();
+        for(Map.Entry<PickerItem, Boolean> entry :pickersMap.entrySet()){
+            PickerItem item = entry.getKey();
+            Boolean selected = entry.getValue();
+            if(selected){
+                selectedIds.add(item.getIndexId());
+            }
+        }
+        return selectedIds;
+    }
 
 }

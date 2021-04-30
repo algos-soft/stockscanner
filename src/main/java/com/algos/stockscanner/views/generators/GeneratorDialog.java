@@ -79,6 +79,10 @@ public class GeneratorDialog extends Dialog {
     private IndexCombo indexCombo;
     private IndexesPanel indexesPanel;
 
+    private Component pag1;
+    private Component pag2;
+    private Div placeholder;
+
     @Autowired
     private Utils utils;
 
@@ -110,6 +114,9 @@ public class GeneratorDialog extends Dialog {
         setHeight("42em");
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
+        setResizable(true);
+        setDraggable(true);
+
         add(buildContent());
 
         if (model != null) {
@@ -120,29 +127,15 @@ public class GeneratorDialog extends Dialog {
 
     private Component buildContent() {
 
-        Div layout = new Div();
+        VerticalLayout layout = new VerticalLayout();
+        layout.setPadding(false);
+        layout.setSpacing(false);
+
         layout.addClassName("dialog");
         Component header = buildHeader();
         Component body = buildBody();
         Component footer = buildFooter();
         layout.add(header, body, footer);
-
-
-        // PROVVISORIO!!
-        Button button = new Button("associate indexes");
-        button.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                List<MarketIndex> entities = marketIndexService.findAll();
-                for(MarketIndex entity : entities){
-                    IndexModel model = new IndexModel();
-                    marketIndexService.entityToModel(entity, model);
-                    IndexComponent indexComponent=context.getBean(IndexComponent.class, utils.toPrimitive(model.getId()), model.getImage(), model.getSymbol());
-                    indexesPanel.add(indexComponent);
-                }
-            }
-        });
-        layout.add(button);
 
         return layout;
 
@@ -176,30 +169,54 @@ public class GeneratorDialog extends Dialog {
 
     private Component buildBody() {
 
-        Div body = new Div();
+        VerticalLayout body = new VerticalLayout();
         body.addClassName("body");
 
+        placeholder=new Div();
+        placeholder.getStyle().set("width","100%");
+        placeholder.getStyle().set("height","100%");
+
         Tab tab1 = new Tab("General");
-        Component page1 = buildPage1();
+        pag1 = buildPage1();
 
         Tab tab2 = new Tab("Permutations");
-        Component page2 = buildPage2();
-        page2.setVisible(false);
+        pag2 = buildPage2();
+
+        //page2.setVisible(false);
 
 
-        Map<Tab, Component> tabsToPages = new HashMap<>();
-        tabsToPages.put(tab1, page1);
-        tabsToPages.put(tab2, page2);
+//        Map<Tab, Component> tabsToPages = new HashMap<>();
+//        tabsToPages.put(tab1, page1);
+//        tabsToPages.put(tab2, page2);
         Tabs tabs = new Tabs(tab1, tab2);
-        Div pages = new Div(page1, page2);
+//        Div pages = new Div(page1, page2);
 
         tabs.addSelectedChangeListener(event -> {
-            tabsToPages.values().forEach(page -> page.setVisible(false));
-            Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
-            selectedPage.setVisible(true);
+//            tabsToPages.values().forEach(page -> page.setVisible(false));
+//            Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
+//            selectedPage.setVisible(true);
+
+            String label = event.getSelectedTab().getLabel();
+            placeholder.removeAll();
+            switch (label){
+                case "General":
+                    placeholder.add(pag1);
+                    break;
+                case "Permutations":
+                    placeholder.add(pag2);
+                    break;
+            }
         });
 
-        body.add(tabs, pages);
+        placeholder.add(pag2);
+        body.add (placeholder);
+        //body.add(tabs, pages);
+
+        //page2.setVisible(true);
+//        body.add(tabs, placeholder);
+
+
+        //body.add(tabs, placeholder);
 
         return body;
     }
@@ -207,6 +224,8 @@ public class GeneratorDialog extends Dialog {
     private Component buildPage1(){
 
         VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(false);
+        layout.setPadding(false);
 
         IronIcon tagIcon = new IronIcon("vaadin", "tag");
         Span sNumber = new Span(""+utils.toPrimitive(model.getNumber()));
@@ -215,8 +234,6 @@ public class GeneratorDialog extends Dialog {
         tagLayout.addClassName("taglayout");
         tagLayout.add(tagIcon, sNumber);
 
-        HorizontalLayout row1=new HorizontalLayout();
-        row1.add(tagLayout);
 
         startDatePicker=new DatePicker("Start date");
         startDatePicker.setMaxWidth("10em");
@@ -234,9 +251,8 @@ public class GeneratorDialog extends Dialog {
         takeProfitFld.setHelperText("for each cycle");
         //takeProfitFld.getElement().setAttribute("tooltip", "for each cycle");
 
-        FlexLayout amountsLayout = new FlexLayout();
-        amountsLayout.getStyle().set("gap","1em");
-        amountsLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        HorizontalLayout amountsLayout = new HorizontalLayout();
+        amountsLayout.setSpacing(true);
         amountsLayout.add(amountFld, stopLossFld, takeProfitFld);
 
         lengthRadioGroup = new RadioButtonGroup<>();
@@ -267,12 +283,11 @@ public class GeneratorDialog extends Dialog {
         numberOfSpans.setWidth("10em");
         numberOfSpans.setHelperText("Number of repetitions, each starting when the previous ended");
 
-        FlexLayout lengthLayout = new FlexLayout();
-        lengthLayout.getStyle().set("gap","1em");
-        lengthLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        HorizontalLayout lengthLayout = new HorizontalLayout();
+        lengthLayout.setSpacing(true);
         lengthLayout.add(numberOfDays, numberOfSpans);
 
-        layout.add(row1, startDatePicker, amountsLayout, lengthRadioGroup, lengthLayout);
+        layout.add(tagLayout, startDatePicker, amountsLayout, lengthRadioGroup, lengthLayout);
 
         return layout;
     }
@@ -280,6 +295,8 @@ public class GeneratorDialog extends Dialog {
     private Component buildPage2(){
 
         VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(false);
+        layout.setPadding(false);
 
         Component indexPanel = buildIndexPanel();
         Component amplitudePanel = buildAmplitudePanel();
@@ -301,23 +318,33 @@ public class GeneratorDialog extends Dialog {
         permutateIndexesCheckbox = new Checkbox("Permutate indexes");
         indexesPanel.setVisible(false);
 
-        IndexPickerDialogConfirmListener listener = new IndexPickerDialogConfirmListener() {
-            @Override
-            public void onConfirm() {
-
+        // when the dialog is confirmed, replace the contents of the indexes panel
+        IndexPickerDialogConfirmListener listener = selectedIds -> {
+            indexesPanel.removeAll();
+            for(int id : selectedIds){
+                MarketIndex entity = marketIndexService.get(id).get();
+                IndexModel indexModel = new IndexModel();
+                marketIndexService.entityToModel(entity, indexModel);
+                IndexComponent indexComponent=context.getBean(IndexComponent.class, indexModel.getId(), indexModel.getImage(), indexModel.getSymbol());
+                indexesPanel.add(indexComponent);
             }
         };
 
-        // build a list of the ids of the indexes
-        List<IndexModel> indexes = model.getIndexes();
-        List<Integer> ids=new ArrayList<>();
-        for(IndexModel model : indexes){
-            ids.add(model.getId());
-        }
 
+        // add a click listener to the indexesPanel to open the
+        // indexes picker dialog when is clicked
         indexesPanel.addClickListener(new ComponentEventListener<ClickEvent<HorizontalLayout>>() {
             @Override
             public void onComponentEvent(ClickEvent<HorizontalLayout> horizontalLayoutClickEvent) {
+
+                // build a list of the ids of the indexes contained in the IndexesPanel
+                List<IndexComponent> indexComponents = indexesPanel.getIndexComponents();
+                List<Integer> ids=new ArrayList<>();
+                for(IndexComponent comp : indexComponents){
+                    ids.add(comp.getIndexId());
+                }
+
+                // open the dialog
                 IndexesPickerDialog dialog = context.getBean(IndexesPickerDialog.class, listener, ids);
                 dialog.open();
             }
@@ -346,9 +373,8 @@ public class GeneratorDialog extends Dialog {
         amplitudeMaxFld = new IntegerField("Amplitude max %");
         amplitudeStepsFld = new IntegerField("# of steps");
         HorizontalLayout amplitudeLayout = new HorizontalLayout();
-        amplitudeLayout.setSpacing(false);
+        amplitudeLayout.setSpacing(true);
         amplitudeLayout.setPadding(false);
-        amplitudeLayout.getStyle().set("gap","1em");
         amplitudeLayout.add(amplitudeMinFld, amplitudeMaxFld, amplitudeStepsFld);
         amplitudeLayout.setVisible(false);
 
@@ -376,9 +402,8 @@ public class GeneratorDialog extends Dialog {
         avgDaysMaxFld = new IntegerField("days lookback max");
         avgDaysStepsFld = new IntegerField("# of steps");
         HorizontalLayout avgDaysLayout = new HorizontalLayout();
-        avgDaysLayout.setSpacing(false);
+        avgDaysLayout.setSpacing(true);
         avgDaysLayout.setPadding(false);
-        avgDaysLayout.getStyle().set("gap","1em");
         avgDaysLayout.add(avgDaysMinFld, avgDaysMaxFld, avgDaysStepsFld);
         avgDaysLayout.setVisible(false);
 

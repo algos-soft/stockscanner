@@ -1,4 +1,5 @@
 .indexcomponent {
+    max-width: max-content;
 }
 
 .indexcomponent .image {

@@ -50,6 +50,7 @@ public class IndexesPickerDialog extends Dialog  {
         setCloseOnEsc(false);
         setCloseOnOutsideClick(true);
         setResizable(true);
+        setDraggable(true);
 
         add(buildContent());
     }
@@ -88,9 +89,8 @@ public class IndexesPickerDialog extends Dialog  {
         footer.addClassName("footer");
 
         Button confirmButton = new Button("Confirm", event -> {
-//            GeneratorModel model = modelFromDialog();
-//            confirmListener.onConfirm(model);
-            confirmListener.onConfirm();
+            List<Integer> selectedIds=indexPicker.getSelectedIds();
+            confirmListener.onConfirm(selectedIds);
             close();
         });
         confirmButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);

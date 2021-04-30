@@ -1,6 +1,12 @@
 .indexespanel {
+    height:4em;
     width: 100%;
     overflow: auto;
+    align-items: center;
+}
+
+.emptyview {
+    font-size: var(--lumo-font-size-s);
 }
 
 
