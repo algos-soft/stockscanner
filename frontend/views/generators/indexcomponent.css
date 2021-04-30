@@ -2,11 +2,13 @@
 }
 
 .indexcomponent .image {
-  width: 4em
+  width: 2em
 }
 
 .indexcomponent .symbol {
-    font-size: var(--lumo-font-size-s);
+    width: 100%;
+    text-align: center;
+    font-size: 0.6em;
 }
 
 

@@ -1,6 +1,7 @@
 package com.algos.stockscanner.views.generators;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -13,6 +14,7 @@ import java.util.List;
  * Component showing multiple IndexComponent(s)
  * (index images with symbol)
  */
+@CssImport(value = "./views/generators/indexespanel.css")
 @org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class IndexesPanel extends HorizontalLayout {
@@ -23,6 +25,9 @@ public class IndexesPanel extends HorizontalLayout {
     private void init(){
         setSpacing(true);
         setPadding(false);
+
+        addClassName("indexespanel");
+
         indexComponents=new ArrayList<>();
     }
 

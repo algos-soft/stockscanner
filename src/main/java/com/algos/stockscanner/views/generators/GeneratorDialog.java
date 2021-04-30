@@ -345,6 +345,8 @@ public class GeneratorDialog extends Dialog {
 
     private Component buildAmplitudePanel(){
         VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(false);
+        layout.setPadding(false);
 
         amplitudeFld = new IntegerField("Amplitude %");
 
@@ -352,6 +354,8 @@ public class GeneratorDialog extends Dialog {
         amplitudeMaxFld = new IntegerField("Amplitude max %");
         amplitudeStepsFld = new IntegerField("# of steps");
         HorizontalLayout amplitudeLayout = new HorizontalLayout();
+        amplitudeLayout.setSpacing(false);
+        amplitudeLayout.setPadding(false);
         amplitudeLayout.getStyle().set("gap","1em");
         amplitudeLayout.add(amplitudeMinFld, amplitudeMaxFld, amplitudeStepsFld);
         amplitudeLayout.setVisible(false);
@@ -371,15 +375,17 @@ public class GeneratorDialog extends Dialog {
 
     private Component buildAvgDaysPanel(){
 
-        FlexLayout layout = new FlexLayout();
-        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(false);
+        layout.setPadding(false);
 
         avgDaysFld = new IntegerField("days lookback");
         avgDaysMinFld = new IntegerField("days lookback min");
         avgDaysMaxFld = new IntegerField("days lookback max");
         avgDaysStepsFld = new IntegerField("# of steps");
-        FlexLayout avgDaysLayout = new FlexLayout();
-        avgDaysLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        HorizontalLayout avgDaysLayout = new HorizontalLayout();
+        avgDaysLayout.setSpacing(false);
+        avgDaysLayout.setPadding(false);
         avgDaysLayout.getStyle().set("gap","1em");
         avgDaysLayout.add(avgDaysMinFld, avgDaysMaxFld, avgDaysStepsFld);
         avgDaysLayout.setVisible(false);
