@@ -9,7 +9,7 @@
   border-radius: 10%;
 }
 
-.dialog .header {
+.dialog_header {
     /*background: gray;*/
     display: flex;
     flex-direction: row;
@@ -20,24 +20,18 @@
     gap: 0.3em;
 }
 
-.dialog .body {
+.dialog_body {
     /*background: yellow;*/
     /*display: flex;*/
-    /*flex-direction: column;*/
+    /*flex-direction: row;*/
     height: 100%;
     width: 100%;
     margin-top: 1em;
 }
 
-.dialog .footer {
-    /*background: blue;*/
-    display: flex;
-    flex-direction: row;
-    margin-top: 1em;
-    align-items:center;
-    /*width: 100%*/
-    justify-content:  flex-end ;
-    gap: 1em;
+.dialog_footer {
+    width: 100%;
+    justify-content: flex-end;
 }
 
 .dialog .taglayout {

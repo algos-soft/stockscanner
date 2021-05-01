@@ -69,7 +69,7 @@ public class IndexesPickerDialog extends Dialog  {
 
     private Component buildHeader() {
         Div header = new Div();
-        header.addClassName("header");
+        header.addClassName("dialogheader");
         header.setText("Header");
         return header;
     }
@@ -78,7 +78,7 @@ public class IndexesPickerDialog extends Dialog  {
 
     private Component buildBody() {
         Div body = new Div();
-        body.addClassName("body");
+        body.addClassName("dialogbody");
         indexPicker=context.getBean(IndexPicker.class, selectedIds);
         body.add(indexPicker);
         return body;
@@ -86,7 +86,7 @@ public class IndexesPickerDialog extends Dialog  {
 
     private Component buildFooter() {
         HorizontalLayout footer = new HorizontalLayout();
-        footer.addClassName("footer");
+        footer.addClassName("dialogfooter");
 
         Button confirmButton = new Button("Confirm", event -> {
             List<Integer> selectedIds=indexPicker.getSelectedIds();

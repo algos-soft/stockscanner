@@ -2,17 +2,17 @@
   height: 100%;
 }
 
-.header {
+.dialogheader {
     width: 100%;
 }
 
-.body {
+.dialogbody {
     width: 100%;
     height: 100%;
     flex-wrap: wrap;
 }
 
-.footer {
+.dialogfooter {
     width: 100%;
     justify-content: flex-end;
 }

@@ -144,7 +144,7 @@ public class GeneratorDialog extends Dialog {
 
     private Component buildHeader() {
         Div header = new Div();
-        header.addClassName("header");
+        header.addClassName("dialog_header");
 
         // load default icon
         Resource res = context.getResource("images/generator.png");
@@ -170,11 +170,12 @@ public class GeneratorDialog extends Dialog {
     private Component buildBody() {
 
         VerticalLayout body = new VerticalLayout();
-        body.addClassName("body");
+        body.addClassName("dialog_body");
 
         placeholder=new Div();
         placeholder.getStyle().set("width","100%");
         placeholder.getStyle().set("height","100%");
+        placeholder.getStyle().set("background","yellow");
 
         Tab tab1 = new Tab("General");
         pag1 = buildPage1();
@@ -185,16 +186,16 @@ public class GeneratorDialog extends Dialog {
         //page2.setVisible(false);
 
 
-//        Map<Tab, Component> tabsToPages = new HashMap<>();
-//        tabsToPages.put(tab1, page1);
-//        tabsToPages.put(tab2, page2);
+        Map<Tab, Component> tabsToPages = new HashMap<>();
+        tabsToPages.put(tab1, pag1);
+        tabsToPages.put(tab2, pag2);
         Tabs tabs = new Tabs(tab1, tab2);
-//        Div pages = new Div(page1, page2);
+        Div pages = new Div(pag1, pag2);
 
         tabs.addSelectedChangeListener(event -> {
-//            tabsToPages.values().forEach(page -> page.setVisible(false));
-//            Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
-//            selectedPage.setVisible(true);
+            tabsToPages.values().forEach(page -> page.setVisible(false));
+            Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
+            selectedPage.setVisible(true);
 
             String label = event.getSelectedTab().getLabel();
             placeholder.removeAll();
@@ -208,9 +209,32 @@ public class GeneratorDialog extends Dialog {
             }
         });
 
-        placeholder.add(pag2);
-        body.add (placeholder);
-        //body.add(tabs, pages);
+
+        Button b1 = new Button("Page 1");
+        b1.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                placeholder.removeAll();
+                placeholder.add(pag1);
+            }
+        });
+        Button b2 = new Button("Page 2");
+        b2.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                placeholder.removeAll();
+                placeholder.add(pag2);
+            }
+        });
+        HorizontalLayout btnLayout = new HorizontalLayout(b1, b2);
+
+
+        //pag1=new Label("Page 1");
+        //pag2=new Label("Page 2");
+
+        //placeholder.add(pag2);
+        //body.add (btnLayout, placeholder);
+        body.add(tabs, pages);
 
         //page2.setVisible(true);
 //        body.add(tabs, placeholder);
@@ -426,8 +450,8 @@ public class GeneratorDialog extends Dialog {
 
     private Component buildFooter() {
 
-        Div btnLayout = new Div();
-        btnLayout.addClassName("footer");
+        HorizontalLayout footer = new HorizontalLayout();
+        footer.addClassName("dialog_footer");
 
         Button confirmButton = new Button("Confirm", event -> {
             GeneratorModel model = modelFromDialog();
@@ -440,9 +464,9 @@ public class GeneratorDialog extends Dialog {
             close();
         });
 
-        btnLayout.add(cancelButton, confirmButton);
+        footer.add(cancelButton, confirmButton);
 
-        return btnLayout;
+        return footer;
     }
 
 
