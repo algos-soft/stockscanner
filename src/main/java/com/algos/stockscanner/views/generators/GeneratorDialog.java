@@ -141,7 +141,7 @@ public class GeneratorDialog extends Dialog {
 
 
     private Component buildHeader() {
-        Div header = new Div();
+        HorizontalLayout header = new HorizontalLayout();
         header.addClassName("dialog_header");
 
         // load default icon
@@ -158,8 +158,16 @@ public class GeneratorDialog extends Dialog {
         img.setWidth(2, Unit.EM);
         img.setHeight(2, Unit.EM);
 
+        IronIcon tagIcon = new IronIcon("vaadin", "tag");
+        Span sNumber = new Span(""+utils.toPrimitive(model.getNumber()));
+        sNumber.addClassName("tagnumber");
+        HorizontalLayout tagLayout=new HorizontalLayout();
+        tagLayout.addClassName("taglayout");
+        tagLayout.add(tagIcon, sNumber);
+
+
         Label title = new Label("Generator");
-        header.add(img, title);
+        header.add(img, title, tagLayout);
         return header;
     }
 
@@ -201,13 +209,6 @@ public class GeneratorDialog extends Dialog {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(false);
         layout.setPadding(false);
-
-        IronIcon tagIcon = new IronIcon("vaadin", "tag");
-        Span sNumber = new Span(""+utils.toPrimitive(model.getNumber()));
-        sNumber.addClassName("tagnumber");
-        HorizontalLayout tagLayout=new HorizontalLayout();
-        tagLayout.addClassName("taglayout");
-        tagLayout.add(tagIcon, sNumber);
 
         startDatePicker=new DatePicker("Start date");
         startDatePicker.setMaxWidth("10em");
@@ -261,7 +262,7 @@ public class GeneratorDialog extends Dialog {
         lengthLayout.setSpacing(true);
         lengthLayout.add(numberOfDays, numberOfSpans);
 
-        layout.add(tagLayout, startDatePicker, amountsLayout, lengthRadioGroup, lengthLayout);
+        layout.add(startDatePicker, amountsLayout, lengthRadioGroup, lengthLayout);
 
         return layout;
     }

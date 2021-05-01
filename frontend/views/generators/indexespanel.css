@@ -1,8 +1,10 @@
 .indexespanel {
-    height:4em;
+    height:5em;
     width: 100%;
     overflow: auto;
     align-items: center;
+    margin-top: 0.5em;
+    gap: 1em;
 }
 
 .emptyview {

@@ -2,13 +2,11 @@ package com.algos.stockscanner.views.generators;
 
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
-import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -18,6 +16,7 @@ import javax.annotation.PostConstruct;
 /**
  * Component showing Index image and combo chooser
  */
+@CssImport(value = "./views/generators/indexcombo.css")
 @org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class IndexCombo extends HorizontalLayout {
@@ -32,11 +31,12 @@ public class IndexCombo extends HorizontalLayout {
     private void init(){
         setSpacing(true);
         setPadding(false);
-//        getStyle().set("gap","1em");
-
+        addClassName("indexcombo");
 
         imgPlaceholder=new FlexLayout();
-        imgPlaceholder.getStyle().set("margin-top","auto");
+        imgPlaceholder.addClassName("imgplaceholder");
+
+        //imgPlaceholder.getStyle().set("margin-top","auto");
 
         buildCombo();
 
@@ -52,6 +52,7 @@ public class IndexCombo extends HorizontalLayout {
     private void buildCombo() {
 
         indexComboBox =utils.buildIndexCombo();
+        indexComboBox.addClassName("combobox");
         indexComboBox.setRequired(true);
         indexComboBox.addValueChangeListener(event -> {
             MarketIndex index = event.getValue();
@@ -78,8 +79,9 @@ public class IndexCombo extends HorizontalLayout {
             imageData=utils.getDefaultIndexIcon();
         }
         Image img = utils.byteArrayToImage(imageData);
-        img.setWidth(3f, Unit.EM);
-        img.setHeight(3f, Unit.EM);
+        img.addClassName("image");
+//        img.setWidth(3f, Unit.EM);
+//        img.setHeight(3f, Unit.EM);
         imgPlaceholder.add(img);
     }
 
