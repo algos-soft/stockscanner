@@ -93,13 +93,14 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         filter = Example.of(new Generator());    // empty initial filter
 
         createGrid();
-        Component filterPanel = createFilterPanel();
+        //Component filterPanel = createFilterPanel();
 
         statusLayout = new HorizontalLayout();
 
         VerticalLayout layout = new VerticalLayout();
         layout.getStyle().set("height", "100%");
-        layout.add(filterPanel, grid, statusLayout);
+//        layout.add(filterPanel, grid, statusLayout);
+        layout.add(grid, statusLayout);
 
         add(layout);
 

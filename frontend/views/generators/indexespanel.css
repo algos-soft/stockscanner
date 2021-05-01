@@ -18,15 +18,8 @@
 
 .indexespanel-list {
     flex-wrap: wrap;
-/*
-    height:6em;
-*/
-    width: 100%;
+    max-height: 7.5em;
     overflow: auto;
-    align-items: center;
-/*
-    margin-top: 0.5em;
-*/
     gap: 0.5em;
 }
 

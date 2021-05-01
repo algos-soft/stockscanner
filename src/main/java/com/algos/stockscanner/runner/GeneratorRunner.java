@@ -105,14 +105,14 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
         setId("main-layout");
 
         Label emptyLabel = new Label(); // blank element, for alignment purpose only
-        emptyLabel.getStyle().set("display","flex");
-        emptyLabel.getStyle().set("flex","1");
-        emptyLabel.getStyle().set("max-width","1em");
+        emptyLabel.getStyle().set("display", "flex");
+        emptyLabel.getStyle().set("flex", "1");
+        emptyLabel.getStyle().set("max-width", "1em");
 
         closeIcon = VaadinIcon.CLOSE.create();
-        closeIcon.getStyle().set("display","flex");
-        closeIcon.getStyle().set("flex","1");
-        closeIcon.getStyle().set("max-width","1em");
+        closeIcon.getStyle().set("display", "flex");
+        closeIcon.getStyle().set("flex", "1");
+        closeIcon.getStyle().set("max-width", "1em");
         closeIcon.getStyle().set("font-size", "0.8em");
         closeIcon.addClickListener((ComponentEventListener<ClickEvent<Icon>>) iconClickEvent -> {
             if (completed || error) {
@@ -122,9 +122,9 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
         label = new Label();
         label.setId("label");
-        label.getStyle().set("display","flex");
-        label.getStyle().set("flex","1");
-        label.getStyle().set("justify-content","center");
+        label.getStyle().set("display", "flex");
+        label.getStyle().set("flex", "1");
+        label.getStyle().set("justify-content", "center");
 
         imgPlaceholder = new Div();
         imgPlaceholder.addClickListener((ComponentEventListener<ClickEvent<Div>>) divClickEvent -> infoClicked());
@@ -174,16 +174,17 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
             preliminaryChecks();
 
-            // delete previous simulations for the same generator
+            // delete previous simulations for this generator
             generator.getSimulations().clear();
             generatorService.update(generator);
 
             // build cartesian list of permutable properties
+            List<Integer> indexIds = getIndexIdsList();
             List<Integer> amplitudes = getAmplitudesList();
             Collections.sort(amplitudes);
             List<Integer> lookbacks = getLookbacksList();
             Collections.sort(lookbacks);
-            List<List<Integer>> cartesianList = Lists.cartesianProduct(amplitudes, lookbacks);
+            List<List<Integer>> cartesianList = Lists.cartesianProduct(indexIds, amplitudes, lookbacks);
 
             int s = 0;
             int numPerm = cartesianList.size();
@@ -194,11 +195,12 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     break;
                 }
 
-                int amplitude = permutation.get(0);
-                int lookback = permutation.get(1);
+                int indexId = permutation.get(0);
+                int amplitude = permutation.get(1);
+                int lookback = permutation.get(2);
 
-                LocalDate startDate=generator.getStartDateLD();
-                Simulation simulation=null;
+                LocalDate startDate = generator.getStartDateLD();
+                Simulation simulation = null;
 
                 for (int nspan = 0; nspan < numSpans; nspan++) {
                     if (abort) {
@@ -206,8 +208,8 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     }
 
                     // start new span the day after the previous span ended
-                    if(nspan>0){
-                        startDate=simulation.getEndTsLDT().toLocalDate().plusDays(1);
+                    if (nspan > 0) {
+                        startDate = simulation.getEndTsLDT().toLocalDate().plusDays(1);
                     }
 
                     // update progress
@@ -215,16 +217,16 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     setProgress(numPerm * numSpans, s, null);
 
                     // prepare params
-                    MarketIndex index=generator.getIndex();
+                    MarketIndex index = marketIndexService.get(indexId).get();
                     StrategyParams params = new StrategyParams();
                     params.setIndex(index);
                     params.setStartDate(startDate);
                     params.setFixedDays(generator.getFixedDays());
-                    LocalDate endDate=params.getStartDate().plusDays(generator.getDays() - 1);
-                    if(generator.getFixedDays()){   // Fixd length
+                    LocalDate endDate = params.getStartDate().plusDays(generator.getDays() - 1);
+                    if (generator.getFixedDays()) {   // Fixd length
                         params.setEndDate(endDate);
-                    }else{  // Variable length
-                        if(generator.getDays()>0){
+                    } else {  // Variable length
+                        if (generator.getDays() > 0) {
                             params.setEndDate(endDate);
                         }
                     }
@@ -237,10 +239,10 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
                     // run the strategy and retrieve a Simulation
                     strategy = context.getBean(SurferStrategy.class, params);
-                    simulation=strategy.execute();
+                    simulation = strategy.execute();
 
                     // assign the Simulation to the Generator and save
-                    if(simulation!=null){
+                    if (simulation != null) {
                         simulation.setGenerator(generator);
                         simulationService.update(simulation);
                     }
@@ -262,7 +264,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             error = true;
 
             ui.access((Command) () -> {
-                closeIcon.getStyle().set("color","red");
+                closeIcon.getStyle().set("color", "red");
                 button.setEnabled(false);
                 setProgress(1, 0, "Error - (!) for info");
             });
@@ -336,7 +338,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
     private void setCompleted() {
         completed = true;
         ui.access((Command) () -> {
-            closeIcon.getStyle().set("color","red");
+            closeIcon.getStyle().set("color", "red");
             button.setText("Show");
             progressBar.setMax(1);
             progressBar.setValue(1);
@@ -505,8 +507,20 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
     }
 
 
-    private void showSimulations(){
-        UI.getCurrent().navigate(SimulationsView.class, ""+ generator.getNumber());
+    private void showSimulations() {
+        UI.getCurrent().navigate(SimulationsView.class, "" + generator.getNumber());
+    }
+
+    private List<Integer> getIndexIdsList() throws Exception {
+        List<Integer> list = new ArrayList<>();
+        if (generator.getIndexesPermutate()) {
+            for (MarketIndex index : generator.getIndexes()) {
+                list.add(index.getId());
+            }
+        } else {
+            list.add(generator.getIndex().getId());
+        }
+        return list;
     }
 
     private List<Integer> getAmplitudesList() throws Exception {
@@ -518,11 +532,10 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             int max = utils.toPrimitive(generator.getAmplitudeMax());
             int steps = utils.toPrimitive(generator.getAmplitudeSteps());
             list.addAll(rangeToList(min, max, steps));
-            return list;
         } else {
             list.add(utils.toPrimitive(generator.getAmplitude()));
-            return list;
         }
+        return list;
     }
 
     private List<Integer> getLookbacksList() throws Exception {
@@ -534,11 +547,10 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             int max = utils.toPrimitive(generator.getAvgDaysMax());
             int steps = utils.toPrimitive(generator.getAvgDaysSteps());
             list.addAll(rangeToList(min, max, steps));
-            return list;
         } else {
             list.add(utils.toPrimitive(generator.getAvgDays()));
-            return list;
         }
+        return list;
     }
 
 
