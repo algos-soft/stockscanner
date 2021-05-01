@@ -44,7 +44,7 @@ public class IndexPicker extends HorizontalLayout {
 
     private List<Integer> selectedIds;
 
-    private Map<PickerItem, Boolean> pickersMap;
+    private List<PickerItem> pickerItems;
 
     public IndexPicker(List<Integer> selectedIds, IndexPickerSelectionListener selectionListener) {
         this.selectedIds=selectedIds;
@@ -60,7 +60,7 @@ public class IndexPicker extends HorizontalLayout {
         setSpacing(false);
         setPadding(true);
 
-        pickersMap=new HashMap<>();
+        pickerItems=new ArrayList<>();
 
         addClassName("indexpicker");
         populateBody();
@@ -73,30 +73,28 @@ public class IndexPicker extends HorizontalLayout {
             IndexModel model = new IndexModel();
 
             marketIndexService.entityToModel(entity, model);
-            PickerItem pickerItem = context.getBean(PickerItem.class, utils.toPrimitive(model.getId()), model.getImage(), model.getSymbol());
+            PickerItem pickerItem = context.getBean(PickerItem.class, utils.toPrimitive(model.getId()), model.getImageData(), model.getSymbol());
 
             pickerItem.addClickListener((ComponentEventListener<ClickEvent<VerticalLayout>>) event -> {
                 Component fComp=event.getSource();
                 PickerItem item = (PickerItem)fComp;
-                if(isHighlighted(item)){
-                    dim(item);
-                    pickersMap.put(item, false);
+                if(item.isHighlighted()){
+                    item.dim();
                     selectionListener.itemSelection(item, false, countSelected());
                 }else{
-                    highlight(item);
-                    pickersMap.put(item, true);
+                    item.highlight();
                     selectionListener.itemSelection(item, true, countSelected());
                 }
             });
 
             boolean selected=false;
             if(selectedIds.contains(model.getId())){
-                highlight(pickerItem);
+                pickerItem.highlight();
                 selected=true;
             }
 
             add(pickerItem);
-            pickersMap.put(pickerItem, selected);
+            pickerItems.add(pickerItem);
 
             if(selected){
                 selectionListener.itemSelection(pickerItem, true, countSelected());
@@ -105,31 +103,12 @@ public class IndexPicker extends HorizontalLayout {
         }
     }
 
-    private void highlight(PickerItem item){
-        Style style = item.getStyle();
-        style.set("background","#d8952a");
-        style.set("filter","invert(100%)");
-    }
-
-    private void dim(PickerItem item){
-        Style style = item.getStyle();
-        style.remove("background");
-        style.remove("filter");
-    }
-
-    private boolean isHighlighted(PickerItem item){
-        Style style = item.getStyle();
-        String value = style.get("filter");
-        return value!=null;
-    }
 
 
     public List<Integer> getSelectedIds() {
         List<Integer> selectedIds=new ArrayList<>();
-        for(Map.Entry<PickerItem, Boolean> entry :pickersMap.entrySet()){
-            PickerItem item = entry.getKey();
-            Boolean selected = entry.getValue();
-            if(selected){
+        for(PickerItem item : pickerItems){
+            if(item.isHighlighted()){
                 selectedIds.add(item.getIndexId());
             }
         }
@@ -139,8 +118,7 @@ public class IndexPicker extends HorizontalLayout {
     public void filter(String value) {
         this.filter=value;
 
-        for(Map.Entry<PickerItem, Boolean> entry :pickersMap.entrySet()){
-            PickerItem item = entry.getKey();
+        for(PickerItem item : pickerItems){
             String symbol=item.getIndexSymbol();
             if(symbol.toUpperCase().contains(value.toUpperCase())){
                 item.setVisible(true);
@@ -154,12 +132,35 @@ public class IndexPicker extends HorizontalLayout {
 
     private int countSelected(){
         int count=0;
-        for(boolean selected :pickersMap.values() ){
-            if(selected){
+        for(PickerItem item : pickerItems){
+            if(item.isHighlighted()){
                 count++;
             }
         }
         return count;
+    }
+
+
+    public void selectAll() {
+        for(PickerItem item : pickerItems){
+            if(item.isVisible()){
+                if(!item.isHighlighted()){
+                    item.highlight();
+                    selectionListener.itemSelection(item, true, countSelected());
+                }
+            }
+        }
+    }
+
+    public void selectNone() {
+        for(PickerItem item : pickerItems){
+            if(item.isVisible()){
+                if(item.isHighlighted()){
+                    item.dim();
+                    selectionListener.itemSelection(item, false, countSelected());
+                }
+            }
+        }
     }
 
 

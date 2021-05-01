@@ -3,7 +3,6 @@ package com.algos.stockscanner.views.generators;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -23,18 +22,31 @@ public class IndexesPanel extends HorizontalLayout {
 
     private List<IndexComponent> indexComponents;
     private Component emptyView;
+    private String cssSuffix;
+
+    public IndexesPanel(String cssSuffix) {
+        this.cssSuffix = cssSuffix;
+    }
+
+    public IndexesPanel() {
+        this(null);
+    }
 
     @PostConstruct
     private void init(){
+        if(cssSuffix==null){
+            cssSuffix="";
+        }
+
         setSpacing(false);
         setPadding(false);
 
+        addClassName("indexespanel"+cssSuffix);
+
         Div div = new Div();
         div.setText("No indexes - click to add");
-        div.addClassName("emptyview");
+        div.addClassName("emptyview"+cssSuffix);
         emptyView=div;
-
-        addClassName("indexespanel");
 
         indexComponents=new ArrayList<>();
 

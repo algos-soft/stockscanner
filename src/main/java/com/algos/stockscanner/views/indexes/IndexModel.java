@@ -1,8 +1,10 @@
 package com.algos.stockscanner.views.indexes;
 
+import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.enums.FrequencyTypes;
 import com.algos.stockscanner.data.enums.IndexCategories;
 import com.vaadin.flow.component.html.Image;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 
@@ -14,7 +16,6 @@ public class IndexModel {
 
     private Integer id;
     private byte[] imageData;
-    private Image image;
     private String symbol;
     private String name;
     private IndexCategories category;
@@ -38,14 +39,6 @@ public class IndexModel {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Image getImage() {
-        return image;
-    }
-
-    public void setImage(Image image) {
-        this.image = image;
     }
 
     public String getName() {

@@ -86,10 +86,28 @@ public class IndexesPickerDialog extends Dialog  {
             indexPicker.filter(value);
         });
 
+        Button buttonAll = new Button("Select all");
+        buttonAll.addClassName("selectbutton");
+        buttonAll.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                indexPicker.selectAll();
+            }
+        });
+
+        Button buttonNone = new Button("Select none");
+        buttonNone.addClassName("selectbutton");
+        buttonNone.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                indexPicker.selectNone();
+            }
+        });
+
         selectionIndicator = new Label();
         selectionIndicator.addClassName("selectionindicator");
 
-        header.add(filterFld, selectionIndicator);
+        header.add(filterFld, buttonAll, buttonNone, selectionIndicator);
         return header;
     }
 

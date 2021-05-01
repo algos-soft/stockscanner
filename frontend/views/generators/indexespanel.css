@@ -14,6 +14,28 @@
 }
 
 
+/* -list suffix for usage in generator view */
+
+.indexespanel-list {
+    flex-wrap: wrap;
+/*
+    height:6em;
+*/
+    width: 100%;
+    overflow: auto;
+    align-items: center;
+/*
+    margin-top: 0.5em;
+*/
+    gap: 0.5em;
+}
+
+.emptyview-list {
+    width: 100%;
+    font-size: var(--lumo-font-size-s);
+    text-align: center;
+}
+
 
 
 

@@ -156,11 +156,12 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
     private Component buildPan1(IndexModel model) {
         Pan pan = new Pan();
-        Image image = model.getImage();
+        Image image = utils.byteArrayToImage(model.getImageData());
         pan.add(image);
         pan.setMaxWidth("6em");
         return pan;
     }
+
 
     private Component buildPan2(IndexModel model) {
 

@@ -252,7 +252,7 @@ public class GeneratorDialog extends Dialog {
         numberOfSpans.setHasControls(true);
         numberOfSpans.setMin(1);
         numberOfSpans.setWidth("10em");
-        numberOfSpans.setHelperText("Number of repetitions, each starting when the previous ended");
+        numberOfSpans.setHelperText("Number of consecutive repetitions");
 
         HorizontalLayout lengthLayout = new HorizontalLayout();
         lengthLayout.setSpacing(true);
@@ -296,7 +296,7 @@ public class GeneratorDialog extends Dialog {
                 MarketIndex entity = marketIndexService.get(id).get();
                 IndexModel indexModel = new IndexModel();
                 marketIndexService.entityToModel(entity, indexModel);
-                IndexComponent indexComponent = context.getBean(IndexComponent.class, indexModel.getId(), indexModel.getImage(), indexModel.getSymbol());
+                IndexComponent indexComponent = context.getBean(IndexComponent.class, indexModel.getId(), indexModel.getImageData(), indexModel.getSymbol());
                 components.add(indexComponent);
             }
 
@@ -502,7 +502,7 @@ public class GeneratorDialog extends Dialog {
         // retrieve the indexes
         List<IndexComponent> components = new ArrayList<>();
         for (IndexModel iModel : model.getIndexes()) {
-            IndexComponent indexComponent = context.getBean(IndexComponent.class, iModel.getId(), iModel.getImage(), iModel.getSymbol());
+            IndexComponent indexComponent = context.getBean(IndexComponent.class, iModel.getId(), iModel.getImageData(), iModel.getSymbol());
             components.add(indexComponent);
         }
 

@@ -39,7 +39,7 @@
 
 .generators-view .symbol {
   margin-left: var(--lumo-space-s);
-  font-size: var(--lumo-font-size-l);
+  font-size: var(--lumo-font-size-m);
   font-weight: bold;
 }
 
