@@ -4,14 +4,17 @@ import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.views.indexes.IndexModel;
-import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -36,6 +39,9 @@ public class IndexesPickerDialog extends Dialog  {
     private IndexPicker indexPicker;
 
     private List<Integer> selectedIds;
+
+    private Label selectionIndicator;
+
 
     public IndexesPickerDialog(IndexPickerDialogConfirmListener confirmListener, List<Integer> selectedIds) {
         this.confirmListener = confirmListener;
@@ -68,9 +74,22 @@ public class IndexesPickerDialog extends Dialog  {
     }
 
     private Component buildHeader() {
-        Div header = new Div();
+        HorizontalLayout header = new HorizontalLayout();
         header.addClassName("dialogheader");
-        header.setText("Header");
+
+        TextField filterFld= new TextField("Filter");
+        filterFld.addClassName("filterfield");
+
+        filterFld.setValueChangeMode(ValueChangeMode.EAGER);
+        filterFld.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>) event -> {
+            String value = event.getValue();
+            indexPicker.filter(value);
+        });
+
+        selectionIndicator = new Label();
+        selectionIndicator.addClassName("selectionindicator");
+
+        header.add(filterFld, selectionIndicator);
         return header;
     }
 
@@ -79,7 +98,12 @@ public class IndexesPickerDialog extends Dialog  {
     private Component buildBody() {
         Div body = new Div();
         body.addClassName("dialogbody");
-        indexPicker=context.getBean(IndexPicker.class, selectedIds);
+
+        IndexPickerSelectionListener selectionListener = (item, selected, totSelected) -> {
+            selectionIndicator.setText("selected: "+ totSelected);
+        };
+
+        indexPicker=context.getBean(IndexPicker.class, selectedIds, selectionListener);
         body.add(indexPicker);
         return body;
     }

@@ -99,14 +99,13 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         model.setNumber(utils.toPrimitive(entity.getNumber()));
 
         MarketIndex index = entity.getIndex();
-        String symbol;
+        String symbol=null;
         byte[] imageData;
         if (index != null) {
             imageData = index.getImage();
             symbol = index.getSymbol();
         } else {
             imageData = utils.getDefaultIndexIcon();
-            symbol = "n.a.";
         }
         model.setSymbol(symbol);
         model.setImage(utils.byteArrayToImage(imageData));
@@ -150,10 +149,12 @@ public class GeneratorService extends CrudService<Generator, Integer> {
 
         String symbol = model.getSymbol();
         MarketIndex index=null;
-        try {
-            index = marketIndexService.findUniqueBySymbol(symbol);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(symbol!=null){
+            try {
+                index = marketIndexService.findUniqueBySymbol(symbol);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         entity.setIndex(index);
 

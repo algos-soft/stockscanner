@@ -46,9 +46,14 @@ public class IndexPicker extends HorizontalLayout {
 
     private Map<PickerItem, Boolean> pickersMap;
 
-    public IndexPicker(List<Integer> selectedIds) {
+    public IndexPicker(List<Integer> selectedIds, IndexPickerSelectionListener selectionListener) {
         this.selectedIds=selectedIds;
+        this.selectionListener = selectionListener;
     }
+
+    private String filter;
+
+    private IndexPickerSelectionListener selectionListener;
 
     @PostConstruct
     private void init(){
@@ -66,31 +71,36 @@ public class IndexPicker extends HorizontalLayout {
         List<MarketIndex> entities = marketIndexService.findAllOrderBySymbol();
         for(MarketIndex entity : entities){
             IndexModel model = new IndexModel();
+
             marketIndexService.entityToModel(entity, model);
-            PickerItem comp = context.getBean(PickerItem.class, utils.toPrimitive(model.getId()), model.getImage(), model.getSymbol());
-            comp.addClickListener(new ComponentEventListener<ClickEvent<VerticalLayout>>() {
-                @Override
-                public void onComponentEvent(ClickEvent<VerticalLayout> event) {
-                    FlexComponent fComp=event.getSource();
-                    PickerItem item = (PickerItem)fComp;
-                    if(isHighlighted(item)){
-                        dim(item);
-                        pickersMap.put(item, false);
-                    }else{
-                        highlight(item);
-                        pickersMap.put(item, true);
-                    }
+            PickerItem pickerItem = context.getBean(PickerItem.class, utils.toPrimitive(model.getId()), model.getImage(), model.getSymbol());
+
+            pickerItem.addClickListener((ComponentEventListener<ClickEvent<VerticalLayout>>) event -> {
+                Component fComp=event.getSource();
+                PickerItem item = (PickerItem)fComp;
+                if(isHighlighted(item)){
+                    dim(item);
+                    pickersMap.put(item, false);
+                    selectionListener.itemSelection(item, false, countSelected());
+                }else{
+                    highlight(item);
+                    pickersMap.put(item, true);
+                    selectionListener.itemSelection(item, true, countSelected());
                 }
             });
 
             boolean selected=false;
             if(selectedIds.contains(model.getId())){
-                highlight(comp);
+                highlight(pickerItem);
                 selected=true;
             }
 
-            add(comp);
-            pickersMap.put(comp, selected);
+            add(pickerItem);
+            pickersMap.put(pickerItem, selected);
+
+            if(selected){
+                selectionListener.itemSelection(pickerItem, true, countSelected());
+            }
 
         }
     }
@@ -125,5 +135,33 @@ public class IndexPicker extends HorizontalLayout {
         }
         return selectedIds;
     }
+
+    public void filter(String value) {
+        this.filter=value;
+
+        for(Map.Entry<PickerItem, Boolean> entry :pickersMap.entrySet()){
+            PickerItem item = entry.getKey();
+            String symbol=item.getIndexSymbol();
+            if(symbol.toUpperCase().contains(value.toUpperCase())){
+                item.setVisible(true);
+            }else{
+                item.setVisible(false);
+            }
+
+        }
+    }
+
+
+    private int countSelected(){
+        int count=0;
+        for(boolean selected :pickersMap.values() ){
+            if(selected){
+                count++;
+            }
+        }
+        return count;
+    }
+
+
 
 }

@@ -32,10 +32,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -159,9 +156,9 @@ public class GeneratorDialog extends Dialog {
         img.setHeight(2, Unit.EM);
 
         IronIcon tagIcon = new IronIcon("vaadin", "tag");
-        Span sNumber = new Span(""+utils.toPrimitive(model.getNumber()));
+        Span sNumber = new Span("" + utils.toPrimitive(model.getNumber()));
         sNumber.addClassName("tagnumber");
-        HorizontalLayout tagLayout=new HorizontalLayout();
+        HorizontalLayout tagLayout = new HorizontalLayout();
         tagLayout.addClassName("taglayout");
         tagLayout.add(tagIcon, sNumber);
 
@@ -172,15 +169,14 @@ public class GeneratorDialog extends Dialog {
     }
 
 
-
     private Component buildBody() {
 
         page1 = buildPage1();
         page2 = buildPage2();
 
-        Div placeholder=new Div();
-        placeholder.getStyle().set("width","100%");
-        placeholder.getStyle().set("height","100%");
+        Div placeholder = new Div();
+        placeholder.getStyle().set("width", "100%");
+        placeholder.getStyle().set("height", "100%");
         placeholder.add(page1);
 
         Tab tab1 = new Tab("General");
@@ -190,10 +186,10 @@ public class GeneratorDialog extends Dialog {
         tabs.addSelectedChangeListener((ComponentEventListener<Tabs.SelectedChangeEvent>) event -> {
             Tab tab = event.getSelectedTab();
             placeholder.removeAll();
-            if(tab.equals(tab1)){
+            if (tab.equals(tab1)) {
                 placeholder.add(page1);
             }
-            if(tab.equals(tab2)){
+            if (tab.equals(tab2)) {
                 placeholder.add(page2);
             }
         });
@@ -204,24 +200,24 @@ public class GeneratorDialog extends Dialog {
         return body;
     }
 
-    private Component buildPage1(){
+    private Component buildPage1() {
 
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(false);
         layout.setPadding(false);
 
-        startDatePicker=new DatePicker("Start date");
+        startDatePicker = new DatePicker("Start date");
         startDatePicker.setMaxWidth("10em");
         startDatePicker.setRequired(true);
 
         amountFld = new IntegerField("Amount");
         amountFld.setWidth("6em");
 
-        stopLossFld= new IntegerField("SL%");
+        stopLossFld = new IntegerField("SL%");
         stopLossFld.setWidth("6em");
         stopLossFld.setHelperText("for each cycle");
 
-        takeProfitFld= new IntegerField("TP%");
+        takeProfitFld = new IntegerField("TP%");
         takeProfitFld.setWidth("6em");
         takeProfitFld.setHelperText("for each cycle");
         //takeProfitFld.getElement().setAttribute("tooltip", "for each cycle");
@@ -235,10 +231,10 @@ public class GeneratorDialog extends Dialog {
         lengthRadioGroup.setItems(LABEL_FIXED, LABEL_VARIABLE);
         lengthRadioGroup.addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                if(event.getValue().equals(LABEL_FIXED)){
+                if (event.getValue().equals(LABEL_FIXED)) {
                     numberOfDays.setLabel("Fixed number of days");
                     numberOfDays.setHelperText("The simulation will stop after this number of days");
-                }else{
+                } else {
                     numberOfDays.setLabel("Max number of days");
                     numberOfDays.setHelperText("(Optional) the simulation will not exceed this number of days");
                 }
@@ -267,7 +263,7 @@ public class GeneratorDialog extends Dialog {
         return layout;
     }
 
-    private Component buildPage2(){
+    private Component buildPage2() {
 
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(false);
@@ -283,26 +279,37 @@ public class GeneratorDialog extends Dialog {
     }
 
 
-    private Component buildIndexPanel(){
+    private Component buildIndexPanel() {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(false);
         layout.setPadding(false);
 
-        indexCombo=context.getBean(IndexCombo.class);
-        indexesPanel=context.getBean(IndexesPanel.class);
+        indexCombo = context.getBean(IndexCombo.class);
+        indexesPanel = context.getBean(IndexesPanel.class);
         permutateIndexesCheckbox = new Checkbox("Permutate indexes");
         indexesPanel.setVisible(false);
 
         // when the dialog is confirmed, replace the contents of the indexes panel
         IndexPickerDialogConfirmListener listener = selectedIds -> {
-            indexesPanel.removeAll();
-            for(int id : selectedIds){
+            List<IndexComponent> components = new ArrayList<>();
+            for (int id : selectedIds) {
                 MarketIndex entity = marketIndexService.get(id).get();
                 IndexModel indexModel = new IndexModel();
                 marketIndexService.entityToModel(entity, indexModel);
-                IndexComponent indexComponent=context.getBean(IndexComponent.class, indexModel.getId(), indexModel.getImage(), indexModel.getSymbol());
-                indexesPanel.add(indexComponent);
+                IndexComponent indexComponent = context.getBean(IndexComponent.class, indexModel.getId(), indexModel.getImage(), indexModel.getSymbol());
+                components.add(indexComponent);
             }
+
+            // sort by symbol
+            sortIndexComponents(components);
+
+            // add
+            indexesPanel.removeAll();
+            for (IndexComponent comp : components) {
+                indexesPanel.add(comp);
+            }
+
+
         };
 
 
@@ -314,8 +321,8 @@ public class GeneratorDialog extends Dialog {
 
                 // build a list of the ids of the indexes contained in the IndexesPanel
                 List<IndexComponent> indexComponents = indexesPanel.getIndexComponents();
-                List<Integer> ids=new ArrayList<>();
-                for(IndexComponent comp : indexComponents){
+                List<Integer> ids = new ArrayList<>();
+                for (IndexComponent comp : indexComponents) {
                     ids.add(comp.getIndexId());
                 }
 
@@ -332,12 +339,12 @@ public class GeneratorDialog extends Dialog {
             indexesPanel.setVisible(checked);
         });
 
-        layout.add(indexCombo,indexesPanel,permutateIndexesCheckbox);
+        layout.add(indexCombo, indexesPanel, permutateIndexesCheckbox);
         return layout;
     }
 
 
-    private Component buildAmplitudePanel(){
+    private Component buildAmplitudePanel() {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(false);
         layout.setPadding(false);
@@ -366,7 +373,7 @@ public class GeneratorDialog extends Dialog {
         return layout;
     }
 
-    private Component buildAvgDaysPanel(){
+    private Component buildAvgDaysPanel() {
 
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(false);
@@ -397,8 +404,6 @@ public class GeneratorDialog extends Dialog {
     }
 
 
-
-
     private Component buildFooter() {
 
         HorizontalLayout footer = new HorizontalLayout();
@@ -421,8 +426,6 @@ public class GeneratorDialog extends Dialog {
     }
 
 
-
-
     /**
      * Build a new model or update the current model from the data displayed in the dialog
      */
@@ -436,20 +439,20 @@ public class GeneratorDialog extends Dialog {
         }
 
         MarketIndex index = indexCombo.getValue();
-        if(index!=null){
+        if (index != null) {
             model.setSymbol(index.getSymbol());
         }
 
         // replace index model from Indexes panel contents
         List<IndexComponent> indexComponents = indexesPanel.getIndexComponents();
         model.getIndexes().clear();
-        for(IndexComponent indexComponent : indexComponents){
-            int indexId=indexComponent.getIndexId();
+        for (IndexComponent indexComponent : indexComponents) {
+            int indexId = indexComponent.getIndexId();
             MarketIndex marketIndex;
-            if(indexId>0){
-                marketIndex=marketIndexService.get(indexId).get();
+            if (indexId > 0) {
+                marketIndex = marketIndexService.get(indexId).get();
                 IndexModel indexModel = new IndexModel();
-                marketIndexService.entityToModel(marketIndex,indexModel);
+                marketIndexService.entityToModel(marketIndex, indexModel);
                 model.getIndexes().add(indexModel);
             }
         }
@@ -459,8 +462,8 @@ public class GeneratorDialog extends Dialog {
         model.setStopLoss(utils.toPrimitive(stopLossFld.getValue()));
         model.setTakeProfit(utils.toPrimitive(takeProfitFld.getValue()));
 
-        String value=lengthRadioGroup.getValue();
-        if(value!=null){
+        String value = lengthRadioGroup.getValue();
+        if (value != null) {
             model.setDurationFixed(value.equals(LABEL_FIXED));
         }
 
@@ -487,28 +490,38 @@ public class GeneratorDialog extends Dialog {
 
     private void populateFromModel() {
 
-        if(model.getSymbol()!=null){
+        if (model.getSymbol() != null) {
             try {
-                MarketIndex index=marketIndexService.findUniqueBySymbol(model.getSymbol());
+                MarketIndex index = marketIndexService.findUniqueBySymbol(model.getSymbol());
                 indexCombo.setValue(index);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        indexesPanel.removeAll();
-        for(IndexModel iModel : model.getIndexes()){
+        // retrieve the indexes
+        List<IndexComponent> components = new ArrayList<>();
+        for (IndexModel iModel : model.getIndexes()) {
             IndexComponent indexComponent = context.getBean(IndexComponent.class, iModel.getId(), iModel.getImage(), iModel.getSymbol());
-            indexesPanel.add(indexComponent);
+            components.add(indexComponent);
+        }
+
+        // sort by symbol
+        sortIndexComponents(components);
+
+        // add to the IndexPanel
+        indexesPanel.removeAll();
+        for (IndexComponent comp : components) {
+            indexesPanel.add(comp);
         }
 
         startDatePicker.setValue(model.getStartDate());
         amountFld.setValue(utils.toPrimitive(model.getAmount()));
         stopLossFld.setValue(utils.toPrimitive(model.getStopLoss()));
         takeProfitFld.setValue(utils.toPrimitive(model.getTakeProfit()));
-        if(model.isDurationFixed()){
+        if (model.isDurationFixed()) {
             lengthRadioGroup.setValue(LABEL_FIXED);
-        }else{
+        } else {
             lengthRadioGroup.setValue(LABEL_VARIABLE);
         }
         numberOfDays.setValue(utils.toPrimitive(model.getDays()));
@@ -530,5 +543,16 @@ public class GeneratorDialog extends Dialog {
 
     }
 
+    /**
+     * Sort a list of IndexComponent(s) by symbol
+     */
+    private void sortIndexComponents(List<IndexComponent> components) {
+        Collections.sort(components, new Comparator<IndexComponent>() {
+            @Override
+            public int compare(IndexComponent comp1, IndexComponent comp2) {
+                return comp1.getIndexSymbol().compareTo(comp2.getIndexSymbol());
+            }
+        });
+    }
 
 }

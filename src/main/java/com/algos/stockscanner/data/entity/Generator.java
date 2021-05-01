@@ -30,7 +30,7 @@ public class Generator extends AbstractEntity {
     @ManyToMany
     @LazyCollection(LazyCollectionOption.FALSE)
     @JoinTable(name = "generator_index")
-    private List<MarketIndex> indexes;
+    private List<MarketIndex> indexes=new ArrayList<>();
 
     private LocalDateTime created;
     private LocalDateTime modified;

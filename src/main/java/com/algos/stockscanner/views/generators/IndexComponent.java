@@ -47,4 +47,7 @@ public class IndexComponent extends VerticalLayout {
         return indexId;
     }
 
+    public String getIndexSymbol() {
+        return indexSymbol;
+    }
 }

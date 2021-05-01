@@ -48,4 +48,7 @@ public class PickerItem extends VerticalLayout {
         return indexId;
     }
 
+    public String getIndexSymbol() {
+        return indexSymbol;
+    }
 }
