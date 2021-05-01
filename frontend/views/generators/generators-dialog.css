@@ -20,12 +20,16 @@
     gap: 0.3em;
 }
 
+.dialog_tabs {
+    width: 100%;
+}
+
 .dialog_body {
     /*background: yellow;*/
     /*display: flex;*/
     /*flex-direction: row;*/
     height: 100%;
-    width: 100%;
+    /*width: 100%;*/
     margin-top: 1em;
 }
 

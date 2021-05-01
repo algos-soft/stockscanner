@@ -16,7 +16,6 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.IronIcon;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
@@ -79,9 +78,8 @@ public class GeneratorDialog extends Dialog {
     private IndexCombo indexCombo;
     private IndexesPanel indexesPanel;
 
-    private Component pag1;
-    private Component pag2;
-    private Div placeholder;
+    private Component page1;
+    private Component page2;
 
     @Autowired
     private Utils utils;
@@ -169,78 +167,31 @@ public class GeneratorDialog extends Dialog {
 
     private Component buildBody() {
 
-        VerticalLayout body = new VerticalLayout();
-        body.addClassName("dialog_body");
+        page1 = buildPage1();
+        page2 = buildPage2();
 
-        placeholder=new Div();
+        Div placeholder=new Div();
         placeholder.getStyle().set("width","100%");
         placeholder.getStyle().set("height","100%");
-        placeholder.getStyle().set("background","yellow");
+        placeholder.add(page1);
 
         Tab tab1 = new Tab("General");
-        pag1 = buildPage1();
-
         Tab tab2 = new Tab("Permutations");
-        pag2 = buildPage2();
-
-        //page2.setVisible(false);
-
-
-        Map<Tab, Component> tabsToPages = new HashMap<>();
-        tabsToPages.put(tab1, pag1);
-        tabsToPages.put(tab2, pag2);
         Tabs tabs = new Tabs(tab1, tab2);
-        Div pages = new Div(pag1, pag2);
-
-        tabs.addSelectedChangeListener(event -> {
-            tabsToPages.values().forEach(page -> page.setVisible(false));
-            Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
-            selectedPage.setVisible(true);
-
-            String label = event.getSelectedTab().getLabel();
+        tabs.addClassName("dialog_tabs");
+        tabs.addSelectedChangeListener((ComponentEventListener<Tabs.SelectedChangeEvent>) event -> {
+            Tab tab = event.getSelectedTab();
             placeholder.removeAll();
-            switch (label){
-                case "General":
-                    placeholder.add(pag1);
-                    break;
-                case "Permutations":
-                    placeholder.add(pag2);
-                    break;
+            if(tab.equals(tab1)){
+                placeholder.add(page1);
+            }
+            if(tab.equals(tab2)){
+                placeholder.add(page2);
             }
         });
 
-
-        Button b1 = new Button("Page 1");
-        b1.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                placeholder.removeAll();
-                placeholder.add(pag1);
-            }
-        });
-        Button b2 = new Button("Page 2");
-        b2.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                placeholder.removeAll();
-                placeholder.add(pag2);
-            }
-        });
-        HorizontalLayout btnLayout = new HorizontalLayout(b1, b2);
-
-
-        //pag1=new Label("Page 1");
-        //pag2=new Label("Page 2");
-
-        //placeholder.add(pag2);
-        //body.add (btnLayout, placeholder);
-        body.add(tabs, pages);
-
-        //page2.setVisible(true);
-//        body.add(tabs, placeholder);
-
-
-        //body.add(tabs, placeholder);
+        VerticalLayout body = new VerticalLayout(tabs, placeholder);
+        body.addClassName("dialog_body");
 
         return body;
     }
@@ -257,7 +208,6 @@ public class GeneratorDialog extends Dialog {
         HorizontalLayout tagLayout=new HorizontalLayout();
         tagLayout.addClassName("taglayout");
         tagLayout.add(tagIcon, sNumber);
-
 
         startDatePicker=new DatePicker("Start date");
         startDatePicker.setMaxWidth("10em");
