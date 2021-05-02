@@ -259,19 +259,4 @@ public class Generator extends AbstractEntity {
         this.startDate = Du.toUtcString(localDate);
     }
 
-//    public MarketIndex getIndex(){
-//        List<MarketIndex> indexes = getIndexes();
-//        if(indexes.size()>0){
-//            return indexes.get(0);
-//        }
-//        return null;
-//    }
-
-//    public void setIndex(MarketIndex index){
-//        List<MarketIndex> indexes = getIndexes();
-//        indexes.clear();
-//        indexes.add(index);
-//    }
-
-
 }
