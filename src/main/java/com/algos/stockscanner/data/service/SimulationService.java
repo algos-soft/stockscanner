@@ -99,9 +99,7 @@ public class SimulationService extends CrudService<Simulation, Integer> {
     }
 
     public int countBy(Generator generator) {
-        Simulation entity = new Simulation();
-        entity.setGenerator(generator);
-        return (int) repository.count(Example.of(entity));
+        return repository.countByGenerator(generator);
     }
 
 
@@ -114,7 +112,7 @@ public class SimulationService extends CrudService<Simulation, Integer> {
     /**
      * Copy data from Entity to View Model
      */
-    private void entityToModel(Simulation entity, SimulationModel model) {
+    public void entityToModel(Simulation entity, SimulationModel model) {
         model.setId(utils.toPrimitive(entity.getId()));
 
         if (entity.getIndex() != null) {

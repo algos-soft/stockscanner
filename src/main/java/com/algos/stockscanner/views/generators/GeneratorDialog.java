@@ -3,14 +3,11 @@ package com.algos.stockscanner.views.generators;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.Unit;
+import com.algos.stockscanner.views.indexes.IndexModel;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -19,31 +16,23 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.IronIcon;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.Renderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.*;
 
 
 /**
@@ -60,9 +49,6 @@ public class GeneratorDialog extends Dialog {
     private GeneratorModel model;
     private GeneratorDialogConfirmListener confirmListener;
 
-    private FlexLayout imgPlaceholder;
-
-    private ComboBox<MarketIndex> indexCombo;
     private DatePicker startDatePicker;
 
     private IntegerField amountFld;
@@ -84,6 +70,13 @@ public class GeneratorDialog extends Dialog {
     private IntegerField avgDaysMinFld;
     private IntegerField avgDaysMaxFld;
     private IntegerField avgDaysStepsFld;
+
+    private Checkbox permutateIndexesCheckbox;
+    private IndexCombo indexCombo;
+    private IndexesPanel indexesPanel;
+
+    private Component page1;
+    private Component page2;
 
     @Autowired
     private Utils utils;
@@ -116,6 +109,9 @@ public class GeneratorDialog extends Dialog {
         setHeight("42em");
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
+        setResizable(true);
+        setDraggable(true);
+
         add(buildContent());
 
         if (model != null) {
@@ -126,7 +122,10 @@ public class GeneratorDialog extends Dialog {
 
     private Component buildContent() {
 
-        Div layout = new Div();
+        VerticalLayout layout = new VerticalLayout();
+        layout.setPadding(false);
+        layout.setSpacing(false);
+
         layout.addClassName("dialog");
         Component header = buildHeader();
         Component body = buildBody();
@@ -139,8 +138,8 @@ public class GeneratorDialog extends Dialog {
 
 
     private Component buildHeader() {
-        Div header = new Div();
-        header.addClassName("header");
+        HorizontalLayout header = new HorizontalLayout();
+        header.addClassName("dialog_header");
 
         // load default icon
         Resource res = context.getResource("images/generator.png");
@@ -156,103 +155,75 @@ public class GeneratorDialog extends Dialog {
         img.setWidth(2, Unit.EM);
         img.setHeight(2, Unit.EM);
 
-        Label title = new Label("Generator");
-        header.add(img, title);
-        return header;
-    }
+        IronIcon tagIcon = new IronIcon("vaadin", "tag");
+        Span sNumber = new Span("" + utils.toPrimitive(model.getNumber()));
+        sNumber.addClassName("tagnumber");
+        HorizontalLayout tagLayout = new HorizontalLayout();
+        tagLayout.addClassName("taglayout");
+        tagLayout.add(tagIcon, sNumber);
 
-    /**
-     * Updates the icon in the header based on the current byte array
-     * <p>
-     * null image data restores the default icon
-     *
-     */
-    private void updateIcon(byte[] imageData) {
-        imgPlaceholder.removeAll();
-        if(imageData==null){
-            imageData=utils.getDefaultIndexIcon();
-        }
-        Image img = utils.byteArrayToImage(imageData);
-        img.setWidth(3f, Unit.EM);
-        img.setHeight(3f, Unit.EM);
-        imgPlaceholder.add(img);
+
+        Label title = new Label("Generator");
+        header.add(img, title, tagLayout);
+        return header;
     }
 
 
     private Component buildBody() {
 
-        Div body = new Div();
-        body.addClassName("body");
+        page1 = buildPage1();
+        page2 = buildPage2();
+
+        Div placeholder = new Div();
+        placeholder.getStyle().set("width", "100%");
+        placeholder.getStyle().set("height", "100%");
+        placeholder.add(page1);
 
         Tab tab1 = new Tab("General");
-        Component page1 = buildPage1();
-
         Tab tab2 = new Tab("Permutations");
-        Component page2 = buildPage2();
-        page2.setVisible(false);
-
-
-        Map<Tab, Component> tabsToPages = new HashMap<>();
-        tabsToPages.put(tab1, page1);
-        tabsToPages.put(tab2, page2);
         Tabs tabs = new Tabs(tab1, tab2);
-        Div pages = new Div(page1, page2);
-
-        tabs.addSelectedChangeListener(event -> {
-            tabsToPages.values().forEach(page -> page.setVisible(false));
-            Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
-            selectedPage.setVisible(true);
+        tabs.addClassName("dialog_tabs");
+        tabs.addSelectedChangeListener((ComponentEventListener<Tabs.SelectedChangeEvent>) event -> {
+            Tab tab = event.getSelectedTab();
+            placeholder.removeAll();
+            if (tab.equals(tab1)) {
+                placeholder.add(page1);
+            }
+            if (tab.equals(tab2)) {
+                placeholder.add(page2);
+            }
         });
 
-        body.add(tabs, pages);
+        VerticalLayout body = new VerticalLayout(tabs, placeholder);
+        body.addClassName("dialog_body");
 
         return body;
     }
 
-    private Component buildPage1(){
-        FlexLayout layout = new FlexLayout();
-        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+    private Component buildPage1() {
 
-        imgPlaceholder=new FlexLayout();
-        imgPlaceholder.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
-        imgPlaceholder.getStyle().set("margin-top","auto");
-        byte[] imageData=utils.getDefaultIndexIcon();
-        updateIcon(imageData);
-        buildCombo();
-        FlexLayout comboPanel = new FlexLayout();
-        comboPanel.setFlexDirection(FlexLayout.FlexDirection.ROW);
-        comboPanel.getStyle().set("gap","1em");
-        comboPanel.add(imgPlaceholder, indexCombo);
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(false);
+        layout.setPadding(false);
 
-        IronIcon tagIcon = new IronIcon("vaadin", "tag");
-        Span sNumber = new Span(""+utils.toPrimitive(model.getNumber()));
-        sNumber.addClassName("tagnumber");
-        HorizontalLayout tagLayout=new HorizontalLayout();
-        tagLayout.addClassName("taglayout");
-        tagLayout.add(tagIcon, sNumber);
-
-        HorizontalLayout row1=new HorizontalLayout();
-        row1.add(comboPanel, tagLayout);
-
-        startDatePicker=new DatePicker("Start date");
+        startDatePicker = new DatePicker("Start date");
         startDatePicker.setMaxWidth("10em");
         startDatePicker.setRequired(true);
 
         amountFld = new IntegerField("Amount");
         amountFld.setWidth("6em");
 
-        stopLossFld= new IntegerField("SL%");
+        stopLossFld = new IntegerField("SL%");
         stopLossFld.setWidth("6em");
         stopLossFld.setHelperText("for each cycle");
 
-        takeProfitFld= new IntegerField("TP%");
+        takeProfitFld = new IntegerField("TP%");
         takeProfitFld.setWidth("6em");
         takeProfitFld.setHelperText("for each cycle");
         //takeProfitFld.getElement().setAttribute("tooltip", "for each cycle");
 
-        FlexLayout amountsLayout = new FlexLayout();
-        amountsLayout.getStyle().set("gap","1em");
-        amountsLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        HorizontalLayout amountsLayout = new HorizontalLayout();
+        amountsLayout.setSpacing(true);
         amountsLayout.add(amountFld, stopLossFld, takeProfitFld);
 
         lengthRadioGroup = new RadioButtonGroup<>();
@@ -260,10 +231,10 @@ public class GeneratorDialog extends Dialog {
         lengthRadioGroup.setItems(LABEL_FIXED, LABEL_VARIABLE);
         lengthRadioGroup.addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                if(event.getValue().equals(LABEL_FIXED)){
+                if (event.getValue().equals(LABEL_FIXED)) {
                     numberOfDays.setLabel("Fixed number of days");
                     numberOfDays.setHelperText("The simulation will stop after this number of days");
-                }else{
+                } else {
                     numberOfDays.setLabel("Max number of days");
                     numberOfDays.setHelperText("(Optional) the simulation will not exceed this number of days");
                 }
@@ -281,43 +252,111 @@ public class GeneratorDialog extends Dialog {
         numberOfSpans.setHasControls(true);
         numberOfSpans.setMin(1);
         numberOfSpans.setWidth("10em");
-        numberOfSpans.setHelperText("Number of repetitions, each starting when the previous ended");
+        numberOfSpans.setHelperText("Number of consecutive repetitions");
 
-        FlexLayout lengthLayout = new FlexLayout();
-        lengthLayout.getStyle().set("gap","1em");
-        lengthLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
+        HorizontalLayout lengthLayout = new HorizontalLayout();
+        lengthLayout.setSpacing(true);
         lengthLayout.add(numberOfDays, numberOfSpans);
 
-        layout.add(row1, startDatePicker, amountsLayout, lengthRadioGroup, lengthLayout);
+        layout.add(startDatePicker, amountsLayout, lengthRadioGroup, lengthLayout);
 
         return layout;
     }
 
-    private Component buildPage2(){
+    private Component buildPage2() {
 
-        FlexLayout layout = new FlexLayout();
-        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(false);
+        layout.setPadding(false);
 
+        Component indexPanel = buildIndexPanel();
         Component amplitudePanel = buildAmplitudePanel();
         Component avgDaysPanel = buildAvgDaysPanel();
 
-        layout.add(amplitudePanel, avgDaysPanel);
+        layout.add(indexPanel, amplitudePanel, avgDaysPanel);
 
         return layout;
     }
 
-    private Component buildAmplitudePanel(){
-        FlexLayout layout = new FlexLayout();
-        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+
+    private Component buildIndexPanel() {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(false);
+        layout.setPadding(false);
+
+        indexCombo = context.getBean(IndexCombo.class);
+        indexesPanel = context.getBean(IndexesPanel.class);
+        permutateIndexesCheckbox = new Checkbox("Permutate indexes");
+        indexesPanel.setVisible(false);
+
+        // when the dialog is confirmed, replace the contents of the indexes panel
+        IndexPickerDialogConfirmListener listener = selectedIds -> {
+            List<IndexComponent> components = new ArrayList<>();
+            for (int id : selectedIds) {
+                MarketIndex entity = marketIndexService.get(id).get();
+                IndexModel indexModel = new IndexModel();
+                marketIndexService.entityToModel(entity, indexModel);
+                IndexComponent indexComponent = context.getBean(IndexComponent.class, indexModel.getId(), indexModel.getImageData(), indexModel.getSymbol());
+                components.add(indexComponent);
+            }
+
+            // sort by symbol
+            sortIndexComponents(components);
+
+            // add
+            indexesPanel.removeAll();
+            for (IndexComponent comp : components) {
+                indexesPanel.add(comp);
+            }
+
+
+        };
+
+
+        // add a click listener to the indexesPanel to open the
+        // indexes picker dialog when is clicked
+        indexesPanel.addClickListener(new ComponentEventListener<ClickEvent<HorizontalLayout>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<HorizontalLayout> horizontalLayoutClickEvent) {
+
+                // build a list of the ids of the indexes contained in the IndexesPanel
+                List<IndexComponent> indexComponents = indexesPanel.getIndexComponents();
+                List<Integer> ids = new ArrayList<>();
+                for (IndexComponent comp : indexComponents) {
+                    ids.add(comp.getIndexId());
+                }
+
+                // open the dialog
+                IndexesPickerDialog dialog = context.getBean(IndexesPickerDialog.class, listener, ids);
+                dialog.open();
+            }
+        });
+
+
+        permutateIndexesCheckbox.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>>) event -> {
+            boolean checked = event.getValue();
+            indexCombo.setVisible(!checked);
+            indexesPanel.setVisible(checked);
+        });
+
+        layout.add(indexCombo, indexesPanel, permutateIndexesCheckbox);
+        return layout;
+    }
+
+
+    private Component buildAmplitudePanel() {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(false);
+        layout.setPadding(false);
 
         amplitudeFld = new IntegerField("Amplitude %");
 
         amplitudeMinFld = new IntegerField("Amplitude min %");
         amplitudeMaxFld = new IntegerField("Amplitude max %");
         amplitudeStepsFld = new IntegerField("# of steps");
-        FlexLayout amplitudeLayout = new FlexLayout();
-        amplitudeLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
-        amplitudeLayout.getStyle().set("gap","1em");
+        HorizontalLayout amplitudeLayout = new HorizontalLayout();
+        amplitudeLayout.setSpacing(true);
+        amplitudeLayout.setPadding(false);
         amplitudeLayout.add(amplitudeMinFld, amplitudeMaxFld, amplitudeStepsFld);
         amplitudeLayout.setVisible(false);
 
@@ -334,18 +373,19 @@ public class GeneratorDialog extends Dialog {
         return layout;
     }
 
-    private Component buildAvgDaysPanel(){
+    private Component buildAvgDaysPanel() {
 
-        FlexLayout layout = new FlexLayout();
-        layout.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(false);
+        layout.setPadding(false);
 
         avgDaysFld = new IntegerField("days lookback");
         avgDaysMinFld = new IntegerField("days lookback min");
         avgDaysMaxFld = new IntegerField("days lookback max");
         avgDaysStepsFld = new IntegerField("# of steps");
-        FlexLayout avgDaysLayout = new FlexLayout();
-        avgDaysLayout.setFlexDirection(FlexLayout.FlexDirection.ROW);
-        avgDaysLayout.getStyle().set("gap","1em");
+        HorizontalLayout avgDaysLayout = new HorizontalLayout();
+        avgDaysLayout.setSpacing(true);
+        avgDaysLayout.setPadding(false);
         avgDaysLayout.add(avgDaysMinFld, avgDaysMaxFld, avgDaysStepsFld);
         avgDaysLayout.setVisible(false);
 
@@ -364,88 +404,10 @@ public class GeneratorDialog extends Dialog {
     }
 
 
-
-
-    private void buildCombo() {
-
-        indexCombo=utils.buildIndexCombo();
-        indexCombo.setRequired(true);
-        indexCombo.addValueChangeListener(event -> {
-            MarketIndex index = event.getValue();
-            byte[] imageData=null;
-            if (index!=null){
-                imageData=index.getImage();
-            }
-            updateIcon(imageData);
-        });
-
-//        // create a DataProvider with filtering callbacks
-//        MarketIndex exampleItem = new MarketIndex();
-//        ExampleMatcher matcher = ExampleMatcher.matchingAny().withMatcher("symbol", ExampleMatcher.GenericPropertyMatchers.startsWith().ignoreCase());
-//        Example<MarketIndex> example = Example.of(exampleItem, matcher);
-//        DataProvider<MarketIndex, String> dataProvider = DataProvider.fromFilteringCallbacks(fetchCallback -> {
-//            AtomicReference<String> filter=new AtomicReference<>();
-//            fetchCallback.getFilter().ifPresent( x -> filter.set(x));
-//            exampleItem.setSymbol(filter.get());
-//            return marketIndexService.fetch(fetchCallback.getOffset(), fetchCallback.getLimit(), example, null).stream();
-//        }, countCallback -> {
-//            AtomicReference<String> filter=new AtomicReference<>();
-//            countCallback.getFilter().ifPresent( x -> filter.set(x));
-//            exampleItem.setSymbol(filter.get());
-//            return marketIndexService.count(example);
-//        });
-//
-//        // create a renderer for the items in the combo list
-//        Renderer<MarketIndex> listItemRenderer = new ComponentRenderer<>(item -> {
-//            Div divSymbol = new Div();
-//            divSymbol.setText(item.getSymbol());
-//            divSymbol.getStyle().set("font-weight", "bold");
-//            Div divName = new Div();
-//            divName.setText(item.getName());
-//            divName.setMaxHeight("0.6em");
-//            divName.getStyle().set("font-size", "60%");
-//            FlexLayout texts = new FlexLayout();
-//            texts.setFlexDirection(FlexLayout.FlexDirection.COLUMN);
-//            texts.add(divSymbol, divName);
-//            texts.getStyle().set("margin-left", "0.5em");
-//
-//            Image image = utils.byteArrayToImage(item.getImage());
-//            image.getStyle().set("border-radius","10%");
-//
-//            image.setWidth("2em");
-//            image.setHeight("2em");
-//
-//            FlexLayout wrapper = new FlexLayout();
-//            wrapper.setFlexDirection(FlexLayout.FlexDirection.ROW);
-//            wrapper.add(image, texts);
-//
-//            return wrapper;
-//        });
-//
-//        indexCombo = new ComboBox<>();
-//        indexCombo.setLabel("Index");
-//        indexCombo.setWidth("14em");
-//        indexCombo.setDataProvider(dataProvider);
-//        indexCombo.setRenderer(listItemRenderer);
-//        indexCombo.setItemLabelGenerator(MarketIndex::getSymbol);
-//        indexCombo.setRequired(true);
-//
-//        indexCombo.addValueChangeListener(event -> {
-//            MarketIndex index = event.getValue();
-//            byte[] imageData=null;
-//            if (index!=null){
-//                imageData=index.getImage();
-//            }
-//            updateIcon(imageData);
-//        });
-
-    }
-
-
     private Component buildFooter() {
 
-        Div btnLayout = new Div();
-        btnLayout.addClassName("footer");
+        HorizontalLayout footer = new HorizontalLayout();
+        footer.addClassName("dialog_footer");
 
         Button confirmButton = new Button("Confirm", event -> {
             GeneratorModel model = modelFromDialog();
@@ -458,18 +420,17 @@ public class GeneratorDialog extends Dialog {
             close();
         });
 
-        btnLayout.add(cancelButton, confirmButton);
+        footer.add(cancelButton, confirmButton);
 
-        return btnLayout;
+        return footer;
     }
-
-
 
 
     /**
      * Build a new model or update the current model from the data displayed in the dialog
      */
     private GeneratorModel modelFromDialog() {
+
         GeneratorModel model;
         if (this.model != null) {
             model = this.model;
@@ -478,8 +439,22 @@ public class GeneratorDialog extends Dialog {
         }
 
         MarketIndex index = indexCombo.getValue();
-        if(index!=null){
+        if (index != null) {
             model.setSymbol(index.getSymbol());
+        }
+
+        // replace index model from Indexes panel contents
+        List<IndexComponent> indexComponents = indexesPanel.getIndexComponents();
+        model.getIndexes().clear();
+        for (IndexComponent indexComponent : indexComponents) {
+            int indexId = indexComponent.getIndexId();
+            MarketIndex marketIndex;
+            if (indexId > 0) {
+                marketIndex = marketIndexService.get(indexId).get();
+                IndexModel indexModel = new IndexModel();
+                marketIndexService.entityToModel(marketIndex, indexModel);
+                model.getIndexes().add(indexModel);
+            }
         }
 
         model.setStartDate(startDatePicker.getValue());
@@ -487,8 +462,8 @@ public class GeneratorDialog extends Dialog {
         model.setStopLoss(utils.toPrimitive(stopLossFld.getValue()));
         model.setTakeProfit(utils.toPrimitive(takeProfitFld.getValue()));
 
-        String value=lengthRadioGroup.getValue();
-        if(value!=null){
+        String value = lengthRadioGroup.getValue();
+        if (value != null) {
             model.setDurationFixed(value.equals(LABEL_FIXED));
         }
 
@@ -507,29 +482,46 @@ public class GeneratorDialog extends Dialog {
         model.setDaysLookbackSteps(utils.toPrimitive(avgDaysStepsFld.getValue()));
         model.setPermutateDaysLookback(permutateAvgDaysCheckbox.getValue());
 
+        model.setPermutateIndexes(permutateIndexesCheckbox.getValue());
+
         return model;
     }
 
 
     private void populateFromModel() {
 
-        if(model.getSymbol()!=null){
+        if (model.getSymbol() != null) {
             try {
-                MarketIndex index=marketIndexService.findUniqueBySymbol(model.getSymbol());
+                MarketIndex index = marketIndexService.findUniqueBySymbol(model.getSymbol());
                 indexCombo.setValue(index);
-                updateIcon(index.getImage());
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        // retrieve the indexes
+        List<IndexComponent> components = new ArrayList<>();
+        for (IndexModel iModel : model.getIndexes()) {
+            IndexComponent indexComponent = context.getBean(IndexComponent.class, iModel.getId(), iModel.getImageData(), iModel.getSymbol());
+            components.add(indexComponent);
+        }
+
+        // sort by symbol
+        sortIndexComponents(components);
+
+        // add to the IndexPanel
+        indexesPanel.removeAll();
+        for (IndexComponent comp : components) {
+            indexesPanel.add(comp);
         }
 
         startDatePicker.setValue(model.getStartDate());
         amountFld.setValue(utils.toPrimitive(model.getAmount()));
         stopLossFld.setValue(utils.toPrimitive(model.getStopLoss()));
         takeProfitFld.setValue(utils.toPrimitive(model.getTakeProfit()));
-        if(model.isDurationFixed()){
+        if (model.isDurationFixed()) {
             lengthRadioGroup.setValue(LABEL_FIXED);
-        }else{
+        } else {
             lengthRadioGroup.setValue(LABEL_VARIABLE);
         }
         numberOfDays.setValue(utils.toPrimitive(model.getDays()));
@@ -547,7 +539,20 @@ public class GeneratorDialog extends Dialog {
         avgDaysStepsFld.setValue(utils.toPrimitive(model.getDaysLookbackSteps()));
         permutateAvgDaysCheckbox.setValue(utils.toPrimitive(model.isPermutateDaysLookback()));
 
+        permutateIndexesCheckbox.setValue(utils.toPrimitive(model.isPermutateIndexes()));
+
     }
 
+    /**
+     * Sort a list of IndexComponent(s) by symbol
+     */
+    private void sortIndexComponents(List<IndexComponent> components) {
+        Collections.sort(components, new Comparator<IndexComponent>() {
+            @Override
+            public int compare(IndexComponent comp1, IndexComponent comp2) {
+                return comp1.getIndexSymbol().compareTo(comp2.getIndexSymbol());
+            }
+        });
+    }
 
 }

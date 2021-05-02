@@ -3,6 +3,8 @@ package com.algos.stockscanner.data.entity;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.AbstractEntity;
 import com.algos.stockscanner.utils.Du;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Generator extends AbstractEntity {
@@ -21,8 +24,14 @@ public class Generator extends AbstractEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     private MarketIndex index;
 
-    @OneToMany(mappedBy = "generator", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Simulation> simulations;
+//    @OneToMany(mappedBy = "generator", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "generator", fetch=FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Simulation> simulations=new ArrayList<>();
+
+    @ManyToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JoinTable(name = "generator_index")
+    private List<MarketIndex> indexes=new ArrayList<>();
 
     private LocalDateTime created;
     private LocalDateTime modified;
@@ -51,8 +60,22 @@ public class Generator extends AbstractEntity {
     private Integer avgDaysMax;
     private Integer avgDaysSteps;   // must be divisor of maxAvgDays-minAvgDays
 
+    private Boolean indexesPermutate;
+
     public List<Simulation> getSimulations() {
         return simulations;
+    }
+
+    public void setSimulations(List<Simulation> simulations) {
+        this.simulations = simulations;
+    }
+
+    public void setIndexes(List<MarketIndex> indexes) {
+        this.indexes = indexes;
+    }
+
+    public List<MarketIndex> getIndexes() {
+        return indexes;
     }
 
     public Integer getNumber() {
@@ -223,6 +246,13 @@ public class Generator extends AbstractEntity {
         this.avgDaysSteps = avgDaysSteps;
     }
 
+    public Boolean getIndexesPermutate() {
+        return indexesPermutate;
+    }
+
+    public void setIndexesPermutate(Boolean indexesPermutate) {
+        this.indexesPermutate = indexesPermutate;
+    }
 
     // --------------
     public LocalDate getStartDateLD(){

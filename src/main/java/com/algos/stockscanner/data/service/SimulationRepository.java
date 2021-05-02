@@ -17,9 +17,7 @@ import java.util.List;
 
 public interface SimulationRepository extends JpaRepository<Simulation, Integer> {
 
-//    @Modifying
-//    @Query("delete from Simulation s where s.generator = :generator")
-//    @Transactional
-//    void deleteByGenerator(@Param("generator") Generator generator);
+    @Query("SELECT COUNT(s) FROM Simulation s WHERE s.generator=:generator")
+    int countByGenerator(@Param("generator") Generator generator);
 
 }

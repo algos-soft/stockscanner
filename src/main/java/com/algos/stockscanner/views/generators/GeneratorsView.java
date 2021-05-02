@@ -8,6 +8,7 @@ import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.data.service.SimulationService;
 import com.algos.stockscanner.runner.GeneratorRunner;
 import com.algos.stockscanner.runner.RunnerService;
+import com.algos.stockscanner.views.indexes.IndexModel;
 import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -92,13 +93,14 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         filter = Example.of(new Generator());    // empty initial filter
 
         createGrid();
-        Component filterPanel = createFilterPanel();
+        //Component filterPanel = createFilterPanel();
 
         statusLayout = new HorizontalLayout();
 
         VerticalLayout layout = new VerticalLayout();
         layout.getStyle().set("height", "100%");
-        layout.add(filterPanel, grid, statusLayout);
+//        layout.add(filterPanel, grid, statusLayout);
+        layout.add(grid, statusLayout);
 
         add(layout);
 
@@ -197,43 +199,62 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         card.setSpacing(false);
         card.getThemeList().add("spacing-s");
 
+        Component pan0 = buildPan0(model);
         Component pan1 = buildPan1(model);
         Component pan2 = buildPan2(model);
         Component pan3 = buildPan3(model);
         Component pan4 = buildPan4(model);
         Component action = buildActionCombo(model);
 
-        card.add(pan1, pan2, pan3, pan4, action);
+        card.add(pan0, pan1, pan2, pan3, pan4, action);
 
         return card;
     }
 
 
-    private Component buildPan1(GeneratorModel model) {
-
+    private Component buildPan0(GeneratorModel model) {
         IronIcon tagIcon = new IronIcon("vaadin", "tag");
-
         int number = utils.toPrimitive(model.getNumber());
         Span sNumber = new Span("" + number);
         sNumber.addClassName("number");
-
         HorizontalLayout row1 = new HorizontalLayout();
         row1.addClassName("tagRow");
         row1.add(tagIcon, sNumber);
+        Pan pan = new Pan();
+        pan.setMaxWidth("5em");
+        pan.add(row1);
+        return pan;
+    }
 
-        Image img = model.getImage();
-        if (img == null) {
-            img = utils.byteArrayToImage(utils.getDefaultIndexIcon());
+    private Component buildPan1(GeneratorModel model) {
+
+        Component comp;
+
+        if(model.isPermutateIndexes()){
+            IndexesPanel panel = context.getBean(IndexesPanel.class,"-list");
+            for(IndexModel idxModel : model.getIndexes()){
+                IndexComponent idxComp = context.getBean(IndexComponent.class, idxModel.getId(), idxModel.getImageData(), idxModel.getSymbol(), "-list");
+                panel.add(idxComp);
+            }
+            comp=panel;
+        }else{
+            Image img = model.getImage();
+            if (img == null) {
+                img = utils.byteArrayToImage(utils.getDefaultIndexIcon());
+            }
+            img.addClassName("icon");
+
+            Span symbol = new Span(model.getSymbol());
+            symbol.addClassName("symbol");
+            HorizontalLayout hl = new HorizontalLayout();
+            hl.add(img, symbol);
+            comp=hl;
         }
-        img.addClassName("icon");
-
-        Span symbol = new Span(model.getSymbol());
-        symbol.addClassName("symbol");
-        HorizontalLayout hl = new HorizontalLayout();
-        hl.add(img, symbol);
 
         Pan pan = new Pan();
-        pan.add(row1, hl);
+        pan.setMinWidth("20em");
+        pan.setMaxWidth("20em");
+        pan.add(comp);
         return pan;
     }
 
@@ -411,7 +432,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
         // show results
         account.getSubMenu().addItem("Show results", i -> {
-            UI.getCurrent().navigate(SimulationsView.class, ""+model.getNumber());
+            UI.getCurrent().navigate(SimulationsView.class, "" + model.getNumber());
         });
 
         // edit an item
@@ -420,7 +441,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
             Generator entity = generatorService.get(model.getId()).get();
 
             GeneratorDialogConfirmListener listener = model1 -> {
-                generatorService.modelToEntity(model, entity);
+                generatorService.modelToEntity(model1, entity);
                 generatorService.update(entity);    // write db
                 generatorService.entityToModel(entity, model1); // from db back to model - to be sure the model reflects the changes happened on db
                 grid.getDataProvider().refreshItem(model1); // refresh only this item
@@ -456,6 +477,34 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         account.getSubMenu().addItem("Clone generator", i -> {
         });
 
+        // delete existing simulations
+        account.getSubMenu().addItem("Delete simulations", i -> {
+            if(model.getSimulations().size()>0){
+
+//                Button bConfirm = new Button();
+//                ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete " + model.getNumber() + " - " + model.getSymbol() + "?")
+//                        .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
+//                        .withButton(bConfirm, ButtonOption.caption("Delete"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
+//
+//                bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+//                    try {
+//                        generatorService.delete(model.getId());
+//                        refreshGrid();
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                });
+//
+//                dialog.open();
+//
+            }else{
+                ConfirmDialog dialog = ConfirmDialog.create().withMessage("No simulations found");
+                dialog.open();
+            }
+
+        });
+
+
         return menuBar;
 
     }
@@ -479,7 +528,6 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
             run3(model);
         }
     }
-
 
 
     private void run3(GeneratorModel model) {
@@ -582,7 +630,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
 
     // add GeneratorRunner to Session context
-    private void registerRunnerInContext(GeneratorRunner runner){
+    private void registerRunnerInContext(GeneratorRunner runner) {
         UI ui = UI.getCurrent();
         Object obj = ui.getSession().getAttribute(RUNNERS_KEY);
         List<GeneratorRunner> runners;
@@ -597,7 +645,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
 
     // remove GeneratorRunner from Session context
-    private void unregisterRunnerFromContext(GeneratorRunner runner){
+    private void unregisterRunnerFromContext(GeneratorRunner runner) {
         UI ui = UI.getCurrent();
         Object obj = ui.getSession().getAttribute(RUNNERS_KEY);
         List<GeneratorRunner> runners;

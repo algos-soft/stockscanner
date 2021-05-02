@@ -79,6 +79,10 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         return repository.findAll();
     }
 
+    public List<MarketIndex> findAllOrderBySymbol(){
+        return repository.findAllAndSort(Sort.by("symbol"));
+    }
+
     public int countDataPoints(MarketIndex index){
         return indexUnitService.countBy(index);
     }
@@ -104,7 +108,7 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         }
 
         model.setImageData(entity.getImage());
-        model.setImage(utils.byteArrayToImage(entity.getImage()));
+//        model.setImage(utils.byteArrayToImage(entity.getImage()));
         model.setSymbol(entity.getSymbol());
 
         model.setSpreadPercent(utils.toPrimitive(entity.getSpreadPercent()));
@@ -126,6 +130,25 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
     }
 
 
+    /**
+     * Update entity from model
+     */
+    public void modelToEntity(IndexModel model, MarketIndex entity) {
+        entity.setImage(model.getImageData());
+        entity.setSymbol(model.getSymbol());
+        entity.setName(model.getName());
+
+        IndexCategories category = model.getCategory();
+        if (category != null) {
+            entity.setCategory(category.getCode());
+        }
+
+        entity.setSpreadPercent(model.getSpreadPercent());
+        entity.setOvnBuyDay(model.getOvnBuyDay());
+        entity.setOvnBuyWe(model.getOvnBuyWe());
+        entity.setOvnSellDay(model.getOvnSellDay());
+        entity.setOvnSellWe(model.getOvnSellWe());
+    }
 
 
 }

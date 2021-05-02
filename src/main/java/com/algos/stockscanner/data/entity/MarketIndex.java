@@ -3,10 +3,13 @@ package com.algos.stockscanner.data.entity;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.AbstractEntity;
 import com.algos.stockscanner.utils.Du;
+import org.hibernate.collection.internal.PersistentSet;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -38,13 +41,10 @@ public class MarketIndex extends AbstractEntity {
     private String unitFrequency;
 
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<IndexUnit> units;
+    private List<IndexUnit> units=new ArrayList<>();
 
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Generator> generators;
-
-    @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Simulation> simulations;
+    private List<Simulation> simulations=new ArrayList<>();
 
 
     public byte[] getImage() {

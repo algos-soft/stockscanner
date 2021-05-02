@@ -19,6 +19,7 @@
   box-shadow: var(--lumo-box-shadow-xs);
   padding: calc(var(--lumo-space-s) * 1.5) var(--lumo-space-m);
   align-items: center;
+  max-height: 8em;
 }
 
 .generators-view .panel {
@@ -39,7 +40,7 @@
 
 .generators-view .symbol {
   margin-left: var(--lumo-space-s);
-  font-size: var(--lumo-font-size-l);
+  font-size: var(--lumo-font-size-m);
   font-weight: bold;
 }
 

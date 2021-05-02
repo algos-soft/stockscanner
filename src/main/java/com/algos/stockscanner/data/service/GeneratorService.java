@@ -5,6 +5,7 @@ import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.views.generators.GeneratorModel;
+import com.algos.stockscanner.views.indexes.IndexModel;
 import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class GeneratorService extends CrudService<Generator, Integer> {
 
     @Autowired
     private MarketIndexService marketIndexService;
+
+    @Autowired
+    private SimulationService simulationService;
 
     public GeneratorService(@Autowired GeneratorRepository repository) {
         this.repository = repository;
@@ -87,9 +91,6 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         return (int)repository.count();
     }
 
-
-
-
     /**
      * Copy data from Entity to Model
      */
@@ -98,17 +99,32 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         model.setNumber(utils.toPrimitive(entity.getNumber()));
 
         MarketIndex index = entity.getIndex();
-        String symbol;
+        String symbol=null;
         byte[] imageData;
         if (index != null) {
             imageData = index.getImage();
             symbol = index.getSymbol();
         } else {
             imageData = utils.getDefaultIndexIcon();
-            symbol = "n.a.";
         }
         model.setSymbol(symbol);
         model.setImage(utils.byteArrayToImage(imageData));
+
+        List<IndexModel> mIndexes = new ArrayList<>();
+        for(MarketIndex eIndex : entity.getIndexes()){
+            IndexModel mIndex = new IndexModel();
+            marketIndexService.entityToModel(eIndex, mIndex);
+            mIndexes.add(mIndex);
+        }
+        model.setIndexes(mIndexes);
+
+        List<SimulationModel> mSimulations = new ArrayList<>();
+        for(Simulation eSimulation : entity.getSimulations()){
+            SimulationModel mSimulation = new SimulationModel();
+            simulationService.entityToModel(eSimulation, mSimulation);
+            mSimulations.add(mSimulation);
+        }
+        model.setSimulations(mSimulations);
 
         model.setStartDate(entity.getStartDateLD());
         model.setAmount(utils.toPrimitive(entity.getAmount()));
@@ -130,6 +146,7 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         model.setDaysLookbackSteps(utils.toPrimitive(entity.getAvgDaysSteps()));
         model.setPermutateDaysLookback(utils.toPrimitive(entity.getAvgDaysPermutate()));
 
+        model.setPermutateIndexes(utils.toPrimitive(entity.getIndexesPermutate()));
 
     }
 
@@ -140,12 +157,26 @@ public class GeneratorService extends CrudService<Generator, Integer> {
 
         String symbol = model.getSymbol();
         MarketIndex index=null;
-        try {
-            index = marketIndexService.findUniqueBySymbol(symbol);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(symbol!=null){
+            try {
+                index = marketIndexService.findUniqueBySymbol(symbol);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         entity.setIndex(index);
+
+        entity.getIndexes().clear();
+        for(IndexModel iModel : model.getIndexes()){
+            MarketIndex iEntity = marketIndexService.get(iModel.getId()).get();
+            entity.getIndexes().add(iEntity);
+        }
+
+        entity.getSimulations().clear();
+        for(SimulationModel iModel : model.getSimulations()){
+            Simulation iEntity = simulationService.get(iModel.getId()).get();
+            entity.getSimulations().add(iEntity);
+        }
 
         entity.setStartDateLD(model.getStartDate());
         entity.setAmount(model.getAmount());
@@ -166,6 +197,8 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         entity.setAvgDaysMin(model.getDaysLookbackMin());
         entity.setAvgDaysSteps(model.getDaysLookbackSteps());
         entity.setAvgDaysPermutate(model.isPermutateDaysLookback());
+
+        entity.setIndexesPermutate(model.isPermutateIndexes());
 
     }
 

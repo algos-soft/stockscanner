@@ -263,7 +263,7 @@ public class IndexDialog extends Dialog {
         }
 
         model.setImageData(imageData);
-        model.setImage(utils.byteArrayToImage(imageData));
+//        model.setImage(utils.byteArrayToImage(imageData));
         model.setSymbol(symbolFld.getValue());
         model.setName(nameFld.getValue());
         model.setCategory(categoryFld.getValue());
