@@ -2,33 +2,13 @@ package com.algos.stockscanner.services;
 
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
-import com.algos.stockscanner.data.enums.FrequencyTypes;
-import com.algos.stockscanner.data.enums.IndexCategories;
-import com.algos.stockscanner.runner.GeneratorRunner;
-import com.algos.stockscanner.utils.Du;
-import com.algos.stockscanner.views.indexes.IndexModel;
-import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.server.Command;
-import org.claspina.confirmdialog.ButtonOption;
-import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.vaadin.artur.helpers.CrudService;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -65,22 +45,55 @@ public class AdminService {
 
 
     /**
-     * Download index data for an indexes in a separate thread.
+     * Download index data for one index in a separate thread.
      * <p></p>
      * @param index the MarketIndex
      * @param mode the update mode:
      * ALL - delete all index data and load all the available data in the db
      * DATE - add/update all data starting from the given date included
-     * @param startDate in case of DATE mode, the date where to begin the update od the data in the db,
+     * @param startDate in case of DATE mode, the date where to begin the update od the data in the db
+     * @param handler to call abort() to interrupt the process
      */
-    public void downloadIndexData(MarketIndex index, String mode, LocalDate startDate){
-        DownloadIndexDataCallable callable = context.getBean(DownloadIndexDataCallable.class);
-        ExecutorService executorService = Executors.newFixedThreadPool(4);
-        Future<DownloadIndexDataStatus> result = executorService.submit(callable);
+    public UpdateIndexDataHandler downloadIndexData(MarketIndex index, String mode, LocalDate startDate, UpdateIndexDataListener listener, UpdateIndexDataHandler handler){
 
-//            result.get();
+        UpdateIndexDataCallable callable = context.getBean(UpdateIndexDataCallable.class, index, mode, startDate, listener, handler);
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        Future<UpdateIndexDataStatus> future = executorService.submit(callable);
+
+        int i=0;
+//        while(!future.isDone()){
+//            try {
+//                Thread.sleep(500);
+//                i++;
+//                System.out.println(i+": not finished");
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        System.out.println("finished");
+
+//        try {
+//            Thread.sleep(2000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
+//        try {
+//            Object obj = future.get();
+//            int a = 87;
+//            int b=a;
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
+
+        int a = 87;
+        int b=a;
+
 //            result.cancel()
 
+        return handler;
     }
 
 

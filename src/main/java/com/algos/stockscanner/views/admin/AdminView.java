@@ -2,8 +2,11 @@ package com.algos.stockscanner.views.admin;
 
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.services.AdminService;
 import com.algos.stockscanner.services.MarketService;
+import com.algos.stockscanner.services.UpdateIndexDataHandler;
+import com.algos.stockscanner.services.UpdateIndexDataListener;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -30,6 +33,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Route(value = "admin", layout = MainView.class)
@@ -50,6 +54,12 @@ public class AdminView extends VerticalLayout {
 
     @Autowired
     private MarketService marketService;
+
+    @Autowired
+    private AdminService adminService;
+
+    @Autowired
+    private MarketIndexService marketIndexService;
 
     @Autowired
     private ApplicationContext context;
@@ -132,7 +142,63 @@ public class AdminView extends VerticalLayout {
         layout1.setAlignItems(Alignment.BASELINE);
         layout1.add(bDownloadIndexes, limitField);
 
+
         Button bUpdateAllIndexData = new Button("Update data for all indexes");
+        bUpdateAllIndexData.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                try {
+
+                    MarketIndex index = marketIndexService.findUniqueBySymbol("AAPL");
+
+                    UpdateIndexDataHandler handler=new UpdateIndexDataHandler();
+
+                    // setup the progress dialog
+                    Text text = new Text("Loading data...");
+                    ProgressBar progressBar = new ProgressBar();
+                    progressBar.setIndeterminate(true);
+                    VerticalLayout layout = new VerticalLayout();
+                    layout.add(text, progressBar);
+                    Button bAbort = new Button();
+                    ConfirmDialog dialog = ConfirmDialog.create()
+                            .withMessage(layout)
+                            .withButton(bAbort, ButtonOption.caption("Abort"), ButtonOption.closeOnClick(false));
+                    dialog.setCloseOnEsc(false);
+                    dialog.setCloseOnOutsideClick(false);
+                    bAbort.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+                        handler.abort();
+                    });
+                    dialog.setWidth("20em");
+
+                    // keep this out of the listener, the listener is called on another thread
+                    UI ui = UI.getCurrent();
+
+                    UpdateIndexDataListener listener = new UpdateIndexDataListener() {
+                        @Override
+                        public void onProgress(int current, int total, LocalDate date) {
+                            ui.access((Command) () -> {
+                                progressBar.setIndeterminate(false);
+                                progressBar.setValue(current);
+                                progressBar.setMax(total);
+                            });
+                        }
+
+                        @Override
+                        public void onCompleted(boolean aborted) {
+                            ui.access((Command) () -> dialog.close());
+                        }
+                    };
+
+                    dialog.open();
+
+                    // start background operation
+                    adminService.downloadIndexData(index, "ALL", null, listener, handler);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         VerticalLayout layout = new VerticalLayout();
         //layout.getStyle().set("background","yellow");
