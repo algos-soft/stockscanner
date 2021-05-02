@@ -24,8 +24,9 @@ public class Generator extends AbstractEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     private MarketIndex index;
 
-    @OneToMany(mappedBy = "generator", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Simulation> simulations;
+//    @OneToMany(mappedBy = "generator", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "generator", fetch=FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Simulation> simulations=new ArrayList<>();
 
     @ManyToMany
     @LazyCollection(LazyCollectionOption.FALSE)
@@ -61,9 +62,16 @@ public class Generator extends AbstractEntity {
 
     private Boolean indexesPermutate;
 
-
     public List<Simulation> getSimulations() {
         return simulations;
+    }
+
+    public void setSimulations(List<Simulation> simulations) {
+        this.simulations = simulations;
+    }
+
+    public void setIndexes(List<MarketIndex> indexes) {
+        this.indexes = indexes;
     }
 
     public List<MarketIndex> getIndexes() {

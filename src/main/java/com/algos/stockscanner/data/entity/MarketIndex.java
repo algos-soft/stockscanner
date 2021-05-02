@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -45,8 +46,8 @@ public class MarketIndex extends AbstractEntity {
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Simulation> simulations=new ArrayList<>();
 
-    @ManyToMany(mappedBy = "indexes")
-    private Set<Generator> generators=new PersistentSet();
+//    @ManyToMany(mappedBy = "indexes")
+//    private Set<Generator> generators=new HashSet();
 
     public byte[] getImage() {
         return image;

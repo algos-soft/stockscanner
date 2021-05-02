@@ -1,6 +1,7 @@
 package com.algos.stockscanner.views.generators;
 
 import com.algos.stockscanner.views.indexes.IndexModel;
+import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.component.html.Image;
 
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ public class GeneratorModel {
     private String symbol;
 
     private List<IndexModel> indexes=new ArrayList<>();
+    private List<SimulationModel> simulations=new ArrayList<>();
 
     private LocalDate startDate;
     private int days;
@@ -64,6 +66,14 @@ public class GeneratorModel {
 
     public void setIndexes(List<IndexModel> indexes) {
         this.indexes = indexes;
+    }
+
+    public List<SimulationModel> getSimulations() {
+        return simulations;
+    }
+
+    public void setSimulations(List<SimulationModel> simulations) {
+        this.simulations = simulations;
     }
 
     public Image getImage() {

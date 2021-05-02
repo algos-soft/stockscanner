@@ -38,6 +38,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -176,6 +177,14 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
             // delete previous simulations for this generator
             generator.getSimulations().clear();
+
+//            for(Iterator<Simulation> iterator = generator.getSimulations().iterator();
+//                iterator.hasNext(); ) {
+//                Simulation simulation = iterator .next();
+//                simulation.setGenerator(null);
+//                iterator.remove();
+//            }
+
             generatorService.update(generator);
 
             // build cartesian list of permutable properties
@@ -407,17 +416,28 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
     void preliminaryChecks() throws RunnerException {
 
-        // check that a index is specified
-        MarketIndex marketIndex = generator.getIndex();
-        if (marketIndex == null) {
-            throw new RunnerException("The Generator does not have a Market Index specified");
+        // build a list of market indices
+        List<MarketIndex> marketIndexes=new ArrayList<>();
+        if(generator.getIndexesPermutate()){
+            for(MarketIndex marketIndex : generator.getIndexes()){
+                marketIndexes.add(marketIndex);
+            }
+        }else{
+            marketIndexes.add(generator.getIndex());
         }
 
-        // check that index has data
-        int count = marketIndexService.countDataPoints(marketIndex);
-        if (count == 0) {
-            String msg = "The index " + marketIndex.getSymbol() + " has no historic data. Download data for the index.";
-            throw new RunnerException(msg);
+        // check not empty
+        if(marketIndexes.size()==0){
+            throw new RunnerException("The Generator does not have Market Indexes specified");
+        }
+
+        // check that all the indexes haves data
+        for(MarketIndex marketIndex : marketIndexes){
+            int count = marketIndexService.countDataPoints(marketIndex);
+            if (count == 0) {
+                String msg = "The index " + marketIndex.getSymbol() + " has no historic data. Download data for the index.";
+                throw new RunnerException(msg);
+            }
         }
 
         // start date

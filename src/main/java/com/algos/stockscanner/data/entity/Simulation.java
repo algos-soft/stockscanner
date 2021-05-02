@@ -17,7 +17,9 @@ public class Simulation extends AbstractEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     private MarketIndex index;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+//    @ManyToOne(fetch = FetchType.EAGER)
+//    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne
     private Generator generator;
 
     @OneToMany(mappedBy = "simulation", cascade = CascadeType.ALL, orphanRemoval = true)

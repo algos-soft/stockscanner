@@ -31,6 +31,9 @@ public class GeneratorService extends CrudService<Generator, Integer> {
     @Autowired
     private MarketIndexService marketIndexService;
 
+    @Autowired
+    private SimulationService simulationService;
+
     public GeneratorService(@Autowired GeneratorRepository repository) {
         this.repository = repository;
     }
@@ -88,9 +91,6 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         return (int)repository.count();
     }
 
-
-
-
     /**
      * Copy data from Entity to Model
      */
@@ -117,6 +117,14 @@ public class GeneratorService extends CrudService<Generator, Integer> {
             mIndexes.add(mIndex);
         }
         model.setIndexes(mIndexes);
+
+        List<SimulationModel> mSimulations = new ArrayList<>();
+        for(Simulation eSimulation : entity.getSimulations()){
+            SimulationModel mSimulation = new SimulationModel();
+            simulationService.entityToModel(eSimulation, mSimulation);
+            mSimulations.add(mSimulation);
+        }
+        model.setSimulations(mSimulations);
 
         model.setStartDate(entity.getStartDateLD());
         model.setAmount(utils.toPrimitive(entity.getAmount()));
@@ -162,6 +170,12 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         for(IndexModel iModel : model.getIndexes()){
             MarketIndex iEntity = marketIndexService.get(iModel.getId()).get();
             entity.getIndexes().add(iEntity);
+        }
+
+        entity.getSimulations().clear();
+        for(SimulationModel iModel : model.getSimulations()){
+            Simulation iEntity = simulationService.get(iModel.getId()).get();
+            entity.getSimulations().add(iEntity);
         }
 
         entity.setStartDateLD(model.getStartDate());
