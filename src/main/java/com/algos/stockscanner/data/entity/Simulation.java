@@ -17,12 +17,10 @@ public class Simulation extends AbstractEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     private MarketIndex index;
 
-//    @ManyToOne(fetch = FetchType.EAGER)
-//    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.EAGER)
     private Generator generator;
 
-    @OneToMany(mappedBy = "simulation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "simulation", fetch=FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SimulationItem> simulationItems=new ArrayList<>();
 
     private String startTs;  // timestamp of first point scanned

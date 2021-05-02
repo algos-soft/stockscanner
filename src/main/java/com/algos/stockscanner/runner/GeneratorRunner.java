@@ -176,16 +176,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             preliminaryChecks();
 
             // delete previous simulations for this generator
-            generator.getSimulations().clear();
-
-//            for(Iterator<Simulation> iterator = generator.getSimulations().iterator();
-//                iterator.hasNext(); ) {
-//                Simulation simulation = iterator .next();
-//                simulation.setGenerator(null);
-//                iterator.remove();
-//            }
-
-            generatorService.update(generator);
+            simulationService.deleteBy(generator);
 
             // build cartesian list of permutable properties
             List<Integer> indexIds = getIndexIdsList();

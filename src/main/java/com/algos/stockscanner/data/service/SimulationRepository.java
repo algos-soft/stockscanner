@@ -20,4 +20,6 @@ public interface SimulationRepository extends JpaRepository<Simulation, Integer>
     @Query("SELECT COUNT(s) FROM Simulation s WHERE s.generator=:generator")
     int countByGenerator(@Param("generator") Generator generator);
 
+
+
 }

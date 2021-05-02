@@ -23,6 +23,7 @@ import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -32,6 +33,7 @@ public class SimulationService extends CrudService<Simulation, Integer> {
     private Utils utils;
 
     private SimulationRepository repository;
+
 
     public SimulationService(@Autowired SimulationRepository repository) {
         this.repository = repository;
@@ -100,6 +102,14 @@ public class SimulationService extends CrudService<Simulation, Integer> {
 
     public int countBy(Generator generator) {
         return repository.countByGenerator(generator);
+    }
+
+    public void deleteBy(Generator generator) {
+        for (Iterator<Simulation> iterator = generator.getSimulations().iterator(); iterator.hasNext(); ) {
+            Simulation simulation = iterator.next();
+            delete(simulation.getId());
+            iterator.remove();
+        }
     }
 
 

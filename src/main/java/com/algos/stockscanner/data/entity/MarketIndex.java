@@ -40,12 +40,8 @@ public class MarketIndex extends AbstractEntity {
 
     private String unitFrequency;
 
-    @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "index", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IndexUnit> units=new ArrayList<>();
-
-    @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Simulation> simulations=new ArrayList<>();
-
 
     public byte[] getImage() {
         return image;
@@ -126,23 +122,6 @@ public class MarketIndex extends AbstractEntity {
     public void setUnits(List<IndexUnit> units) {
         this.units = units;
     }
-
-//    public LocalDate getUnitsFrom() {
-//        return unitsFrom;
-//    }
-
-//    public void setUnitsFrom(LocalDate unitsFrom) {
-//        this.unitsFrom = unitsFrom;
-//    }
-
-//    public LocalDate getUnitsTo() {
-//        return unitsTo;
-//    }
-
-//    public void setUnitsTo(LocalDate unitsTo) {
-//        this.unitsTo = unitsTo;
-//    }
-
 
     public String getUnitsFrom() {
         return unitsFrom;

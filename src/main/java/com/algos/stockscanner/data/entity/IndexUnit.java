@@ -14,8 +14,7 @@ public class IndexUnit extends AbstractEntity {
     private Float close;
     private String dateTime;
 
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.EAGER)
     private MarketIndex index;
 
     public Float getOpen() {
@@ -35,33 +34,12 @@ public class IndexUnit extends AbstractEntity {
     }
 
     public String getDateTime() {
-//        ZonedDateTime ldtZoned = dateTime.atZone(ZoneId.systemDefault());
-//        ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
-//        LocalDateTime ldt = utcZoned.toLocalDateTime();
-//        return ldt;
         return dateTime;
     }
 
     public void setDateTime(String dateTime) {
         this.dateTime = dateTime;
     }
-
-//    public LocalDateTime getLocalDateTime() {
-////        ZonedDateTime ldtZoned = dateTime.atZone(ZoneId.systemDefault());
-////        ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
-////        LocalDateTime ldt = utcZoned.toLocalDateTime();
-////        return ldt;
-//        return dateTime.toLocalDateTime();
-//    }
-
-//    public void setLocalDateTime(LocalDateTime dateTime) {
-//        final ZoneId zone = ZoneId.systemDefault();
-//        ZoneOffset zoneOffSet = zone.getRules().getOffset(dateTime);
-//        OffsetDateTime offsetDateTime = dateTime.atOffset(zoneOffSet);
-//        this.dateTime = offsetDateTime;
-//    }
-
-
 
     public MarketIndex getIndex() {
         return index;
@@ -75,10 +53,6 @@ public class IndexUnit extends AbstractEntity {
     // --------------
 
     public LocalDateTime getDateTimeLDT() {
-//        ZonedDateTime ldtZoned = dateTime.atZone(ZoneId.systemDefault());
-//        ZonedDateTime utcZoned = ldtZoned.withZoneSameInstant(ZoneId.of("UTC"));
-//        LocalDateTime ldt = utcZoned.toLocalDateTime();
-//        return ldt;
         return Du.toLocalDateTime(dateTime);
     }
 
