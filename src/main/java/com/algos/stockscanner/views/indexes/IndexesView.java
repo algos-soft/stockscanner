@@ -373,84 +373,84 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
 
-    private Component buildActions(IndexModel model) {
-
-        Select<String> select = new Select<>();
-        select.setPlaceholder("Actions");
-        select.setItems("Edit index", "Delete index", "Download historic data");
-        select.getStyle().set("width", "3em");
-        select.setEmptySelectionCaption("Test");
-//        select.add(new Label("Edit index"));
-//        select.add(new Label("Delete index"));
-//        select.add(new Label("Download historic data"));
-
-
-        select.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<String>, String>>() {
-            @Override
-            public void valueChanged(AbstractField.ComponentValueChangeEvent<Select<String>, String> event) {
-
-                String text = event.getValue();
-                select.setValue(null);
-
-                if (text != null) {
-
-                    switch (text) {
-                        case "Edit index":
-
-                            MarketIndex entity = marketIndexService.get(model.getId()).get();
-
-                            IndexDialogConfirmListener listener = model1 -> {
-                                marketIndexService.modelToEntity(model1, entity);
-                                marketIndexService.update(entity);   // write db
-                                marketIndexService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
-                                grid.getDataProvider().refreshItem(model1); // refresh only this item
-                            };
-
-                            IndexDialog dialog = context.getBean(IndexDialog.class, model, listener);
-
-                            dialog.open();
-
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-
-            }
-        });
-
-//        select.setLabel("Name");
-//        select.setItems("Option one", "Option two");
+//    private Component buildActions(IndexModel model) {
 //
-//        Div value = new Div();
-//        value.setText("Select a value");
-//        select.addValueChangeListener(
-//                event -> value.setText("Selected: " + event.getValue()));
+//        Select<String> select = new Select<>();
+//        select.setPlaceholder("Actions");
+//        select.setItems("Edit index", "Delete index", "Download historic data");
+//        select.getStyle().set("width", "3em");
+//        select.setEmptySelectionCaption("Test");
+////        select.add(new Label("Edit index"));
+////        select.add(new Label("Delete index"));
+////        select.add(new Label("Download historic data"));
 //
 //
+//        select.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<String>, String>>() {
+//            @Override
+//            public void valueChanged(AbstractField.ComponentValueChangeEvent<Select<String>, String> event) {
 //
-//        account.getSubMenu().addItem("Edit index", i -> {
+//                String text = event.getValue();
+//                select.setValue(null);
 //
-//            MarketIndex entity = marketIndexService.get(model.getId()).get();
+//                if (text != null) {
 //
-//            IndexDialogConfirmListener listener = model1 -> {
-//                updateEntity(entity, model1);
-//                marketIndexService.update(entity);   // write db
-//                marketIndexService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
-//                grid.getDataProvider().refreshItem(model1); // refresh only this item
-//            };
+//                    switch (text) {
+//                        case "Edit index":
 //
-//            IndexDialog dialog = context.getBean(IndexDialog.class, model, listener);
+//                            MarketIndex entity = marketIndexService.get(model.getId()).get();
 //
-//            dialog.open();
+//                            IndexDialogConfirmListener listener = model1 -> {
+//                                marketIndexService.modelToEntity(model1, entity);
+//                                marketIndexService.update(entity);   // write db
+//                                marketIndexService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
+//                                grid.getDataProvider().refreshItem(model1); // refresh only this item
+//                            };
 //
+//                            IndexDialog dialog = context.getBean(IndexDialog.class, model, listener);
+//
+//                            dialog.open();
+//
+//                            break;
+//                        default:
+//                            break;
+//                    }
+//                }
+//
+//
+//            }
 //        });
-
-
-        return select;
-
-    }
+//
+////        select.setLabel("Name");
+////        select.setItems("Option one", "Option two");
+////
+////        Div value = new Div();
+////        value.setText("Select a value");
+////        select.addValueChangeListener(
+////                event -> value.setText("Selected: " + event.getValue()));
+////
+////
+////
+////        account.getSubMenu().addItem("Edit index", i -> {
+////
+////            MarketIndex entity = marketIndexService.get(model.getId()).get();
+////
+////            IndexDialogConfirmListener listener = model1 -> {
+////                updateEntity(entity, model1);
+////                marketIndexService.update(entity);   // write db
+////                marketIndexService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
+////                grid.getDataProvider().refreshItem(model1); // refresh only this item
+////            };
+////
+////            IndexDialog dialog = context.getBean(IndexDialog.class, model, listener);
+////
+////            dialog.open();
+////
+////        });
+//
+//
+//        return select;
+//
+//    }
 
 
 //    /**
