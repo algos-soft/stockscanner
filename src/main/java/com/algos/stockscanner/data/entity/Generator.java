@@ -1,30 +1,25 @@
 package com.algos.stockscanner.data.entity;
 
-import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.AbstractEntity;
 import com.algos.stockscanner.utils.Du;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 public class Generator extends AbstractEntity {
 
-    // remember: never use primitives or initialize values in JPA entities!
-    // JPA relies on nulls in query by example
+    // remember: never use primitives or initialize values in JPA entities
+    // if you want to use Query by Example. JPA relies on nulls in query by example
 
     @ManyToOne(fetch = FetchType.EAGER)
     private MarketIndex index;
 
-//    @OneToMany(mappedBy = "generator", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @OneToMany(mappedBy = "generator", fetch=FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Simulation> simulations=new ArrayList<>();
 
@@ -76,6 +71,7 @@ public class Generator extends AbstractEntity {
 
     public List<MarketIndex> getIndexes() {
         return indexes;
+//        return new ArrayList<MarketIndex>();
     }
 
     public Integer getNumber() {
@@ -262,5 +258,20 @@ public class Generator extends AbstractEntity {
     public void setStartDateLD(LocalDate localDate) {
         this.startDate = Du.toUtcString(localDate);
     }
+
+//    public MarketIndex getIndex(){
+//        List<MarketIndex> indexes = getIndexes();
+//        if(indexes.size()>0){
+//            return indexes.get(0);
+//        }
+//        return null;
+//    }
+
+//    public void setIndex(MarketIndex index){
+//        List<MarketIndex> indexes = getIndexes();
+//        indexes.clear();
+//        indexes.add(index);
+//    }
+
 
 }

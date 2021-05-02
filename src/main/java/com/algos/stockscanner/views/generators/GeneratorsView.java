@@ -3,6 +3,7 @@ package com.algos.stockscanner.views.generators;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.data.service.SimulationService;
@@ -42,6 +43,7 @@ import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -230,14 +232,14 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
         Component comp;
 
-        if(model.isPermutateIndexes()){
-            IndexesPanel panel = context.getBean(IndexesPanel.class,"-list");
-            for(IndexModel idxModel : model.getIndexes()){
+        if (model.isPermutateIndexes()) {
+            IndexesPanel panel = context.getBean(IndexesPanel.class, "-list");
+            for (IndexModel idxModel : model.getIndexes()) {
                 IndexComponent idxComp = context.getBean(IndexComponent.class, idxModel.getId(), idxModel.getImageData(), idxModel.getSymbol(), "-list");
                 panel.add(idxComp);
             }
-            comp=panel;
-        }else{
+            comp = panel;
+        } else {
             Image img = model.getImage();
             if (img == null) {
                 img = utils.byteArrayToImage(utils.getDefaultIndexIcon());
@@ -248,7 +250,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
             symbol.addClassName("symbol");
             HorizontalLayout hl = new HorizontalLayout();
             hl.add(img, symbol);
-            comp=hl;
+            comp = hl;
         }
 
         Pan pan = new Pan();
@@ -479,18 +481,18 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
         // delete existing simulations
         account.getSubMenu().addItem("Delete simulations", i -> {
-            if(model.getSimulations().size()>0){
+
+            Generator generator = generatorService.get(model.getId()).get();
+            if (generator.getSimulations().size() > 0) {
 
                 Button bConfirm = new Button();
-                ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete " + model.getSimulations().size() + " simulations?")
+                ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete " + generator.getSimulations().size() + " simulations?")
                         .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
                         .withButton(bConfirm, ButtonOption.caption("Delete"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
 
                 bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
                     try {
-                        Generator generator = generatorService.get(model.getId()).get();
-                        generator.getSimulations().clear();
-                        generatorService.update(generator);
+                        simulationService.deleteBy(generator);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -498,7 +500,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
                 dialog.open();
 
-            }else{
+            } else {
                 ConfirmDialog dialog = ConfirmDialog.create().withMessage("No simulations found");
                 dialog.open();
             }

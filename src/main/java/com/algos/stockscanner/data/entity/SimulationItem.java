@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Entity
 public class SimulationItem extends AbstractEntity {
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     private Simulation simulation;
 
     private String timestamp;

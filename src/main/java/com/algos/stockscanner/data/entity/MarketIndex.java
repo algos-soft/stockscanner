@@ -43,11 +43,8 @@ public class MarketIndex extends AbstractEntity {
     @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IndexUnit> units=new ArrayList<>();
 
-    @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Simulation> simulations=new ArrayList<>();
-
-//    @ManyToMany(mappedBy = "indexes")
-//    private Set<Generator> generators=new HashSet();
+//    @OneToMany(mappedBy = "index", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Simulation> simulations=new ArrayList<>();
 
     public byte[] getImage() {
         return image;
@@ -129,7 +126,15 @@ public class MarketIndex extends AbstractEntity {
         this.units = units;
     }
 
-//    public LocalDate getUnitsFrom() {
+//    public List<Simulation> getSimulations() {
+//        return simulations;
+//    }
+//
+//    public void setSimulations(List<Simulation> simulations) {
+//        this.simulations = simulations;
+//    }
+
+    //    public LocalDate getUnitsFrom() {
 //        return unitsFrom;
 //    }
 
