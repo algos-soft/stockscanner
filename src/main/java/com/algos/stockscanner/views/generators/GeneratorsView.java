@@ -481,22 +481,23 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         account.getSubMenu().addItem("Delete simulations", i -> {
             if(model.getSimulations().size()>0){
 
-//                Button bConfirm = new Button();
-//                ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete " + model.getNumber() + " - " + model.getSymbol() + "?")
-//                        .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
-//                        .withButton(bConfirm, ButtonOption.caption("Delete"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
-//
-//                bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
-//                    try {
-//                        generatorService.delete(model.getId());
-//                        refreshGrid();
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                });
-//
-//                dialog.open();
-//
+                Button bConfirm = new Button();
+                ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete " + model.getSimulations().size() + " simulations?")
+                        .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
+                        .withButton(bConfirm, ButtonOption.caption("Delete"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
+
+                bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+                    try {
+                        Generator generator = generatorService.get(model.getId()).get();
+                        generator.getSimulations().clear();
+                        generatorService.update(generator);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+
+                dialog.open();
+
             }else{
                 ConfirmDialog dialog = ConfirmDialog.create().withMessage("No simulations found");
                 dialog.open();
