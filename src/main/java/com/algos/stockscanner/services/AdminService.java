@@ -2,16 +2,16 @@ package com.algos.stockscanner.services;
 
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.task.TaskHandler;
+import com.algos.stockscanner.task.TaskListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 @Service
 public class AdminService {
@@ -54,7 +54,7 @@ public class AdminService {
      * @param startDate in case of DATE mode, the date where to begin the update od the data in the db
      * @param handler to call abort() to interrupt the process
      */
-    public Future<UpdateIndexDataStatus> downloadIndexData(MarketIndex index, String mode, LocalDate startDate, UpdateIndexDataListener listener, UpdateIndexDataHandler handler){
+    public Future<UpdateIndexDataStatus> downloadIndexData(MarketIndex index, String mode, LocalDate startDate, TaskListener listener, TaskHandler handler){
 
         UpdateIndexDataCallable callable = context.getBean(UpdateIndexDataCallable.class, index, mode, startDate, listener, handler);
         ExecutorService executorService = Executors.newFixedThreadPool(4);
@@ -94,6 +94,28 @@ public class AdminService {
 //            result.cancel()
 
         return future;
+    }
+
+
+
+    public List<UpdateIndexDataCallable> scheduleUpdate(List<MarketIndex> indexes, int intervalSeconds){
+        List<UpdateIndexDataCallable> callables = new ArrayList<>();
+
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
+
+        UpdateIndexDataCallable callable;
+        long millis=0;
+        for(MarketIndex index : indexes){
+            callable = context.getBean(UpdateIndexDataCallable.class, index, "ALL", null, null, null);
+            callables.add(callable);
+            executorService.schedule(callable, millis, TimeUnit.MILLISECONDS);
+            millis+=intervalSeconds*1000;
+        }
+
+        executorService.shutdown(); // terminate ongoing and scheduled tasks, then shutdown
+
+        return callables;
+
     }
 
 

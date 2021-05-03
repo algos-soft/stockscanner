@@ -3,22 +3,19 @@ package com.algos.stockscanner.views.admin;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.algos.stockscanner.services.AdminService;
-import com.algos.stockscanner.services.MarketService;
-import com.algos.stockscanner.services.UpdateIndexDataHandler;
-import com.algos.stockscanner.services.UpdateIndexDataListener;
+import com.algos.stockscanner.task.TaskHandler;
+import com.algos.stockscanner.task.TaskListener;
+import com.algos.stockscanner.services.*;
+import com.algos.stockscanner.task.TaskMonitor;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -27,13 +24,9 @@ import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.Resource;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
@@ -50,6 +43,7 @@ public class AdminView extends VerticalLayout {
     private Component generatorComponent;
 
     private IntegerField limitField;
+
 
     private @Autowired
     Utils utils;
@@ -130,6 +124,8 @@ public class AdminView extends VerticalLayout {
 
     private Component buildMarketIndexesComponent(){
 
+        HorizontalLayout statusLayout = new HorizontalLayout();
+
         Button bDownloadIndexes = new Button("Download indexes");
         bDownloadIndexes.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
@@ -152,7 +148,7 @@ public class AdminView extends VerticalLayout {
                 try {
 
 
-                    UpdateIndexDataHandler handler=new UpdateIndexDataHandler();
+                    TaskHandler handler=new TaskHandler();
 
                     // setup the progress dialog
                     Text text = new Text("Loading data...");
@@ -174,9 +170,9 @@ public class AdminView extends VerticalLayout {
                     // keep this out of the listener, the listener is called on another thread
                     UI ui = UI.getCurrent();
 
-                    UpdateIndexDataListener listener = new UpdateIndexDataListener() {
+                    TaskListener listener = new TaskListener() {
                         @Override
-                        public void onProgress(int current, int total, LocalDate date) {
+                        public void onProgress(int current, int total, Object info) {
                             ui.access((Command) () -> {
                                 progressBar.setIndeterminate(false);
                                 progressBar.setValue(current);
@@ -217,11 +213,73 @@ public class AdminView extends VerticalLayout {
             }
         });
 
-        VerticalLayout layout = new VerticalLayout();
-        //layout.getStyle().set("background","yellow");
-        layout.add(layout1, bUpdateAllIndexData);
 
-        return layout;
+        Button bTest = new Button("Test task scheduler");
+        bTest.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                try {
+                    List<MarketIndex> indexes = new ArrayList<>();
+                    indexes.add(marketIndexService.findUniqueBySymbol("AAPL"));
+                    indexes.add(marketIndexService.findUniqueBySymbol("AMZN"));
+                    indexes.add(marketIndexService.findUniqueBySymbol("PYPL"));
+
+                    List<UpdateIndexDataCallable> callables = adminService.scheduleUpdate(indexes, 5);
+
+                    for(UpdateIndexDataCallable callable : callables){
+
+                        // manage events coming from the monitor
+                        TaskMonitor taskMonitor = context.getBean(TaskMonitor.class, new TaskMonitor.MonitorListener() {
+                            @Override
+                            public void onAborted() {
+                                callable.getHandler().abort();
+                            }
+
+                            @Override
+                            public void onClosed() {
+
+                            }
+                        });
+
+                        // register a listener for events happening in the Callable
+                        callable.setListener(new TaskListener() {
+                            @Override
+                            public void onProgress(int current, int total, Object info) {
+                                taskMonitor.onProgress(current, total, info);
+                            }
+
+                            @Override
+                            public void onCompleted(boolean aborted) {
+                                taskMonitor.onCompleted(aborted);
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                taskMonitor.onError(e);
+                            }
+                        });
+
+                        callable.setHandler(new TaskHandler());
+
+                        statusLayout.add(taskMonitor);
+
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
+
+        VerticalLayout content = new VerticalLayout();
+        content.add(layout1, bUpdateAllIndexData, bTest);
+
+        VerticalLayout page = new VerticalLayout();
+        page.add(content, statusLayout);
+
+        return page;
 
     }
 

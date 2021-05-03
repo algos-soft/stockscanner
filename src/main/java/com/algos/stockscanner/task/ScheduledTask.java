@@ -1,4 +1,4 @@
-package com.algos.stockscanner.downloader;
+package com.algos.stockscanner.task;
 
 import org.springframework.stereotype.Component;
 

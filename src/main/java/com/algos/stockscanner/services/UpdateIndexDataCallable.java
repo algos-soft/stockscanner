@@ -1,6 +1,8 @@
 package com.algos.stockscanner.services;
 
 import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.task.TaskHandler;
+import com.algos.stockscanner.task.TaskListener;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +16,8 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
     private MarketIndex index;
     private String mode;
     private LocalDate startDate;
-    private UpdateIndexDataListener listener;
-    private UpdateIndexDataHandler handler;
+    private TaskListener listener;
+    private TaskHandler handler;
 
     /**
      * @param index the index to update
@@ -26,7 +28,7 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
      * @param listener listener to inform with progress events (optional)
      * @param handler to check for external abort requests (optional)
      */
-    public UpdateIndexDataCallable(MarketIndex index, String mode, LocalDate startDate, UpdateIndexDataListener listener, UpdateIndexDataHandler handler) {
+    public UpdateIndexDataCallable(MarketIndex index, String mode, LocalDate startDate, TaskListener listener, TaskHandler handler) {
         this.index=index;
         this.mode=mode;
         this.startDate=startDate;
@@ -62,13 +64,34 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
             }
 
         }catch (Exception e){
-            listener.onError(e);
+            if(listener!=null){
+                listener.onError(e);
+            }
             return null;
         }
 
-        listener.onCompleted(true);
+        if(listener!=null){
+            listener.onCompleted(true);
+        }
 
         return new UpdateIndexDataStatus();
 
+    }
+
+
+    public TaskListener getListener() {
+        return listener;
+    }
+
+    public void setListener(TaskListener listener) {
+        this.listener = listener;
+    }
+
+    public TaskHandler getHandler() {
+        return handler;
+    }
+
+    public void setHandler(TaskHandler handler) {
+        this.handler = handler;
     }
 }

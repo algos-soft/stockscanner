@@ -38,7 +38,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -53,7 +52,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
     private Generator generator;
 
-    private RunnerListener RunnerListener;
+    private RunnerListener runnerListener;
 
     private Label label;
 
@@ -388,19 +387,19 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
     }
 
     public void setRunnerListener(RunnerListener runnerListener) {
-        this.RunnerListener = runnerListener;
+        this.runnerListener = runnerListener;
     }
 
 
     private void fireAborted() {
-        if (RunnerListener != null) {
-            RunnerListener.onAborted();
+        if (runnerListener != null) {
+            runnerListener.onAborted();
         }
     }
 
     private void fireClosed() {
-        if (RunnerListener != null) {
-            RunnerListener.onClosed();
+        if (runnerListener != null) {
+            runnerListener.onClosed();
         }
     }
 

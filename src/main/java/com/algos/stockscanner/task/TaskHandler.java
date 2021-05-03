@@ -1,6 +1,6 @@
-package com.algos.stockscanner.services;
+package com.algos.stockscanner.task;
 
-public class UpdateIndexDataHandler {
+public class TaskHandler {
 
     private boolean aborted;
 
