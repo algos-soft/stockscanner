@@ -226,10 +226,14 @@ public class AdminView extends VerticalLayout {
 
                     List<UpdateIndexDataCallable> callables = adminService.scheduleUpdate(indexes, 5);
 
+                    // keep this out of the listener, the listener is called on another thread
+                    UI ui = UI.getCurrent();
+
                     for(UpdateIndexDataCallable callable : callables){
 
+
                         // manage events coming from the monitor
-                        TaskMonitor taskMonitor = context.getBean(TaskMonitor.class, new TaskMonitor.MonitorListener() {
+                        TaskMonitor taskMonitor = context.getBean(TaskMonitor.class, ui, new TaskMonitor.MonitorListener() {
                             @Override
                             public void onAborted() {
                                 callable.getHandler().abort();
@@ -237,7 +241,15 @@ public class AdminView extends VerticalLayout {
 
                             @Override
                             public void onClosed() {
-
+                                ui.access(new Command() {
+                                    @Override
+                                    public void execute() {
+//                                        statusLayout.remove(taskMonitor);
+                                    }
+                                });
+//                                statusLayout.remove(taskMonitor);
+                                int a = 87;
+                                int b=a;
                             }
                         });
 

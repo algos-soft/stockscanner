@@ -39,6 +39,8 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
     @Override
     public UpdateIndexDataStatus call() throws Exception {
 
+        System.out.println("Callable task called for index "+index.getSymbol());
+
         // long task, can throw exception
         try {
 
@@ -64,6 +66,9 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
             }
 
         }catch (Exception e){
+
+            System.out.println("Callable task error for index "+index.getSymbol()+": "+e.getMessage());
+
             if(listener!=null){
                 listener.onError(e);
             }
@@ -71,6 +76,7 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
         }
 
         if(listener!=null){
+            System.out.println("Callable task completed for index "+index.getSymbol());
             listener.onCompleted(true);
         }
 
