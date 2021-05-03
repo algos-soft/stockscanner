@@ -54,7 +54,7 @@ public class AdminService {
      * @param startDate in case of DATE mode, the date where to begin the update od the data in the db
      * @param handler to call abort() to interrupt the process
      */
-    public UpdateIndexDataHandler downloadIndexData(MarketIndex index, String mode, LocalDate startDate, UpdateIndexDataListener listener, UpdateIndexDataHandler handler){
+    public Future<UpdateIndexDataStatus> downloadIndexData(MarketIndex index, String mode, LocalDate startDate, UpdateIndexDataListener listener, UpdateIndexDataHandler handler){
 
         UpdateIndexDataCallable callable = context.getBean(UpdateIndexDataCallable.class, index, mode, startDate, listener, handler);
         ExecutorService executorService = Executors.newFixedThreadPool(4);
@@ -93,7 +93,7 @@ public class AdminService {
 
 //            result.cancel()
 
-        return handler;
+        return future;
     }
 
 

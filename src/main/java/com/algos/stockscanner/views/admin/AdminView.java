@@ -34,7 +34,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Future;
 
 @Route(value = "admin", layout = MainView.class)
 @PageTitle("Admin")
@@ -149,7 +151,6 @@ public class AdminView extends VerticalLayout {
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 try {
 
-                    MarketIndex index = marketIndexService.findUniqueBySymbol("AAPL");
 
                     UpdateIndexDataHandler handler=new UpdateIndexDataHandler();
 
@@ -187,12 +188,28 @@ public class AdminView extends VerticalLayout {
                         public void onCompleted(boolean aborted) {
                             ui.access((Command) () -> dialog.close());
                         }
+
+                        @Override
+                        public void onError(Exception e) {
+                            e.printStackTrace();
+                            ui.access((Command) () -> dialog.close());
+                        }
                     };
 
                     dialog.open();
 
-                    // start background operation
-                    adminService.downloadIndexData(index, "ALL", null, listener, handler);
+                    // start background operations
+                    MarketIndex index = marketIndexService.findUniqueBySymbol("AAPL");
+                    Future future = adminService.downloadIndexData(index, "ALL", null, listener, handler);
+                    //Object obj = future.get();
+                    int a = 87;
+                    int b = a;
+
+//                    List<MarketIndex> indexes = marketIndexService.findAll();
+//                    for(MarketIndex index : indexes){
+//                        adminService.downloadIndexData(index, "ALL", null, listener, handler);
+//                    }
+
 
                 } catch (Exception e) {
                     e.printStackTrace();

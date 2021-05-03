@@ -31,33 +31,42 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
         this.mode=mode;
         this.startDate=startDate;
         this.listener = listener;
-        this.handler=handler;
+        this.handler = handler;
     }
 
     @Override
     public UpdateIndexDataStatus call() throws Exception {
 
-        boolean aborted=false;
+        // long task, can throw exception
+        try {
 
-        // 10 secondi
-        int tot=100;
-        for(int i=0;i<tot;i++){
+            int tot=100;
+            for(int i=0;i<tot;i++){
 
-            if(listener!=null){
-                listener.onProgress(i, tot, null);
-            }
+//                if(i==80){
+//                    throw new Exception("Internal error!");
+//                }
 
-            if(handler!=null){
-                if(handler.isAborted()){
-                    aborted=true;
-                    break;
+                if(listener!=null){
+                    listener.onProgress(i, tot, null);
                 }
+
+                if(handler!=null){
+                    if(handler.isAborted()){
+                        listener.onCompleted(false);
+                        return null;
+                    }
+                }
+
+                Thread.sleep(100);
             }
 
-            Thread.sleep(100);
+        }catch (Exception e){
+            listener.onError(e);
+            return null;
         }
 
-        listener.onCompleted(aborted);
+        listener.onCompleted(true);
 
         return new UpdateIndexDataStatus();
 
