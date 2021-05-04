@@ -181,9 +181,10 @@ public class AdminView extends VerticalLayout {
                         }
 
                         @Override
-                        public void onCompleted(boolean aborted) {
+                        public void onCompleted(Object info) {
                             ui.access((Command) () -> dialog.close());
                         }
+
 
                         @Override
                         public void onError(Exception e) {
@@ -250,13 +251,13 @@ public class AdminView extends VerticalLayout {
                         // listen to events happening in the Callable
                         callable.setListener(new TaskListener() {
                             @Override
-                            public void onProgress(int current, int total, Object info) {
-                                taskMonitor.onProgress(current, total, info);
+                            public void onProgress(int current, int total, Object progressInfo) {
+                                taskMonitor.onProgress(current, total, progressInfo);
                             }
 
                             @Override
-                            public void onCompleted(boolean aborted) {
-                                taskMonitor.onCompleted(aborted);
+                            public void onCompleted(Object completionInfo) {
+                                taskMonitor.onCompleted(completionInfo);
                             }
 
                             @Override

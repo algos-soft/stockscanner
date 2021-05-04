@@ -47,18 +47,13 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
             int tot=100;
             for(int i=0;i<tot;i++){
 
-                if(i==80){
-                    throw new Exception("Internal error!");
-                }
-
                 if(listener!=null){
                     listener.onProgress(i, tot, null);
                 }
 
                 if(handler!=null){
                     if(handler.isAborted()){
-                        listener.onCompleted(false);
-                        return null;
+                        throw new Exception("Aborted by user");
                     }
                 }
 

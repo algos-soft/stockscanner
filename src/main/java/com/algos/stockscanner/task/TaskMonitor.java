@@ -15,13 +15,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.server.Command;
 import org.apache.commons.lang3.StringUtils;
+import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Component to monitor the status of a task
@@ -33,30 +32,27 @@ public class TaskMonitor extends VerticalLayout  {
 
     private Label label;
 
-    private Button button;
-
     private ProgressBar progressBar;
 
-    private Div imgPlaceholder;
+    private HorizontalLayout imgPlaceholder;
 
     private Icon closeIcon;
 
     private MonitorListener monitorListener;
 
-    private boolean error;  // error during execution
-    private boolean abort;  // user aborted
-    private boolean completed;
+    // if execution is completed (successfully or not)
+    private boolean executionCompleted;
+
+    // the exception if execution was not successful
+    private Exception exception;
+
 
     private final UI ui;
 
-//    private TaskListener taskListener;
-//
-//    private TaskHandler taskHandler;
 
     public TaskMonitor(UI ui, MonitorListener monitorListener) {
         this.ui = ui;
         this.monitorListener = monitorListener;
-//        this.taskHandler = taskHandler;
     }
 
     @PostConstruct
@@ -70,13 +66,22 @@ public class TaskMonitor extends VerticalLayout  {
         emptyLabel.getStyle().set("max-width", "1em");
 
         closeIcon = VaadinIcon.CLOSE.create();
-        closeIcon.getStyle().set("display", "flex");
-        closeIcon.getStyle().set("flex", "1");
-        closeIcon.getStyle().set("max-width", "1em");
-        closeIcon.getStyle().set("font-size", "0.8em");
+        closeIcon.setId("taskmonitor-close-icon");
         closeIcon.addClickListener((ComponentEventListener<ClickEvent<Icon>>) iconClickEvent -> {
-            if (completed || error) {
+            if (executionCompleted) {
                 fireClosed();
+            }else{
+
+                Button bConfirm = new Button();
+                ConfirmDialog dialog = ConfirmDialog.create().withMessage("Really abort execution?")
+                        .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
+                        .withButton(bConfirm, ButtonOption.caption("Abort execution"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
+
+                bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+                    fireAborted();
+                });
+                dialog.open();
+
             }
         });
 
@@ -86,27 +91,12 @@ public class TaskMonitor extends VerticalLayout  {
         label.getStyle().set("flex", "1");
         label.getStyle().set("justify-content", "center");
 
-        imgPlaceholder = new Div();
-        imgPlaceholder.addClickListener((ComponentEventListener<ClickEvent<Div>>) divClickEvent -> infoClicked());
+        imgPlaceholder = new HorizontalLayout();
+        imgPlaceholder.addClickListener((ComponentEventListener<ClickEvent<HorizontalLayout>>) horizontalLayoutClickEvent -> infoClicked());
         setImage("RUN");
 
         progressBar = new ProgressBar();
         progressBar.setId("taskmonitor-progress-bar");
-
-        button = new Button("Abort");
-        button.setId("taskmonitor-button");
-
-        button.addClickListener((ComponentEventListener<ClickEvent<Button>>) event -> {
-            if (completed || error) {
-//                showSimulations();
-            } else {
-                abort = true;
-//                if (strategy != null) {
-//                    strategy.abort();
-//                }
-                fireAborted();
-            }
-        });
 
         setProgress(0, 0, null);   // initialize the progress status
 
@@ -115,29 +105,26 @@ public class TaskMonitor extends VerticalLayout  {
         row1.setAlignItems(Alignment.CENTER);
         row1.add(imgPlaceholder, label, closeIcon);
 
-        HorizontalLayout row2 = new HorizontalLayout();
-        row2.setAlignItems(Alignment.CENTER);
-        row2.add(progressBar, button);
-
-        add(row1, row2);
+        add(row1, progressBar);
 
     }
 
 
-    public void onProgress(int current, int total, Object info) {
+    public void onProgress(int current, int total, Object progressInfo) {
         String sInfo="";
-        if(info!=null){
-            sInfo=info.toString();
+        if(progressInfo!=null){
+            sInfo=progressInfo.toString();
         }
         setProgress(current, total, sInfo);
     }
 
-    public void onCompleted(boolean aborted) {
+    public void onCompleted(Object completionInfo) {
         setCompleted();
     }
 
     public void onError(Exception e) {
-        setAborted(e);
+        exception=e;
+        setAborted();
     }
 
 
@@ -154,12 +141,11 @@ public class TaskMonitor extends VerticalLayout  {
     }
 
     private void infoClicked() {
-        if (error) {
-//            ConfirmDialog dialog = ConfirmDialog.createError().withCaption("Error info").withMessage(exception.getMessage());
-//            dialog.setCloseOnOutsideClick(true);
-//            dialog.open();
-        }
-        if (completed) {
+        if (exception!=null) {
+            ConfirmDialog dialog = ConfirmDialog.createError().withCaption("Error info").withMessage(exception.getMessage());
+            dialog.setCloseOnOutsideClick(true);
+            dialog.open();
+        } else {
 //            Duration dur = Duration.between(startTime, endTime);
 //            long millis = dur.toMillis();
 //
@@ -195,7 +181,6 @@ public class TaskMonitor extends VerticalLayout  {
         }
 
         assert image != null;
-//        image.addClassName("image");
         image.setId("taskmonitor-image");
         if (color != null) {
             image.getStyle().set("color", color);
@@ -254,10 +239,8 @@ public class TaskMonitor extends VerticalLayout  {
 
 
     private void setCompleted() {
-        completed = true;
+        executionCompleted = true;
         ui.access((Command) () -> {
-            closeIcon.getStyle().set("color", "red");
-            button.setText("Show");
             progressBar.setMax(1);
             progressBar.setValue(1);
             progressBar.setIndeterminate(false);
@@ -265,11 +248,9 @@ public class TaskMonitor extends VerticalLayout  {
         setImage("END");
     }
 
-    private void setAborted(Exception e) {
-        completed = true;
+    private void setAborted() {
+        executionCompleted = true;
         ui.access((Command) () -> {
-            closeIcon.getStyle().set("color", "red");
-            button.setText("Show");
             progressBar.setMax(1);
             progressBar.setValue(1);
             progressBar.setIndeterminate(false);

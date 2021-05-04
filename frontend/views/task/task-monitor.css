@@ -10,14 +10,24 @@
    font-size: var(--lumo-font-size-xs);
 }
 
+#taskmonitor-close-icon{
+    display: flex;
+    flex: 1;
+    max-width: 1em;
+    font-size: 0.9em;
+    color: red;
+}
+
 #taskmonitor-image{
-    height: 1.2em;
-    width: 1.2em;
+    color: gray;
+    height: 1.0em;
+    width: 1.0em;
 }
 
 #taskmonitor-progress-bar{
-    height: 0.8em;
-    width: 4em;
+    margin-top: var(--lumo-space-s);
+    height: 0.4em;
+    width: 8em;
 }
 
 #taskmonitor-button{
