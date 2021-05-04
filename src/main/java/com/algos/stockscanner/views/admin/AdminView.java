@@ -125,6 +125,9 @@ public class AdminView extends VerticalLayout {
     private Component buildMarketIndexesComponent(){
 
         HorizontalLayout statusLayout = new HorizontalLayout();
+        statusLayout.setSpacing(false);
+        statusLayout.setPadding(false);
+        statusLayout.addClassName("admin-view-statuslayout");
 
         Button bDownloadIndexes = new Button("Download indexes");
         bDownloadIndexes.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
@@ -282,8 +285,10 @@ public class AdminView extends VerticalLayout {
 
         VerticalLayout content = new VerticalLayout();
         content.add(layout1, bUpdateAllIndexData, bTest);
+        content.setHeight("100%");
 
         VerticalLayout page = new VerticalLayout();
+        page.setHeight("100%");
         page.add(content, statusLayout);
 
         return page;

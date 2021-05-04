@@ -5,11 +5,8 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -46,12 +43,10 @@ public class TaskMonitor extends VerticalLayout  {
     // the exception if execution was not successful
     private Exception exception;
 
+    private Object completionInfo;
 
     private UI ui;
 
-
-    public TaskMonitor() {
-    }
 
     @PostConstruct
     private void init() {
@@ -65,7 +60,6 @@ public class TaskMonitor extends VerticalLayout  {
         emptyLabel.getStyle().set("flex", "1");
         emptyLabel.getStyle().set("max-width", "1em");
 
-//        closeIcon = VaadinIcon.CLOSE.create();
         closeIcon = new IronIcon("vaadin", "close");
         closeIcon.setId("taskmonitor-close-icon");
         closeIcon.addClickListener(new ComponentEventListener<ClickEvent<IronIcon>>() {
@@ -89,23 +83,6 @@ public class TaskMonitor extends VerticalLayout  {
             }
         });
 
-//        closeIcon.addClickListener((ComponentEventListener<ClickEvent<Icon>>) iconClickEvent -> {
-//            if (executionCompleted) {
-//                fireClosed();
-//            }else{
-//
-//                Button bConfirm = new Button();
-//                ConfirmDialog dialog = ConfirmDialog.create().withMessage("Really abort execution?")
-//                        .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
-//                        .withButton(bConfirm, ButtonOption.caption("Abort execution"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
-//
-//                bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
-//                    fireAborted();
-//                });
-//                dialog.open();
-//
-//            }
-//        });
 
         label = new Label();
         label.setId("taskmonitor-label");
@@ -119,11 +96,11 @@ public class TaskMonitor extends VerticalLayout  {
 
         progressBar = new ProgressBar();
         progressBar.setId("taskmonitor-progress-bar");
-
         setProgress(0, 0, null);   // initialize the progress status
 
         HorizontalLayout row1 = new HorizontalLayout();
-        row1.setWidth("100%");
+        row1.setSpacing(false);
+        row1.setId("taskmonitor-upper-row");
         row1.setAlignItems(Alignment.CENTER);
         row1.add(imgPlaceholder, label, closeIcon);
 
@@ -141,7 +118,7 @@ public class TaskMonitor extends VerticalLayout  {
     }
 
     public void onCompleted(Object completionInfo) {
-        setCompleted();
+        setCompleted(completionInfo);
     }
 
     public void onError(Exception e) {
@@ -163,24 +140,20 @@ public class TaskMonitor extends VerticalLayout  {
     }
 
     private void infoClicked() {
-        if (exception!=null) {
-            ConfirmDialog dialog = ConfirmDialog.createError().withCaption("Error info").withMessage(exception.getMessage());
-            dialog.setCloseOnOutsideClick(true);
-            dialog.open();
-        } else {
-//            Duration dur = Duration.between(startTime, endTime);
-//            long millis = dur.toMillis();
-//
-//            String timeString = String.format("%02dh %02dm %02ds",
-//                    TimeUnit.MILLISECONDS.toHours(millis),
-//                    TimeUnit.MILLISECONDS.toMinutes(millis) -
-//                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
-//                    TimeUnit.MILLISECONDS.toSeconds(millis) -
-//                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
-//
-//            ConfirmDialog dialog = ConfirmDialog.createInfo().withCaption("Success").withMessage("Generation completed successfully in " + timeString);
-//            dialog.setCloseOnOutsideClick(true);
-//            dialog.open();
+        if(executionCompleted){
+            if (exception==null) {  // completed successfully
+                String sInfo="";
+                if(completionInfo!=null){
+                    sInfo=completionInfo.toString();
+                }
+                ConfirmDialog dialog = ConfirmDialog.createInfo().withCaption("Completed").withMessage(sInfo);
+                dialog.setCloseOnOutsideClick(true);
+                dialog.open();
+            }else{                  // aborted by user or with error
+                ConfirmDialog dialog = ConfirmDialog.createError().withCaption("Error").withMessage(exception.getMessage());
+                dialog.setCloseOnOutsideClick(true);
+                dialog.open();
+            }
         }
     }
 
@@ -260,8 +233,9 @@ public class TaskMonitor extends VerticalLayout  {
     }
 
 
-    private void setCompleted() {
+    private void setCompleted(Object completionInfo) {
         executionCompleted = true;
+        this.completionInfo=completionInfo;
         ui.access((Command) () -> {
             progressBar.setMax(1);
             progressBar.setValue(1);
@@ -273,14 +247,12 @@ public class TaskMonitor extends VerticalLayout  {
     private void setAborted() {
         executionCompleted = true;
         ui.access((Command) () -> {
-            progressBar.setMax(1);
-            progressBar.setValue(1);
+//            progressBar.setMax(1);
+//            progressBar.setValue(1);
             progressBar.setIndeterminate(false);
         });
         setImage("ERR");
     }
-
-
 
 
     public interface MonitorListener {

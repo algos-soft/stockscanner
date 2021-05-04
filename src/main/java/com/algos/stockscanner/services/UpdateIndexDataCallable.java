@@ -6,7 +6,13 @@ import com.algos.stockscanner.task.TaskListener;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Callable;
 
 @Component
@@ -18,6 +24,8 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
     private LocalDate startDate;
     private TaskListener listener;
     private TaskHandler handler;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 
     /**
      * @param index the index to update
@@ -36,10 +44,15 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
         this.handler = handler;
     }
 
+    @PostConstruct
+    private void init(){
+    }
+
     @Override
     public UpdateIndexDataStatus call() throws Exception {
 
         System.out.println("Callable task called for index "+index.getSymbol());
+        startTime=LocalDateTime.now();
 
         // long task, can throw exception
         try {
@@ -64,15 +77,23 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
 
             System.out.println("Callable task error for index "+index.getSymbol()+": "+e.getMessage());
 
+
             if(listener!=null){
                 listener.onError(e);
             }
             return null;
         }
 
+        endTime=LocalDateTime.now();
+
+
         if(listener!=null){
             System.out.println("Callable task completed for index "+index.getSymbol());
-            listener.onCompleted(true);
+            Duration duration=Duration.between(startTime, endTime);
+            String sDuration=duration.toString();
+            DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm:ss");
+            String info = "start: "+startTime.format(format)+", end: "+endTime.format(format)+" elapsed: "+sDuration;
+            listener.onCompleted(info);
         }
 
         return new UpdateIndexDataStatus();

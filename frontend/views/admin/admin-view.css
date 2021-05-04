@@ -3,8 +3,14 @@
   margin: 0 0;
   max-width: 1024px;
   padding: 0 var(--lumo-space-l);
+  height: 100%;
 }
+
 .admin-view .button-layout {
   margin-bottom: var(--lumo-space-l);
   margin-top: var(--lumo-space-m);
+}
+
+.admin-view-statuslayout{
+    flex-wrap: wrap;
 }
