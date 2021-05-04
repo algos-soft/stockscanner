@@ -14,6 +14,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.server.Command;
+import org.apache.commons.lang3.StringUtils;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -61,7 +62,7 @@ public class TaskMonitor extends VerticalLayout  {
     @PostConstruct
     private void init() {
 
-        setId("main-layout");
+        setId("taskmonitor-main-layout");
 
         Label emptyLabel = new Label(); // blank element, for alignment purpose only
         emptyLabel.getStyle().set("display", "flex");
@@ -80,7 +81,7 @@ public class TaskMonitor extends VerticalLayout  {
         });
 
         label = new Label();
-        label.setId("label");
+        label.setId("taskmonitor-label");
         label.getStyle().set("display", "flex");
         label.getStyle().set("flex", "1");
         label.getStyle().set("justify-content", "center");
@@ -90,10 +91,10 @@ public class TaskMonitor extends VerticalLayout  {
         setImage("RUN");
 
         progressBar = new ProgressBar();
-        progressBar.setId("progress-bar");
+        progressBar.setId("taskmonitor-progress-bar");
 
         button = new Button("Abort");
-        button.setId("button");
+        button.setId("taskmonitor-button");
 
         button.addClickListener((ComponentEventListener<ClickEvent<Button>>) event -> {
             if (completed || error) {
@@ -112,11 +113,11 @@ public class TaskMonitor extends VerticalLayout  {
         HorizontalLayout row1 = new HorizontalLayout();
         row1.setWidth("100%");
         row1.setAlignItems(Alignment.CENTER);
-        row1.add(emptyLabel, label, closeIcon);
+        row1.add(imgPlaceholder, label, closeIcon);
 
         HorizontalLayout row2 = new HorizontalLayout();
         row2.setAlignItems(Alignment.CENTER);
-        row2.add(imgPlaceholder, progressBar, button);
+        row2.add(progressBar, button);
 
         add(row1, row2);
 
@@ -124,7 +125,11 @@ public class TaskMonitor extends VerticalLayout  {
 
 
     public void onProgress(int current, int total, Object info) {
-        setProgress(current, total, info.toString());
+        String sInfo="";
+        if(info!=null){
+            sInfo=info.toString();
+        }
+        setProgress(current, total, sInfo);
     }
 
     public void onCompleted(boolean aborted) {
@@ -132,7 +137,7 @@ public class TaskMonitor extends VerticalLayout  {
     }
 
     public void onError(Exception e) {
-        setCompleted();
+        setAborted(e);
     }
 
 
@@ -190,7 +195,8 @@ public class TaskMonitor extends VerticalLayout  {
         }
 
         assert image != null;
-        image.setId("image");
+//        image.addClassName("image");
+        image.setId("taskmonitor-image");
         if (color != null) {
             image.getStyle().set("color", color);
         } else {
@@ -213,27 +219,32 @@ public class TaskMonitor extends VerticalLayout  {
      */
     private void setProgress(int current, int total, String message) {
         Command command;
+
+        StringBuilder builder=new StringBuilder();
+        if(!StringUtils.isEmpty(message)){
+            builder.append(message);
+            builder.append(" ");
+        }
+
+        if(current>0){
+            builder.append("[" + current + "/" + total+"]");
+        }else{
+            builder.append("[running...]");
+        }
+        final String finalmsg = builder.toString();
+
+
         if (total > 0) {
             command = (Command) () -> {
                 progressBar.setIndeterminate(false);
                 progressBar.setMax(total);
                 progressBar.setValue(current);
-                String text = "[" + message + "]";
-                if (message != null) {
-                    label.setText(text + " " + message);
-                } else {
-                    label.setText(text + " " + current + "/" + total);
-                }
+                label.setText(finalmsg);
             };
         } else {
             command = (Command) () -> {
                 progressBar.setIndeterminate(true);
-                String text = "[" + message + "]";
-                if (message != null) {
-                    label.setText(text + " " + message);
-                } else {
-                    label.setText(text + " running...");
-                }
+                label.setText(finalmsg);
             };
         }
 
@@ -254,6 +265,19 @@ public class TaskMonitor extends VerticalLayout  {
         setImage("END");
     }
 
+    private void setAborted(Exception e) {
+        completed = true;
+        ui.access((Command) () -> {
+            closeIcon.getStyle().set("color", "red");
+            button.setText("Show");
+            progressBar.setMax(1);
+            progressBar.setValue(1);
+            progressBar.setIndeterminate(false);
+        });
+        setImage("ERR");
+    }
+
+
 
 
     public interface MonitorListener {
@@ -262,6 +286,7 @@ public class TaskMonitor extends VerticalLayout  {
     }
 
 
-
-
+    public void setMonitorListener(MonitorListener monitorListener) {
+        this.monitorListener = monitorListener;
+    }
 }

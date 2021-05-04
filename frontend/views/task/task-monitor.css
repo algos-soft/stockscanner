@@ -1,4 +1,4 @@
-#main-layout {
+#taskmonitor-main-layout {
   border-style: solid;
   border-radius: var(--lumo-space-s);
   align-items: center;
@@ -6,21 +6,21 @@
   padding: var(--lumo-space-s);
 }
 
-#label{
+#taskmonitor-label{
    font-size: var(--lumo-font-size-xs);
 }
 
-#image{
-    height: 1.4em;
-    width: 1.4em;
+#taskmonitor-image{
+    height: 1.2em;
+    width: 1.2em;
 }
 
-#progress-bar{
+#taskmonitor-progress-bar{
     height: 0.8em;
     width: 4em;
 }
 
-#button{
+#taskmonitor-button{
    font-size: var(--lumo-font-size-xs);
    height: 1.8em;
 }
