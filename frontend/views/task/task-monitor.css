@@ -4,18 +4,30 @@
   align-items: center;
   border-width: thin;
   padding: var(--lumo-space-s);
+  max-width: 7em;
+  min-width: 7em;
 }
 
 #taskmonitor-label{
-   font-size: var(--lumo-font-size-xs);
+   width: 100%;
+   font-size: 0.6em;
 }
 
 #taskmonitor-close-icon{
+/*
     display: flex;
     flex: 1;
+*/
+/*
     max-width: 1em;
     font-size: 0.9em;
+*/
     color: red;
+
+        height: 1.0em;
+        width: 1.0em;
+        min-width: 1.0em;
+
 }
 
 #taskmonitor-image{
@@ -27,7 +39,7 @@
 #taskmonitor-progress-bar{
     margin-top: var(--lumo-space-s);
     height: 0.4em;
-    width: 8em;
+    width: 100%;
 }
 
 #taskmonitor-button{

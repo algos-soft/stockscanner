@@ -36,7 +36,7 @@ public class TaskMonitor extends VerticalLayout  {
 
     private HorizontalLayout imgPlaceholder;
 
-    private Icon closeIcon;
+    private IronIcon closeIcon;
 
     private MonitorListener monitorListener;
 
@@ -47,16 +47,16 @@ public class TaskMonitor extends VerticalLayout  {
     private Exception exception;
 
 
-    private final UI ui;
+    private UI ui;
 
 
-    public TaskMonitor(UI ui, MonitorListener monitorListener) {
-        this.ui = ui;
-        this.monitorListener = monitorListener;
+    public TaskMonitor() {
     }
 
     @PostConstruct
     private void init() {
+
+        ui=UI.getCurrent();
 
         setId("taskmonitor-main-layout");
 
@@ -65,25 +65,47 @@ public class TaskMonitor extends VerticalLayout  {
         emptyLabel.getStyle().set("flex", "1");
         emptyLabel.getStyle().set("max-width", "1em");
 
-        closeIcon = VaadinIcon.CLOSE.create();
+//        closeIcon = VaadinIcon.CLOSE.create();
+        closeIcon = new IronIcon("vaadin", "close");
         closeIcon.setId("taskmonitor-close-icon");
-        closeIcon.addClickListener((ComponentEventListener<ClickEvent<Icon>>) iconClickEvent -> {
-            if (executionCompleted) {
-                fireClosed();
-            }else{
+        closeIcon.addClickListener(new ComponentEventListener<ClickEvent<IronIcon>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<IronIcon> ironIconClickEvent) {
+                if (executionCompleted) {
+                    fireClosed();
+                }else{
 
-                Button bConfirm = new Button();
-                ConfirmDialog dialog = ConfirmDialog.create().withMessage("Really abort execution?")
-                        .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
-                        .withButton(bConfirm, ButtonOption.caption("Abort execution"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
+                    Button bConfirm = new Button();
+                    ConfirmDialog dialog = ConfirmDialog.create().withMessage("Really abort execution?")
+                            .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
+                            .withButton(bConfirm, ButtonOption.caption("Abort execution"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
 
-                bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
-                    fireAborted();
-                });
-                dialog.open();
+                    bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+                        fireAborted();
+                    });
+                    dialog.open();
 
+                }
             }
         });
+
+//        closeIcon.addClickListener((ComponentEventListener<ClickEvent<Icon>>) iconClickEvent -> {
+//            if (executionCompleted) {
+//                fireClosed();
+//            }else{
+//
+//                Button bConfirm = new Button();
+//                ConfirmDialog dialog = ConfirmDialog.create().withMessage("Really abort execution?")
+//                        .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
+//                        .withButton(bConfirm, ButtonOption.caption("Abort execution"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
+//
+//                bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+//                    fireAborted();
+//                });
+//                dialog.open();
+//
+//            }
+//        });
 
         label = new Label();
         label.setId("taskmonitor-label");

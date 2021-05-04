@@ -48,7 +48,7 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
             for(int i=0;i<tot;i++){
 
                 if(listener!=null){
-                    listener.onProgress(i, tot, null);
+                    listener.onProgress(i, tot, index.getSymbol());
                 }
 
                 if(handler!=null){

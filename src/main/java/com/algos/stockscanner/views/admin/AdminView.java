@@ -233,7 +233,7 @@ public class AdminView extends VerticalLayout {
                     for(UpdateIndexDataCallable callable : callables){
 
                         // GUI component handling events coming from the monitor
-                        TaskMonitor taskMonitor = context.getBean(TaskMonitor.class, ui, null);
+                        TaskMonitor taskMonitor = context.getBean(TaskMonitor.class);
                         TaskMonitor.MonitorListener listener = new TaskMonitor.MonitorListener() {
                             @Override
                             public void onAborted() {
