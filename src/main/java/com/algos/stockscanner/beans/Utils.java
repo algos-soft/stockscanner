@@ -4,6 +4,7 @@ package com.algos.stockscanner.beans;
 import com.algos.stockscanner.Application;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.algos.stockscanner.services.UpdateIndexDataCallable;
 import com.vaadin.flow.component.Component;
 //import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -20,6 +21,8 @@ import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.server.StreamResource;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -53,6 +56,8 @@ import java.util.stream.Stream;
 @org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class Utils {
+
+    private static final Logger log = LoggerFactory.getLogger(Utils.class);
 
 
 
@@ -205,7 +210,7 @@ public class Utils {
             imageData = Files.readAllBytes(Paths.get(res.getURI()));
             imageData = scaleImage(imageData, Application.STORED_ICON_WIDTH, Application.STORED_ICON_HEIGHT);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("can't load default index icon "+Application.GENERIC_INDEX_ICON, e);
         }
         return imageData;
     }

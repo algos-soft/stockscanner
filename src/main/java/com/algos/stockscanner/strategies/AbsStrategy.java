@@ -9,6 +9,9 @@ import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.IndexUnitService;
 import com.algos.stockscanner.data.service.SimulationItemService;
 import com.algos.stockscanner.data.service.SimulationService;
+import com.algos.stockscanner.runner.GeneratorRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
@@ -18,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class AbsStrategy implements Strategy {
+
+    private static final Logger log = LoggerFactory.getLogger(AbsStrategy.class);
 
     private static final int PAGE_SIZE = 100;      // max units per page
 
@@ -222,7 +227,7 @@ public abstract class AbsStrategy implements Strategy {
         Decision decision = takeDecision();
         Actions action = decision.getAction();
 
-        System.out.println(decision);
+        log.debug(decision.toString());
 
         switch (action) {
 

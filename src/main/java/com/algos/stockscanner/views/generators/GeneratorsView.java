@@ -35,6 +35,8 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.server.Command;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Example;
@@ -53,6 +55,8 @@ import java.util.Optional;
 @CssImport(value = "./views/generators/generators-view.css")
 @CssImport(value = "./views/generators/generators-grid.css", themeFor = "vaadin-grid")
 public class GeneratorsView extends Div implements AfterNavigationObserver {
+
+    private static final Logger log = LoggerFactory.getLogger(GeneratorsView.class);
 
     private static final String RUNNERS_KEY = "runners";
 
@@ -468,7 +472,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
                     generatorService.delete(model.getId());
                     refreshGrid();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("could not delete entity id "+model.getId(), e);
                 }
             });
 
@@ -494,7 +498,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
                     try {
                         simulationService.deleteBy(generator);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("could not delete simulations for generator id "+generator.getId(), e);
                     }
                 });
 

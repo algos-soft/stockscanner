@@ -8,6 +8,8 @@ import com.algos.stockscanner.views.generators.GeneratorModel;
 import com.algos.stockscanner.views.indexes.IndexModel;
 import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -23,6 +25,8 @@ import java.util.List;
 
 @Service
 public class GeneratorService extends CrudService<Generator, Integer> {
+
+    private static final Logger log = LoggerFactory.getLogger(GeneratorService.class);
 
     @Autowired
     private Utils utils;
@@ -162,7 +166,7 @@ public class GeneratorService extends CrudService<Generator, Integer> {
             try {
                 index = marketIndexService.findUniqueBySymbol(symbol);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("can't find unique record for symbol "+symbol, e);
             }
         }
         entity.setIndex(index);

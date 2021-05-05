@@ -22,6 +22,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -35,6 +37,8 @@ import java.util.concurrent.Future;
 @PageTitle("Admin")
 @CssImport("./views/admin/admin-view.css")
 public class AdminView extends VerticalLayout {
+
+    private static final Logger log = LoggerFactory.getLogger(MarketService.class);
 
     private static final String MARKET_INDEXES = "Market Indexes";
     private static final String GENERATOR = "Generator";
@@ -191,7 +195,6 @@ public class AdminView extends VerticalLayout {
 
                         @Override
                         public void onError(Exception e) {
-                            e.printStackTrace();
                             ui.access((Command) () -> dialog.close());
                         }
                     };
@@ -212,7 +215,7 @@ public class AdminView extends VerticalLayout {
 
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("error while updating data for all indexes", e);
                 }
             }
         });

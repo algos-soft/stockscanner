@@ -34,6 +34,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
@@ -50,6 +52,8 @@ import java.util.Optional;
 @PageTitle("Indexes")
 @CssImport("./views/indexes/indexes-view.css")
 public class IndexesView extends Div implements AfterNavigationObserver {
+
+    private static final Logger log = LoggerFactory.getLogger(IndexesView.class);
 
     Grid<IndexModel> grid;
 
@@ -278,7 +282,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                     marketIndexService.delete(model.getId());
                     loadAll();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("could not delete index entity id "+model.getId(), e);
                 }
             });
 

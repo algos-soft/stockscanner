@@ -11,6 +11,8 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -28,6 +30,8 @@ import java.util.List;
 
 @Service
 public class SimulationService extends CrudService<Simulation, Integer> {
+
+    private static final Logger log = LoggerFactory.getLogger(SimulationService.class);
 
     @Autowired
     private Utils utils;
@@ -199,6 +203,7 @@ public class SimulationService extends CrudService<Simulation, Integer> {
         try {
             wb.write(bos);
         } catch (IOException e) {
+            log.error("can't serialize excel workbook", e);
             e.printStackTrace();
         }
 

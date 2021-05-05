@@ -16,6 +16,8 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -34,6 +36,8 @@ import java.math.RoundingMode;
 @org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class IndexDialog extends Dialog {
+
+    private static final Logger log = LoggerFactory.getLogger(IndexDialog.class);
 
     private IndexModel model;
     private IndexDialogConfirmListener confirmListener;
@@ -151,7 +155,7 @@ public class IndexDialog extends Dialog {
                 imageData = utils.getIconFromUrl(url);
                 updateIcon();
             }catch (Exception e){
-                e.printStackTrace();
+                log.error("could not retrieve icon from url "+url, e);
             }
         });
 

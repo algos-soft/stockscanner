@@ -29,6 +29,8 @@ import org.vaadin.artur.exampledata.ExampleDataGenerator;
 @SpringComponent
 public class DataGenerator {
 
+    private static final Logger log = LoggerFactory.getLogger(DataGenerator.class);
+
     @Autowired
     private MarketIndexService marketIndexService;
 
@@ -276,7 +278,7 @@ public class DataGenerator {
         try {
             imageData = utils.getIconFromUrl(url);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("can't retrieve image from url: "+url,e);
         }
         return imageData;
     }

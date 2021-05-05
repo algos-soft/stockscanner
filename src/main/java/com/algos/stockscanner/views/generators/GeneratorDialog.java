@@ -3,6 +3,7 @@ package com.algos.stockscanner.views.generators;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.algos.stockscanner.services.MarketService;
 import com.algos.stockscanner.views.indexes.IndexModel;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -22,6 +23,8 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.IntegerField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -42,6 +45,8 @@ import java.util.*;
 @org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GeneratorDialog extends Dialog {
+
+    private static final Logger log = LoggerFactory.getLogger(GeneratorDialog.class);
 
     private static final String LABEL_FIXED = "Fixed";
     private static final String LABEL_VARIABLE = "Variable";
@@ -142,13 +147,14 @@ public class GeneratorDialog extends Dialog {
         header.addClassName("dialog_header");
 
         // load default icon
-        Resource res = context.getResource("images/generator.png");
+        String name="images/generator.png";
+        Resource res = context.getResource(name);
         byte[] imageData = null;
         try {
             imageData = Files.readAllBytes(Paths.get(res.getURI()));
 //            imageData = utils.scaleImage(imageData, MAX_IMG_WIDTH, MAX_IMG_HEIGHT);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("error loading default icon "+name, e);
         }
 
         Image img = utils.byteArrayToImage(imageData);
@@ -495,7 +501,7 @@ public class GeneratorDialog extends Dialog {
                 MarketIndex index = marketIndexService.findUniqueBySymbol(model.getSymbol());
                 indexCombo.setValue(index);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("could not find unique record for symbol "+model.getSymbol(), e);
             }
         }
 

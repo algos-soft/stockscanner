@@ -9,6 +9,7 @@ import com.algos.stockscanner.data.entity.IndexUnit;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.IndexUnitService;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.algos.stockscanner.runner.GeneratorRunner;
 import com.crazzyghost.alphavantage.AlphaVantage;
 import com.crazzyghost.alphavantage.AlphaVantageException;
 import com.crazzyghost.alphavantage.parameters.DataType;
@@ -23,6 +24,8 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -42,6 +45,8 @@ import java.util.*;
 
 @Service
 public class MarketService {
+
+    private static final Logger log = LoggerFactory.getLogger(MarketService.class);
 
     @Autowired
     ResourceLoader resourceLoader;
@@ -98,7 +103,7 @@ public class MarketService {
         String filename="config/etoro_instruments.csv";
         File etoroInstrumentsFile = new File(filename);
         if(!etoroInstrumentsFile.exists()){
-            System.out.println("File "+filename+" not found. Can't load list of eToro instruments.");
+            log.warn("File "+filename+" not found. Can't load list of eToro instruments.");
             return;
         }
 
@@ -108,7 +113,7 @@ public class MarketService {
                 eToroInstruments.add(line);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("could not read eToro instruments file "+etoroInstrumentsFile.toString(), e);
         }
     }
 
@@ -264,7 +269,7 @@ public class MarketService {
         String filename="config/indexes.csv";
         File indexesFile = new File(filename);
         if(!indexesFile.exists()){
-            System.out.println("File "+filename+" not found. Can't download indexes.");
+            log.error("File "+filename+" not found. Can't download indexes.");
             return null;
         }
 
@@ -285,7 +290,7 @@ public class MarketService {
             }
         } catch (IOException | CsvException e ) {
             downloadListener.onDownloadAborted(new Exception("Malformed resource file "+filename));
-            e.printStackTrace();
+            log.error("could not parse the file "+indexesFile.toString(), e);
         }
 
         int sleepMillis=0;
@@ -320,11 +325,9 @@ public class MarketService {
                             fd = fetchFundamentalData(entry.getSymbol());
                             syncIndex(fd);
                         } catch (IOException e) {
-                            System.out.println("Fetch error - "+entry.getSymbol()+" skipped");
-                            e.printStackTrace();
+                            log.error("Fetch error - "+entry.getSymbol()+" skipped", e);
                         } catch (Exception e) {
-                            System.out.println("Sync error - "+entry.getSymbol()+" skipped");
-                            e.printStackTrace();
+                            log.error("Sync error - "+entry.getSymbol()+" skipped", e);
                         }
 
                         break;
@@ -342,7 +345,7 @@ public class MarketService {
                 }
 
             }else{
-                System.out.println(entry.getSymbol()+" skipped because not present on eToro");
+                log.warn(entry.getSymbol()+" skipped because not present on eToro");
             }
 
         }

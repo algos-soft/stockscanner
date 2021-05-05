@@ -26,8 +26,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.server.Command;
-import lombok.extern.slf4j.Slf4j;
 import org.claspina.confirmdialog.ConfirmDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
@@ -50,8 +51,10 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Scope("prototype")
 @CssImport(value = "./views/runner/generator-runner.css")
-@Slf4j
+//@Slf4j
 public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
+
+    private static final Logger log = LoggerFactory.getLogger(GeneratorRunner.class);
 
     private Generator generator;
 
@@ -171,7 +174,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
         try {
 
-            log.info("Generator id: "+generator.getId()+" #"+generator.getNumber()+": generation started");
+            log.info("Generator id: " + generator.getId() + " #" + generator.getNumber() + ": generation started");
 
             startTime = LocalDateTime.now();
 
@@ -203,10 +206,15 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                 int amplitude = permutation.get(1);
                 int lookback = permutation.get(2);
 
+                log.info("Starting simulation: indexId=" + indexId + ", amplitude=" + amplitude + ", lookback: "+lookback);
+
                 LocalDate startDate = generator.getStartDateLD();
                 Simulation simulation = null;
 
                 for (int nspan = 0; nspan < numSpans; nspan++) {
+
+                    log.debug("Starting span #"+nspan);
+
                     if (abort) {
                         break;
                     }
@@ -251,8 +259,11 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                         simulationService.update(simulation);
                     }
 
+                    log.debug("End span #"+nspan);
+
                 }
 
+                log.info("Simulation id: "+simulation.getId()+" completed");
 
             }
 
@@ -262,7 +273,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
             setCompleted();
 
-            log.info("Generator id: "+generator.getId()+" #"+generator.getNumber()+": generation completed");
+            log.info("Generator id: " + generator.getId() + " #" + generator.getNumber() + ": generation completed");
 
 
         } catch (RunnerException e) {
@@ -278,7 +289,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             setImage("ERR");
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("error while running generator number "+generator.getNumber(), e);
         }
 
         return null;
@@ -415,22 +426,22 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
     void preliminaryChecks() throws RunnerException {
 
         // build a list of market indices
-        List<MarketIndex> marketIndexes=new ArrayList<>();
-        if(generator.getIndexesPermutate()){
-            for(MarketIndex marketIndex : generator.getIndexes()){
+        List<MarketIndex> marketIndexes = new ArrayList<>();
+        if (generator.getIndexesPermutate()) {
+            for (MarketIndex marketIndex : generator.getIndexes()) {
                 marketIndexes.add(marketIndex);
             }
-        }else{
+        } else {
             marketIndexes.add(generator.getIndex());
         }
 
         // check not empty
-        if(marketIndexes.size()==0){
+        if (marketIndexes.size() == 0) {
             throw new RunnerException("The Generator does not have Market Indexes specified");
         }
 
         // check that all the indexes haves data
-        for(MarketIndex marketIndex : marketIndexes){
+        for (MarketIndex marketIndex : marketIndexes) {
             int count = marketIndexService.countDataPoints(marketIndex);
             if (count == 0) {
                 String msg = "The index " + marketIndex.getSymbol() + " has no historic data. Download data for the index.";

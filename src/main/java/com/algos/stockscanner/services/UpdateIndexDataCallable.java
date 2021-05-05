@@ -4,6 +4,8 @@ import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,8 @@ import java.util.concurrent.Callable;
 @Component
 @Scope("prototype")
 public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> {
+
+    private static final Logger log = LoggerFactory.getLogger(UpdateIndexDataCallable.class);
 
     private MarketIndex index;
     private String mode;
@@ -52,7 +56,8 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
     @Override
     public UpdateIndexDataStatus call() throws Exception {
 
-        System.out.println("Callable task called for index "+index.getSymbol());
+        log.debug("Callable task called for index "+index.getSymbol());
+
         startTime=LocalDateTime.now();
 
         // long task, can throw exception
@@ -76,8 +81,7 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
 
         }catch (Exception e){
 
-            System.out.println("Callable task error for index "+index.getSymbol()+": "+e.getMessage());
-
+            log.error("Callable task error for index "+index.getSymbol(), e);
 
             if(listener!=null){
                 listener.onError(e);
@@ -89,7 +93,7 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
 
 
         if(listener!=null){
-            System.out.println("Callable task completed for index "+index.getSymbol());
+            log.debug("Callable task completed for index "+index.getSymbol());
             Duration duration=Duration.between(startTime, endTime);
             String sDuration = DurationFormatUtils.formatDuration(duration.toMillis(), "H:mm:ss", true);
             DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm:ss");
