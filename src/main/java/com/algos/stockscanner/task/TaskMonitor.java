@@ -47,6 +47,7 @@ public class TaskMonitor extends VerticalLayout  {
 
     private UI ui;
 
+    private boolean autoClose;  // close automatically when completed successfully
 
     @PostConstruct
     private void init() {
@@ -119,6 +120,9 @@ public class TaskMonitor extends VerticalLayout  {
 
     public void onCompleted(Object completionInfo) {
         setCompleted(completionInfo);
+        if(autoClose){
+            fireClosed();
+        }
     }
 
     public void onError(Exception e) {
@@ -263,5 +267,13 @@ public class TaskMonitor extends VerticalLayout  {
 
     public void setMonitorListener(MonitorListener monitorListener) {
         this.monitorListener = monitorListener;
+    }
+
+    public boolean isAutoClose() {
+        return autoClose;
+    }
+
+    public void setAutoClose(boolean autoClose) {
+        this.autoClose = autoClose;
     }
 }

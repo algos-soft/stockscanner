@@ -6,6 +6,7 @@
   border-radius: var(--lumo-space-s);
   align-items: center;
   padding: var(--lumo-space-s);
+  margin: var(--lumo-space-xs);
 }
 
 #taskmonitor-label{

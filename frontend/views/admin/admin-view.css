@@ -1,7 +1,6 @@
 .admin-view {
   display: block;
   margin: 0 0;
-  max-width: 1024px;
   padding: 0 var(--lumo-space-l);
   height: 100%;
 }
@@ -12,5 +11,11 @@
 }
 
 .admin-view-statuslayout{
+    visibility: visible;
+    width: 100%;
     flex-wrap: wrap;
+    padding-top: var(--lumo-space-s);
+    margin-bottom: var(--lumo-space-m);
+    border-top: thin solid;
 }
+

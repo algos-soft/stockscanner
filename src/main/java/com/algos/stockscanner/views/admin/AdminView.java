@@ -249,6 +249,7 @@ public class AdminView extends VerticalLayout {
                             }
                         };
                         taskMonitor.setMonitorListener(listener);
+                        //taskMonitor.setAutoClose(true);
 
 
                         // listen to events happening in the Callable

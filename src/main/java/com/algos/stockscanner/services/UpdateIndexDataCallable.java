@@ -3,6 +3,7 @@ package com.algos.stockscanner.services;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -90,9 +91,9 @@ public class UpdateIndexDataCallable implements Callable<UpdateIndexDataStatus> 
         if(listener!=null){
             System.out.println("Callable task completed for index "+index.getSymbol());
             Duration duration=Duration.between(startTime, endTime);
-            String sDuration=duration.toString();
+            String sDuration = DurationFormatUtils.formatDuration(duration.toMillis(), "H:mm:ss", true);
             DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm:ss");
-            String info = "start: "+startTime.format(format)+", end: "+endTime.format(format)+" elapsed: "+sDuration;
+            String info = "start: "+startTime.format(format)+", end: "+endTime.format(format)+", elapsed: "+sDuration;
             listener.onCompleted(info);
         }
 
