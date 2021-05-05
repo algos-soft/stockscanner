@@ -1,0 +1,97 @@
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+    <!--    In the current release of Logback, if spring properties are used, configuration scan does not work.-->
+    <!--    We prefer to have configuration scan and give up with the spring properties. We use local variables instead.-->
+    <!--    <springProperty name="loggingFile" source="logging.file"/>-->
+    <!--    <springProperty name="springLoggingFile" source="wam.logging.spring.file"/>-->
+    <!--    <springProperty name="consoleLog" source="wam.logging.console.log.enable"/>-->
+
+    <!-- enable console logging. to be disabled in production-->
+    <variable name="LOG_TO_CONSOLE" value="true"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5p) - ${PID:-} %cyan([%15t]) %blue(%-100m) - %C.%M:%L %n
+            </pattern>
+        </encoder>
+    </appender>
+
+
+    <variable name="APP_LOG_FILE" value="log/stockscanner.log"/>
+    <appender name="rollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${APP_LOG_FILE}</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p --- ${PID:-} [%t] %C.%M:%L --- %m %n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <maxIndex>10</maxIndex>
+            <FileNamePattern>${APP_LOG_FILE}.%i.log</FileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>10MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+    <variable name="SPRING_LOG_FILE" value="log/stockscanner-spring.log"/>
+    <appender name="springContextAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${SPRING_LOG_FILE}</file>
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p --- ${PID:-} [%t] %C.%M:%L --- %m %n</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <maxIndex>10</maxIndex>
+            <FileNamePattern>${SPRING_LOG_FILE}.%i.log</FileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>10MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+    <variable name="ADMIN_LOG_FILE" value="log/stockscanner-admin.log"/>
+    <appender name="adminAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${ADMIN_LOG_FILE}</file>
+        <encoder>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} --- %m %n</Pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>${ADMIN_LOG_FILE}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+
+    <!--additivity = false: il log si ferma qui-->
+    <!--additivity = true: il log attraversa questo logger e viene propagato agli ancestors-->
+    <!--un logger può avere più appenders e invia il log a tutti i suoi appenders-->
+    <logger name="com.algos.stockscanner" level="INFO" additivity="true">
+        <!--    <logger name="it.algos" level="DEBUG" additivity="true">-->
+        <appender-ref ref="rollingFileAppender"/>
+    </logger>
+
+    <logger name="org.springframework" level="INFO" additivity="true">
+        <appender-ref ref="springContextAppender"/>
+    </logger>
+
+    <logger name="app.admin" level="INFO" additivity="true">
+        <appender-ref ref="adminAppender"/>
+    </logger>
+
+
+    <!--    un logger di questo tipo (senza appenders) blocca tutti i log qui e non li propaga oltre-->
+    <!--    <logger name="org.atmosphere" level="INFO" additivity="false"/>-->
+
+
+    <!--qui arrivano tutti i logger che hanno additivity = true-->
+    <!-- vengono stampati in console solo se la property LOG_TO_CONSOLE è a true-->
+    <root level="INFO">
+        <!--    <root level="DEBUG">-->
+        <if condition='property("LOG_TO_CONSOLE").contains("true")'>
+            <then>
+                <appender-ref ref="STDOUT"/>
+            </then>
+        </if>
+    </root>
+
+</configuration>

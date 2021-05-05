@@ -26,6 +26,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.server.Command;
+import lombok.extern.slf4j.Slf4j;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -42,12 +43,14 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+
 /**
  * Runs a Generator in a separate thread
  */
 @Component
 @Scope("prototype")
 @CssImport(value = "./views/runner/generator-runner.css")
+@Slf4j
 public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
     private Generator generator;
@@ -168,6 +171,8 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
         try {
 
+            log.info("Generator id: "+generator.getId()+" #"+generator.getNumber()+": generation started");
+
             startTime = LocalDateTime.now();
 
             // here the business logic cycle, can throw exceptions
@@ -256,6 +261,9 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             endTime = LocalDateTime.now();
 
             setCompleted();
+
+            log.info("Generator id: "+generator.getId()+" #"+generator.getNumber()+": generation completed");
+
 
         } catch (RunnerException e) {
 
