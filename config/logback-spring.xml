@@ -7,7 +7,7 @@
     <!--    <springProperty name="consoleLog" source="wam.logging.console.log.enable"/>-->
 
     <!-- enable console logging. to be disabled in production-->
-    <variable name="LOG_TO_CONSOLE" value="true"/>
+    <variable name="LOG_TO_CONSOLE" value="false"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
