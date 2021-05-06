@@ -46,23 +46,13 @@ public class AdminView extends VerticalLayout {
     private Component marketIndexesComponent;
     private Component generatorComponent;
 
-    private IntegerField limitField;
-
 
     private @Autowired
     Utils utils;
 
     @Autowired
-    private MarketService marketService;
-
-    @Autowired
-    private AdminService adminService;
-
-    @Autowired
-    private MarketIndexService marketIndexService;
-
-    @Autowired
     private ApplicationContext context;
+
 
     public AdminView(AdminService adminService) {
         addClassName("admin-view");
@@ -101,7 +91,7 @@ public class AdminView extends VerticalLayout {
         button1.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
             removeAll();
             if(marketIndexesComponent==null){
-                marketIndexesComponent=buildMarketIndexesComponent();
+                marketIndexesComponent=context.getBean(MarketIndexesPage.class);
             }
             add(marketIndexesComponent);
         });
@@ -126,178 +116,6 @@ public class AdminView extends VerticalLayout {
 
 
 
-    private Component buildMarketIndexesComponent(){
-
-        HorizontalLayout statusLayout = new HorizontalLayout();
-        statusLayout.setSpacing(false);
-        statusLayout.setPadding(false);
-        statusLayout.addClassName("admin-view-statuslayout");
-
-        Button bDownloadIndexes = new Button("Download indexes");
-        bDownloadIndexes.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                downloadIndexes();
-            }
-        });
-        limitField=new IntegerField("Max req per minute");
-        limitField.setMinWidth("9em");
-        limitField.setValue(5);
-        HorizontalLayout layout1=new HorizontalLayout();
-        layout1.setAlignItems(Alignment.BASELINE);
-        layout1.add(bDownloadIndexes, limitField);
-
-
-        Button bUpdateAllIndexData = new Button("Update data for all indexes");
-        bUpdateAllIndexData.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                try {
-
-
-                    TaskHandler handler=new TaskHandler();
-
-                    // setup the progress dialog
-                    Text text = new Text("Loading data...");
-                    ProgressBar progressBar = new ProgressBar();
-                    progressBar.setIndeterminate(true);
-                    VerticalLayout layout = new VerticalLayout();
-                    layout.add(text, progressBar);
-                    Button bAbort = new Button();
-                    ConfirmDialog dialog = ConfirmDialog.create()
-                            .withMessage(layout)
-                            .withButton(bAbort, ButtonOption.caption("Abort"), ButtonOption.closeOnClick(false));
-                    dialog.setCloseOnEsc(false);
-                    dialog.setCloseOnOutsideClick(false);
-                    bAbort.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
-                        handler.abort();
-                    });
-                    dialog.setWidth("20em");
-
-                    // keep this out of the listener, the listener is called on another thread
-                    UI ui = UI.getCurrent();
-
-                    TaskListener listener = new TaskListener() {
-                        @Override
-                        public void onProgress(int current, int total, Object info) {
-                            ui.access((Command) () -> {
-                                progressBar.setIndeterminate(false);
-                                progressBar.setValue(current);
-                                progressBar.setMax(total);
-                            });
-                        }
-
-                        @Override
-                        public void onCompleted(Object info) {
-                            ui.access((Command) () -> dialog.close());
-                        }
-
-
-                        @Override
-                        public void onError(Exception e) {
-                            ui.access((Command) () -> dialog.close());
-                        }
-                    };
-
-                    dialog.open();
-
-                    // start background operations
-                    MarketIndex index = marketIndexService.findUniqueBySymbol("AAPL");
-                    Future future = adminService.downloadIndexData(index, "ALL", null, listener, handler);
-                    //Object obj = future.get();
-                    int a = 87;
-                    int b = a;
-
-//                    List<MarketIndex> indexes = marketIndexService.findAll();
-//                    for(MarketIndex index : indexes){
-//                        adminService.downloadIndexData(index, "ALL", null, listener, handler);
-//                    }
-
-
-                } catch (Exception e) {
-                    log.error("error while updating data for all indexes", e);
-                }
-            }
-        });
-
-
-        Button bTest = new Button("Test task scheduler");
-        bTest.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                try {
-                    List<MarketIndex> indexes = new ArrayList<>();
-                    indexes.add(marketIndexService.findUniqueBySymbol("AAPL"));
-                    indexes.add(marketIndexService.findUniqueBySymbol("AMZN"));
-                    indexes.add(marketIndexService.findUniqueBySymbol("PYPL"));
-
-                    List<UpdateIndexDataCallable> callables = adminService.scheduleUpdate(indexes, 5);
-
-                    // keep this out of the listener, the listener is called on another thread
-                    UI ui = UI.getCurrent();
-
-                    for(UpdateIndexDataCallable callable : callables){
-
-                        // GUI component handling events coming from the monitor
-                        TaskMonitor taskMonitor = context.getBean(TaskMonitor.class);
-                        TaskMonitor.MonitorListener listener = new TaskMonitor.MonitorListener() {
-                            @Override
-                            public void onAborted() {
-                                callable.getHandler().abort();
-                            }
-
-                            @Override
-                            public void onClosed() {
-                                ui.access((Command) () -> statusLayout.remove(taskMonitor));
-                            }
-                        };
-                        taskMonitor.setMonitorListener(listener);
-                        //taskMonitor.setAutoClose(true);
-
-
-                        // listen to events happening in the Callable
-                        callable.setListener(new TaskListener() {
-                            @Override
-                            public void onProgress(int current, int total, Object progressInfo) {
-                                taskMonitor.onProgress(current, total, progressInfo);
-                            }
-
-                            @Override
-                            public void onCompleted(Object completionInfo) {
-                                taskMonitor.onCompleted(completionInfo);
-                            }
-
-                            @Override
-                            public void onError(Exception e) {
-                                taskMonitor.onError(e);
-                            }
-                        });
-
-                        callable.setHandler(new TaskHandler());
-
-                        statusLayout.add(taskMonitor);
-
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-        });
-
-
-        VerticalLayout content = new VerticalLayout();
-        content.add(layout1, bUpdateAllIndexData, bTest);
-        content.setHeight("100%");
-
-        VerticalLayout page = new VerticalLayout();
-        page.setHeight("100%");
-        page.add(content, statusLayout);
-
-        return page;
-
-    }
 
 
     private Component buildGeneratorComponent(){
@@ -314,83 +132,6 @@ public class AdminView extends VerticalLayout {
 
 
 
-    /**
-     * Download indexes
-     */
-    public void downloadIndexes(){
-        final MarketService.DownloadHandler[] handler = {null}; // use single-element array to avoid the need to be final
-
-        // setup the progress dialog
-        Text text = new Text("Downloading...");
-        ProgressBar progressBar = new ProgressBar();
-        progressBar.setIndeterminate(true);
-        VerticalLayout layout = new VerticalLayout();
-        layout.add(text, progressBar);
-        Button bAbort = new Button();
-        ConfirmDialog dialog = ConfirmDialog.create()
-                .withMessage(layout)
-                .withButton(bAbort, ButtonOption.caption("Abort"), ButtonOption.closeOnClick(false));
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
-        bAbort.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
-            handler[0].setAbort(true);
-        });
-        dialog.setWidth("20em");
-        dialog.open();
-
-        UI ui = UI.getCurrent();
-        int maxReqPerMinute = utils.toPrimitive(limitField.getValue());
-
-        // download data in a separate thread
-        new Thread(() -> {
-
-            handler[0] =  marketService.downloadIndexes(new MarketService.DownloadListener() {
-                @Override
-                public void onDownloadCompleted() {
-                    ui.access(new Command() {
-                        @Override
-                        public void execute() {
-                            dialog.close();
-                        }
-                    });
-
-                }
-
-                @Override
-                public void onDownloadAborted(Exception e) {
-                    ui.access(new Command() {
-                        @Override
-                        public void execute() {
-                            dialog.close();
-                            ConfirmDialog dialog1 = ConfirmDialog.createError().withMessage("Download failed: "+e.getMessage());
-                            dialog1.open();
-                        }
-                    });
-
-                }
-
-                @Override
-                public void onDownloadProgress(int current, int total, String message) {
-
-                    ui.access(new Command() {
-                        @Override
-                        public void execute() {
-                            progressBar.setMax(total);
-                            progressBar.setValue(current);
-                            if(current==0){
-                                progressBar.setIndeterminate(true);
-                                text.setText(message);
-                            }else{
-                                progressBar.setIndeterminate(false);
-                                text.setText("["+current+"/"+total+"] "+message);
-                            }
-                        }
-                    });
-                }
-
-            },maxReqPerMinute);
-        }).start();
-    }
 
 
 

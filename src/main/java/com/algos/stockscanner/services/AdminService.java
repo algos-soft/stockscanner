@@ -1,5 +1,6 @@
 package com.algos.stockscanner.services;
 
+import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.task.TaskHandler;
@@ -21,6 +22,9 @@ public class AdminService {
 
     @Autowired
     private ApplicationContext context;
+
+    @Autowired
+    private ContextStore contextStore;
 
     public AdminService() {
     }
@@ -54,11 +58,11 @@ public class AdminService {
      * @param startDate in case of DATE mode, the date where to begin the update od the data in the db
      * @param handler to call abort() to interrupt the process
      */
-    public Future<UpdateIndexDataStatus> downloadIndexData(MarketIndex index, String mode, LocalDate startDate, TaskListener listener, TaskHandler handler){
+    public Future downloadIndexData(MarketIndex index, String mode, LocalDate startDate, TaskListener listener, TaskHandler handler){
 
         UpdateIndexDataCallable callable = context.getBean(UpdateIndexDataCallable.class, index, mode, startDate, listener, handler);
         ExecutorService executorService = Executors.newFixedThreadPool(4);
-        Future<UpdateIndexDataStatus> future = executorService.submit(callable);
+        Future future = executorService.submit(callable);
 
         int i=0;
 //        while(!future.isDone()){
@@ -106,7 +110,7 @@ public class AdminService {
         UpdateIndexDataCallable callable;
         long millis=0;
         for(MarketIndex index : indexes){
-            callable = context.getBean(UpdateIndexDataCallable.class, index, "ALL", null, null, null);
+            callable = context.getBean(UpdateIndexDataCallable.class, index, "ALL", null);
             callables.add(callable);
             executorService.schedule(callable, millis, TimeUnit.MILLISECONDS);
             millis+=intervalSeconds*1000;

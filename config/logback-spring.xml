@@ -14,17 +14,6 @@
 
         <appender name="StandardAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>log/stockscanner.log</file>
-
-            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                <fileNamePattern>log/archived/stockscanner.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-                <!-- each archived file, size max 10MB -->
-                <maxFileSize>10MB</maxFileSize>
-                <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
-                <totalSizeCap>20GB</totalSizeCap>
-                <!-- 60 days to keep -->
-                <maxHistory>60</maxHistory>
-            </rollingPolicy>
-
             <encoder>
                 <pattern>%d %p %c{1.} [%t] %m%n</pattern>
             </encoder>
@@ -50,7 +39,7 @@
 
 
 
-        <logger name="com.algos.stockscanner" level="INFO" additivity="false">
+        <logger name="com.algos.stockscanner" level="DEBUG" additivity="false">
             <appender-ref ref="StandardAppender"/>
         </logger>
 
@@ -58,7 +47,14 @@
             <appender-ref ref="SpringContextAppender"/>
         </logger>
 
-        <root level="ERROR">
+<!--
+        <logger name="org.hibernate.*" level="INFO" additivity="false">
+            <appender-ref ref="StandardAppender"/>
+        </logger>
+-->
+
+
+        <root level="INFO">
             <appender-ref ref="StandardAppender"/>
         </root>
 

@@ -2,6 +2,9 @@ package com.algos.stockscanner.data.entity;
 
 import com.algos.stockscanner.data.AbstractEntity;
 import com.algos.stockscanner.utils.Du;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -259,4 +262,33 @@ public class Generator extends AbstractEntity {
         this.startDate = Du.toUtcString(localDate);
     }
 
+    @Override
+    public String toString() {
+        return "Generator{" +
+                "index=" + index +
+                ", simulations=" + simulations +
+                ", indexes=" + indexes +
+                ", created=" + created +
+                ", modified=" + modified +
+                ", number=" + number +
+                ", startDate='" + startDate + '\'' +
+                ", fixedDays=" + fixedDays +
+                ", days=" + days +
+                ", spans=" + spans +
+                ", amount=" + amount +
+                ", stopLoss=" + stopLoss +
+                ", takeProfit=" + takeProfit +
+                ", amplitude=" + amplitude +
+                ", amplitudePermutate=" + amplitudePermutate +
+                ", amplitudeMin=" + amplitudeMin +
+                ", amplitudeMax=" + amplitudeMax +
+                ", amplitudeSteps=" + amplitudeSteps +
+                ", avgDays=" + avgDays +
+                ", avgDaysPermutate=" + avgDaysPermutate +
+                ", avgDaysMin=" + avgDaysMin +
+                ", avgDaysMax=" + avgDaysMax +
+                ", avgDaysSteps=" + avgDaysSteps +
+                ", indexesPermutate=" + indexesPermutate +
+                '}';
+    }
 }
