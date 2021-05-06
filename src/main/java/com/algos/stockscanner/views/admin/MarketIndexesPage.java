@@ -16,6 +16,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -78,104 +79,28 @@ public class MarketIndexesPage  extends VerticalLayout {
         statusLayout.addClassName("admin-view-statuslayout");
 
         Button bDownloadIndexes = new Button("Download indexes");
+        bDownloadIndexes.setId("adminview-bdownloadindexes");
         bDownloadIndexes.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 downloadIndexes();
             }
         });
-        limitField=new IntegerField("Max req per minute");
-        limitField.setMinWidth("9em");
-        limitField.setValue(5);
-        HorizontalLayout layout1=new HorizontalLayout();
-        layout1.setAlignItems(Alignment.BASELINE);
-        layout1.add(bDownloadIndexes, limitField);
 
-
-        Button bUpdateAllIndexData = new Button("Update data for all indexes");
-        bUpdateAllIndexData.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                try {
-
-
-                    TaskHandler handler=new TaskHandler();
-
-                    // setup the progress dialog
-                    Text text = new Text("Loading data...");
-                    ProgressBar progressBar = new ProgressBar();
-                    progressBar.setIndeterminate(true);
-                    VerticalLayout layout = new VerticalLayout();
-                    layout.add(text, progressBar);
-                    Button bAbort = new Button();
-                    ConfirmDialog dialog = ConfirmDialog.create()
-                            .withMessage(layout)
-                            .withButton(bAbort, ButtonOption.caption("Abort"), ButtonOption.closeOnClick(false));
-                    dialog.setCloseOnEsc(false);
-                    dialog.setCloseOnOutsideClick(false);
-                    bAbort.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
-                        handler.abort();
-                    });
-                    dialog.setWidth("20em");
-
-                    // keep this out of the listener, the listener is called on another thread
-                    UI ui = UI.getCurrent();
-
-                    TaskListener listener = new TaskListener() {
-                        @Override
-                        public void onProgress(int current, int total, Object info) {
-                            ui.access((Command) () -> {
-                                progressBar.setIndeterminate(false);
-                                progressBar.setValue(current);
-                                progressBar.setMax(total);
-                            });
-                        }
-
-                        @Override
-                        public void onCompleted(Object info) {
-                            ui.access((Command) () -> dialog.close());
-                        }
-
-
-                        @Override
-                        public void onError(Exception e) {
-                            ui.access((Command) () -> dialog.close());
-                        }
-                    };
-
-                    dialog.open();
-
-                    // start background operations
-                    MarketIndex index = marketIndexService.findUniqueBySymbol("AAPL");
-                    Future future = adminService.downloadIndexData(index, "ALL", null, listener, handler);
-                    //Object obj = future.get();
-                    int a = 87;
-                    int b = a;
-
-//                    List<MarketIndex> indexes = marketIndexService.findAll();
-//                    for(MarketIndex index : indexes){
-//                        adminService.downloadIndexData(index, "ALL", null, listener, handler);
-//                    }
-
-
-                } catch (Exception e) {
-                    log.error("error while updating data for all indexes", e);
-                }
-            }
-        });
-
-
-        Button bTest = new Button("Test task scheduler");
-        bTest.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+        // button update prices
+        Button bUpdatePrices = new Button("Update prices");
+        bUpdatePrices.setId("adminview-bupdateprices");
+        bUpdatePrices.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 try {
                     List<MarketIndex> indexes = new ArrayList<>();
                     indexes.add(marketIndexService.findUniqueBySymbol("AAPL"));
-                    indexes.add(marketIndexService.findUniqueBySymbol("AMZN"));
-                    indexes.add(marketIndexService.findUniqueBySymbol("PYPL"));
+//                    indexes.add(marketIndexService.findUniqueBySymbol("AMZN"));
+//                    indexes.add(marketIndexService.findUniqueBySymbol("PYPL"));
 
-                    List<UpdateIndexDataCallable> callables = adminService.scheduleUpdate(indexes, 5);
+                    int intervalSec = 60/limitField.getValue();
+                    List<UpdateIndexDataCallable> callables = adminService.scheduleUpdate(indexes, intervalSec);
                     for(UpdateIndexDataCallable callable : callables){
                         attachMonitorToTask(callable);
                     }
@@ -187,9 +112,13 @@ public class MarketIndexesPage  extends VerticalLayout {
             }
         });
 
+        // request limit field
+        limitField=new IntegerField("Max req per minute");
+        limitField.setId("adminview-reqlimitfield");
+        limitField.setValue(5);
 
         VerticalLayout content = new VerticalLayout();
-        content.add(layout1, bUpdateAllIndexData, bTest);
+        content.add(bDownloadIndexes, bUpdatePrices, limitField);
         content.setHeight("100%");
 
         setHeight("100%");

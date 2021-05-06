@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Singleton bean used as a storage of object common to the application
+ * Singleton used as a storage of objects common to all the application
  * (not related to sessions or UI but to the whole Spring instance on the server)
  */
 @Component

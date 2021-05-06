@@ -19,3 +19,15 @@
     border-top: thin solid;
 }
 
+#adminview-bdownloadindexes{
+    width: 11em;
+}
+
+#adminview-bupdateprices{
+    width: 11em;
+}
+
+#adminview-reqlimitfield{
+    width: 11em;
+}
+
