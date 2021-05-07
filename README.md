@@ -28,7 +28,7 @@ deploy directory structure
 ## Build for production
 > mvn clean package -Pproduction
 
-(the 'poduction' profile is defined in pom.xml)
+(the 'production' profile is defined in pom.xml)
 
 a .jar file is created in the 'target' directory
 
