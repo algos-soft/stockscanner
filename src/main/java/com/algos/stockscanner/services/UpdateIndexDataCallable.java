@@ -86,7 +86,7 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     @PostConstruct
     private void init() {
 
-        log.debug("Callable task created for index " + index.getSymbol());
+        log.info("Callable task created for index " + index.getSymbol());
 
         // register itself to the context-level storage
         contextStore.updateIndexCallableMap.put("" + hashCode(), this);
@@ -164,7 +164,7 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
             endTime = LocalDateTime.now();
             String info = buildDurationInfo();
-            log.debug("Callable task completed for index " + index.getSymbol() + " " + info);
+            log.info("Callable task completed for index " + index.getSymbol() + " " + info);
             notifyCompleted(info);
 
         } catch (Exception e) {

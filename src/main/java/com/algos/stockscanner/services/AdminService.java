@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -23,14 +24,20 @@ public class AdminService {
     @Autowired
     private ContextStore contextStore;
 
+    private ScheduledExecutorService executorService;
+
+
     public AdminService() {
     }
 
+    @PostConstruct
+    private void init(){
+        executorService = Executors.newScheduledThreadPool(Integer.MAX_VALUE);
+    }
 
     public List<UpdateIndexDataCallable> scheduleUpdate(List<MarketIndex> indexes, int intervalSeconds){
         List<UpdateIndexDataCallable> callables = new ArrayList<>();
 
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
 
         UpdateIndexDataCallable callable;
         long millis=0;
@@ -41,7 +48,7 @@ public class AdminService {
             millis+=intervalSeconds*1000;
         }
 
-        executorService.shutdown(); // terminate ongoing and scheduled tasks, then shutdown
+        //executorService.shutdown(); // terminate ongoing and scheduled tasks, then shutdown
 
         return callables;
 

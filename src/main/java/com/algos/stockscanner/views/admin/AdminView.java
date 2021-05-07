@@ -25,7 +25,7 @@ import java.util.Optional;
 @CssImport("./views/admin/admin-view.css")
 public class AdminView extends VerticalLayout {
 
-    private static final Logger log = LoggerFactory.getLogger(MarketService.class);
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private static final String MARKET_INDEXES = "Market Indexes";
     private static final String GENERATOR = "Generator";
@@ -96,6 +96,13 @@ public class AdminView extends VerticalLayout {
         button2.getStyle().set("width", bWidth);
         button2.setIconAfterText(true);
         button2.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
+
+            log.trace("A TRACE Message");
+            log.debug("A DEBUG Message");
+            log.info("An INFO Message");
+            log.warn("A WARN Message");
+            log.error("An ERROR Message");
+
             removeAll();
             if(generatorComponent==null){
                 generatorComponent=buildGeneratorComponent();
