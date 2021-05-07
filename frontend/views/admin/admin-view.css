@@ -24,7 +24,7 @@
 }
 
 #adminview-bupdateprices{
-    width: 11em;
+    min-width: 11em;
 }
 
 #adminview-reqlimitfield{

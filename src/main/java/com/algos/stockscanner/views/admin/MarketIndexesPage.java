@@ -96,8 +96,8 @@ public class MarketIndexesPage  extends VerticalLayout {
                 try {
                     List<MarketIndex> indexes = new ArrayList<>();
                     indexes.add(marketIndexService.findUniqueBySymbol("AAPL"));
-//                    indexes.add(marketIndexService.findUniqueBySymbol("AMZN"));
-//                    indexes.add(marketIndexService.findUniqueBySymbol("PYPL"));
+                    indexes.add(marketIndexService.findUniqueBySymbol("AMZN"));
+                    indexes.add(marketIndexService.findUniqueBySymbol("PYPL"));
 
                     int intervalSec = 60/limitField.getValue();
                     List<UpdateIndexDataCallable> callables = adminService.scheduleUpdate(indexes, intervalSec);

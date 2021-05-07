@@ -56,11 +56,6 @@ public class TaskMonitor extends VerticalLayout  {
 
         setId("taskmonitor-main-layout");
 
-        Label emptyLabel = new Label(); // blank element, for alignment purpose only
-        emptyLabel.getStyle().set("display", "flex");
-        emptyLabel.getStyle().set("flex", "1");
-        emptyLabel.getStyle().set("max-width", "1em");
-
         closeIcon = new IronIcon("vaadin", "close");
         closeIcon.setId("taskmonitor-close-icon");
         closeIcon.addClickListener(new ComponentEventListener<ClickEvent<IronIcon>>() {
@@ -87,9 +82,6 @@ public class TaskMonitor extends VerticalLayout  {
 
         label = new Label();
         label.setId("taskmonitor-label");
-        label.getStyle().set("display", "flex");
-        label.getStyle().set("flex", "1");
-        label.getStyle().set("justify-content", "center");
 
         imgPlaceholder = new HorizontalLayout();
         imgPlaceholder.addClickListener((ComponentEventListener<ClickEvent<HorizontalLayout>>) horizontalLayoutClickEvent -> infoClicked());
@@ -207,13 +199,15 @@ public class TaskMonitor extends VerticalLayout  {
         StringBuilder builder=new StringBuilder();
         if(!StringUtils.isEmpty(message)){
             builder.append(message);
-            builder.append(" ");
         }
 
         if(current>0){
+            if(builder.length()>0){
+                builder.append(" ");
+            }
             builder.append("[" + current + "/" + total+"]");
-        }else{
-            builder.append("[running...]");
+//        }else{
+//            builder.append("[running...]");
         }
         final String finalmsg = builder.toString();
 

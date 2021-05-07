@@ -57,6 +57,8 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
+    private Progress currentProgress;
+
     @Autowired
     private ContextStore contextStore;
 
@@ -84,6 +86,9 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
         // register itself to the context-level storage
         contextStore.updateIndexCallableMap.put("" + hashCode(), this);
+
+        currentProgress=new Progress();
+        currentProgress.update("waiting...");
 
     }
 
@@ -175,6 +180,10 @@ public class UpdateIndexDataCallable implements Callable<Void> {
      */
     public void addListener(TaskListener listener) {
         this.listeners.add(listener);
+
+        // update the listener as soon as it attaches
+        listener.onProgress(currentProgress.getCurrent(), currentProgress.getTot(), currentProgress.getStatus());
+
     }
 
     /**
@@ -185,6 +194,9 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     }
 
     private void notifyProgress(int current, int tot, String info) {
+
+        currentProgress.update(current, tot, info);
+
         for (TaskListener listener : listeners) {
             listener.onProgress(current, tot, info);
         }
@@ -280,6 +292,34 @@ public class UpdateIndexDataCallable implements Callable<Void> {
         indexUnit.setDateTimeLDT(dateTime);
 
         return indexUnit;
+    }
+
+    class Progress{
+        private int current;
+        private int tot;
+        private String status;
+
+        public void update(int current, int tot, String status){
+            this.current=current;
+            this.tot=tot;
+            this.status=status;
+        }
+
+        public void update(String status){
+            this.status=status;
+        }
+
+        public int getCurrent() {
+            return current;
+        }
+
+        public int getTot() {
+            return tot;
+        }
+
+        public String getStatus() {
+            return status;
+        }
     }
 
 
