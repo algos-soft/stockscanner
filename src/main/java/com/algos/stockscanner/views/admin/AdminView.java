@@ -1,12 +1,7 @@
 package com.algos.stockscanner.views.admin;
 
 import com.algos.stockscanner.beans.Utils;
-import com.algos.stockscanner.data.entity.MarketIndex;
-import com.algos.stockscanner.data.service.MarketIndexService;
-import com.algos.stockscanner.task.TaskHandler;
-import com.algos.stockscanner.task.TaskListener;
 import com.algos.stockscanner.services.*;
-import com.algos.stockscanner.task.TaskMonitor;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -15,23 +10,15 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.Command;
-import org.claspina.confirmdialog.ButtonOption;
-import org.claspina.confirmdialog.ConfirmDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Future;
 
 @Route(value = "admin", layout = MainView.class)
 @PageTitle("Admin")
@@ -72,6 +59,12 @@ public class AdminView extends VerticalLayout {
                 }
             }
         });
+
+        // show default page
+        if(marketIndexesComponent==null){
+            marketIndexesComponent=context.getBean(MarketIndexesPage.class);
+            add(marketIndexesComponent);
+        }
 
     }
 
@@ -123,7 +116,6 @@ public class AdminView extends VerticalLayout {
         Button bDownloadIndexes = new Button("Test");
 
         VerticalLayout layout = new VerticalLayout();
-        //layout.getStyle().set("background","yellow");
         layout.add(bDownloadIndexes);
 
         return layout;

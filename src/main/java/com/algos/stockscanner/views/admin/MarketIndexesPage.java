@@ -16,7 +16,6 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -35,7 +34,6 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Future;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
@@ -44,7 +42,7 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @CssImport("./views/admin/admin-view.css")
 public class MarketIndexesPage  extends VerticalLayout {
 
-    private static final Logger log = LoggerFactory.getLogger(MarketIndexesPage.class);
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private ApplicationContext context;
@@ -94,6 +92,8 @@ public class MarketIndexesPage  extends VerticalLayout {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 try {
+                    log.info("Update Prices action requested");
+
                     List<MarketIndex> indexes = new ArrayList<>();
                     indexes.add(marketIndexService.findUniqueBySymbol("AAPL"));
                     indexes.add(marketIndexService.findUniqueBySymbol("AMZN"));
@@ -140,7 +140,8 @@ public class MarketIndexesPage  extends VerticalLayout {
 
         UI ui = UI.getCurrent();
 
-        TaskHandler handler = new TaskHandler();
+        // obtain a handle to interrupt/manage the task
+        TaskHandler handler=callable.obtainHandler();
 
         // GUI component handling events coming from the monitor
         TaskMonitor taskMonitor = context.getBean(TaskMonitor.class);
@@ -182,8 +183,6 @@ public class MarketIndexesPage  extends VerticalLayout {
                 taskMonitor.onError(e);
             }
         });
-
-        callable.addHandler(handler);
 
         statusLayout.add(taskMonitor);
 

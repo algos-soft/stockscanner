@@ -7,6 +7,7 @@ import com.algos.stockscanner.data.enums.FrequencyTypes;
 import com.algos.stockscanner.data.enums.IndexCategories;
 import com.algos.stockscanner.data.service.IndexUnitService;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.algos.stockscanner.task.AbortedByUserException;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
 import com.crazzyghost.alphavantage.AlphaVantage;
@@ -38,7 +39,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Scope("prototype")
 public class UpdateIndexDataCallable implements Callable<Void> {
 
-    private static final Logger log = LoggerFactory.getLogger(UpdateIndexDataCallable.class);
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private static final DateTimeFormatter fmt = new DateTimeFormatterBuilder()
             .appendPattern("yyyy-MM-dd")
@@ -53,10 +54,11 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     private String mode;
     private LocalDate startDate;
     private ConcurrentLinkedQueue<TaskListener> listeners = new ConcurrentLinkedQueue<>();
-    private ConcurrentLinkedQueue<TaskHandler> handlers = new ConcurrentLinkedQueue<>();
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
+    private boolean running;
+    private boolean abort;
     private Progress currentProgress;
 
     @Autowired
@@ -84,10 +86,14 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     @PostConstruct
     private void init() {
 
+        log.debug("Callable task created for index " + index.getSymbol());
+
         // register itself to the context-level storage
         contextStore.updateIndexCallableMap.put("" + hashCode(), this);
 
         currentProgress=new Progress();
+
+        // puts the task in 'waiting for start' status
         currentProgress.update("waiting...");
 
     }
@@ -95,14 +101,24 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     @Override
     public Void call() {
 
+        // if already aborted before starting,
+        // unregister itself from the context-level storage and return
+        if(abort){
+            contextStore.updateIndexCallableMap.remove("" + hashCode(), this);
+            return null;
+        }
+
         log.debug("Callable task called for index " + index.getSymbol());
 
+        running=true;
+
+        // if is already aborted, don't perform the task
         startTime = LocalDateTime.now();
 
         // long task, can throw exception
         try {
 
-            checkHandlers();    // throws exception if at least one handler is aborted
+            checkAbort();   // throws exception if the task is aborted
 
             // retrieve the category
             java.util.Optional<IndexCategories> oCategory = IndexCategories.getItem(index.getCategory());
@@ -153,14 +169,16 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
         } catch (Exception e) {
 
-            endTime = LocalDateTime.now();
-            log.error("Callable task error for index " + index.getSymbol(), e);
-            notifyError(e);
+            terminateWithError(e);
+
+        } finally {
+
+            // unregister itself from the context-level storage
+            contextStore.updateIndexCallableMap.remove("" + hashCode(), this);
 
         }
 
-        // unregister itself from the context-level storage
-        contextStore.updateIndexCallableMap.remove("" + hashCode(), this);
+
 
         return null;
 
@@ -186,12 +204,32 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
     }
 
+
     /**
-     * @param handler handler to check for external abort requests (optional)
+     * @return provide a handler to interrupt/manage the execution
      */
-    public void addHandler(TaskHandler handler) {
-        this.handlers.add(handler);
+    public TaskHandler obtainHandler() {
+        TaskHandler handler = new TaskHandler() {
+            @Override
+            public void abort() {
+
+                // turn on the abort flag
+                abort=true;
+
+                // if not running yet (the task is scheduled and is in a wait state)
+                // call immediately the abort procedure
+                if(!running){
+                    try {
+                        checkAbort();
+                    } catch (Exception e) {
+                        terminateWithError(e);
+                    }
+                }
+            }
+        };
+        return handler;
     }
+
 
     private void notifyProgress(int current, int tot, String info) {
 
@@ -214,11 +252,12 @@ public class UpdateIndexDataCallable implements Callable<Void> {
         }
     }
 
-    private void checkHandlers() throws Exception {
-        for (TaskHandler handler : handlers) {
-            if (handler.isAborted()) {
-                throw new Exception("Aborted by user");
-            }
+
+    private void checkAbort() throws Exception{
+        if (abort) {
+            currentProgress.update("Aborted");
+            notifyProgress(currentProgress.getCurrent(), currentProgress.getTot(), currentProgress.getStatus());
+            throw new AbortedByUserException();
         }
     }
 
@@ -240,7 +279,7 @@ public class UpdateIndexDataCallable implements Callable<Void> {
         LocalDateTime maxDateTime = null;
         for (StockUnit unit : units) {
 
-            checkHandlers();
+            checkAbort();
 
             j++;
 
@@ -293,6 +332,22 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
         return indexUnit;
     }
+
+
+    /**
+     * Sets the end timestamp, logs the error and
+     * notifies the listeners
+     */
+    private void terminateWithError(Exception e){
+        endTime = LocalDateTime.now();
+        if(e instanceof AbortedByUserException){
+            log.info("Callable task aborted by user for index " + index.getSymbol());
+        }else{
+            log.error("Callable task error for index " + index.getSymbol(), e);
+        }
+        notifyError(e);
+    }
+
 
     class Progress{
         private int current;
