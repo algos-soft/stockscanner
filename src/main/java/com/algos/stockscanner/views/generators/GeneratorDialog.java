@@ -147,7 +147,7 @@ public class GeneratorDialog extends Dialog {
         header.addClassName("dialog_header");
 
         // load default icon
-        String name="images/generator.png";
+        String name="icons/generator.png";
         Resource res = context.getResource(name);
         byte[] imageData = null;
         try {
