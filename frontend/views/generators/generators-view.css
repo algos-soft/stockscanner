@@ -77,6 +77,15 @@
   align-items: center;
 }
 
+.generators-view .genview-name {
+  font-size: 0.8em;
+  line-height: 1.2em;
+  white-space:normal;
+  overflow: hidden;
+}
+
+
+
 
 
 

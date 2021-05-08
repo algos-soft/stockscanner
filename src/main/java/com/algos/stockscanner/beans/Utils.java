@@ -5,6 +5,7 @@ import com.algos.stockscanner.Application;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.services.UpdateIndexDataCallable;
+import com.google.common.io.Resources;
 import com.vaadin.flow.component.Component;
 //import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -20,13 +21,16 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.server.*;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Sort;
@@ -39,6 +43,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -68,6 +73,8 @@ public class Utils {
     @Autowired
     private MarketIndexService marketIndexService;
 
+    @Autowired
+    private ResourceLoader resourceLoader;
 
     /**
      * Find a child component by id
@@ -125,14 +132,15 @@ public class Utils {
 
     /**
      * Retrieve a resource file from the resources directory as a byte array.
-     * Specify path relative to the resource directory, no leading slash
+     * @param path of the file relative to the resource directory, no leading slash
      */
     public byte[] resourceToByteArray(String path){
         byte[] bytes=null;
         String classpath = "classpath:META-INF/resources/"+path;
         try {
-            File file = ResourceUtils.getFile(classpath);
-            bytes=Files.readAllBytes(file.toPath());
+            Resource resource = resourceLoader.getResource(classpath);
+            InputStream inputStream = resource.getInputStream();
+            bytes = IOUtils.toByteArray(inputStream);
         } catch (IOException e) {
             log.error("can't retrieve file from resources", e);
         }

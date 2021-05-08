@@ -2,6 +2,7 @@ package com.algos.stockscanner.views.about;
 
 import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
+import com.algos.stockscanner.views.PageSubtitle;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Route(value = "about", layout = MainView.class)
 @PageTitle(Application.APP_NAME+" | About")
+@PageSubtitle("About")
 @CssImport("./views/about/about-view.css")
 public class AboutView extends Div {
 

@@ -6,6 +6,7 @@ import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.service.SimulationService;
+import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -44,6 +45,7 @@ import java.util.Optional;
 
 @Route(value = "simulations", layout = MainView.class)
 @PageTitle(Application.APP_NAME+" | Simulations")
+@PageSubtitle("Simulations")
 @CssImport(value = "./views/simulations/simulations-view.css")
 @CssImport(value = "./views/simulations/simulations-grid.css", themeFor = "vaadin-grid")
 public class SimulationsView extends Div implements HasUrlParameter<String>, AfterNavigationObserver {

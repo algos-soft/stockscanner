@@ -5,6 +5,7 @@ import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.services.AdminService;
+import com.algos.stockscanner.services.IndexEntry;
 import com.algos.stockscanner.services.MarketService;
 import com.algos.stockscanner.services.UpdateIndexDataCallable;
 import com.algos.stockscanner.task.TaskHandler;
@@ -19,6 +20,8 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.server.Command;
 import org.claspina.confirmdialog.ButtonOption;
@@ -65,8 +68,13 @@ public class MarketIndexesPage  extends VerticalLayout {
 
     private HorizontalLayout statusLayout;
 
+    private RadioButtonGroup<String> optionsGroup;
 
     private IntegerField limitField;
+
+    private static final String MODE1="Download new only";
+    private static final String MODE2="Update existing only";
+    private static final String MODE3="Download new and update existing";
 
     @PostConstruct
     private void init(){
@@ -76,34 +84,41 @@ public class MarketIndexesPage  extends VerticalLayout {
         statusLayout.setPadding(false);
         statusLayout.addClassName("admin-view-statuslayout");
 
-        Button bDownloadIndexes = new Button("Download indexes");
+
+        optionsGroup = new RadioButtonGroup<>();
+        optionsGroup.setLabel("Download mode");
+        optionsGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        optionsGroup.setItems(MODE1, MODE2, MODE3);
+        optionsGroup.setValue(MODE1);
+        optionsGroup.addValueChangeListener(event -> {
+            if (event.getValue() != null) {
+                switch (event.getValue()){
+                    case MODE1:
+                    break;
+                    case MODE2:
+                        break;
+                    case MODE3:
+                        break;
+                }
+            }
+        });
+
+
+
+        Button bDownloadIndexes = new Button("Start download");
         bDownloadIndexes.setId("adminview-bdownloadindexes");
         bDownloadIndexes.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                downloadIndexes();
-            }
-        });
 
-        // button update prices
-        Button bUpdatePrices = new Button("Update prices");
-        bUpdatePrices.setId("adminview-bupdateprices");
-        bUpdatePrices.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 try {
-                    log.info("Update Prices action requested");
-
-                    List<MarketIndex> indexes = new ArrayList<>();
-                    indexes.add(marketIndexService.findUniqueBySymbol("AAPL"));
-                    indexes.add(marketIndexService.findUniqueBySymbol("AMZN"));
-                    indexes.add(marketIndexService.findUniqueBySymbol("PYPL"));
-
+                    log.info("Download Indexes action requested");
+                    List<String> indexes=getSimbolsToDownload();
                     int intervalSec = 60/limitField.getValue();
-                    List<UpdateIndexDataCallable> callables = adminService.scheduleUpdate(indexes, intervalSec);
-                    for(UpdateIndexDataCallable callable : callables){
-                        attachMonitorToTask(callable);
-                    }
+//                    List<UpdateIndexDataCallable> callables = adminService.scheduleUpdate(indexes, intervalSec);
+//                    for(UpdateIndexDataCallable callable : callables){
+//                        attachMonitorToTask(callable);
+//                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -112,14 +127,19 @@ public class MarketIndexesPage  extends VerticalLayout {
             }
         });
 
+
         // request limit field
         limitField=new IntegerField("Max req per minute");
         limitField.setId("adminview-reqlimitfield");
         limitField.setValue(5);
 
+        HorizontalLayout row1 = new HorizontalLayout();
+        row1.setAlignItems(Alignment.BASELINE);
+        row1.add(limitField, bDownloadIndexes);
+
         VerticalLayout content = new VerticalLayout();
-        content.add(bDownloadIndexes, bUpdatePrices, limitField);
         content.setHeight("100%");
+        content.add(optionsGroup, row1);
 
         setHeight("100%");
         add(content, statusLayout);
@@ -130,6 +150,38 @@ public class MarketIndexesPage  extends VerticalLayout {
             attachMonitorToTask(callable);
         }
 
+    }
+
+
+
+    /**
+     * Build the list of symbols to download based on the currently selected mode
+     */
+    private List<String> getSimbolsToDownload(){
+        ArrayList<String> symbols=new ArrayList<>();
+
+        List<IndexEntry> allSymbols = marketIndexService.loadAllAvailableSymbols();
+        List<String> existingSymbols=new ArrayList<>();
+        List<MarketIndex> entities = marketIndexService.findAll();
+        for(MarketIndex index : entities){
+            existingSymbols.add(index.getSymbol());
+        }
+        switch (optionsGroup.getValue()){
+            case MODE1: // new only
+                for(IndexEntry entry : allSymbols){
+                    String symbol=entry.getSymbol();
+                    if(!existingSymbols.contains(symbol)){
+                        symbols.add(entry.getSymbol());
+                    }
+                }
+                break;
+            case MODE2: // update existing
+                break;
+            case MODE3:// new and update
+                break;
+        }
+
+        return symbols;
     }
 
 

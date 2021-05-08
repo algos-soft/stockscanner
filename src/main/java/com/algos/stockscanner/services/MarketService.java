@@ -9,7 +9,6 @@ import com.algos.stockscanner.data.entity.IndexUnit;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.IndexUnitService;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.algos.stockscanner.runner.GeneratorRunner;
 import com.crazzyghost.alphavantage.AlphaVantage;
 import com.crazzyghost.alphavantage.AlphaVantageException;
 import com.crazzyghost.alphavantage.parameters.DataType;
@@ -21,7 +20,6 @@ import com.opencsv.exceptions.CsvException;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.server.StreamResource;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -31,16 +29,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -100,6 +94,8 @@ public class MarketService {
         loadEtoroInstruments();
 
     }
+
+
 
 
     private void loadEtoroInstruments(){
@@ -482,34 +478,6 @@ public class MarketService {
         }
     }
 
-
-    class IndexEntry{
-
-        public String symbol;
-
-        public String type;
-
-        public IndexEntry(String symbol, String type) {
-            this.symbol = symbol;
-            this.type = type;
-        }
-
-        public String getSymbol() {
-            return symbol;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        @Override
-        public String toString() {
-            return "IndexEntry{" +
-                    "symbol='" + symbol + '\'' +
-                    ", type='" + type + '\'' +
-                    '}';
-        }
-    }
 
     class FundamentalData {
         private String symbol;

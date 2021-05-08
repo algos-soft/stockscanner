@@ -16,6 +16,7 @@ public class GeneratorModel {
 
     private int id;
     private int number;
+    private String name;
     private Image image;
     private String symbol;
 
@@ -58,6 +59,14 @@ public class GeneratorModel {
 
     public void setNumber(int number) {
         this.number = number;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public List<IndexModel> getIndexes() {

@@ -2,6 +2,7 @@ package com.algos.stockscanner.views.main;
 
 import java.util.Optional;
 
+import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.admin.AdminView;
 import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.vaadin.flow.component.Component;
@@ -133,7 +134,8 @@ public class MainView extends AppLayout {
     }
 
     private String getCurrentPageTitle() {
-        PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
+//        PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
+        PageSubtitle title = getContent().getClass().getAnnotation(PageSubtitle.class);
         return title == null ? "" : title.value();
     }
 }

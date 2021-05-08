@@ -103,7 +103,7 @@ public class GeneratorService extends CrudService<Generator, Integer> {
     public void entityToModel(Generator entity, GeneratorModel model) {
         model.setId(utils.toPrimitive(entity.getId()));
         model.setNumber(utils.toPrimitive(entity.getNumber()));
-
+        model.setName(entity.getName());
         MarketIndex index = entity.getIndex();
         String symbol=null;
         Image img;
@@ -161,6 +161,8 @@ public class GeneratorService extends CrudService<Generator, Integer> {
      * Copy data from Model to Entity
      */
     public void modelToEntity(GeneratorModel model, Generator entity){
+
+        entity.setName(model.getName());
 
         String symbol = model.getSymbol();
         MarketIndex index=null;

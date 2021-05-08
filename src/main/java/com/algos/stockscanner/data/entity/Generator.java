@@ -36,6 +36,7 @@ public class Generator extends AbstractEntity {
 
     // fixed properties
     private Integer number;   // human readable number of the Configurator
+    private String name;  // mnemonic name
     private String startDate;  // start date
     private Boolean fixedDays;  // true for fixed number of days, false to go or until TP/SL or until end of index data
     private Integer days;   // number of days
@@ -83,6 +84,14 @@ public class Generator extends AbstractEntity {
 
     public void setNumber(Integer number) {
         this.number = number;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public LocalDateTime getCreated() {

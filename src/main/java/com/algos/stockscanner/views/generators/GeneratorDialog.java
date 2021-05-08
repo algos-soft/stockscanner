@@ -22,19 +22,20 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextField;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
-import org.springframework.core.io.Resource;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 
 /**
@@ -52,6 +53,8 @@ public class GeneratorDialog extends Dialog {
 
     private GeneratorModel model;
     private GeneratorDialogConfirmListener confirmListener;
+
+    private TextField nameFld;
 
     private DatePicker startDatePicker;
 
@@ -198,9 +201,8 @@ public class GeneratorDialog extends Dialog {
 
     private Component buildPage1() {
 
-        VerticalLayout layout = new VerticalLayout();
-        layout.setSpacing(false);
-        layout.setPadding(false);
+        nameFld=new TextField("Name");
+        nameFld.setWidth("14em");
 
         startDatePicker = new DatePicker("Start date");
         startDatePicker.setMaxWidth("10em");
@@ -254,7 +256,13 @@ public class GeneratorDialog extends Dialog {
         lengthLayout.setSpacing(true);
         lengthLayout.add(numberOfDays, numberOfSpans);
 
-        layout.add(startDatePicker, amountsLayout, lengthRadioGroup, lengthLayout);
+        HorizontalLayout row1=new HorizontalLayout();
+        row1.add(nameFld, startDatePicker);
+
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(false);
+        layout.setPadding(false);
+        layout.add(row1, amountsLayout, lengthRadioGroup, lengthLayout);
 
         return layout;
     }
@@ -453,6 +461,7 @@ public class GeneratorDialog extends Dialog {
             }
         }
 
+        model.setName(nameFld.getValue());
         model.setStartDate(startDatePicker.getValue());
         model.setAmount(utils.toPrimitive(amountFld.getValue()));
         model.setStopLoss(utils.toPrimitive(stopLossFld.getValue()));
@@ -511,6 +520,9 @@ public class GeneratorDialog extends Dialog {
             indexesPanel.add(comp);
         }
 
+        if(!StringUtils.isEmpty(model.getName())){
+            nameFld.setValue(model.getName());
+        }
         startDatePicker.setValue(model.getStartDate());
         amountFld.setValue(utils.toPrimitive(model.getAmount()));
         stopLossFld.setValue(utils.toPrimitive(model.getStopLoss()));

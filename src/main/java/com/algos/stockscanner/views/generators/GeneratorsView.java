@@ -10,6 +10,7 @@ import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.data.service.SimulationService;
 import com.algos.stockscanner.runner.GeneratorRunner;
 import com.algos.stockscanner.runner.RunnerService;
+import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.indexes.IndexModel;
 import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.vaadin.flow.component.*;
@@ -20,6 +21,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
@@ -52,7 +54,8 @@ import java.util.Optional;
 
 @Route(value = "generators", layout = MainView.class)
 @RouteAlias(value = "", layout = MainView.class)
-@PageTitle(Application.APP_NAME+" | Generators")
+@PageTitle(Application.APP_NAME +" | Generators")
+@PageSubtitle("Generators")
 @CssImport(value = "./views/generators/generators-view.css")
 @CssImport(value = "./views/generators/generators-grid.css", themeFor = "vaadin-grid")
 public class GeneratorsView extends Div implements AfterNavigationObserver {
@@ -90,6 +93,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
     public GeneratorsView() {
     }
+
 
     @PostConstruct
     private void init() {
@@ -227,9 +231,14 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         HorizontalLayout row1 = new HorizontalLayout();
         row1.addClassName("tagRow");
         row1.add(tagIcon, sNumber);
+
+        Div nameDiv = new Div();
+        nameDiv.addClassName("genview-name");
+        nameDiv.setText(model.getName());
+
         Pan pan = new Pan();
-        pan.setMaxWidth("5em");
-        pan.add(row1);
+        pan.setMaxWidth("6em");
+        pan.add(row1, nameDiv);
         return pan;
     }
 

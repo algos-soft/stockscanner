@@ -3,6 +3,7 @@ package com.algos.stockscanner.views.admin;
 import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.services.*;
+import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -23,16 +24,17 @@ import java.util.Optional;
 
 @Route(value = "admin", layout = MainView.class)
 @PageTitle(Application.APP_NAME+" | Admin")
+@PageSubtitle("Admin")
 @CssImport("./views/admin/admin-view.css")
 public class AdminView extends VerticalLayout {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private static final String MARKET_INDEXES = "Market Indexes";
-    private static final String GENERATOR = "Generator";
+    private static final String PRICES = "Prices";
 
     private Component marketIndexesComponent;
-    private Component generatorComponent;
+    private Component pricesComponent;
 
 
     private @Autowired
@@ -90,47 +92,23 @@ public class AdminView extends VerticalLayout {
             add(marketIndexesComponent);
         });
 
-
-        Button button2 = new Button(GENERATOR, new Icon(VaadinIcon.COG_O));
+        Button button2 = new Button(PRICES, new Icon(VaadinIcon.DOLLAR));
         button2.getStyle().set("margin-left", "0.5em");
         button2.getStyle().set("margin-right", "0.5em");
         button2.getStyle().set("width", bWidth);
         button2.setIconAfterText(true);
         button2.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
 
-            log.trace("A TRACE Message");
-            log.debug("A DEBUG Message");
-            log.info("An INFO Message");
-            log.warn("A WARN Message");
-            log.error("An ERROR Message");
-
             removeAll();
-            if(generatorComponent==null){
-                generatorComponent=buildGeneratorComponent();
+            if(pricesComponent ==null){
+                pricesComponent = context.getBean(PricesPage.class);;
             }
-            add(generatorComponent);
+            add(pricesComponent);
         });
 
 
         header.add(button2, button1);
     }
-
-
-
-
-
-    private Component buildGeneratorComponent(){
-
-        Button bDownloadIndexes = new Button("Test");
-
-        VerticalLayout layout = new VerticalLayout();
-        layout.add(bDownloadIndexes);
-
-        return layout;
-
-    }
-
-
 
 
 

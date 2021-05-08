@@ -7,6 +7,7 @@ import com.algos.stockscanner.data.enums.IndexCategories;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.services.MarketService;
+import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.generators.GeneratorModel;
 import com.algos.stockscanner.views.generators.GeneratorsView;
 import com.algos.stockscanner.views.main.MainView;
@@ -51,6 +52,7 @@ import java.util.Optional;
 
 @Route(value = "indexes", layout = MainView.class)
 @PageTitle(Application.APP_NAME+" | Indexes")
+@PageSubtitle("Indexes")
 @CssImport("./views/indexes/indexes-view.css")
 public class IndexesView extends Div implements AfterNavigationObserver {
 

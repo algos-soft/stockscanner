@@ -4,8 +4,13 @@ import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.enums.FrequencyTypes;
 import com.algos.stockscanner.data.enums.IndexCategories;
+import com.algos.stockscanner.services.IndexEntry;
 import com.algos.stockscanner.utils.Du;
 import com.algos.stockscanner.views.indexes.IndexModel;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -14,11 +19,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class MarketIndexService extends CrudService<MarketIndex, Integer> {
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private Utils utils;
@@ -148,6 +159,43 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         entity.setOvnBuyWe(model.getOvnBuyWe());
         entity.setOvnSellDay(model.getOvnSellDay());
         entity.setOvnSellWe(model.getOvnSellWe());
+    }
+
+
+
+    /**
+     * Return the list of all the available symbols
+     */
+    public List<IndexEntry> loadAllAvailableSymbols(){
+
+        String filename="config/indexes.csv";
+        File indexesFile = new File(filename);
+        if(!indexesFile.exists()){
+            log.error("File "+filename+" not found.");
+            return null;
+        }
+
+        // parse the file into a list of objects
+        List<IndexEntry> entries = new ArrayList<>();
+        try {
+            FileReader fileReader = new FileReader(indexesFile);
+            CSVReader reader = new CSVReader(fileReader);
+            List<String[]> list = reader.readAll();
+            for(String[] element : list){
+                if(element.length>=2){
+                    String symbol = element[0].trim();
+                    String type = element[1].trim();
+                    entries.add(new IndexEntry(symbol, type));
+                }else{
+                    throw new IOException("Invalid element "+element+" in "+filename);
+                }
+            }
+        } catch (IOException | CsvException e ) {
+            log.error("could not parse the file "+indexesFile.toString(), e);
+        }
+
+        return entries;
+
     }
 
 

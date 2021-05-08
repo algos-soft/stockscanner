@@ -4,6 +4,7 @@ import com.algos.stockscanner.Application;
 import com.algos.stockscanner.data.entity.SamplePerson;
 import com.algos.stockscanner.data.service.SamplePersonService;
 import com.algos.stockscanner.beans.Utils;
+import com.algos.stockscanner.views.PageSubtitle;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -30,6 +31,7 @@ import java.util.Optional;
 
 @Route(value = "settings", layout = MainView.class)
 @PageTitle(Application.APP_NAME+" | Settings")
+@PageSubtitle("Settings")
 @CssImport("./views/settings/settings-view.css")
 public class SettingsView extends Div {
 
