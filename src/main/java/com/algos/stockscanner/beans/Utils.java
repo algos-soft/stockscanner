@@ -17,8 +17,7 @@ import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.server.InputStreamFactory;
-import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.*;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.slf4j.Logger;
@@ -31,18 +30,17 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Sort;
+import org.springframework.util.ResourceUtils;
 
 import javax.imageio.ImageIO;
 //import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -115,15 +113,29 @@ public class Utils {
         return new Image(streamResource, "img");
     }
 
+    /**
+     * Convert an image to a byte array
+     * Works only for images retrieved from resources!
+     */
     public byte[] imageToByteArray(Image img){
         String src=img.getSrc();
-        byte[] bytes = new byte[0];
-        try {
-            bytes = Files.readAllBytes(Paths.get(src));
-        } catch (IOException e) {
-            log.error("Could not read file "+src, e);
-        }
+        byte[] bytes = resourceToByteArray(src);
+        return bytes;
+    }
 
+    /**
+     * Retrieve a resource file from the resources directory as a byte array.
+     * Specify path relative to the resource directory, no leading slash
+     */
+    public byte[] resourceToByteArray(String path){
+        byte[] bytes=null;
+        String classpath = "classpath:META-INF/resources/"+path;
+        try {
+            File file = ResourceUtils.getFile(classpath);
+            bytes=Files.readAllBytes(file.toPath());
+        } catch (IOException e) {
+            log.error("can't retrieve file from resources", e);
+        }
         return bytes;
     }
 
