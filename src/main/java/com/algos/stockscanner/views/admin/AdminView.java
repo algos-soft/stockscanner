@@ -31,7 +31,7 @@ public class AdminView extends VerticalLayout {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private static final String MARKET_INDEXES = "Market Indexes";
-    private static final String PRICES = "Prices";
+    private static final String PRICES = "Historic data";
 
     private Component marketIndexesComponent;
     private Component pricesComponent;
