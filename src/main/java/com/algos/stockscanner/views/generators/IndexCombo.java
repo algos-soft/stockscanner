@@ -40,8 +40,8 @@ public class IndexCombo extends HorizontalLayout {
 
         buildCombo();
 
-        byte[] imageData=utils.getDefaultIndexIcon();
-        updateIcon(imageData);
+//        byte[] imageData=utils.getDefaultIndexIcon();
+        updateIcon(utils.getDefaultIndexIcon());
 
         add(imgPlaceholder, indexComboBox);
 
@@ -60,35 +60,52 @@ public class IndexCombo extends HorizontalLayout {
             if (index!=null){
                 imageData=index.getImage();
             }
-            updateIcon(imageData);
+            Image img = utils.byteArrayToImage(imageData);
+            updateIcon(img);
         });
 
     }
 
 
 
+//    /**
+//     * Updates the icon in the header based on the current byte array
+//     * <p>
+//     * null image data restores the default icon
+//     *
+//     */
+//    private void updateIcon(byte[] imageData) {
+//        imgPlaceholder.removeAll();
+//        if(imageData==null){
+//            imageData=utils.getDefaultIndexIcon();
+//        }
+//        Image img = utils.byteArrayToImage(imageData);
+//        img.addClassName("image");
+////        img.setWidth(3f, Unit.EM);
+////        img.setHeight(3f, Unit.EM);
+//        imgPlaceholder.add(img);
+//    }
+
     /**
-     * Updates the icon in the header based on the current byte array
+     * Updates the icon in the header
      * <p>
-     * null image data restores the default icon
-     *
+     * null image restores the default icon
      */
-    private void updateIcon(byte[] imageData) {
+    private void updateIcon(Image img) {
         imgPlaceholder.removeAll();
-        if(imageData==null){
-            imageData=utils.getDefaultIndexIcon();
+        if(img==null){
+            img=utils.getDefaultIndexIcon();
         }
-        Image img = utils.byteArrayToImage(imageData);
         img.addClassName("image");
-//        img.setWidth(3f, Unit.EM);
-//        img.setHeight(3f, Unit.EM);
         imgPlaceholder.add(img);
     }
 
 
+
     public void setValue(MarketIndex index) {
         indexComboBox.setValue(index);
-        updateIcon(index.getImage());
+        Image img = utils.byteArrayToImage(index.getImage());
+        updateIcon(img);
     }
 
     public MarketIndex getValue() {

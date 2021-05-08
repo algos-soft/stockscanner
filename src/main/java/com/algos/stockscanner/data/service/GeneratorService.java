@@ -7,6 +7,7 @@ import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.views.generators.GeneratorModel;
 import com.algos.stockscanner.views.indexes.IndexModel;
 import com.algos.stockscanner.views.simulations.SimulationModel;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,15 +106,16 @@ public class GeneratorService extends CrudService<Generator, Integer> {
 
         MarketIndex index = entity.getIndex();
         String symbol=null;
-        byte[] imageData;
+        Image img;
         if (index != null) {
-            imageData = index.getImage();
+            byte[] imageData = index.getImage();
+            img=utils.byteArrayToImage(imageData);
             symbol = index.getSymbol();
         } else {
-            imageData = utils.getDefaultIndexIcon();
+            img = utils.getDefaultIndexIcon();
         }
         model.setSymbol(symbol);
-        model.setImage(utils.byteArrayToImage(imageData));
+        model.setImage(img);
 
         List<IndexModel> mIndexes = new ArrayList<>();
         for(MarketIndex eIndex : entity.getIndexes()){

@@ -1,5 +1,6 @@
 package com.algos.stockscanner.views.admin;
 
+import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.services.*;
 import com.algos.stockscanner.views.main.MainView;
@@ -21,7 +22,7 @@ import javax.annotation.PostConstruct;
 import java.util.Optional;
 
 @Route(value = "admin", layout = MainView.class)
-@PageTitle("Admin")
+@PageTitle(Application.APP_NAME+" | Admin")
 @CssImport("./views/admin/admin-view.css")
 public class AdminView extends VerticalLayout {
 

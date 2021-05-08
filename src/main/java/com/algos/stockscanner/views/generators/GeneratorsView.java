@@ -1,5 +1,6 @@
 package com.algos.stockscanner.views.generators;
 
+import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
@@ -51,7 +52,7 @@ import java.util.Optional;
 
 @Route(value = "generators", layout = MainView.class)
 @RouteAlias(value = "", layout = MainView.class)
-@PageTitle("Generators")
+@PageTitle(Application.APP_NAME+" | Generators")
 @CssImport(value = "./views/generators/generators-view.css")
 @CssImport(value = "./views/generators/generators-grid.css", themeFor = "vaadin-grid")
 public class GeneratorsView extends Div implements AfterNavigationObserver {
@@ -246,7 +247,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         } else {
             Image img = model.getImage();
             if (img == null) {
-                img = utils.byteArrayToImage(utils.getDefaultIndexIcon());
+                img=utils.getDefaultIndexIcon();
             }
             img.addClassName("icon");
 

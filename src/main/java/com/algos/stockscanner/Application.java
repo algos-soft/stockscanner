@@ -14,6 +14,8 @@ import java.util.TimeZone;
 @SpringBootApplication
 public class Application extends SpringBootServletInitializer {
 
+    public static final String APP_NAME="StockScanner";
+
     // the resource for the generic index icon
     public static final String GENERIC_INDEX_ICON="images/generic_index.jpg";
 

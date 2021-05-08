@@ -32,7 +32,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 /**
  * The main view is a top-level placeholder for other views.
  */
-@PWA(name = "StockScanner", shortName = "StockScanner", enableInstallPrompt = false)
+@PWA(name = "StockScanner", shortName = "StockScanner", enableInstallPrompt = false, iconPath = "images/logo.png")
 @JsModule("./styles/shared-styles.js")
 @CssImport("./views/main/main-view.css")
 @Push   // or you can not access the UI from non-UI threads. This annotation must be on a top-level layout.

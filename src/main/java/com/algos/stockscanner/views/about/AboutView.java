@@ -1,5 +1,6 @@
 package com.algos.stockscanner.views.about;
 
+import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -16,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Optional;
 
 @Route(value = "about", layout = MainView.class)
-@PageTitle("About")
+@PageTitle(Application.APP_NAME+" | About")
 @CssImport("./views/about/about-view.css")
 public class AboutView extends Div {
 

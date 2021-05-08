@@ -114,7 +114,10 @@ public class IndexDialog extends Dialog {
         });
 
         // load default icon
-        imageData=utils.getDefaultIndexIcon();
+        Image img = utils.getDefaultIndexIcon();
+        byte[] bytes = utils.imageToByteArray(img);
+        imageData=bytes;
+
         updateIcon();
 
         Label title = new Label("Index");

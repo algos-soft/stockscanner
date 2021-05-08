@@ -1,5 +1,6 @@
 package com.algos.stockscanner.views.simulations;
 
+import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
@@ -42,7 +43,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 @Route(value = "simulations", layout = MainView.class)
-@PageTitle("Simulations")
+@PageTitle(Application.APP_NAME+" | Simulations")
 @CssImport(value = "./views/simulations/simulations-view.css")
 @CssImport(value = "./views/simulations/simulations-grid.css", themeFor = "vaadin-grid")
 public class SimulationsView extends Div implements HasUrlParameter<String>, AfterNavigationObserver {

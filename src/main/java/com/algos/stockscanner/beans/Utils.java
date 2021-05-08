@@ -115,6 +115,18 @@ public class Utils {
         return new Image(streamResource, "img");
     }
 
+    public byte[] imageToByteArray(Image img){
+        String src=img.getSrc();
+        byte[] bytes = new byte[0];
+        try {
+            bytes = Files.readAllBytes(Paths.get(src));
+        } catch (IOException e) {
+            log.error("Could not read file "+src, e);
+        }
+
+        return bytes;
+    }
+
 
     public byte[] scaleImage(byte[] fileData, int width, int height) throws IOException {
         ByteArrayInputStream in = new ByteArrayInputStream(fileData);
@@ -200,19 +212,26 @@ public class Utils {
         return imageData;
     }
 
+//    /**
+//     * @return the data of the default index icon
+//     */
+//    public byte[] getDefaultIndexIcon(){
+//        Resource res=context.getResource(Application.GENERIC_INDEX_ICON);
+//        byte[] imageData=null;
+//        try {
+//            imageData = Files.readAllBytes(Paths.get(res.getURI()));
+//            imageData = scaleImage(imageData, Application.STORED_ICON_WIDTH, Application.STORED_ICON_HEIGHT);
+//        } catch (IOException e) {
+//            log.error("can't load default index icon "+Application.GENERIC_INDEX_ICON, e);
+//        }
+//        return imageData;
+//    }
+
     /**
-     * @return the data of the default index icon
+     * @return the default index icon
      */
-    public byte[] getDefaultIndexIcon(){
-        Resource res=context.getResource(Application.GENERIC_INDEX_ICON);
-        byte[] imageData=null;
-        try {
-            imageData = Files.readAllBytes(Paths.get(res.getURI()));
-            imageData = scaleImage(imageData, Application.STORED_ICON_WIDTH, Application.STORED_ICON_HEIGHT);
-        } catch (IOException e) {
-            log.error("can't load default index icon "+Application.GENERIC_INDEX_ICON, e);
-        }
-        return imageData;
+    public Image getDefaultIndexIcon(){
+        return new Image(Application.GENERIC_INDEX_ICON,"index");
     }
 
 

@@ -1,5 +1,6 @@
 package com.algos.stockscanner.views.indexes;
 
+import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.enums.FrequencyTypes;
 import com.algos.stockscanner.data.enums.IndexCategories;
@@ -49,7 +50,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Route(value = "indexes", layout = MainView.class)
-@PageTitle("Indexes")
+@PageTitle(Application.APP_NAME+" | Indexes")
 @CssImport("./views/indexes/indexes-view.css")
 public class IndexesView extends Div implements AfterNavigationObserver {
 

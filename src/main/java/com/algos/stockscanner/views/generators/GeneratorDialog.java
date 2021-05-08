@@ -3,7 +3,6 @@ package com.algos.stockscanner.views.generators;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.algos.stockscanner.services.MarketService;
 import com.algos.stockscanner.views.indexes.IndexModel;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -147,17 +146,8 @@ public class GeneratorDialog extends Dialog {
         header.addClassName("dialog_header");
 
         // load default icon
-        String name="icons/generator.png";
-        Resource res = context.getResource(name);
-        byte[] imageData = null;
-        try {
-            imageData = Files.readAllBytes(Paths.get(res.getURI()));
-//            imageData = utils.scaleImage(imageData, MAX_IMG_WIDTH, MAX_IMG_HEIGHT);
-        } catch (IOException e) {
-            log.error("error loading default icon "+name, e);
-        }
+        Image img = new Image("images/generator.png","generator");
 
-        Image img = utils.byteArrayToImage(imageData);
         img.setWidth(2, Unit.EM);
         img.setHeight(2, Unit.EM);
 

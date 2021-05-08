@@ -20,6 +20,8 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.server.StreamResource;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -35,8 +37,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -408,7 +412,8 @@ public class MarketService {
                     index.setImage(scaled);
                 }
             }else{  // Icon not found on etoro, symbol not managed on eToro or icon has a different name? Use standard icon.
-                bytes = utils.getDefaultIndexIcon();
+                Image img = utils.getDefaultIndexIcon();
+                bytes = utils.imageToByteArray(img);
                 byte[] scaled = utils.scaleImage(bytes, Application.STORED_ICON_WIDTH, Application.STORED_ICON_HEIGHT);
                 index.setImage(scaled);
             }
