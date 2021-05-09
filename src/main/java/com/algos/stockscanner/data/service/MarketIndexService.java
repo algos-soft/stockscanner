@@ -8,7 +8,9 @@ import com.algos.stockscanner.services.IndexEntry;
 import com.algos.stockscanner.utils.Du;
 import com.algos.stockscanner.views.indexes.IndexModel;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +121,6 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         }
 
         model.setImageData(entity.getImage());
-//        model.setImage(utils.byteArrayToImage(entity.getImage()));
         model.setSymbol(entity.getSymbol());
 
         model.setSpreadPercent(utils.toPrimitive(entity.getSpreadPercent()));
@@ -187,7 +188,7 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
                     String type = element[1].trim();
                     entries.add(new IndexEntry(symbol, type));
                 }else{
-                    throw new IOException("Invalid element "+element+" in "+filename);
+                    log.warn("Invalid element "+element+" in "+filename);
                 }
             }
         } catch (IOException | CsvException e ) {

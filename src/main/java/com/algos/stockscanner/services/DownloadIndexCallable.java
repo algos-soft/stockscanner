@@ -1,6 +1,8 @@
 package com.algos.stockscanner.services;
 
+import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.ContextStore;
+import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.IndexUnit;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.enums.FrequencyTypes;
@@ -18,6 +20,7 @@ import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
 import com.crazzyghost.alphavantage.timeseries.response.TimeSeriesResponse;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import com.vaadin.flow.component.html.Image;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -60,7 +63,6 @@ public class DownloadIndexCallable implements Callable<Void> {
 
     private IndexDownloadModes mode;
     private String symbol;
-    private MarketIndex index;
     private ConcurrentLinkedQueue<TaskListener> listeners = new ConcurrentLinkedQueue<>();
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -77,6 +79,9 @@ public class DownloadIndexCallable implements Callable<Void> {
 
     @Autowired
     private MarketIndexService marketIndexService;
+
+    @Autowired
+    private Utils utils;
 
     @Value("${alphavantage.api.key}")
     private String alphavantageApiKey;
@@ -136,24 +141,11 @@ public class DownloadIndexCallable implements Callable<Void> {
 
             checkAbort();   // throws exception if the task is aborted
 
-            notifyProgress(0, 0, "Requesting data");
-
-//            TimeSeriesResponse response=AlphaVantage.api()
-//                    .timeSeries()
-//                    .daily()
-//                    .forSymbol(symbol)
-//                    .outputSize(OutputSize.FULL)
-//                    .dataType(DataType.JSON)
-//                    .fetchSync();
+            notifyProgress(1, 3, "Requesting data");
 
             FundamentalData fundamentalData = fetchFundamentalData(symbol);
 
-//            String error=response.getErrorMessage();
-//            if(error!=null){
-//                throw new Exception(error);
-//            }
-
-            //handleResponse(response);
+            handleResponse(fundamentalData);
 
             endTime = LocalDateTime.now();
             String info = buildDurationInfo();
@@ -291,75 +283,121 @@ public class DownloadIndexCallable implements Callable<Void> {
     }
 
 
-    /**
+//    /**
+//     * Manage a successful response from the api
+//     */
+//    public void handleResponse(TimeSeriesResponse response)  throws Exception {
+//
+//        // delete all previous unit data
+//        notifyProgress(0, 0, "Deleting old data");
+//        indexUnitService.deleteByIndex(index);
+//
+//        // Iterate the new units and save them
+//        List<StockUnit> units = response.getStockUnits();
+//        Collections.sort(units, Comparator.comparing(StockUnit::getDate));
+//        int j = 0;
+//        LocalDateTime minDateTime = null;
+//        LocalDateTime maxDateTime = null;
+//        for (StockUnit unit : units) {
+//
+//            checkAbort();
+//
+//            j++;
+//
+//            notifyProgress(j, units.size(), index.getSymbol());
+//
+//            IndexUnit indexUnit = saveItem(unit);
+//
+//            // keep minDateTime and maxDateTime up to date
+//            if (minDateTime == null) {
+//                minDateTime = indexUnit.getDateTimeLDT();
+//            } else {
+//                if (indexUnit.getDateTimeLDT().isBefore(minDateTime)) {
+//                    minDateTime = indexUnit.getDateTimeLDT();
+//                }
+//            }
+//            if (maxDateTime == null) {
+//                maxDateTime = indexUnit.getDateTimeLDT();
+//            } else {
+//                if (indexUnit.getDateTimeLDT().isAfter(maxDateTime)) {
+//                    maxDateTime = indexUnit.getDateTimeLDT();
+//                }
+//            }
+//
+//        }
+//
+//        // Consolidate the totals in the MarketIndex
+//        index.setUnitsFromLD(minDateTime.toLocalDate());
+//        index.setUnitsToLD(maxDateTime.toLocalDate());
+//        index.setNumUnits(units.size());
+//        index.setUnitFrequency(FrequencyTypes.DAILY.getCode());
+//        marketIndexService.update(index);
+//
+//    }
+
+
+
+     /**
      * Manage a successful response from the api
+     * find the index in the database.
+     * If exists, update it
+     * If not, create it
      */
-    public void handleResponse(TimeSeriesResponse response)  throws Exception {
+    private void handleResponse(FundamentalData fd) throws Exception {
 
-        // delete all previous unit data
-        notifyProgress(0, 0, "Deleting old data");
-        indexUnitService.deleteByIndex(index);
+        notifyProgress(2, 3, "updating db: "+symbol);
 
-        // Iterate the new units and save them
-        List<StockUnit> units = response.getStockUnits();
-        Collections.sort(units, Comparator.comparing(StockUnit::getDate));
-        int j = 0;
-        LocalDateTime minDateTime = null;
-        LocalDateTime maxDateTime = null;
-        for (StockUnit unit : units) {
+        List<MarketIndex> indexes = marketIndexService.findBySymbol(fd.getSymbol());
+        if(indexes.size()>1){
+            throw new Exception("Multiple instances ("+indexes.size()+") of symbol "+fd.getSymbol()+" found in the database.");
+        }
 
-            checkAbort();
+        MarketIndex index;
+        if(indexes.size()==0){  // does not exist in db
+            index=new MarketIndex();
+            index.setSymbol(fd.getSymbol());
+            index.setName(fd.getName());
+            index.setCategory(fd.getType().getCode());
+            updateIcon(index);
 
-            j++;
-
-            notifyProgress(j, units.size(), index.getSymbol());
-
-            IndexUnit indexUnit = saveItem(unit);
-
-            // keep minDateTime and maxDateTime up to date
-            if (minDateTime == null) {
-                minDateTime = indexUnit.getDateTimeLDT();
-            } else {
-                if (indexUnit.getDateTimeLDT().isBefore(minDateTime)) {
-                    minDateTime = indexUnit.getDateTimeLDT();
-                }
+        }else{  // index exists in db
+            index = indexes.get(0);
+            if(fd.getName()!=null){
+                index.setName(fd.getName());
             }
-            if (maxDateTime == null) {
-                maxDateTime = indexUnit.getDateTimeLDT();
-            } else {
-                if (indexUnit.getDateTimeLDT().isAfter(maxDateTime)) {
-                    maxDateTime = indexUnit.getDateTimeLDT();
-                }
+            if(fd.getType()!=null){
+                index.setCategory(fd.getType().getCode());
             }
 
         }
 
-        // Consolidate the totals in the MarketIndex
-        index.setUnitsFromLD(minDateTime.toLocalDate());
-        index.setUnitsToLD(maxDateTime.toLocalDate());
-        index.setNumUnits(units.size());
-        index.setUnitFrequency(FrequencyTypes.DAILY.getCode());
         marketIndexService.update(index);
 
+        notifyProgress(3, 3, "done: "+symbol);
+
     }
 
 
-    private IndexUnit saveItem(StockUnit unit) {
-        IndexUnit indexUnit = createIndexUnit(unit);
-        indexUnit.setIndex(index);
-        return indexUnitService.update(indexUnit);
-    }
+    /**
+     * add the icon to an index if missing
+     */
+    private void updateIcon(MarketIndex index) throws IOException {
 
-    private IndexUnit createIndexUnit(StockUnit unit) {
-        IndexUnit indexUnit = new IndexUnit();
-        indexUnit.setOpen((float) unit.getOpen());
-        indexUnit.setClose((float) unit.getClose());
+        if(index.getImage()==null){
+            String url = "https://etoro-cdn.etorostatic.com/market-avatars/"+index.getSymbol().toLowerCase()+"/150x150.png";
+            byte[] bytes = utils.getBytesFromUrl(url);
+            if(bytes!=null){
+                if(bytes.length>0){
+                    byte[] scaled = utils.scaleImage(bytes, Application.STORED_ICON_WIDTH, Application.STORED_ICON_HEIGHT);
+                    index.setImage(scaled);
+                }
+            }else{  // Icon not found on etoro, symbol not managed on eToro or icon has a different name? Use standard icon.
+                bytes = utils.getDefaultIndexIconBytes();
+                byte[] scaled = utils.scaleImage(bytes, Application.STORED_ICON_WIDTH, Application.STORED_ICON_HEIGHT);
+                index.setImage(scaled);
+            }
+        }
 
-        LocalDateTime dateTime = LocalDateTime.parse(unit.getDate(), fmt);
-
-        indexUnit.setDateTimeLDT(dateTime);
-
-        return indexUnit;
     }
 
 
@@ -370,9 +408,10 @@ public class DownloadIndexCallable implements Callable<Void> {
     private void terminateWithError(Exception e){
         endTime = LocalDateTime.now();
         if(e instanceof AbortedByUserException){
-            log.info("Callable task aborted by user for index " + index.getSymbol());
+            log.info("Callable task aborted by user for index " + symbol);
         }else{
-            log.error("Callable task error for index " + index.getSymbol(), e);
+            notifyProgress(currentProgress.getCurrent(), currentProgress.getTot(), "Error");
+            log.error("Callable task error for index " + symbol, e);
         }
         notifyError(e);
     }

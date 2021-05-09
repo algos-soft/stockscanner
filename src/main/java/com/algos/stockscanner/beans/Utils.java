@@ -254,6 +254,14 @@ public class Utils {
         return new Image(Application.GENERIC_INDEX_ICON,"index");
     }
 
+    /**
+     * @return the default index icon as a byte array
+     */
+    public byte[] getDefaultIndexIconBytes(){
+        return resourceToByteArray(Application.GENERIC_INDEX_ICON);
+    }
+
+
 
     public ComboBox<MarketIndex> buildIndexCombo() {
 
