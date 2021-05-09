@@ -3,11 +3,9 @@ package com.algos.stockscanner.views.admin;
 import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.enums.IndexDownloadModes;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.algos.stockscanner.services.AdminService;
-import com.algos.stockscanner.services.IndexEntry;
-import com.algos.stockscanner.services.MarketService;
-import com.algos.stockscanner.services.UpdateIndexDataCallable;
+import com.algos.stockscanner.services.*;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
 import com.algos.stockscanner.task.TaskMonitor;
@@ -68,13 +66,13 @@ public class MarketIndexesPage  extends VerticalLayout {
 
     private HorizontalLayout statusLayout;
 
-    private RadioButtonGroup<String> optionsGroup;
+    private RadioButtonGroup<IndexDownloadModes> optionsGroup;
 
     private IntegerField limitField;
 
-    private static final String MODE1="Download new only";
-    private static final String MODE2="Update existing only";
-    private static final String MODE3="Download new and update existing";
+//    private static final String MODE1="Download new indexes";
+//    private static final String MODE2="Update existing indexes";
+//    private static final String MODE3="Download new and update existing";
 
     @PostConstruct
     private void init(){
@@ -88,20 +86,20 @@ public class MarketIndexesPage  extends VerticalLayout {
         optionsGroup = new RadioButtonGroup<>();
         optionsGroup.setLabel("Download mode");
         optionsGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-        optionsGroup.setItems(MODE1, MODE2, MODE3);
-        optionsGroup.setValue(MODE1);
-        optionsGroup.addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                switch (event.getValue()){
-                    case MODE1:
-                    break;
-                    case MODE2:
-                        break;
-                    case MODE3:
-                        break;
-                }
-            }
-        });
+        optionsGroup.setItems(IndexDownloadModes.values());
+        optionsGroup.setValue(IndexDownloadModes.NEW);
+//        optionsGroup.addValueChangeListener(event -> {
+//            if (event.getValue() != null) {
+//                switch (event.getValue()){
+//                    case NEW:
+//                        break;
+//                    case UPDATE:
+//                        break;
+//                    case NEW_AND_UPDATE:
+//                        break;
+//                }
+//            }
+//        });
 
 
 
@@ -114,11 +112,12 @@ public class MarketIndexesPage  extends VerticalLayout {
                 try {
                     log.info("Download Indexes action requested");
                     List<String> indexes=getSimbolsToDownload();
+                    List<MarketIndex> entities=marketIndexService.findBySymbolList(indexes);
                     int intervalSec = 60/limitField.getValue();
-//                    List<UpdateIndexDataCallable> callables = adminService.scheduleUpdate(indexes, intervalSec);
-//                    for(UpdateIndexDataCallable callable : callables){
-//                        attachMonitorToTask(callable);
-//                    }
+                    List<DownloadIndexCallable> callables = adminService.scheduleDownload(entities, intervalSec);
+                    for(DownloadIndexCallable callable : callables){
+                        attachMonitorToTask(callable);
+                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -145,8 +144,8 @@ public class MarketIndexesPage  extends VerticalLayout {
         add(content, statusLayout);
 
         // retrieve the running tasks from the context, create Task Monitors and put them in the UI
-        Collection<UpdateIndexDataCallable> callables = contextStore.updateIndexCallableMap.values();
-        for(UpdateIndexDataCallable callable : callables){
+        Collection<DownloadIndexCallable> callables = contextStore.downloadIndexCallableMap.values();
+        for(DownloadIndexCallable callable : callables){
             attachMonitorToTask(callable);
         }
 
@@ -167,7 +166,7 @@ public class MarketIndexesPage  extends VerticalLayout {
             existingSymbols.add(index.getSymbol());
         }
         switch (optionsGroup.getValue()){
-            case MODE1: // new only
+            case NEW: // new only
                 for(IndexEntry entry : allSymbols){
                     String symbol=entry.getSymbol();
                     if(!existingSymbols.contains(symbol)){
@@ -175,9 +174,9 @@ public class MarketIndexesPage  extends VerticalLayout {
                     }
                 }
                 break;
-            case MODE2: // update existing
+            case UPDATE: // update existing
                 break;
-            case MODE3:// new and update
+            case NEW_AND_UPDATE:// new and update
                 break;
         }
 
@@ -188,7 +187,7 @@ public class MarketIndexesPage  extends VerticalLayout {
     /**
      * Attach a TaskMonitor to a task and add it to the status panel
      */
-    private void attachMonitorToTask(UpdateIndexDataCallable callable){
+    private void attachMonitorToTask(DownloadIndexCallable callable){
 
         UI ui = UI.getCurrent();
 

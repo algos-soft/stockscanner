@@ -199,4 +199,16 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
     }
 
 
+    /**
+     * Find the entities corresponding to a list of symbols
+     */
+    public List<MarketIndex> findBySymbolList(List<String> symbols) throws Exception {
+        List<MarketIndex> indexes = new ArrayList<>();
+        for(String symbol : symbols){
+            MarketIndex entity=findUniqueBySymbol(symbol);
+            indexes.add(entity);
+        }
+        return indexes;
+    }
+
 }

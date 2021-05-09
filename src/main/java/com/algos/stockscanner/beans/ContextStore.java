@@ -1,5 +1,6 @@
 package com.algos.stockscanner.beans;
 
+import com.algos.stockscanner.services.DownloadIndexCallable;
 import com.algos.stockscanner.services.UpdateIndexDataCallable;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -18,6 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ContextStore {
 
     public ConcurrentHashMap<String, UpdateIndexDataCallable> updateIndexCallableMap = new ConcurrentHashMap<>();
+
+    public ConcurrentHashMap<String, DownloadIndexCallable> downloadIndexCallableMap = new ConcurrentHashMap<>();
 
 
 

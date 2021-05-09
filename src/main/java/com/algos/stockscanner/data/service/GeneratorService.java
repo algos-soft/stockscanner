@@ -158,7 +158,8 @@ public class GeneratorService extends CrudService<Generator, Integer> {
     }
 
     /**
-     * Copy data from Model to Entity
+     * Copy data from Model to Entity.
+     * (Copy only the data that can be changed by the dialog)
      */
     public void modelToEntity(GeneratorModel model, Generator entity){
 
@@ -181,11 +182,11 @@ public class GeneratorService extends CrudService<Generator, Integer> {
             entity.getIndexes().add(iEntity);
         }
 
-        entity.getSimulations().clear();
-        for(SimulationModel iModel : model.getSimulations()){
-            Simulation iEntity = simulationService.get(iModel.getId()).get();
-            entity.getSimulations().add(iEntity);
-        }
+//        entity.getSimulations().clear();
+//        for(SimulationModel iModel : model.getSimulations()){
+//            Simulation iEntity = simulationService.get(iModel.getId()).get();
+//            entity.getSimulations().add(iEntity);
+//        }
 
         entity.setStartDateLD(model.getStartDate());
         entity.setAmount(model.getAmount());

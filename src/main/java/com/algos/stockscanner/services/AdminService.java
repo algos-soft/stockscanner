@@ -55,4 +55,22 @@ public class AdminService {
     }
 
 
+    public List<DownloadIndexCallable> scheduleDownload(List<MarketIndex> indexes, int intervalSeconds){
+        List<DownloadIndexCallable> callables = new ArrayList<>();
+
+        DownloadIndexCallable callable;
+        long millis=0;
+        for(MarketIndex index : indexes){
+            callable = context.getBean(DownloadIndexCallable.class, index);
+            callables.add(callable);
+            executorService.schedule(callable, millis, TimeUnit.MILLISECONDS);
+            millis+=intervalSeconds*1000;
+        }
+
+        return callables;
+
+    }
+
+
+
 }
