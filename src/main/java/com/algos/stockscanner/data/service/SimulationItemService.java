@@ -2,9 +2,9 @@ package com.algos.stockscanner.data.service;
 
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.*;
-import com.algos.stockscanner.data.enums.ActionTypes;
-import com.algos.stockscanner.data.enums.Actions;
-import com.algos.stockscanner.data.enums.Reasons;
+import com.algos.stockscanner.enums.ActionTypes;
+import com.algos.stockscanner.enums.Actions;
+import com.algos.stockscanner.enums.Reasons;
 import com.algos.stockscanner.views.simulations.SimulationItemModel;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.springframework.beans.factory.annotation.Autowired;

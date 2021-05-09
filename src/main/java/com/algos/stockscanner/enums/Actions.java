@@ -1,6 +1,4 @@
-package com.algos.stockscanner.data.enums;
-
-import java.util.Arrays;
+package com.algos.stockscanner.enums;
 
 public enum Actions {
     OPEN ("OPEN"),

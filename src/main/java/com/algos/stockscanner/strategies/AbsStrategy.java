@@ -1,15 +1,14 @@
 package com.algos.stockscanner.strategies;
 
 import com.algos.stockscanner.data.entity.*;
-import com.algos.stockscanner.data.enums.ActionTypes;
-import com.algos.stockscanner.data.enums.Actions;
-import com.algos.stockscanner.data.enums.Reasons;
-import com.algos.stockscanner.data.enums.Terminations;
+import com.algos.stockscanner.enums.ActionTypes;
+import com.algos.stockscanner.enums.Actions;
+import com.algos.stockscanner.enums.Reasons;
+import com.algos.stockscanner.enums.Terminations;
 import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.IndexUnitService;
 import com.algos.stockscanner.data.service.SimulationItemService;
 import com.algos.stockscanner.data.service.SimulationService;
-import com.algos.stockscanner.runner.GeneratorRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.algos.stockscanner.data.enums;
+package com.algos.stockscanner.enums;
 
 public enum ActionTypes {
     BUY ("BUY"),

@@ -1,9 +1,8 @@
 package com.algos.stockscanner.strategies;
 
 import com.algos.stockscanner.beans.Utils;
-import com.algos.stockscanner.data.entity.SimulationItem;
-import com.algos.stockscanner.data.enums.*;
-import com.algos.stockscanner.data.enums.Actions;
+import com.algos.stockscanner.enums.*;
+import com.algos.stockscanner.enums.Actions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

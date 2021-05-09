@@ -1,8 +1,8 @@
 package com.algos.stockscanner.views.simulations;
 
-import com.algos.stockscanner.data.enums.ActionTypes;
-import com.algos.stockscanner.data.enums.Actions;
-import com.algos.stockscanner.data.enums.Reasons;
+import com.algos.stockscanner.enums.ActionTypes;
+import com.algos.stockscanner.enums.Actions;
+import com.algos.stockscanner.enums.Reasons;
 
 import java.time.LocalDateTime;
 

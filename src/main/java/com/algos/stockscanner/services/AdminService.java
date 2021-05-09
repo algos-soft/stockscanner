@@ -3,6 +3,7 @@ package com.algos.stockscanner.services;
 import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.enums.IndexDownloadModes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -55,13 +56,13 @@ public class AdminService {
     }
 
 
-    public List<DownloadIndexCallable> scheduleDownload(List<MarketIndex> indexes, int intervalSeconds){
+    public List<DownloadIndexCallable> scheduleDownload(IndexDownloadModes mode, List<String> symbols, int intervalSeconds){
         List<DownloadIndexCallable> callables = new ArrayList<>();
 
         DownloadIndexCallable callable;
         long millis=0;
-        for(MarketIndex index : indexes){
-            callable = context.getBean(DownloadIndexCallable.class, index);
+        for(String symbol : symbols){
+            callable = context.getBean(DownloadIndexCallable.class, mode, symbol);
             callables.add(callable);
             executorService.schedule(callable, millis, TimeUnit.MILLISECONDS);
             millis+=intervalSeconds*1000;

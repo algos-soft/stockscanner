@@ -1,9 +1,8 @@
 package com.algos.stockscanner.strategies;
 
-import com.algos.stockscanner.data.entity.SimulationItem;
-import com.algos.stockscanner.data.enums.ActionTypes;
-import com.algos.stockscanner.data.enums.Actions;
-import com.algos.stockscanner.data.enums.Reasons;
+import com.algos.stockscanner.enums.ActionTypes;
+import com.algos.stockscanner.enums.Actions;
+import com.algos.stockscanner.enums.Reasons;
 
 public class Decision {
     Actions action;

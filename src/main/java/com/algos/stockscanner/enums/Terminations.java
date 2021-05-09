@@ -1,4 +1,4 @@
-package com.algos.stockscanner.data.enums;
+package com.algos.stockscanner.enums;
 
 public enum Terminations {
     NO_MORE_DATA ("NO_MORE_DATA"),

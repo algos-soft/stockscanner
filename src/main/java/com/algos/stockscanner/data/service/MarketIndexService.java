@@ -2,8 +2,8 @@ package com.algos.stockscanner.data.service;
 
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
-import com.algos.stockscanner.data.enums.FrequencyTypes;
-import com.algos.stockscanner.data.enums.IndexCategories;
+import com.algos.stockscanner.enums.FrequencyTypes;
+import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.services.IndexEntry;
 import com.algos.stockscanner.utils.Du;
 import com.algos.stockscanner.views.indexes.IndexModel;

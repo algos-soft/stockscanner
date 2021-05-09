@@ -1,7 +1,7 @@
 package com.algos.stockscanner.views.indexes;
 
 import com.algos.stockscanner.beans.Utils;
-import com.algos.stockscanner.data.enums.IndexCategories;
+import com.algos.stockscanner.enums.IndexCategories;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;

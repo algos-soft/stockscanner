@@ -3,7 +3,7 @@ package com.algos.stockscanner.views.simulations;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.entity.SimulationItem;
-import com.algos.stockscanner.data.enums.Actions;
+import com.algos.stockscanner.enums.Actions;
 import com.algos.stockscanner.data.service.SimulationItemService;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;

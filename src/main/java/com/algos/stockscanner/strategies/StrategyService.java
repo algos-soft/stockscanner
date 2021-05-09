@@ -3,8 +3,6 @@ package com.algos.stockscanner.strategies;
 import com.algos.stockscanner.data.entity.IndexUnit;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.entity.SimulationItem;
-import com.algos.stockscanner.data.enums.Reasons;
-import com.algos.stockscanner.data.enums.Terminations;
 import org.springframework.stereotype.Service;
 
 

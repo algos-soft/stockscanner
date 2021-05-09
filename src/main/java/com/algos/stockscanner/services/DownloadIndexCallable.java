@@ -3,10 +3,11 @@ package com.algos.stockscanner.services;
 import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.data.entity.IndexUnit;
 import com.algos.stockscanner.data.entity.MarketIndex;
-import com.algos.stockscanner.data.enums.FrequencyTypes;
-import com.algos.stockscanner.data.enums.IndexCategories;
+import com.algos.stockscanner.enums.FrequencyTypes;
+import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.data.service.IndexUnitService;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.algos.stockscanner.enums.IndexDownloadModes;
 import com.algos.stockscanner.task.AbortedByUserException;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
@@ -15,16 +16,23 @@ import com.crazzyghost.alphavantage.parameters.DataType;
 import com.crazzyghost.alphavantage.parameters.OutputSize;
 import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
 import com.crazzyghost.alphavantage.timeseries.response.TimeSeriesResponse;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -50,9 +58,9 @@ public class DownloadIndexCallable implements Callable<Void> {
             .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
             .toFormatter();
 
+    private IndexDownloadModes mode;
+    private String symbol;
     private MarketIndex index;
-    private String mode;
-    private LocalDate startDate;
     private ConcurrentLinkedQueue<TaskListener> listeners = new ConcurrentLinkedQueue<>();
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -70,23 +78,27 @@ public class DownloadIndexCallable implements Callable<Void> {
     @Autowired
     private MarketIndexService marketIndexService;
 
+    @Value("${alphavantage.api.key}")
+    private String alphavantageApiKey;
+
+    private OkHttpClient okHttpClient;
+
+    private JsonAdapter<MarketService.FDResponse> fdJsonAdapter;
+
+
     /**
-     * @param index     the index to update
-     * @param mode      the update mode
-     *                  ALL - delete all index data and load all the available data
-     *                  DATE - add/update all data starting from the given date included
-     * @param startDate in case of DATE mode, the date when to begin the update
+     * @param mode      the download mode
+     * @param symbol    the symbol to download/update
      */
-    public DownloadIndexCallable(MarketIndex index, String mode, LocalDate startDate) {
-        this.index = index;
+    public DownloadIndexCallable(IndexDownloadModes mode, String symbol) {
         this.mode = mode;
-        this.startDate = startDate;
+        this.symbol=symbol;
     }
 
     @PostConstruct
     private void init() {
 
-        log.info("Callable task created for index " + index.getSymbol());
+        log.info("Callable task created for index " + symbol);
 
         // register itself to the context-level storage
         contextStore.downloadIndexCallableMap.put("" + hashCode(), this);
@@ -96,6 +108,10 @@ public class DownloadIndexCallable implements Callable<Void> {
         // puts the task in 'waiting for start' status
         currentProgress.update("waiting...");
 
+        okHttpClient = new OkHttpClient();
+        Moshi moshi = new Moshi.Builder().build();
+        fdJsonAdapter = moshi.adapter(MarketService.FDResponse.class);
+
     }
 
     @Override
@@ -104,11 +120,11 @@ public class DownloadIndexCallable implements Callable<Void> {
         // if already aborted before starting,
         // unregister itself from the context-level storage and return
         if(abort){
-            contextStore.updateIndexCallableMap.remove("" + hashCode(), this);
+            contextStore.downloadIndexCallableMap.remove("" + hashCode(), this);
             return null;
         }
 
-        log.debug("Callable task called for index " + index.getSymbol());
+        log.debug("Download task called for index " + symbol);
 
         running=true;
 
@@ -120,51 +136,28 @@ public class DownloadIndexCallable implements Callable<Void> {
 
             checkAbort();   // throws exception if the task is aborted
 
-            // retrieve the category
-            java.util.Optional<IndexCategories> oCategory = IndexCategories.getItem(index.getCategory());
-            if (!oCategory.isPresent()) {
-                throw new Exception("Index " + index.getSymbol() + " does not have a category.");
-            }
-            IndexCategories category = oCategory.get();
+            notifyProgress(0, 0, "Requesting data");
 
-            // switch on the category
-            String url = null;
-            switch (category) {
-                case CRYPTO:
-                    break;
-                case EXCHANGE:
-                    break;
-                case FOREX:
-                    break;
-                case SECTOR:
-                    break;
-                case STOCK:
+//            TimeSeriesResponse response=AlphaVantage.api()
+//                    .timeSeries()
+//                    .daily()
+//                    .forSymbol(symbol)
+//                    .outputSize(OutputSize.FULL)
+//                    .dataType(DataType.JSON)
+//                    .fetchSync();
 
-                    notifyProgress(0, 0, "Requesting data");
+            FundamentalData fundamentalData = fetchFundamentalData(symbol);
 
-                    TimeSeriesResponse response=AlphaVantage.api()
-                            .timeSeries()
-                            .daily()
-                            .forSymbol(index.getSymbol())
-                            .outputSize(OutputSize.FULL)
-                            .dataType(DataType.JSON)
-                            .fetchSync();
+//            String error=response.getErrorMessage();
+//            if(error!=null){
+//                throw new Exception(error);
+//            }
 
-                    String error=response.getErrorMessage();
-                    if(error!=null){
-                        throw new Exception(error);
-                    }
-
-                    handleResponse(response);
-
-                    break;
-                case TECH:
-                    break;
-            }
+            //handleResponse(response);
 
             endTime = LocalDateTime.now();
             String info = buildDurationInfo();
-            log.info("Callable task completed for index " + index.getSymbol() + " " + info);
+            log.info("Download task completed for index " + symbol + " " + info);
             notifyCompleted(info);
 
         } catch (Exception e) {
@@ -174,7 +167,7 @@ public class DownloadIndexCallable implements Callable<Void> {
         } finally {
 
             // unregister itself from the context-level storage
-            contextStore.updateIndexCallableMap.remove("" + hashCode(), this);
+            contextStore.downloadIndexCallableMap.remove("" + hashCode(), this);
 
         }
 
@@ -259,6 +252,42 @@ public class DownloadIndexCallable implements Callable<Void> {
             notifyProgress(currentProgress.getCurrent(), currentProgress.getTot(), currentProgress.getStatus());
             throw new AbortedByUserException();
         }
+    }
+
+
+
+    /**
+     * Fetch fundamental data from the network
+     */
+    private FundamentalData fetchFundamentalData(String symbol) throws IOException {
+        FundamentalData fundamentalData=null;
+
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.alphavantage.co/query").newBuilder();
+        urlBuilder.addQueryParameter("apikey", alphavantageApiKey);
+        urlBuilder.addQueryParameter("function", "OVERVIEW");
+        urlBuilder.addQueryParameter("symbol", symbol);
+
+        String url = urlBuilder.build().toString();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        Response response = okHttpClient.newCall(request).execute();
+        if(response.isSuccessful()){
+
+            MarketService.FDResponse fdresp = fdJsonAdapter.fromJson(response.body().string());
+
+            if(fdresp.Symbol==null){
+                throw new IOException("malformed response, license limits reached?");
+            }
+
+            IndexCategories category = IndexCategories.getByAlphaVantageType(fdresp.AssetType);
+            fundamentalData=new FundamentalData(symbol, fdresp.Name, category);
+
+        }
+
+        return fundamentalData;
     }
 
 

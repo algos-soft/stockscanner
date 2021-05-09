@@ -2,7 +2,7 @@ package com.algos.stockscanner.strategies;
 
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.entity.SimulationItem;
-import com.algos.stockscanner.data.enums.Terminations;
+import com.algos.stockscanner.enums.Terminations;
 
 public interface Strategy {
     String getCode();

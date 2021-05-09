@@ -1,10 +1,7 @@
 package com.algos.stockscanner.views.indexes;
 
-import com.algos.stockscanner.beans.Utils;
-import com.algos.stockscanner.data.enums.FrequencyTypes;
-import com.algos.stockscanner.data.enums.IndexCategories;
-import com.vaadin.flow.component.html.Image;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.algos.stockscanner.enums.FrequencyTypes;
+import com.algos.stockscanner.enums.IndexCategories;
 
 import java.time.LocalDate;
 
