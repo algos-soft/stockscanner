@@ -32,9 +32,11 @@ public class AdminView extends VerticalLayout {
 
     private static final String MARKET_INDEXES = "Market Indexes";
     private static final String PRICES = "Historic data";
+    private static final String TOOLS = "Tools";
 
     private Component marketIndexesComponent;
     private Component pricesComponent;
+    private Component toolsComponent;
 
 
     private @Autowired
@@ -106,8 +108,21 @@ public class AdminView extends VerticalLayout {
             add(pricesComponent);
         });
 
+        Button button3 = new Button(TOOLS, new Icon(VaadinIcon.TOOLS));
+        button3.getStyle().set("margin-left", "0.5em");
+        button3.getStyle().set("margin-right", "0.5em");
+        button3.getStyle().set("width", bWidth);
+        button3.setIconAfterText(true);
+        button3.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
 
-        header.add(button2, button1);
+            removeAll();
+            if(toolsComponent ==null){
+                toolsComponent = context.getBean(ToolsPage.class);;
+            }
+            add(toolsComponent);
+        });
+
+        header.add(button3, button2, button1);
     }
 
 

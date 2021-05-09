@@ -103,7 +103,7 @@ public class DownloadIndexCallable implements Callable<Void> {
     @PostConstruct
     private void init() {
 
-        log.info("Callable task created for index " + symbol);
+        log.info("Download task created for index " + symbol);
 
         // register itself to the context-level storage
         contextStore.downloadIndexCallableMap.put("" + hashCode(), this);
@@ -111,7 +111,7 @@ public class DownloadIndexCallable implements Callable<Void> {
         currentProgress=new Progress();
 
         // puts the task in 'waiting for start' status
-        currentProgress.update("waiting...");
+        currentProgress.update("waiting: "+symbol);
 
         okHttpClient = new OkHttpClient();
         Moshi moshi = new Moshi.Builder().build();
@@ -150,6 +150,7 @@ public class DownloadIndexCallable implements Callable<Void> {
             endTime = LocalDateTime.now();
             String info = buildDurationInfo();
             log.info("Download task completed for index " + symbol + " " + info);
+
             notifyCompleted(info);
 
         } catch (Exception e) {
@@ -240,7 +241,7 @@ public class DownloadIndexCallable implements Callable<Void> {
 
     private void checkAbort() throws Exception{
         if (abort) {
-            currentProgress.update("Aborted");
+            currentProgress.update("Aborted: "+symbol);
             notifyProgress(currentProgress.getCurrent(), currentProgress.getTot(), currentProgress.getStatus());
             throw new AbortedByUserException();
         }
@@ -408,10 +409,10 @@ public class DownloadIndexCallable implements Callable<Void> {
     private void terminateWithError(Exception e){
         endTime = LocalDateTime.now();
         if(e instanceof AbortedByUserException){
-            log.info("Callable task aborted by user for index " + symbol);
+            log.info("Download task aborted by user for index " + symbol);
         }else{
-            notifyProgress(currentProgress.getCurrent(), currentProgress.getTot(), "Error");
-            log.error("Callable task error for index " + symbol, e);
+            notifyProgress(currentProgress.getCurrent(), currentProgress.getTot(), "Error: "+symbol);
+            log.error("Download task error for index " + symbol, e);
         }
         notifyError(e);
     }

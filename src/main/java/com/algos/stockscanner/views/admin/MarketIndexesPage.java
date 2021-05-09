@@ -48,8 +48,8 @@ public class MarketIndexesPage  extends VerticalLayout {
     @Autowired
     private ApplicationContext context;
 
-    @Autowired
-    private MarketService marketService;
+    //@Autowired
+    //private MarketService marketService;
 
     @Autowired
     private MarketIndexService marketIndexService;
@@ -83,7 +83,6 @@ public class MarketIndexesPage  extends VerticalLayout {
         optionsGroup.setItems(IndexDownloadModes.values());
         optionsGroup.setValue(IndexDownloadModes.NEW);
 
-
         Button bDownloadIndexes = new Button("Start download");
         bDownloadIndexes.setId("adminview-bdownloadindexes");
         bDownloadIndexes.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
@@ -91,9 +90,9 @@ public class MarketIndexesPage  extends VerticalLayout {
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
 
                 try {
-                    log.info("Download Indexes action requested");
                     List<String> symbols=getSimbolsToDownload();
                     IndexDownloadModes mode = optionsGroup.getValue();
+                    log.info(mode.toString()+" requested - "+symbols.size()+" indexes to download");
                     int intervalSec = 60/limitField.getValue();
                     List<DownloadIndexCallable> callables = adminService.scheduleDownload(mode, symbols, intervalSec);
                     for(DownloadIndexCallable callable : callables){
@@ -155,9 +154,13 @@ public class MarketIndexesPage  extends VerticalLayout {
                     }
                 }
                 break;
+
             case UPDATE: // update existing
+                symbols.addAll(existingSymbols);
                 break;
+
             case NEW_AND_UPDATE:// new and update
+
                 break;
         }
 
@@ -219,86 +222,6 @@ public class MarketIndexesPage  extends VerticalLayout {
         statusLayout.add(taskMonitor);
 
     }
-
-
-    /**
-     * Download indexes
-     */
-    private void downloadIndexes(){
-        final MarketService.DownloadHandler[] handler = {null}; // use single-element array to avoid the need to be final
-
-        // setup the progress dialog
-        Text text = new Text("Downloading...");
-        ProgressBar progressBar = new ProgressBar();
-        progressBar.setIndeterminate(true);
-        VerticalLayout layout = new VerticalLayout();
-        layout.add(text, progressBar);
-        Button bAbort = new Button();
-        ConfirmDialog dialog = ConfirmDialog.create()
-                .withMessage(layout)
-                .withButton(bAbort, ButtonOption.caption("Abort"), ButtonOption.closeOnClick(false));
-        dialog.setCloseOnEsc(false);
-        dialog.setCloseOnOutsideClick(false);
-        bAbort.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
-            handler[0].setAbort(true);
-        });
-        dialog.setWidth("20em");
-        dialog.open();
-
-        UI ui = UI.getCurrent();
-        int maxReqPerMinute = utils.toPrimitive(limitField.getValue());
-
-        // download data in a separate thread
-        new Thread(() -> {
-
-            handler[0] =  marketService.downloadIndexes(new MarketService.DownloadListener() {
-                @Override
-                public void onDownloadCompleted() {
-                    ui.access(new Command() {
-                        @Override
-                        public void execute() {
-                            dialog.close();
-                        }
-                    });
-
-                }
-
-                @Override
-                public void onDownloadAborted(Exception e) {
-                    ui.access(new Command() {
-                        @Override
-                        public void execute() {
-                            dialog.close();
-                            ConfirmDialog dialog1 = ConfirmDialog.createError().withMessage("Download failed: "+e.getMessage());
-                            dialog1.open();
-                        }
-                    });
-
-                }
-
-                @Override
-                public void onDownloadProgress(int current, int total, String message) {
-
-                    ui.access(new Command() {
-                        @Override
-                        public void execute() {
-                            progressBar.setMax(total);
-                            progressBar.setValue(current);
-                            if(current==0){
-                                progressBar.setIndeterminate(true);
-                                text.setText(message);
-                            }else{
-                                progressBar.setIndeterminate(false);
-                                text.setText("["+current+"/"+total+"] "+message);
-                            }
-                        }
-                    });
-                }
-
-            },maxReqPerMinute);
-        }).start();
-    }
-
 
 
 }

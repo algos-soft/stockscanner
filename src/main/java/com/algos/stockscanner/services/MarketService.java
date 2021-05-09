@@ -83,7 +83,7 @@ public class MarketService {
 
     private OkHttpClient okHttpClient;
 
-    private HashSet<String> eToroInstruments = new HashSet<String>();
+//    private HashSet<String> eToroInstruments = new HashSet<String>();
 
 
     @PostConstruct
@@ -91,31 +91,31 @@ public class MarketService {
 
         okHttpClient = new OkHttpClient();
 
-        loadEtoroInstruments();
+//        loadEtoroInstruments();
 
     }
 
 
 
 
-    private void loadEtoroInstruments(){
-
-        String filename="config/etoro_instruments.csv";
-        File etoroInstrumentsFile = new File(filename);
-        if(!etoroInstrumentsFile.exists()){
-            log.warn("File "+filename+" not found. Can't load list of eToro instruments.");
-            return;
-        }
-
-        try {
-            List<String> lines = Files.readAllLines(etoroInstrumentsFile.toPath());
-            for(String line : lines){
-                eToroInstruments.add(line);
-            }
-        } catch (IOException e) {
-            log.error("could not read eToro instruments file "+etoroInstrumentsFile.toString(), e);
-        }
-    }
+//    private void loadEtoroInstruments(){
+//
+//        String filename="config/etoro_instruments.csv";
+//        File etoroInstrumentsFile = new File(filename);
+//        if(!etoroInstrumentsFile.exists()){
+//            log.warn("File "+filename+" not found. Can't load list of eToro instruments.");
+//            return;
+//        }
+//
+//        try {
+//            List<String> lines = Files.readAllLines(etoroInstrumentsFile.toPath());
+//            for(String line : lines){
+//                eToroInstruments.add(line);
+//            }
+//        } catch (IOException e) {
+//            log.error("could not read eToro instruments file "+etoroInstrumentsFile.toString(), e);
+//        }
+//    }
 
 
 
@@ -257,103 +257,103 @@ public class MarketService {
     }
 
 
-    /**
-     * Download all the indexes declared in the resource file indexes.csv
-     * @param maxReqPerMinute max request per minute to the API, 0=unlimited
-     */
-    public DownloadHandler downloadIndexes(DownloadListener downloadListener, int maxReqPerMinute) {
-        DownloadHandler downloadHandler = null;
-        downloadHandler = new DownloadHandler();
-
-        // retrieve the list of indexes to download from resources
-        String filename="config/indexes.csv";
-        File indexesFile = new File(filename);
-        if(!indexesFile.exists()){
-            log.error("File "+filename+" not found. Can't download indexes.");
-            return null;
-        }
-
-        // parse the file into a list of objects
-        List<IndexEntry> entries = new ArrayList<>();
-        try {
-            FileReader fileReader = new FileReader(indexesFile);
-            CSVReader reader = new CSVReader(fileReader);
-            List<String[]> list = reader.readAll();
-            for(String[] element : list){
-                if(element.length>=2){
-                    String symbol = element[0].trim();
-                    String type = element[1].trim();
-                    entries.add(new IndexEntry(symbol, type));
-                }else{
-                    throw new IOException("Invalid element "+element+" in "+filename);
-                }
-            }
-        } catch (IOException | CsvException e ) {
-            downloadListener.onDownloadAborted(new Exception("Malformed resource file "+filename));
-            log.error("could not parse the file "+indexesFile.toString(), e);
-        }
-
-        int sleepMillis=0;
-        if(maxReqPerMinute>0){
-            sleepMillis=(int)(60f/(float)maxReqPerMinute*1000f);
-        }
-
-        // perform and process the requests to retrieve each symbol
-        int i=0;
-        for(IndexEntry entry : entries){
-            i++;
-
-            if(eToroInstruments.contains(entry.getSymbol())){
-
-                IndexCategories category = IndexCategories.getItem(entry.getType()).get();
-
-                switch (category) {
-                    case CRYPTO:
-                        break;
-                    case EXCHANGE:
-                        break;
-                    case FOREX:
-                        break;
-                    case SECTOR:
-                        break;
-                    case STOCK:
-
-                        downloadListener.onDownloadProgress(i, entries.size(), entry.getSymbol());
-
-                        FundamentalData fd;
-                        try {
-                            fd = fetchFundamentalData(entry.getSymbol());
-                            syncIndex(fd);
-                        } catch (IOException e) {
-                            log.error("Fetch error - "+entry.getSymbol()+" skipped", e);
-                        } catch (Exception e) {
-                            log.error("Sync error - "+entry.getSymbol()+" skipped", e);
-                        }
-
-                        break;
-                    case TECH:
-                        break;
-                }
-
-                // going too fast can exceed API license limits
-                if(sleepMillis>0){
-                    try {
-                        Thread.sleep(sleepMillis);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }else{
-                log.warn(entry.getSymbol()+" skipped because not present on eToro");
-            }
-
-        }
-
-        downloadListener.onDownloadCompleted();
-
-        return downloadHandler;
-    }
+//    /**
+//     * Download all the indexes declared in the resource file indexes.csv
+//     * @param maxReqPerMinute max request per minute to the API, 0=unlimited
+//     */
+//    private DownloadHandler downloadIndexes(DownloadListener downloadListener, int maxReqPerMinute) {
+//        DownloadHandler downloadHandler = null;
+//        downloadHandler = new DownloadHandler();
+//
+//        // retrieve the list of indexes to download from resources
+//        String filename="config/indexes.csv";
+//        File indexesFile = new File(filename);
+//        if(!indexesFile.exists()){
+//            log.error("File "+filename+" not found. Can't download indexes.");
+//            return null;
+//        }
+//
+//        // parse the file into a list of objects
+//        List<IndexEntry> entries = new ArrayList<>();
+//        try {
+//            FileReader fileReader = new FileReader(indexesFile);
+//            CSVReader reader = new CSVReader(fileReader);
+//            List<String[]> list = reader.readAll();
+//            for(String[] element : list){
+//                if(element.length>=2){
+//                    String symbol = element[0].trim();
+//                    String type = element[1].trim();
+//                    entries.add(new IndexEntry(symbol, type));
+//                }else{
+//                    throw new IOException("Invalid element "+element+" in "+filename);
+//                }
+//            }
+//        } catch (IOException | CsvException e ) {
+//            downloadListener.onDownloadAborted(new Exception("Malformed resource file "+filename));
+//            log.error("could not parse the file "+indexesFile.toString(), e);
+//        }
+//
+//        int sleepMillis=0;
+//        if(maxReqPerMinute>0){
+//            sleepMillis=(int)(60f/(float)maxReqPerMinute*1000f);
+//        }
+//
+//        // perform and process the requests to retrieve each symbol
+//        int i=0;
+//        for(IndexEntry entry : entries){
+//            i++;
+//
+//            if(eToroInstruments.contains(entry.getSymbol())){
+//
+//                IndexCategories category = IndexCategories.getItem(entry.getType()).get();
+//
+//                switch (category) {
+//                    case CRYPTO:
+//                        break;
+//                    case EXCHANGE:
+//                        break;
+//                    case FOREX:
+//                        break;
+//                    case SECTOR:
+//                        break;
+//                    case STOCK:
+//
+//                        downloadListener.onDownloadProgress(i, entries.size(), entry.getSymbol());
+//
+//                        FundamentalData fd;
+//                        try {
+//                            fd = fetchFundamentalData(entry.getSymbol());
+//                            syncIndex(fd);
+//                        } catch (IOException e) {
+//                            log.error("Fetch error - "+entry.getSymbol()+" skipped", e);
+//                        } catch (Exception e) {
+//                            log.error("Sync error - "+entry.getSymbol()+" skipped", e);
+//                        }
+//
+//                        break;
+//                    case TECH:
+//                        break;
+//                }
+//
+//                // going too fast can exceed API license limits
+//                if(sleepMillis>0){
+//                    try {
+//                        Thread.sleep(sleepMillis);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//
+//            }else{
+//                log.warn(entry.getSymbol()+" skipped because not present on eToro");
+//            }
+//
+//        }
+//
+//        downloadListener.onDownloadCompleted();
+//
+//        return downloadHandler;
+//    }
 
 
 
