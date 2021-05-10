@@ -31,3 +31,9 @@
     width: 8em;
 }
 
+#adminview-compare_symbols_label{
+    width: 40em;
+    font-size: var(--lumo-font-size-xxs);
+}
+
+

@@ -19,6 +19,10 @@ public class Application extends SpringBootServletInitializer {
     // the resource for the generic index icon
     public static final String GENERIC_INDEX_ICON="images/generic_index.jpg";
 
+    // the file containing all the potentially available symbols
+    public static final String ALL_AVAILABLE_SYMBOLS="config/indexes.csv";
+
+
     // size of a stored icon on the database (the icon is always resized before storage)
     public static final int STORED_ICON_WIDTH=128;
     public static final int STORED_ICON_HEIGHT =128;

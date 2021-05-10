@@ -11,19 +11,18 @@ import com.algos.stockscanner.task.TaskListener;
 import com.algos.stockscanner.task.TaskMonitor;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.server.Command;
-import org.claspina.confirmdialog.ButtonOption;
-import org.claspina.confirmdialog.ConfirmDialog;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +68,9 @@ public class MarketIndexesPage  extends VerticalLayout {
 
     private IntegerField limitField;
 
+    private Select<Character> filterFrom;
+    private Select<Character> filterTo;
+
     @PostConstruct
     private void init(){
 
@@ -107,18 +109,37 @@ public class MarketIndexesPage  extends VerticalLayout {
         });
 
 
+        String str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        char[] charArray = str.toCharArray();
+        Character[] characters = ArrayUtils.toObject(charArray);
+
+
+        filterFrom =new Select<>();
+        filterFrom.setLabel("from");
+        filterFrom.setItems(characters);
+        filterFrom.setWidth("4em");
+
+        filterTo =new Select<>();
+        filterTo.setLabel("to");
+        filterTo.setItems(characters);
+        filterTo.setWidth("4em");
+
+
         // request limit field
         limitField=new IntegerField("Max req per minute");
         limitField.setId("adminview-reqlimitfield");
         limitField.setValue(5);
 
-        HorizontalLayout row1 = new HorizontalLayout();
-        row1.setAlignItems(Alignment.BASELINE);
-        row1.add(limitField, bDownloadIndexes);
+        HorizontalLayout filterRow = new HorizontalLayout();
+        filterRow.add(filterFrom, filterTo);
+
+        HorizontalLayout buttonRow = new HorizontalLayout();
+        buttonRow.setAlignItems(Alignment.BASELINE);
+        buttonRow.add(limitField, bDownloadIndexes);
 
         VerticalLayout content = new VerticalLayout();
         content.setHeight("100%");
-        content.add(optionsGroup, row1);
+        content.add(optionsGroup, filterRow, buttonRow);
 
         setHeight("100%");
         add(content, statusLayout);

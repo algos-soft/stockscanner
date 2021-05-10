@@ -1,5 +1,6 @@
 package com.algos.stockscanner.views.admin;
 
+import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.service.MarketIndexService;
@@ -9,8 +10,11 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import okhttp3.HttpUrl;
@@ -70,6 +74,8 @@ public class ToolsPage extends VerticalLayout {
 
     private HorizontalLayout statusLayout;
 
+    private static final String OUTPUT_FILENAME="etoro_valid_symbols.txt";
+
     @PostConstruct
     private void init() {
 
@@ -83,8 +89,9 @@ public class ToolsPage extends VerticalLayout {
         statusLayout.addClassName("admin-view-statuslayout");
 
         // button compare etoro alphavantage
-        Button bCompare = new Button("Cross check eToro / Alphavantage");
-        bCompare.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+        Button bComp = new Button("Start thread on server");
+
+        bComp.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 try {
@@ -97,9 +104,21 @@ public class ToolsPage extends VerticalLayout {
             }
         });
 
+        String label = "<strong>Symbol validation</strong><br>" +
+                "Iterate all symbols contained in the file <strong>"+ Application.ALL_AVAILABLE_SYMBOLS+"</strong><br>" +
+                "For each symbol, check if it is available on Alpha Vantage API.<br>" +
+                "Produces the file <strong>"+OUTPUT_FILENAME+"</strong> containing the available symbols.<br>" +
+                "Does the work in a background thread on the server.";
+        Span span = new Span();
+        span.setId("adminview-compare_symbols_label");
+        span.getElement().setProperty("innerHTML", label);
+
+        VerticalLayout bCompLayout = new VerticalLayout();
+        bCompLayout.add(span, bComp);
+
         VerticalLayout content = new VerticalLayout();
-        content.add(bCompare);
         content.setHeight("100%");
+        content.add(bCompLayout);
 
         setHeight("100%");
         add(content, statusLayout);
@@ -240,13 +259,12 @@ public class ToolsPage extends VerticalLayout {
             }
 
             try {
-                String filename="etoro_valid_symbols.txt";
-                FileWriter writer = new FileWriter(filename);
+                FileWriter writer = new FileWriter(OUTPUT_FILENAME);
                 for (String str : validInstruments) {
                     writer.write(str + System.lineSeparator());
                 }
                 writer.close();
-                log.info("output written to file "+filename);
+                log.info("output written to file "+OUTPUT_FILENAME);
             } catch (Exception e) {
                 log.error("could not write list to file", e);
             }

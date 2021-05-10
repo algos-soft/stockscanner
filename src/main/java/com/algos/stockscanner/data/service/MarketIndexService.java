@@ -1,5 +1,6 @@
 package com.algos.stockscanner.data.service;
 
+import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.enums.FrequencyTypes;
@@ -169,7 +170,7 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
      */
     public List<IndexEntry> loadAllAvailableSymbols(){
 
-        String filename="config/indexes.csv";
+        String filename= Application.ALL_AVAILABLE_SYMBOLS;
         File indexesFile = new File(filename);
         if(!indexesFile.exists()){
             log.error("File "+filename+" not found.");
