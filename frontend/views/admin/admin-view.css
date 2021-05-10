@@ -36,4 +36,8 @@
     font-size: var(--lumo-font-size-xxs);
 }
 
+#adminview-filterresult{
+    font-size: var(--lumo-font-size-xxs);
+}
+
 

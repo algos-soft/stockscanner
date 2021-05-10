@@ -56,13 +56,13 @@ public class AdminService {
     }
 
 
-    public List<DownloadIndexCallable> scheduleDownload(IndexDownloadModes mode, List<String> symbols, int intervalSeconds){
+    public List<DownloadIndexCallable> scheduleDownload(List<String> symbols, int intervalSeconds){
         List<DownloadIndexCallable> callables = new ArrayList<>();
 
         DownloadIndexCallable callable;
         long millis=0;
         for(String symbol : symbols){
-            callable = context.getBean(DownloadIndexCallable.class, mode, symbol);
+            callable = context.getBean(DownloadIndexCallable.class, symbol);
             callables.add(callable);
             executorService.schedule(callable, millis, TimeUnit.MILLISECONDS);
             millis+=intervalSeconds*1000;

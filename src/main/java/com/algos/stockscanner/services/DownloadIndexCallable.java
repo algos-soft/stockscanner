@@ -61,7 +61,6 @@ public class DownloadIndexCallable implements Callable<Void> {
             .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
             .toFormatter();
 
-    private IndexDownloadModes mode;
     private String symbol;
     private ConcurrentLinkedQueue<TaskListener> listeners = new ConcurrentLinkedQueue<>();
     private LocalDateTime startTime;
@@ -92,11 +91,9 @@ public class DownloadIndexCallable implements Callable<Void> {
 
 
     /**
-     * @param mode      the download mode
      * @param symbol    the symbol to download/update
      */
-    public DownloadIndexCallable(IndexDownloadModes mode, String symbol) {
-        this.mode = mode;
+    public DownloadIndexCallable(String symbol) {
         this.symbol=symbol;
     }
 

@@ -9,12 +9,11 @@ import com.algos.stockscanner.services.*;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
 import com.algos.stockscanner.task.TaskMonitor;
-import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
@@ -23,6 +22,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.server.Command;
 import org.apache.commons.lang3.ArrayUtils;
+import org.claspina.confirmdialog.ConfirmDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
@@ -71,6 +72,8 @@ public class MarketIndexesPage  extends VerticalLayout {
     private Select<Character> filterFrom;
     private Select<Character> filterTo;
 
+    private Span filterResult;
+
     @PostConstruct
     private void init(){
 
@@ -84,6 +87,12 @@ public class MarketIndexesPage  extends VerticalLayout {
         optionsGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         optionsGroup.setItems(IndexDownloadModes.values());
         optionsGroup.setValue(IndexDownloadModes.NEW);
+        optionsGroup.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<IndexDownloadModes>, IndexDownloadModes>>() {
+            @Override
+            public void valueChanged(AbstractField.ComponentValueChangeEvent<RadioButtonGroup<IndexDownloadModes>, IndexDownloadModes> event) {
+                updateFilter();
+            }
+        });
 
         Button bDownloadIndexes = new Button("Start download");
         bDownloadIndexes.setId("adminview-bdownloadindexes");
@@ -92,11 +101,18 @@ public class MarketIndexesPage  extends VerticalLayout {
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
 
                 try {
-                    List<String> symbols=getSimbolsToDownload();
+
+                    if(contextStore.downloadIndexCallableMap.size()>0){
+                        ConfirmDialog.createWarning().withMessage("Operation already in progress").open();
+                        return;
+                    }
+
+                    List<String> symbols=buildFilteredSymbolList();
+
                     IndexDownloadModes mode = optionsGroup.getValue();
                     log.info(mode.toString()+" requested - "+symbols.size()+" indexes to download");
                     int intervalSec = 60/limitField.getValue();
-                    List<DownloadIndexCallable> callables = adminService.scheduleDownload(mode, symbols, intervalSec);
+                    List<DownloadIndexCallable> callables = adminService.scheduleDownload(symbols, intervalSec);
                     for(DownloadIndexCallable callable : callables){
                         attachMonitorToTask(callable);
                     }
@@ -109,7 +125,7 @@ public class MarketIndexesPage  extends VerticalLayout {
         });
 
 
-        String str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         char[] charArray = str.toCharArray();
         Character[] characters = ArrayUtils.toObject(charArray);
 
@@ -117,12 +133,21 @@ public class MarketIndexesPage  extends VerticalLayout {
         filterFrom =new Select<>();
         filterFrom.setLabel("from");
         filterFrom.setItems(characters);
+        filterFrom.setValue(new Character('A'));
         filterFrom.setWidth("4em");
+        filterFrom.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<Character>, Character>>) event -> {
+            updateFilter();
+        });
 
         filterTo =new Select<>();
         filterTo.setLabel("to");
         filterTo.setItems(characters);
+        filterTo.setValue(new Character('Z'));
         filterTo.setWidth("4em");
+        filterTo.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<Character>, Character>>) event -> {
+            updateFilter();
+        });
+
 
 
         // request limit field
@@ -130,8 +155,23 @@ public class MarketIndexesPage  extends VerticalLayout {
         limitField.setId("adminview-reqlimitfield");
         limitField.setValue(5);
 
+        filterResult = new Span();
+        filterResult.setId("adminview-filterresult");
+
+        Button bShow = new Button("show");
+        bShow.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                List<String> symbolList=buildFilteredSymbolList();
+                String csvList = String.join(", ", symbolList);
+                ConfirmDialog.createInfo().withMessage(csvList).open();
+            }
+        });
+
+
         HorizontalLayout filterRow = new HorizontalLayout();
-        filterRow.add(filterFrom, filterTo);
+        filterRow.setAlignItems(Alignment.BASELINE);
+        filterRow.add(filterFrom, filterTo, filterResult, bShow);
 
         HorizontalLayout buttonRow = new HorizontalLayout();
         buttonRow.setAlignItems(Alignment.BASELINE);
@@ -150,6 +190,51 @@ public class MarketIndexesPage  extends VerticalLayout {
             attachMonitorToTask(callable);
         }
 
+        updateFilter();
+
+    }
+
+
+    private void updateFilter(){
+        List<String> symbolList=buildFilteredSymbolList();
+        String html="selected symbols: <strong>"+symbolList.size()+"</strong>";
+        filterResult.getElement().setProperty("innerHTML", html);
+    }
+
+    /**
+     * Build the list of symbols based on the current filters
+     */
+    private List<String> buildFilteredSymbolList(){
+        List<String> list = getSimbolsToDownload();
+        list=filterFrom(list);
+        list=filterTo(list);
+        Collections.sort(list);
+        return list;
+    }
+
+
+    private List<String> filterFrom(List<String> list){
+        List<String> filteredList=new ArrayList<>();
+        Character from = filterFrom.getValue();
+        for(String string : list){
+            Character first = string.charAt(0);
+            if(Character.toUpperCase(first) >= Character.toUpperCase(from)){
+                filteredList.add(string);
+            }
+        }
+        return filteredList;
+    }
+
+    private List<String> filterTo(List<String> list){
+        List<String> filteredList=new ArrayList<>();
+        Character to = filterTo.getValue();
+        for(String string : list){
+            Character first = string.charAt(0);
+            if(Character.toUpperCase(first) <= Character.toUpperCase(to)){
+                filteredList.add(string);
+            }
+        }
+        return filteredList;
     }
 
 
@@ -161,6 +246,7 @@ public class MarketIndexesPage  extends VerticalLayout {
         ArrayList<String> symbols=new ArrayList<>();
 
         List<IndexEntry> allSymbols = marketIndexService.loadAllAvailableSymbols();
+
         List<String> existingSymbols=new ArrayList<>();
         List<MarketIndex> entities = marketIndexService.findAll();
         for(MarketIndex index : entities){
@@ -181,7 +267,13 @@ public class MarketIndexesPage  extends VerticalLayout {
                 break;
 
             case NEW_AND_UPDATE:// new and update
-
+                symbols.addAll(existingSymbols);
+                for(IndexEntry entry : allSymbols){
+                    String symbol=entry.getSymbol();
+                    if(!existingSymbols.contains(symbol)){
+                        symbols.add(symbol);
+                    }
+                }
                 break;
         }
 
