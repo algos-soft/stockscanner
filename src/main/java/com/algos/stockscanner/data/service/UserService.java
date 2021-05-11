@@ -3,7 +3,7 @@ package com.algos.stockscanner.data.service;
 import com.algos.stockscanner.beans.*;
 import com.algos.stockscanner.data.entity.*;
 
-import com.algos.stockscanner.views.persons.*;
+import com.algos.stockscanner.views.users.*;
 import com.vaadin.flow.data.provider.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -58,6 +58,43 @@ public class UserService extends CrudService<User, Integer> {
      */
     public void entityToModel(User entity, UserModel model) {
         model.setId(utils.toPrimitive(entity.getId()));
+        model.setFirstName(entity.getFirstName());
+        model.setLastName(entity.getLastName());
+        model.setUserName(entity.getUserName());
+        model.setPassword(entity.getPassword());
+        model.setEmail( entity.getEmail());
+        model.setPhone(entity.getPhone());
+        model.setDateOfBirth(entity.getDateOfBirth());
+        model.setImportant(entity.getImportant());
+    }
+
+    /**
+     * Update entity from model
+     */
+    public void modelToEntity(UserModel model, User entity) {
+        entity.setFirstName(model.getFirstName());
+        entity.setLastName(model.getLastName());
+        entity.setUserName(model.getUserName());
+        entity.setPassword(model.getPassword());
+        entity.setEmail( model.getEmail());
+        entity.setPhone(model.getPhone());
+        entity.setDateOfBirth(model.getDateOfBirth());
+        entity.setImportant(model.getImportant());
+    }
+
+    /**
+     * Standard initialization of a new entity for the database.
+     * <p>
+     * Initialize with default values
+     */
+    public void initEntity(User entity) {
+    }
+    /**
+     * Standard initialization of a new model for the dialog.
+     * <p>
+     * Initialize with default values
+     */
+    public void initModel(UserModel model) {
     }
 
     public int count() {

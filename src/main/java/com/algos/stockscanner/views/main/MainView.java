@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.admin.AdminView;
-import com.algos.stockscanner.views.persons.*;
+import com.algos.stockscanner.views.users.*;
 import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;

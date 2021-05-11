@@ -1,8 +1,4 @@
-package com.algos.stockscanner.views.persons;
-
-import com.vaadin.flow.spring.annotation.*;
-import org.springframework.beans.factory.config.*;
-import org.springframework.context.annotation.Scope;
+package com.algos.stockscanner.views.users;
 
 import java.time.*;
 
@@ -21,6 +17,8 @@ public class UserModel {
     private int numGenerator;
     private String firstName;
     private String lastName;
+    private String userName;
+    private String password;
     private String email;
     private String phone;
     private LocalDate dateOfBirth;
@@ -57,6 +55,22 @@ public class UserModel {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getEmail() {
