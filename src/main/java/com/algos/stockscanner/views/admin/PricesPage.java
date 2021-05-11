@@ -4,10 +4,8 @@ import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.algos.stockscanner.enums.IndexDownloadModes;
 import com.algos.stockscanner.enums.IndexUpdateModes;
 import com.algos.stockscanner.services.AdminService;
-import com.algos.stockscanner.services.DownloadIndexCallable;
 import com.algos.stockscanner.services.MarketService;
 import com.algos.stockscanner.services.UpdateIndexDataCallable;
 import com.algos.stockscanner.task.TaskHandler;
@@ -19,14 +17,12 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.server.Command;
 import org.apache.commons.lang3.ArrayUtils;
-import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +88,7 @@ public class PricesPage extends VerticalLayout {
         optionsGroup.setLabel("Download mode");
         optionsGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         optionsGroup.setItems(IndexUpdateModes.values());
-        optionsGroup.setValue(IndexUpdateModes.MISSING_DATA);
+        optionsGroup.setValue(IndexUpdateModes.ADD_MISSING_DATA_ONLY);
         optionsGroup.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<IndexUpdateModes>, IndexUpdateModes>>() {
             @Override
             public void valueChanged(AbstractField.ComponentValueChangeEvent<RadioButtonGroup<IndexUpdateModes>, IndexUpdateModes> event) {
@@ -183,7 +179,7 @@ public class PricesPage extends VerticalLayout {
         buttonRow.add(limitField, bUpdatePrices);
 
         Span headline=new Span("Download historic price data");
-        headline.addClassName("adminview-headline");
+        headline.getStyle().set("font-weight","bold");
 
         VerticalLayout content = new VerticalLayout();
         content.add(headline, optionsGroup, filterRow, buttonRow);

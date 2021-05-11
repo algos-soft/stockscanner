@@ -24,6 +24,8 @@ public class Application extends SpringBootServletInitializer {
     // the file containing all the potentially available symbols
     public static final String ALL_AVAILABLE_SYMBOLS="config/indexes.csv";
 
+    // the file containing all the etoro symbols
+    public static final String ETORO_INSTRUMENTS="config/etoro_instruments.csv";
 
     // size of a stored icon on the database (the icon is always resized before storage)
     public static final int STORED_ICON_WIDTH=128;

@@ -32,6 +32,8 @@ public interface IndexUnitRepository extends JpaRepository<IndexUnit, Integer> {
     @Query("SELECT u FROM IndexUnit u where index=:index AND u.dateTime >= :t1 AND u.dateTime <= :t2 ORDER BY u.id ASC")
     List<IndexUnit> findAllByPeriod(@Param("index") MarketIndex index, @Param("t1") String t1, @Param("t2") String t2, Pageable pageable);
 
+    IndexUnit findFirstByIndexOrderByDateTimeAsc(MarketIndex index);
+    IndexUnit findFirstByIndexOrderByDateTimeDesc(MarketIndex index);
 
 }
 

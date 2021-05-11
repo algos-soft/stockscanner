@@ -13,6 +13,7 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -171,8 +172,8 @@ public class MarketIndexesPage  extends VerticalLayout {
         buttonRow.setAlignItems(Alignment.BASELINE);
         buttonRow.add(limitField, bDownloadIndexes);
 
-        Span headline=new Span("Download/update market indexes");
-        headline.addClassName("adminview-headline");
+        Label headline=new Label("Download/update market indexes");
+        headline.getStyle().set("font-weight","bold");
 
         VerticalLayout content = new VerticalLayout();
         content.setHeight("100%");

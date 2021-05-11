@@ -30,8 +30,8 @@ public class AdminView extends VerticalLayout {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private static final String MARKET_INDEXES = "Market Indexes";
-    private static final String PRICES = "Historic data";
+    private static final String MARKET_INDEXES = "Download indexes";
+    private static final String PRICES = "Download prices";
     private static final String TOOLS = "Tools";
 
     private Component marketIndexesComponent;
@@ -77,7 +77,7 @@ public class AdminView extends VerticalLayout {
 
     private void customizeHeader(HorizontalLayout header) {
 
-        String bWidth="11em";
+        String bWidth="12.5em";
 
         header.getStyle().set("flex-direction", "row-reverse");
 
@@ -94,7 +94,7 @@ public class AdminView extends VerticalLayout {
             add(marketIndexesComponent);
         });
 
-        Button button2 = new Button(PRICES, new Icon(VaadinIcon.DOLLAR));
+        Button button2 = new Button(PRICES, new Icon(VaadinIcon.COINS));
         button2.getStyle().set("margin-left", "0.5em");
         button2.getStyle().set("margin-right", "0.5em");
         button2.getStyle().set("width", bWidth);
@@ -111,7 +111,7 @@ public class AdminView extends VerticalLayout {
         Button button3 = new Button(TOOLS, new Icon(VaadinIcon.TOOLS));
         button3.getStyle().set("margin-left", "0.5em");
         button3.getStyle().set("margin-right", "0.5em");
-        button3.getStyle().set("width", bWidth);
+        button3.getStyle().set("width", "8em");
         button3.setIconAfterText(true);
         button3.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
 

@@ -64,7 +64,7 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     private boolean abort;
     private Progress currentProgress;
 
-    private IndexUnit lastValidPoint;
+    private LocalDateTime lastValidPoint;
 
     @Autowired
     private ContextStore contextStore;
@@ -200,10 +200,10 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
         OutputSize outputSize=null;
         switch (mode){
-            case ALL_DATA:
+            case REPLACE_ALL_DATA:
                 outputSize=OutputSize.FULL;
                 break;
-            case MISSING_DATA:
+            case ADD_MISSING_DATA_ONLY:
                 outputSize=OutputSize.COMPACT;
                 break;
         }
@@ -216,8 +216,14 @@ public class UpdateIndexDataCallable implements Callable<Void> {
                 .dataType(DataType.JSON)
                 .fetchSync();
 
-        if(mode.equals(IndexUpdateModes.MISSING_DATA)){
+        if(mode.equals(IndexUpdateModes.ADD_MISSING_DATA_ONLY)){
             if(!coversMissingPeriod(response)){
+
+                // the compact packet does not cover the missing period!
+                // switch automatically to REPLACE_ALL_DATA mode
+                // and perform the full query
+                mode=IndexUpdateModes.REPLACE_ALL_DATA;
+
                 response=AlphaVantage.api()
                         .timeSeries()
                         .daily()
@@ -245,7 +251,8 @@ public class UpdateIndexDataCallable implements Callable<Void> {
             LocalDateTime firstPoint = LocalDateTime.parse(firstUnit.getDate(), fmt);
             List<IndexUnit> unitsEqOrPost = indexUnitService.findAllByIndexWithDateTimeEqualOrAfterOrderByDate(index, firstPoint);
             if(unitsEqOrPost.size()>0){
-                lastValidPoint = unitsEqOrPost.get(unitsEqOrPost.size()-1); // last valid unit present in db, save it for later
+                IndexUnit lastValidUnit = unitsEqOrPost.get(unitsEqOrPost.size()-1); // last valid unit present in db, save it for later
+                lastValidPoint = lastValidUnit.getDateTimeLDT();
                 return true;
             }
         }
@@ -335,8 +342,8 @@ public class UpdateIndexDataCallable implements Callable<Void> {
      */
     public void handleResponse(TimeSeriesResponse response)  throws Exception {
 
-        // if replace all, delete all previous unit data
-        if(mode.equals(IndexUpdateModes.ALL_DATA)){
+        // if we are in REPLACE_ALL_DATA mode, delete all previous data
+        if(mode.equals(IndexUpdateModes.REPLACE_ALL_DATA)){
             notifyProgress(0, 0, "Deleting old data");
             indexUnitService.deleteByIndex(index);
         }
@@ -345,8 +352,6 @@ public class UpdateIndexDataCallable implements Callable<Void> {
         List<StockUnit> units = response.getStockUnits();
         Collections.sort(units, Comparator.comparing(StockUnit::getDate));
         int j = 0;
-        LocalDateTime minDateTime = null;
-        LocalDateTime maxDateTime = null;
         for (StockUnit unit : units) {
 
             checkAbort();
@@ -355,37 +360,30 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
             notifyProgress(j, units.size(), symbol);
 
-
-            if(mode.equals(IndexUpdateModes.MISSING_DATA)){
-//                if(lastValidPoint....){
-//                    continue;
-//                }
-            }
-
-            IndexUnit indexUnit = saveItem(unit);
-
-            // keep minDateTime and maxDateTime up to date
-            if (minDateTime == null) {
-                minDateTime = indexUnit.getDateTimeLDT();
-            } else {
-                if (indexUnit.getDateTimeLDT().isBefore(minDateTime)) {
-                    minDateTime = indexUnit.getDateTimeLDT();
+            // if we are in ADD_MISSING_DATA_ONLY mode, skip the points
+            // before or equal the lastValidPoint
+            if(mode.equals(IndexUpdateModes.ADD_MISSING_DATA_ONLY)){
+                LocalDateTime dateTime = LocalDateTime.parse(unit.getDate(), fmt);
+                if(!dateTime.isAfter(lastValidPoint)){
+                    continue;
                 }
             }
-            if (maxDateTime == null) {
-                maxDateTime = indexUnit.getDateTimeLDT();
-            } else {
-                if (indexUnit.getDateTimeLDT().isAfter(maxDateTime)) {
-                    maxDateTime = indexUnit.getDateTimeLDT();
-                }
-            }
+
+            saveItem(unit);
 
         }
 
         // Consolidate the totals in the MarketIndex
-        index.setUnitsFromLD(minDateTime.toLocalDate());
-        index.setUnitsToLD(maxDateTime.toLocalDate());
-        index.setNumUnits(units.size());
+        IndexUnit unit;
+        unit = indexUnitService.findFirstByDate(index);
+        if(unit!=null){
+            index.setUnitsFromLD(unit.getDateTimeLDT().toLocalDate());
+        }
+        unit = indexUnitService.findLastByDate(index);
+        if(unit!=null){
+            index.setUnitsToLD(unit.getDateTimeLDT().toLocalDate());
+        }
+        index.setNumUnits(indexUnitService.countBy(index));
         index.setUnitFrequency(FrequencyTypes.DAILY.getCode());
         index.setPricesUpdateTs(Du.toUtcString(LocalDateTime.now()));
         marketIndexService.update(index);

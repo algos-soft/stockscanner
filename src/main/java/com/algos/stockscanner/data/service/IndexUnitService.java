@@ -84,6 +84,15 @@ public class IndexUnitService extends CrudService<IndexUnit, Integer> {
         return indexes;
     }
 
+    public IndexUnit findFirstByDate(MarketIndex index){
+        return repository.findFirstByIndexOrderByDateTimeAsc(index);
+    }
+
+    public IndexUnit findLastByDate(MarketIndex index) {
+        return repository.findFirstByIndexOrderByDateTimeDesc(index);
+    }
+
+
     public int countBy(MarketIndex index) {
         IndexUnit entity = new IndexUnit();
         MarketIndex eIndex = new MarketIndex();

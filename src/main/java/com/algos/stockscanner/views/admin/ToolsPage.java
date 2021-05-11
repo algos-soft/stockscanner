@@ -105,7 +105,7 @@ public class ToolsPage extends VerticalLayout {
         });
 
         String label = "<strong>Symbol validation</strong><br>" +
-                "Iterate all symbols contained in the file <strong>"+ Application.ALL_AVAILABLE_SYMBOLS+"</strong><br>" +
+                "Iterate all symbols contained in the file <strong>"+ Application.ETORO_INSTRUMENTS+"</strong><br>" +
                 "For each symbol, check if it is available on Alpha Vantage API.<br>" +
                 "Produces the file <strong>"+OUTPUT_FILENAME+"</strong> containing the available symbols.<br>" +
                 "Does the work in a background thread on the server.";
@@ -142,7 +142,7 @@ public class ToolsPage extends VerticalLayout {
 
         List<String> eToroInstruments = new ArrayList<>();
 
-        String filename = "config/etoro_instruments.csv";
+        String filename = Application.ETORO_INSTRUMENTS;
         File etoroInstrumentsFile = new File(filename);
         if (!etoroInstrumentsFile.exists()) {
             log.warn("File " + filename + " not found. Can't load list of eToro instruments.");
