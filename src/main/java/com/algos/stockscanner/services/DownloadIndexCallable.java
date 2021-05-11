@@ -13,6 +13,7 @@ import com.algos.stockscanner.enums.IndexDownloadModes;
 import com.algos.stockscanner.task.AbortedByUserException;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
+import com.algos.stockscanner.utils.Du;
 import com.crazzyghost.alphavantage.AlphaVantage;
 import com.crazzyghost.alphavantage.parameters.DataType;
 import com.crazzyghost.alphavantage.parameters.OutputSize;
@@ -368,6 +369,8 @@ public class DownloadIndexCallable implements Callable<Void> {
             }
 
         }
+
+        index.setFundamentalUpdateTs(Du.toUtcString(LocalDateTime.now()));
 
         marketIndexService.update(index);
 

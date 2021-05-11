@@ -44,7 +44,7 @@ import java.util.*;
 @Service
 public class MarketService {
 
-    private static final Logger log = LoggerFactory.getLogger(MarketService.class);
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     ResourceLoader resourceLoader;

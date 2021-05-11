@@ -10,6 +10,11 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -53,7 +58,7 @@ public class IndexDialog extends Dialog {
     private NumberField ovnBuyDayFld;
     private NumberField ovnBuyWEFld;
 
-    private Div imgPlaceholder;
+    private FlexLayout imgPlaceholder;
 
     @Autowired
     private Utils utils;
@@ -82,6 +87,10 @@ public class IndexDialog extends Dialog {
     private void init(){
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
+
+        imgPlaceholder=new FlexLayout();
+        imgPlaceholder.setId("indexdialog-imgplaceholder");
+
         add(buildContent());
 
         if(model!=null){
@@ -105,11 +114,10 @@ public class IndexDialog extends Dialog {
 
 
     private Component buildHeader(){
-        Div header = new Div();
-        header.addClassName("header");
+//        Div div = new Div();
+//        div.addClassName("header");
 
-        imgPlaceholder=new Div();
-        imgPlaceholder.addClickListener((ComponentEventListener<ClickEvent<Div>>) divClickEvent -> {
+        imgPlaceholder.addClickListener((ComponentEventListener<ClickEvent<FlexLayout>>) divClickEvent -> {
             changeIconByUrl();
         });
 
@@ -120,8 +128,29 @@ public class IndexDialog extends Dialog {
 
         updateIcon();
 
-        Label title = new Label("Index");
-        header.add(imgPlaceholder, title);
+        VerticalLayout description = new VerticalLayout();
+        description.setSpacing(false);
+        description.setPadding(false);
+        Span span1=new Span();
+        span1.setId("indexdialog-symbol");
+        Span span2=new Span();
+        span2.setId("indexdialog-name");
+        if(model!=null){
+            if(model.getSymbol()!=null){
+                span1.setText(model.getSymbol());
+            }
+            if(model.getName()!=null){
+                span2.setText(model.getName());
+            }
+        }else{
+            span1.setText("New index");
+        }
+        description.add(span1, span2);
+
+        HorizontalLayout header = new HorizontalLayout();
+        header.setAlignItems(FlexComponent.Alignment.CENTER);
+        header.add(imgPlaceholder, description);
+
         return header;
     }
 

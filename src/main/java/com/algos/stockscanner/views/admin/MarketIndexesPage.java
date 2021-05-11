@@ -48,9 +48,6 @@ public class MarketIndexesPage  extends VerticalLayout {
     @Autowired
     private ApplicationContext context;
 
-    //@Autowired
-    //private MarketService marketService;
-
     @Autowired
     private MarketIndexService marketIndexService;
 
@@ -94,6 +91,48 @@ public class MarketIndexesPage  extends VerticalLayout {
             }
         });
 
+
+        String str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        char[] charArray = str.toCharArray();
+        Character[] characters = ArrayUtils.toObject(charArray);
+
+        filterFrom =new Select<>();
+        filterFrom.setLabel("from");
+        filterFrom.setItems(characters);
+        filterFrom.setValue(new Character('A'));
+        filterFrom.setWidth("4em");
+        filterFrom.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<Character>, Character>>) event -> {
+            updateFilter();
+        });
+
+        filterTo =new Select<>();
+        filterTo.setLabel("to");
+        filterTo.setItems(characters);
+        filterTo.setValue(new Character('Z'));
+        filterTo.setWidth("4em");
+        filterTo.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<Character>, Character>>) event -> {
+            updateFilter();
+        });
+
+        filterResult = new Span();
+        filterResult.setId("adminview-filterresult");
+
+        Button bShow = new Button("show");
+        bShow.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                List<String> symbolList=buildFilteredSymbolList();
+                String csvList = String.join(", ", symbolList);
+                ConfirmDialog.createInfo().withMessage(csvList).open();
+            }
+        });
+
+
+        // request limit field
+        limitField=new IntegerField("Max req per minute");
+        limitField.setId("adminview-reqlimitfield");
+        limitField.setValue(5);
+
         Button bDownloadIndexes = new Button("Start download");
         bDownloadIndexes.setId("adminview-bdownloadindexes");
         bDownloadIndexes.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
@@ -124,51 +163,6 @@ public class MarketIndexesPage  extends VerticalLayout {
             }
         });
 
-
-        String str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        char[] charArray = str.toCharArray();
-        Character[] characters = ArrayUtils.toObject(charArray);
-
-
-        filterFrom =new Select<>();
-        filterFrom.setLabel("from");
-        filterFrom.setItems(characters);
-        filterFrom.setValue(new Character('A'));
-        filterFrom.setWidth("4em");
-        filterFrom.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<Character>, Character>>) event -> {
-            updateFilter();
-        });
-
-        filterTo =new Select<>();
-        filterTo.setLabel("to");
-        filterTo.setItems(characters);
-        filterTo.setValue(new Character('Z'));
-        filterTo.setWidth("4em");
-        filterTo.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<Character>, Character>>) event -> {
-            updateFilter();
-        });
-
-
-
-        // request limit field
-        limitField=new IntegerField("Max req per minute");
-        limitField.setId("adminview-reqlimitfield");
-        limitField.setValue(5);
-
-        filterResult = new Span();
-        filterResult.setId("adminview-filterresult");
-
-        Button bShow = new Button("show");
-        bShow.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                List<String> symbolList=buildFilteredSymbolList();
-                String csvList = String.join(", ", symbolList);
-                ConfirmDialog.createInfo().withMessage(csvList).open();
-            }
-        });
-
-
         HorizontalLayout filterRow = new HorizontalLayout();
         filterRow.setAlignItems(Alignment.BASELINE);
         filterRow.add(filterFrom, filterTo, filterResult, bShow);
@@ -177,12 +171,17 @@ public class MarketIndexesPage  extends VerticalLayout {
         buttonRow.setAlignItems(Alignment.BASELINE);
         buttonRow.add(limitField, bDownloadIndexes);
 
+        Span headline=new Span("Download/update market indexes");
+        headline.addClassName("adminview-headline");
+
         VerticalLayout content = new VerticalLayout();
         content.setHeight("100%");
-        content.add(optionsGroup, filterRow, buttonRow);
+        content.add(headline, optionsGroup, filterRow, buttonRow);
 
         setHeight("100%");
         add(content, statusLayout);
+
+        updateFilter();
 
         // retrieve the running tasks from the context, create Task Monitors and put them in the UI
         Collection<DownloadIndexCallable> callables = contextStore.downloadIndexCallableMap.values();
@@ -190,7 +189,6 @@ public class MarketIndexesPage  extends VerticalLayout {
             attachMonitorToTask(callable);
         }
 
-        updateFilter();
 
     }
 

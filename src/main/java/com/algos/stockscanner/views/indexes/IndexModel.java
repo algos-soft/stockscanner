@@ -4,6 +4,7 @@ import com.algos.stockscanner.enums.FrequencyTypes;
 import com.algos.stockscanner.enums.IndexCategories;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 /***
@@ -26,6 +27,10 @@ public class IndexModel {
     private LocalDate unitsTo;
     private int numUnits;
     private FrequencyTypes unitFrequency;
+
+    private LocalDateTime fundamentalUpdateTs;
+    private LocalDateTime pricesUpdateTs;
+
 
     public IndexModel() {
     }
@@ -141,4 +146,21 @@ public class IndexModel {
     public void setUnitFrequency(FrequencyTypes unitFrequency) {
         this.unitFrequency = unitFrequency;
     }
+
+    public LocalDateTime getFundamentalUpdateTs() {
+        return fundamentalUpdateTs;
+    }
+
+    public void setFundamentalUpdateTs(LocalDateTime fundamentalUpdateTs) {
+        this.fundamentalUpdateTs = fundamentalUpdateTs;
+    }
+
+    public LocalDateTime getPricesUpdateTs() {
+        return pricesUpdateTs;
+    }
+
+    public void setPricesUpdateTs(LocalDateTime pricesUpdateTs) {
+        this.pricesUpdateTs = pricesUpdateTs;
+    }
+
 }

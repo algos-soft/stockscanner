@@ -140,6 +140,9 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
             model.setUnitFrequency(oFrequency.get());
         }
 
+        model.setFundamentalUpdateTs(Du.toLocalDateTime(entity.getFundamentalUpdateTs()));
+        model.setPricesUpdateTs(Du.toLocalDateTime(entity.getPricesUpdateTs()));
+
     }
 
 

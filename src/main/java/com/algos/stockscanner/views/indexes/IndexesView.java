@@ -41,6 +41,7 @@ import org.springframework.data.domain.Pageable;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,11 +82,9 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         Grid.Column col;
         grid = new Grid<>();
-//        grid.getStyle().set("background","yellow");
         grid.setHeight("100%");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
         col = grid.addComponentColumn(index -> createCard(index));
-//        col.setHeader("Colonna 1");
         add(grid);
 
         // customize the header
@@ -149,9 +148,10 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         Component pan1 = buildPan1(model);
         Component pan2 = buildPan2(model);
         Component pan3 = buildPan3(model);
+        Component pan4 = buildPan4(model);
         Component action = buildActionCombo(model);
 
-        card.add(pan1, pan2, pan3, action);
+        card.add(pan1, pan2, pan3, pan4, action);
 
         return card;
     }
@@ -235,9 +235,59 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
 
+
+
+    private Component buildPan4(IndexModel model) {
+
+        IronIcon icon1 = new IronIcon("vaadin", "clock");
+        String text1;
+        if (model.getFundamentalUpdateTs() !=null) {
+            text1 = formatTs(model.getFundamentalUpdateTs());
+        } else {
+            text1 = "never";
+        }
+        text1="last upd: "+text1;
+        Span span1 = new Span(text1);
+        span1.addClassName("interval");
+        HorizontalLayout row1 = new HorizontalLayout();
+        row1.addClassName("details");
+        row1.add(icon1, span1);
+
+        IronIcon icon2 = new IronIcon("vaadin", "clock");
+        String text2;
+        if (model.getPricesUpdateTs() !=null) {
+            text2 = formatTs(model.getPricesUpdateTs());
+        } else {
+            text2 = "never";
+        }
+        text2="prices upd: "+text2;
+        Span span2 = new Span(text2);
+        span2.addClassName("interval");
+        HorizontalLayout row2 = new HorizontalLayout();
+        row2.addClassName("details");
+        row2.add(icon2, span2);
+
+        Pan pan = new Pan();
+        pan.add(row1, row2);
+
+        return pan;
+    }
+
+
+
+
+
     private String format(LocalDate d) {
         if (d != null) {
             return d.format(DateTimeFormatter.ofPattern("dd MMM u"));
+        }
+
+        return null;
+    }
+
+    private String formatTs(LocalDateTime ts) {
+        if (ts != null) {
+            return ts.format(DateTimeFormatter.ofPattern("dd MMM u kk:mm"));
         }
 
         return null;

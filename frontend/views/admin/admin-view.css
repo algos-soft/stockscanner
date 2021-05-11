@@ -40,4 +40,6 @@
     font-size: var(--lumo-font-size-xxs);
 }
 
-
+.adminview-headline{
+  font-weight: bold;
+}

@@ -40,6 +40,10 @@ public class MarketIndex extends AbstractEntity {
 
     private String unitFrequency;
 
+    private String fundamentalUpdateTs;  // last update od Fundamental Data
+    private String pricesUpdateTs;  // last update od Prices data
+
+
     @OneToMany(mappedBy = "index", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IndexUnit> units=new ArrayList<>();
 
@@ -153,6 +157,22 @@ public class MarketIndex extends AbstractEntity {
 
     public void setUnitFrequency(String unitFrequency) {
         this.unitFrequency = unitFrequency;
+    }
+
+    public String getFundamentalUpdateTs() {
+        return fundamentalUpdateTs;
+    }
+
+    public void setFundamentalUpdateTs(String fundamentalUpdateTs) {
+        this.fundamentalUpdateTs = fundamentalUpdateTs;
+    }
+
+    public String getPricesUpdateTs() {
+        return pricesUpdateTs;
+    }
+
+    public void setPricesUpdateTs(String pricesUpdateTs) {
+        this.pricesUpdateTs = pricesUpdateTs;
     }
 
     public LocalDate getUnitsFromLD(){
