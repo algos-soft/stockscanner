@@ -6,7 +6,7 @@ import com.algos.stockscanner.data.AbstractEntity;
 import java.time.LocalDate;
 
 @Entity
-public class SamplePerson extends AbstractEntity {
+public class User extends AbstractEntity {
 
     private String firstName;
     private String lastName;

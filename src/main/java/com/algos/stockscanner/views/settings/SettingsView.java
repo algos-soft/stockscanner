@@ -1,9 +1,9 @@
 package com.algos.stockscanner.views.settings;
 
 import com.algos.stockscanner.Application;
-import com.algos.stockscanner.data.entity.SamplePerson;
-import com.algos.stockscanner.data.service.SamplePersonService;
+import com.algos.stockscanner.data.entity.User;
 import com.algos.stockscanner.beans.Utils;
+import com.algos.stockscanner.data.service.*;
 import com.algos.stockscanner.views.PageSubtitle;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -45,11 +45,11 @@ public class SettingsView extends Div {
     private Button cancel = new Button("Cancel");
     private Button save = new Button("Save");
 
-    private Binder<SamplePerson> binder = new Binder(SamplePerson.class);
+    private Binder<User> binder = new Binder(User.class);
 
     private @Autowired Utils utils;
 
-    public SettingsView(SamplePersonService personService) {
+    public SettingsView(UserService personService) {
         addClassName("settings-view");
 
         add(createTitle());
@@ -81,7 +81,7 @@ public class SettingsView extends Div {
     }
 
     private void clearForm() {
-        binder.setBean(new SamplePerson());
+        binder.setBean(new User());
     }
 
     private Component createTitle() {

@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.admin.AdminView;
+import com.algos.stockscanner.views.persons.*;
 import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -12,7 +13,6 @@ import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -22,7 +22,6 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.PWA;
-import com.vaadin.flow.router.PageTitle;
 import com.algos.stockscanner.views.generators.GeneratorsView;
 import com.algos.stockscanner.views.indexes.IndexesView;
 import com.algos.stockscanner.views.settings.SettingsView;
@@ -108,6 +107,7 @@ public class MainView extends AppLayout {
                 createTab("Indexes", IndexesView.class),
                 createTab("Admin", AdminView.class),
                 createTab("Settings", SettingsView.class),
+                createTab("Users", UsersView.class),
                 createTab("About", AboutView.class)};
     }
 
