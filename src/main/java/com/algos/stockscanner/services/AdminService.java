@@ -5,6 +5,7 @@ import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.enums.IndexDownloadModes;
+import com.algos.stockscanner.enums.IndexUpdateModes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,19 +45,13 @@ public class AdminService {
         executorService = Executors.newScheduledThreadPool(Integer.MAX_VALUE);
     }
 
-    public List<UpdateIndexDataCallable> scheduleUpdate(List<String> symbols, int intervalSeconds)  {
+    public List<UpdateIndexDataCallable> scheduleUpdate(List<String> symbols, IndexUpdateModes mode, int intervalSeconds)  {
         List<UpdateIndexDataCallable> callables = new ArrayList<>();
 
         UpdateIndexDataCallable callable;
         long millis=0;
         for(String symbol : symbols){
-            MarketIndex index = null;
-            try {
-                index = marketIndexService.findUniqueBySymbol(symbol);
-            } catch (Exception e) {
-                log.error("can't find symbol "+symbol, e);
-            }
-            callable = context.getBean(UpdateIndexDataCallable.class, index, "ALL", null);
+            callable = context.getBean(UpdateIndexDataCallable.class, symbol, mode, null);
             callables.add(callable);
             executorService.schedule(callable, millis, TimeUnit.MILLISECONDS);
             millis+=intervalSeconds*1000;

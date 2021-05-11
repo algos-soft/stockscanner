@@ -58,6 +58,11 @@ public class IndexUnitService extends CrudService<IndexUnit, Integer> {
         return repository.findAllByIndexWithDateTimeEqualOrAfter(index, utcString);
     }
 
+    public List<IndexUnit> findAllByIndexWithDateTimeEqualOrAfterOrderByDate(MarketIndex index, LocalDateTime dateTime) {
+        String utcString = Du.toUtcString(dateTime);
+        return repository.findAllByIndexWithDateTimeEqualOrAfterOrderByDate(index, utcString);
+    }
+
     public int findFirstIdOf(MarketIndex index, LocalDateTime dateTime) {
         int id = -1;
         String utcString = Du.toUtcString(dateTime);

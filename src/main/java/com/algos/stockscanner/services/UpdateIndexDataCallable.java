@@ -7,6 +7,7 @@ import com.algos.stockscanner.enums.FrequencyTypes;
 import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.data.service.IndexUnitService;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.algos.stockscanner.enums.IndexUpdateModes;
 import com.algos.stockscanner.task.AbortedByUserException;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
@@ -52,7 +53,8 @@ public class UpdateIndexDataCallable implements Callable<Void> {
             .toFormatter();
 
     private MarketIndex index;
-    private String mode;
+    private String symbol;
+    private IndexUpdateModes mode;
     private LocalDate startDate;
     private ConcurrentLinkedQueue<TaskListener> listeners = new ConcurrentLinkedQueue<>();
     private LocalDateTime startTime;
@@ -61,6 +63,8 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     private boolean running;
     private boolean abort;
     private Progress currentProgress;
+
+    private IndexUnit lastValidPoint;
 
     @Autowired
     private ContextStore contextStore;
@@ -72,25 +76,30 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     private MarketIndexService marketIndexService;
 
     /**
-     * @param index     the index to update
-     * @param mode      the update mode
-     *                  ALL - delete all index data and load all the available data
-     *                  DATE - add/update all data starting from the given date included
+     * @param symbol    the index to update
+     * @param mode      the update mode (@see IndexUpdateModes)
      * @param startDate in case of DATE mode, the date when to begin the update
      */
-    public UpdateIndexDataCallable(MarketIndex index, String mode, LocalDate startDate) {
-        this.index = index;
+    public UpdateIndexDataCallable(String symbol, IndexUpdateModes mode, LocalDate startDate) {
+        this.symbol = symbol;
         this.mode = mode;
         this.startDate = startDate;
     }
 
+
     @PostConstruct
     private void init() {
 
-        log.info("Callable task created for index " + index.getSymbol());
+        log.info("Callable task created for index " + symbol);
 
         // register itself to the context-level storage
         contextStore.updateIndexCallableMap.put("" + hashCode(), this);
+
+        try {
+            index=marketIndexService.findUniqueBySymbol(symbol);
+        } catch (Exception e) {
+            log.error("symbol not found: "+symbol, e);
+        }
 
         currentProgress=new Progress();
 
@@ -109,7 +118,7 @@ public class UpdateIndexDataCallable implements Callable<Void> {
             return null;
         }
 
-        log.debug("Callable task called for index " + index.getSymbol());
+        log.debug("Callable task called for index " + symbol);
 
         running=true;
 
@@ -124,7 +133,7 @@ public class UpdateIndexDataCallable implements Callable<Void> {
             // retrieve the category
             java.util.Optional<IndexCategories> oCategory = IndexCategories.getItem(index.getCategory());
             if (!oCategory.isPresent()) {
-                throw new Exception("Index " + index.getSymbol() + " does not have a category.");
+                throw new Exception("Index " + symbol + " does not have a category.");
             }
             IndexCategories category = oCategory.get();
 
@@ -143,13 +152,7 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
                     notifyProgress(0, 0, "Requesting data");
 
-                    TimeSeriesResponse response=AlphaVantage.api()
-                            .timeSeries()
-                            .daily()
-                            .forSymbol(index.getSymbol())
-                            .outputSize(OutputSize.FULL)
-                            .dataType(DataType.JSON)
-                            .fetchSync();
+                    TimeSeriesResponse response=executeRequest();
 
                     String error=response.getErrorMessage();
                     if(error!=null){
@@ -165,7 +168,7 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
             endTime = LocalDateTime.now();
             String info = buildDurationInfo();
-            log.info("Callable task completed for index " + index.getSymbol() + " " + info);
+            log.info("Callable task completed for index " + symbol + " " + info);
             notifyCompleted(info);
 
         } catch (Exception e) {
@@ -179,10 +182,74 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
         }
 
-
-
         return null;
 
+    }
+
+
+    /**
+     * Execute the request synchronously and return the response.
+     * <br>
+     * If the request mode is ALL_DATA, makes a full request and returns the result.
+     * If the request mode is MISSING_DATA, makes a compact request and checks if
+     * the returned data is enough to cover the missing period.
+     * If the check is positive, return the result.
+     * If negative, make a full request and return the result.
+     */
+    private TimeSeriesResponse executeRequest(){
+
+        OutputSize outputSize=null;
+        switch (mode){
+            case ALL_DATA:
+                outputSize=OutputSize.FULL;
+                break;
+            case MISSING_DATA:
+                outputSize=OutputSize.COMPACT;
+                break;
+        }
+
+        TimeSeriesResponse response=AlphaVantage.api()
+                .timeSeries()
+                .daily()
+                .forSymbol(symbol)
+                .outputSize(outputSize)
+                .dataType(DataType.JSON)
+                .fetchSync();
+
+        if(mode.equals(IndexUpdateModes.MISSING_DATA)){
+            if(!coversMissingPeriod(response)){
+                response=AlphaVantage.api()
+                        .timeSeries()
+                        .daily()
+                        .forSymbol(symbol)
+                        .outputSize(OutputSize.FULL)
+                        .dataType(DataType.JSON)
+                        .fetchSync();
+            }
+        }
+
+        return response;
+    }
+
+
+    /**
+     * Check if the data contained in the response covers the missing data for the index.
+     * The first point of the data contained in the response must precede or be equal to the
+     * last point currently present for the symbol.
+     */
+    private boolean coversMissingPeriod(TimeSeriesResponse response){
+        List<StockUnit> units = response.getStockUnits();
+        if(units.size()>0){
+            Collections.sort(units, Comparator.comparing(StockUnit::getDate));
+            StockUnit firstUnit= units.get(0);
+            LocalDateTime firstPoint = LocalDateTime.parse(firstUnit.getDate(), fmt);
+            List<IndexUnit> unitsEqOrPost = indexUnitService.findAllByIndexWithDateTimeEqualOrAfterOrderByDate(index, firstPoint);
+            if(unitsEqOrPost.size()>0){
+                lastValidPoint = unitsEqOrPost.get(unitsEqOrPost.size()-1); // last valid unit present in db, save it for later
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -268,9 +335,11 @@ public class UpdateIndexDataCallable implements Callable<Void> {
      */
     public void handleResponse(TimeSeriesResponse response)  throws Exception {
 
-        // delete all previous unit data
-        notifyProgress(0, 0, "Deleting old data");
-        indexUnitService.deleteByIndex(index);
+        // if replace all, delete all previous unit data
+        if(mode.equals(IndexUpdateModes.ALL_DATA)){
+            notifyProgress(0, 0, "Deleting old data");
+            indexUnitService.deleteByIndex(index);
+        }
 
         // Iterate the new units and save them
         List<StockUnit> units = response.getStockUnits();
@@ -284,7 +353,14 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
             j++;
 
-            notifyProgress(j, units.size(), index.getSymbol());
+            notifyProgress(j, units.size(), symbol);
+
+
+            if(mode.equals(IndexUpdateModes.MISSING_DATA)){
+//                if(lastValidPoint....){
+//                    continue;
+//                }
+            }
 
             IndexUnit indexUnit = saveItem(unit);
 
@@ -343,9 +419,9 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     private void terminateWithError(Exception e){
         endTime = LocalDateTime.now();
         if(e instanceof AbortedByUserException){
-            log.info("Callable task aborted by user for index " + index.getSymbol());
+            log.info("Callable task aborted by user for index " + symbol);
         }else{
-            log.error("Callable task error for index " + index.getSymbol(), e);
+            log.error("Callable task error for index " + symbol, e);
         }
         notifyError(e);
     }

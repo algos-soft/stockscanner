@@ -5,6 +5,7 @@ import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.enums.IndexDownloadModes;
+import com.algos.stockscanner.enums.IndexUpdateModes;
 import com.algos.stockscanner.services.AdminService;
 import com.algos.stockscanner.services.DownloadIndexCallable;
 import com.algos.stockscanner.services.MarketService;
@@ -19,6 +20,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.server.Command;
@@ -74,6 +77,9 @@ public class PricesPage extends VerticalLayout {
 
     private Span filterResult;
 
+    private RadioButtonGroup<IndexUpdateModes> optionsGroup;
+
+
     @PostConstruct
     private void init(){
 
@@ -82,8 +88,21 @@ public class PricesPage extends VerticalLayout {
         statusLayout.setPadding(false);
         statusLayout.addClassName("admin-view-statuslayout");
 
+        optionsGroup = new RadioButtonGroup<>();
+        optionsGroup.setLabel("Download mode");
+        optionsGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        optionsGroup.setItems(IndexUpdateModes.values());
+        optionsGroup.setValue(IndexUpdateModes.MISSING_DATA);
+        optionsGroup.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<IndexUpdateModes>, IndexUpdateModes>>() {
+            @Override
+            public void valueChanged(AbstractField.ComponentValueChangeEvent<RadioButtonGroup<IndexUpdateModes>, IndexUpdateModes> event) {
+                updateFilter();
+            }
+        });
+
+
         // button update prices
-        Button bUpdatePrices = new Button("Update prices");
+        Button bUpdatePrices = new Button("Start update");
         bUpdatePrices.setId("adminview-bupdateprices");
         bUpdatePrices.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
@@ -99,7 +118,7 @@ public class PricesPage extends VerticalLayout {
 
                     log.info("price update requested - "+symbols.size()+" indexes to update");
                     int intervalSec = 60/limitField.getValue();
-                    List<UpdateIndexDataCallable> callables = adminService.scheduleUpdate(symbols, intervalSec);
+                    List<UpdateIndexDataCallable> callables = adminService.scheduleUpdate(symbols, optionsGroup.getValue(), intervalSec);
                     for(UpdateIndexDataCallable callable : callables){
                         attachMonitorToTask(callable);
                     }
@@ -167,7 +186,7 @@ public class PricesPage extends VerticalLayout {
         headline.addClassName("adminview-headline");
 
         VerticalLayout content = new VerticalLayout();
-        content.add(headline, filterRow, buttonRow);
+        content.add(headline, optionsGroup, filterRow, buttonRow);
         content.setHeight("100%");
 
         setHeight("100%");
