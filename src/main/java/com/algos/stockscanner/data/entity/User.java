@@ -8,11 +8,11 @@ import java.time.LocalDate;
 @Entity
 public class User extends AbstractEntity {
 
-    private String firstName;
-    private String lastName;
     private String userName;
     private String password;
     private String email;
+    private String firstName;
+    private String lastName;
     private String phone;
     private LocalDate dateOfBirth;
     private String occupation;

@@ -2,13 +2,12 @@ package com.algos.stockscanner.data.service;
 
 import com.algos.stockscanner.beans.*;
 import com.algos.stockscanner.data.entity.*;
-
 import com.algos.stockscanner.views.users.*;
 import com.vaadin.flow.data.provider.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
-import org.vaadin.artur.helpers.CrudService;
+import org.springframework.stereotype.*;
+import org.vaadin.artur.helpers.*;
 
 import java.util.*;
 
@@ -17,6 +16,7 @@ public class UserService extends CrudService<User, Integer> {
 
     @Autowired
     private Utils utils;
+
     private UserRepository repository;
 
     public UserService(@Autowired UserRepository repository) {
@@ -37,7 +37,8 @@ public class UserService extends CrudService<User, Integer> {
         Page<User> page;
         if (example != null) {
             page = repository.findAll(example, pageable);
-        } else {
+        }
+        else {
             page = repository.findAll(pageable);
         }
 
@@ -52,7 +53,6 @@ public class UserService extends CrudService<User, Integer> {
     }
 
 
-
     /**
      * Copy data from Entity to View Model
      */
@@ -62,7 +62,7 @@ public class UserService extends CrudService<User, Integer> {
         model.setLastName(entity.getLastName());
         model.setUserName(entity.getUserName());
         model.setPassword(entity.getPassword());
-        model.setEmail( entity.getEmail());
+        model.setEmail(entity.getEmail());
         model.setPhone(entity.getPhone());
         model.setDateOfBirth(entity.getDateOfBirth());
         model.setImportant(entity.getImportant());
@@ -76,7 +76,7 @@ public class UserService extends CrudService<User, Integer> {
         entity.setLastName(model.getLastName());
         entity.setUserName(model.getUserName());
         entity.setPassword(model.getPassword());
-        entity.setEmail( model.getEmail());
+        entity.setEmail(model.getEmail());
         entity.setPhone(model.getPhone());
         entity.setDateOfBirth(model.getDateOfBirth());
         entity.setImportant(model.getImportant());
@@ -88,13 +88,24 @@ public class UserService extends CrudService<User, Integer> {
      * Initialize with default values
      */
     public void initEntity(User entity) {
+        entity.setUserName("Nick");
+        entity.setPassword("+++");
+        entity.setEmail("...@libero.it");
+        entity.setFirstName("Mario");
+        entity.setLastName("Rossi");
     }
+
     /**
      * Standard initialization of a new model for the dialog.
      * <p>
      * Initialize with default values
      */
     public void initModel(UserModel model) {
+        model.setUserName("Nick");
+        model.setPassword("+++");
+        model.setEmail("...@libero.it");
+        model.setFirstName("Mario");
+        model.setLastName("Rossi");
     }
 
     public int count() {
