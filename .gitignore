@@ -18,3 +18,4 @@ webpack.generated.js
 /node/
 /log/
 /etoro_valid_symbols.txt
+/config/etoro_instruments_all.csv
