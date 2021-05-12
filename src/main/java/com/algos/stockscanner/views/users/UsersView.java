@@ -120,12 +120,6 @@ public class UsersView extends Div implements HasUrlParameter<String>, AfterNavi
         col.setWidth("5em");
         col.setResizable(true);
 
-        // Password
-        col = grid.addColumn(UserModel::getPassword);
-        col.setHeader("Password");
-        col.setWidth("5em");
-        col.setResizable(true);
-
         // mail
         col = grid.addColumn(UserModel::getEmail);
         col.setHeader("Mail");
@@ -144,6 +138,7 @@ public class UsersView extends Div implements HasUrlParameter<String>, AfterNavi
         col.setWidth("5em");
         col.setResizable(true);
 
+        grid.addItemDoubleClickListener(listener -> openItem(listener));
     }
 
 
@@ -168,6 +163,26 @@ public class UsersView extends Div implements HasUrlParameter<String>, AfterNavi
         UserDialog dialog = context.getBean(UserDialog.class, model, listener);
 
         dialog.open();
+    }
+
+    /**
+     * Present a dialog to update an item
+     */
+    private void openItem(ItemDoubleClickEvent<UserModel> evento) {
+        UserModel model = (UserModel)evento.getItem();
+
+        UserDialogConfirmListener listener = new UserDialogConfirmListener() {
+            @Override
+            public void onConfirm(UserModel model) {
+                User entity=  userService.getOne(model.getId());
+                userService.initEntity(entity);
+                userService.modelToEntity(model, entity);
+                userService.update(entity);
+                refreshGrid();
+            }
+        };
+
+        context.getBean(UserDialog.class, model, listener).open();
     }
 
     private void refreshGrid() {
