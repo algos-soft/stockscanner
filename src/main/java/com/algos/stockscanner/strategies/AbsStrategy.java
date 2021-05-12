@@ -28,7 +28,13 @@ public abstract class AbsStrategy implements Strategy {
 
     private static final int PAGE_SIZE = 100;      // max units per page
 
-    StrategyParams params;
+//    StrategyParams params;
+    MarketIndex index;
+    LocalDate startDate;
+    int numDays;
+    float initialAmount;
+
+
 
     boolean abort=false;
 
@@ -85,8 +91,11 @@ public abstract class AbsStrategy implements Strategy {
     StrategyService strategyService;
 
 
-    public AbsStrategy(StrategyParams params) {
-        this.params=params;
+    public AbsStrategy(MarketIndex index, LocalDate startDate, int numDays, float initialAmount) {
+        this.index=index;
+        this.startDate=startDate;
+        this.numDays=numDays;
+        this.initialAmount=initialAmount;
     }
 
     public Simulation execute() throws Exception {

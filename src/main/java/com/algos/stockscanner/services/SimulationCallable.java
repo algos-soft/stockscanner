@@ -29,16 +29,17 @@ public class SimulationCallable implements Callable<Void> {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    LocalDate startDate;
-    private int indexId;
-    private float initialAmount;
-    int sl;
-    int tp;
-    int numDays;
-    private StrategyParams strategyParams;
+//    LocalDate startDate;
+//    private int indexId;
+//    private float initialAmount;
+//    int sl;
+//    int tp;
+//    int numDays;
+//    private StrategyParams strategyParams;
 
-    private MarketIndex marketIndex;
+//    private MarketIndex marketIndex;
 
+    private Strategy strategy;
     private ConcurrentLinkedQueue<TaskListener> listeners = new ConcurrentLinkedQueue<>();
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -56,32 +57,33 @@ public class SimulationCallable implements Callable<Void> {
     @Autowired
     private MarketIndexService marketIndexService;
 
-    public SimulationCallable(LocalDate startDate, int indexId, float initialAmount, int sl, int tp, int numDays, StrategyParams strategyParams) {
-        this.startDate = startDate;
-        this.indexId = indexId;
-        this.initialAmount=initialAmount;
-        this.sl=sl;
-        this.tp=tp;
-        this.numDays=numDays;
-        this.strategyParams=strategyParams;
+    public SimulationCallable(Strategy strategy) {
+//        this.startDate = startDate;
+//        this.indexId = indexId;
+//        this.initialAmount=initialAmount;
+//        this.sl=sl;
+//        this.tp=tp;
+//        this.numDays=numDays;
+//        this.strategyParams=strategyParams;
     }
 
-    private String getLogString(){
-        return("date="+startDate+", index=" + marketIndex.getSymbol());
+    private String getLogString() {
+//        return("date="+startDate+", index=" + marketIndex.getSymbol());
+        return ("log string");
     }
 
 
     @PostConstruct
     private void init() {
 
-        marketIndex=marketIndexService.get(indexId).get();
+//        marketIndex=marketIndexService.get(indexId).get();
 
-        log.info("Simulation task created for "+getLogString());
+        log.info("Simulation task created for " + getLogString());
 
         // register itself to the context-level storage
         contextStore.simulationCallableMap.put("" + hashCode(), this);
 
-        currentProgress=new Progress();
+        currentProgress = new Progress();
 
         // puts the task in 'waiting for start' status
         currentProgress.update("waiting...");
@@ -94,14 +96,14 @@ public class SimulationCallable implements Callable<Void> {
 
         // if already aborted before starting,
         // unregister itself from the context-level storage and return
-        if(abort){
+        if (abort) {
             contextStore.simulationCallableMap.remove("" + hashCode(), this);
             return null;
         }
 
         log.debug("Simulation task started for " + getLogString());
 
-        running=true;
+        running = true;
 
         // if is already aborted, don't perform the task
         startTime = LocalDateTime.now();
@@ -113,16 +115,10 @@ public class SimulationCallable implements Callable<Void> {
             // do the stuff
             doTheStuff();
 
-//            for(int i=0; i<10; i++){
-//                checkAbort();   // throws exception if the task is aborted
-//                notifyProgress(i, 9, marketIndex.getSymbol()+", A="+amplitude+", L="+lookback);
-//                Thread.sleep(1000);
-//            }
-
 
             endTime = LocalDateTime.now();
             String info = buildDurationInfo();
-            log.info("Simulation task completed for "+getLogString());
+            log.info("Simulation task completed for " + getLogString());
             notifyCompleted(info);
 
         } catch (Exception e) {
@@ -139,7 +135,6 @@ public class SimulationCallable implements Callable<Void> {
         return null;
 
     }
-
 
 
     private String buildDurationInfo() {
@@ -171,11 +166,11 @@ public class SimulationCallable implements Callable<Void> {
             public void abort() {
 
                 // turn on the abort flag
-                abort=true;
+                abort = true;
 
                 // if not running yet (the task is scheduled and is in a wait state)
                 // call immediately the abort procedure
-                if(!running){
+                if (!running) {
                     try {
                         checkAbort();
                     } catch (Exception e) {
@@ -210,7 +205,7 @@ public class SimulationCallable implements Callable<Void> {
     }
 
 
-    private void checkAbort() throws Exception{
+    private void checkAbort() throws Exception {
         if (abort) {
             currentProgress.update("Aborted");
             notifyProgress(currentProgress.getCurrent(), currentProgress.getTot(), currentProgress.getStatus());
@@ -223,30 +218,30 @@ public class SimulationCallable implements Callable<Void> {
      * Sets the end timestamp, logs the error and
      * notifies the listeners
      */
-    private void terminateWithError(Exception e){
+    private void terminateWithError(Exception e) {
         endTime = LocalDateTime.now();
-        if(e instanceof AbortedByUserException){
-            log.info("Simulation task aborted by user for "+getLogString());
-        }else{
+        if (e instanceof AbortedByUserException) {
+            log.info("Simulation task aborted by user for " + getLogString());
+        } else {
             log.error("Simulation task error for " + getLogString(), e);
         }
         notifyError(e);
     }
 
 
-    class Progress{
+    class Progress {
         private int current;
         private int tot;
         private String status;
 
-        public void update(int current, int tot, String status){
-            this.current=current;
-            this.tot=tot;
-            this.status=status;
+        public void update(int current, int tot, String status) {
+            this.current = current;
+            this.tot = tot;
+            this.status = status;
         }
 
-        public void update(String status){
-            this.status=status;
+        public void update(String status) {
+            this.status = status;
         }
 
         public int getCurrent() {
@@ -263,43 +258,53 @@ public class SimulationCallable implements Callable<Void> {
     }
 
 
+    private void doTheStuff() throws Exception {
 
-    private void doTheStuff(){
+        notifyProgress(0, 1, "running");
 
-        Strategy strategy =  context.getBean(SurferStrategy.class);
-
-
-
-        // prepare params
-        MarketIndex index = marketIndexService.get(indexId).get();
-        StrategyParamsOld params = new StrategyParamsOld();
-        params.setIndex(index);
-        params.setStartDate(startDate);
-        params.setFixedDays(generator.getFixedDays());
-        LocalDate endDate = params.getStartDate().plusDays(generator.getDays() - 1);
-        if (generator.getFixedDays()) {   // Fixd length
-            params.setEndDate(endDate);
-        } else {  // Variable length
-            if (generator.getDays() > 0) {
-                params.setEndDate(endDate);
-            }
+        for (int i = 0; i < 10; i++) {
+            checkAbort();   // throws exception if the task is aborted
+//            notifyProgress(i, 9, marketIndex.getSymbol() + ", A=" + amplitude + ", L=" + lookback);
+            Thread.sleep(1000);
         }
-        params.setInitialAmount(utils.toPrimitive(generator.getAmount()));
-        params.setSl(utils.toPrimitive(generator.getStopLoss()));
-        params.setTp(utils.toPrimitive(generator.getTakeProfit()));
-        params.setAmplitude(amplitude);
-        params.setSpreadPercent(utils.toPrimitive(index.getSpreadPercent()));
-        params.setDaysLookback(lookback);
 
-        // run the strategy and retrieve a Simulation
-        strategy = context.getBean(SurferStrategyOld.class, params);
-        simulation = strategy.execute();
+        notifyProgress(1, 1, "completed");
 
-        // assign the Simulation to the Generator and save
-        if (simulation != null) {
-            simulation.setGenerator(generator);
-            simulationService.update(simulation);
-        }
+
+//        Strategy strategy =  context.getBean(SurferStrategy.class);
+//
+//
+//
+//        // prepare params
+//        MarketIndex index = marketIndexService.get(indexId).get();
+//        StrategyParamsOld params = new StrategyParamsOld();
+//        params.setIndex(index);
+//        params.setStartDate(startDate);
+//        params.setFixedDays(generator.getFixedDays());
+//        LocalDate endDate = params.getStartDate().plusDays(generator.getDays() - 1);
+//        if (generator.getFixedDays()) {   // Fixd length
+//            params.setEndDate(endDate);
+//        } else {  // Variable length
+//            if (generator.getDays() > 0) {
+//                params.setEndDate(endDate);
+//            }
+//        }
+//        params.setInitialAmount(utils.toPrimitive(generator.getAmount()));
+//        params.setSl(utils.toPrimitive(generator.getStopLoss()));
+//        params.setTp(utils.toPrimitive(generator.getTakeProfit()));
+//        params.setAmplitude(amplitude);
+//        params.setSpreadPercent(utils.toPrimitive(index.getSpreadPercent()));
+//        params.setDaysLookback(lookback);
+//
+//        // run the strategy and retrieve a Simulation
+//        strategy = context.getBean(SurferStrategyOld.class, params);
+//        simulation = strategy.execute();
+//
+//        // assign the Simulation to the Generator and save
+//        if (simulation != null) {
+//            simulation.setGenerator(generator);
+//            simulationService.update(simulation);
+//        }
 
 
     }

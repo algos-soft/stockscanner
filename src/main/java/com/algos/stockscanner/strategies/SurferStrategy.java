@@ -1,6 +1,7 @@
 package com.algos.stockscanner.strategies;
 
 import com.algos.stockscanner.beans.Utils;
+import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.enums.ActionTypes;
 import com.algos.stockscanner.enums.Actions;
 import com.algos.stockscanner.enums.Reasons;
@@ -18,6 +19,11 @@ public class SurferStrategy extends AbsStrategy {
     @Autowired
     Utils utils;
 
+    private int sl;
+    private int tp;
+    private float amplitude;
+    private int daysLookback;
+
     boolean amplitudeExceeded;
 
     private boolean preAlertBuy;
@@ -29,8 +35,12 @@ public class SurferStrategy extends AbsStrategy {
         return "SURFER";
     }
 
-    public SurferStrategy(StrategyParams params) {
-        super(params);
+    public SurferStrategy(MarketIndex index, LocalDate startDate, int numDays, float initialAmount, int sl, int tp, float amplitude, int daysLookback) {
+        super(index, startDate, numDays, initialAmount);
+        this.sl=sl;
+        this.tp=tp;
+        this.amplitude=amplitude;
+        this.daysLookback=daysLookback;
     }
 
 
