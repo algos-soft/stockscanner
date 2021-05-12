@@ -29,7 +29,6 @@ public class GeneratorModel {
     private int amount;
     private int stopLoss; // of a single span, in percent
     private int takeProfit; // of a single span, in percent
-    private boolean durationFixed;
 
     private int amplitude;
     private boolean permutateAmpitude;
@@ -147,14 +146,6 @@ public class GeneratorModel {
 
     public void setTakeProfit(int takeProfit) {
         this.takeProfit = takeProfit;
-    }
-
-    public boolean isDurationFixed() {
-        return durationFixed;
-    }
-
-    public void setDurationFixed(boolean durationFixed) {
-        this.durationFixed = durationFixed;
     }
 
     public int getAmplitude() {

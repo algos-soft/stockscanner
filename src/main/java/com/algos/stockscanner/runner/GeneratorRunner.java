@@ -51,7 +51,6 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Scope("prototype")
 @CssImport(value = "./views/runner/generator-runner.css")
-//@Slf4j
 public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(GeneratorRunner.class);
@@ -233,14 +232,9 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     StrategyParamsOld params = new StrategyParamsOld();
                     params.setIndex(index);
                     params.setStartDate(startDate);
-                    params.setFixedDays(generator.getFixedDays());
                     LocalDate endDate = params.getStartDate().plusDays(generator.getDays() - 1);
-                    if (generator.getFixedDays()) {   // Fixd length
+                    if (generator.getDays() > 0) {
                         params.setEndDate(endDate);
-                    } else {  // Variable length
-                        if (generator.getDays() > 0) {
-                            params.setEndDate(endDate);
-                        }
                     }
                     params.setInitialAmount(utils.toPrimitive(generator.getAmount()));
                     params.setSl(utils.toPrimitive(generator.getStopLoss()));
@@ -459,11 +453,9 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
             throw new RunnerException("Initial amount is not specified");
         }
 
-        // if fixed length, number of days is required
-        if (generator.getFixedDays()) {
-            if (utils.toPrimitive(generator.getDays()) == 0) {
-                throw new RunnerException("Fixed length but no number of days specified");
-            }
+        // number of days is required
+        if (utils.toPrimitive(generator.getDays()) == 0) {
+            throw new RunnerException("Fixed length but no number of days specified");
         }
 
         // number of spans

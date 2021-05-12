@@ -248,4 +248,9 @@ public class SurferStrategy extends AbsStrategy {
     }
 
 
+    @Override
+    public String toString() {
+        return(index.getSymbol()+", a="+amplitude+", d="+daysLookback);
+    }
+
 }

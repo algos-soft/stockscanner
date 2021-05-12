@@ -1,5 +1,6 @@
 package com.algos.stockscanner.strategies;
 
+import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.IndexUnit;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
@@ -35,7 +36,6 @@ public abstract class AbsStrategy implements Strategy {
     float initialAmount;
 
     LocalDate endDate;
-    float spreadPercent;
 
     boolean abort=false;
 
@@ -75,6 +75,8 @@ public abstract class AbsStrategy implements Strategy {
     float totPl;        // total P/L of the simulation
     int totOpenings;    // total times a position has been opened
 
+    List<StrategyProgressListener> listeners=new ArrayList<>();
+
     @Autowired
     IndexUnitService indexUnitService;
 
@@ -90,6 +92,9 @@ public abstract class AbsStrategy implements Strategy {
     @Autowired
     StrategyService strategyService;
 
+    @Autowired
+    private Utils utils;
+
 
     public AbsStrategy(MarketIndex index, LocalDate startDate, int numDays, float initialAmount) {
         this.index=index;
@@ -99,6 +104,16 @@ public abstract class AbsStrategy implements Strategy {
         this.endDate=startDate.plusDays(numDays);
     }
 
+    @Override
+    public void addProgressListener(StrategyProgressListener listener) {
+        listeners.add(listener);
+    }
+
+    private void notifyProgress(int current, int total, String status){
+        for(StrategyProgressListener listener : listeners){
+            listener.notifyProgress(current, total, status);
+        }
+    }
 
     public Simulation execute() throws Exception {
 
@@ -107,6 +122,8 @@ public abstract class AbsStrategy implements Strategy {
         simulation.setIndex(index);
         simulation.setStartTsLDT(startDate.atStartOfDay());
         simulation.setInitialAmount(initialAmount);
+
+        notifyProgress(0, 1, ""+this);
 
         // you can exit this cycle only with a termination code assigned
         do {
@@ -147,8 +164,11 @@ public abstract class AbsStrategy implements Strategy {
             }
 
             unitIndex++;
+            notifyProgress(unitIndex, numDays, ""+this);
 
         } while (true);
+
+        notifyProgress(1, 1, ""+this);
 
         // consolidate data in the simulation
         consolidate();
@@ -178,12 +198,6 @@ public abstract class AbsStrategy implements Strategy {
         simulation.getSimulationItems().add(item);
 
     }
-
-
-
-
-
-
 
 
     /**
@@ -320,7 +334,8 @@ public abstract class AbsStrategy implements Strategy {
      * @return the value of the spread
      */
     private float applySpread(){
-        float spreadAmt = -strategyService.calcPercent(currValue,index.getSpreadPercent());
+        float spread = utils.toPrimitive(index.getSpreadPercent());
+        float spreadAmt = -strategyService.calcPercent(currValue,spread);
         currValue+=spreadAmt;
         return spreadAmt;
     }
@@ -492,6 +507,10 @@ public abstract class AbsStrategy implements Strategy {
         public int getI2() {
             return i2;
         }
+    }
+
+    public MarketIndex getIndex(){
+        return index;
     }
 
 }

@@ -38,7 +38,6 @@ public class Generator extends AbstractEntity {
     private Integer number;   // human readable number of the Configurator
     private String name;  // mnemonic name
     private String startDate;  // start date
-    private Boolean fixedDays;  // true for fixed number of days, false to go or until TP/SL or until end of index data
     private Integer days;   // number of days
     private Integer spans;   // number of times to repeat the simulation, starting from the end of the previous simulation
     private Integer amount;  // amount invested
@@ -75,7 +74,6 @@ public class Generator extends AbstractEntity {
 
     public List<MarketIndex> getIndexes() {
         return indexes;
-//        return new ArrayList<MarketIndex>();
     }
 
     public Integer getNumber() {
@@ -124,14 +122,6 @@ public class Generator extends AbstractEntity {
 
     public void setStartDate(String startDate) {
         this.startDate = startDate;
-    }
-
-    public Boolean getFixedDays() {
-        return fixedDays;
-    }
-
-    public void setFixedDays(Boolean fixedDays) {
-        this.fixedDays = fixedDays;
     }
 
     public Integer getDays() {
@@ -281,7 +271,6 @@ public class Generator extends AbstractEntity {
                 ", modified=" + modified +
                 ", number=" + number +
                 ", startDate='" + startDate + '\'' +
-                ", fixedDays=" + fixedDays +
                 ", days=" + days +
                 ", spans=" + spans +
                 ", amount=" + amount +

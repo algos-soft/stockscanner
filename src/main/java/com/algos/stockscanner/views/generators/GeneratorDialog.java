@@ -48,9 +48,6 @@ public class GeneratorDialog extends Dialog {
 
     private static final Logger log = LoggerFactory.getLogger(GeneratorDialog.class);
 
-    private static final String LABEL_FIXED = "Fixed";
-    private static final String LABEL_VARIABLE = "Variable";
-
     private GeneratorModel model;
     private GeneratorDialogConfirmListener confirmListener;
 
@@ -62,7 +59,6 @@ public class GeneratorDialog extends Dialog {
     private IntegerField stopLossFld;
     private IntegerField takeProfitFld;
 
-    private RadioButtonGroup<String> lengthRadioGroup;
     private IntegerField numberOfDays;
     private IntegerField numberOfSpans;
 
@@ -224,26 +220,14 @@ public class GeneratorDialog extends Dialog {
         amountsLayout.setSpacing(true);
         amountsLayout.add(amountFld, stopLossFld, takeProfitFld);
 
-        lengthRadioGroup = new RadioButtonGroup<>();
-        lengthRadioGroup.setLabel("Simulation length");
-        lengthRadioGroup.setItems(LABEL_FIXED, LABEL_VARIABLE);
-        lengthRadioGroup.addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                if (event.getValue().equals(LABEL_FIXED)) {
-                    numberOfDays.setLabel("Fixed number of days");
-                    numberOfDays.setHelperText("The simulation will stop after this number of days");
-                } else {
-                    numberOfDays.setLabel("Max number of days");
-                    numberOfDays.setHelperText("(Optional) the simulation will not exceed this number of days");
-                }
-            }
-        });
 
         numberOfDays = new IntegerField("Number of days");
         numberOfDays.setLabel("Number of days");
         numberOfDays.setHasControls(true);
         numberOfDays.setMin(2);
         numberOfDays.setWidth("10em");
+        numberOfDays.setHelperText("The simulation will stop after this number of days or when you reach SL or TP");
+
 
         numberOfSpans = new IntegerField("Number of spans");
         numberOfSpans.setLabel("Number of spans");
@@ -262,7 +246,7 @@ public class GeneratorDialog extends Dialog {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(false);
         layout.setPadding(false);
-        layout.add(row1, amountsLayout, lengthRadioGroup, lengthLayout);
+        layout.add(row1, amountsLayout, lengthLayout);
 
         return layout;
     }
@@ -467,11 +451,6 @@ public class GeneratorDialog extends Dialog {
         model.setStopLoss(utils.toPrimitive(stopLossFld.getValue()));
         model.setTakeProfit(utils.toPrimitive(takeProfitFld.getValue()));
 
-        String value = lengthRadioGroup.getValue();
-        if (value != null) {
-            model.setDurationFixed(value.equals(LABEL_FIXED));
-        }
-
         model.setDays(utils.toPrimitive(numberOfDays.getValue()));
         model.setSpans(utils.toPrimitive(numberOfSpans.getValue()));
 
@@ -527,11 +506,6 @@ public class GeneratorDialog extends Dialog {
         amountFld.setValue(utils.toPrimitive(model.getAmount()));
         stopLossFld.setValue(utils.toPrimitive(model.getStopLoss()));
         takeProfitFld.setValue(utils.toPrimitive(model.getTakeProfit()));
-        if (model.isDurationFixed()) {
-            lengthRadioGroup.setValue(LABEL_FIXED);
-        } else {
-            lengthRadioGroup.setValue(LABEL_VARIABLE);
-        }
         numberOfDays.setValue(utils.toPrimitive(model.getDays()));
         numberOfSpans.setValue(utils.toPrimitive(model.getSpans()));
 

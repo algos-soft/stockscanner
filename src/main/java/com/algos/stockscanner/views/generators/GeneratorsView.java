@@ -337,14 +337,10 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
         String period;
         IronIcon durationIcon = new IronIcon("vaadin", "clock");
-        if (model.isDurationFixed()) {
-            period = model.getDays() + " days fixed";
+        if (model.getDays() > 0) {
+            period = "max " + model.getDays() + " days";
         } else {
-            if (model.getDays() > 0) {
-                period = "max " + model.getDays() + " days";
-            } else {
-                period = "unlimited";
-            }
+            period = "unlimited";
         }
         Span spanPeriod = new Span(durationIcon, new Text(period));
         spanPeriod.addClassName("period");
@@ -704,10 +700,8 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
         try {
 
-            List<SimulationCallable> callables = runnerService.startGenerator(model);
-            for(SimulationCallable callable : callables){
-                attachMonitorToTask(callable);
-            }
+            SimulationCallable callable = runnerService.startGenerator(model);
+            attachMonitorToTask(callable);
 
         } catch (Exception e) {
             ConfirmDialog dialog = ConfirmDialog.createError()

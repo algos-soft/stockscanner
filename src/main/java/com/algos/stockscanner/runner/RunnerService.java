@@ -10,6 +10,8 @@ import com.algos.stockscanner.data.service.SimulationService;
 import com.algos.stockscanner.enums.IndexUpdateModes;
 import com.algos.stockscanner.services.SimulationCallable;
 import com.algos.stockscanner.services.UpdateIndexDataCallable;
+import com.algos.stockscanner.strategies.Strategy;
+import com.algos.stockscanner.strategies.SurferStrategy;
 import com.algos.stockscanner.views.generators.GeneratorModel;
 import com.google.common.collect.Lists;
 import com.vaadin.flow.component.UI;
@@ -50,7 +52,7 @@ public class RunnerService {
 
     @PostConstruct
     private void init(){
-        executorService=Executors.newFixedThreadPool(Integer.MAX_VALUE);
+        executorService=Executors.newFixedThreadPool(4);
     }
 
     public GeneratorRunner run(Generator generator, UI ui)  {
@@ -64,11 +66,8 @@ public class RunnerService {
     }
 
 
-    public List<SimulationCallable> startGenerator(GeneratorModel model) throws Exception {
+    public SimulationCallable startGenerator(GeneratorModel model) throws Exception {
 
-        log.info("Starting generator id: "+model.getId());
-
-        List<SimulationCallable> callables = new ArrayList<>();
         Generator generator=generatorService.get(model.getId()).get();
 
         preliminaryChecks(generator);
@@ -80,12 +79,11 @@ public class RunnerService {
         List<List<Integer>> cartesianList=null;
         cartesianList=buildCartesianList(generator);
 
-//        int s = 0;
-//        int numPerm = cartesianList.size();
-
         // iterate cartesian list and spans, create and submit the SimulationCallables
         int numSpans = generator.getSpans();
 
+        // prepare a list of strategies to execute
+        List<Strategy> strategies=new ArrayList<>();
         for (List<Integer> permutation : cartesianList) {
 
             int indexId = permutation.get(0);
@@ -94,15 +92,25 @@ public class RunnerService {
 
             LocalDate startDate = generator.getStartDateLD();
             for (int nspan = 0; nspan < numSpans; nspan++) {
-                startDate = startDate.plusDays(generator.getDays()*nspan);
-                SimulationCallable callable = context.getBean(SimulationCallable.class, startDate, indexId, amplitude, lookback);
-                callables.add(callable);
-                executorService.submit(callable);
+                int numDays=generator.getDays();
+                startDate = startDate.plusDays(numDays*nspan);
+                float amount = generator.getAmount();
+                int sl = generator.getStopLoss();
+                int tp=generator.getTakeProfit();
+                MarketIndex index = marketIndexService.get(indexId).get();
+                Strategy strategy = context.getBean(SurferStrategy.class, index, startDate, numDays, amount, sl, tp, amplitude, lookback);
+                strategies.add(strategy);
             }
         }
 
-        return callables;
+        // create a SimulationCallable and assign the strategies
+        SimulationCallable callable = context.getBean(SimulationCallable.class, strategies, generator.getId());
+        executorService.submit(callable);
+
+        return callable;
     }
+
+
 
 
 
@@ -212,11 +220,9 @@ public class RunnerService {
             throw new RunnerException("Initial amount is not specified");
         }
 
-        // if fixed length, number of days is required
-        if (generator.getFixedDays()) {
-            if (utils.toPrimitive(generator.getDays()) == 0) {
-                throw new RunnerException("Fixed length but no number of days specified");
-            }
+        // number of days is required
+        if (utils.toPrimitive(generator.getDays()) == 0) {
+            throw new RunnerException("Fixed length but no number of days specified");
         }
 
         // number of spans

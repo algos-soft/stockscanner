@@ -84,6 +84,11 @@ public class SurferStrategyOld extends AbsStrategyOld {
         return decision;
     }
 
+    @Override
+    public void addProgressListener(StrategyProgressListener listener) {
+
+    }
+
 
     /**
      * we have an open position of type BUY and we have to decide if closing it
