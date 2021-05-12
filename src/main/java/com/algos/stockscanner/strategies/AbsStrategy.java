@@ -34,7 +34,7 @@ public abstract class AbsStrategy implements Strategy {
     int numDays;
     float initialAmount;
 
-
+    LocalDate endDate;
 
     boolean abort=false;
 
@@ -96,24 +96,17 @@ public abstract class AbsStrategy implements Strategy {
         this.startDate=startDate;
         this.numDays=numDays;
         this.initialAmount=initialAmount;
+        this.endDate=startDate.plusDays(numDays);
     }
+
 
     public Simulation execute() throws Exception {
 
-        // check and cast parameters
-        if(!(params instanceof SurferStrategyParams)){
-            throw new Exception("wrong StrategyParams type, SurferStrategyParams expected");
-        }
-
         // create a new Simulation
         simulation = new Simulation();
-        simulation.setIndex(params.getIndex());
-        simulation.setStartTsLDT(params.getStartDate().atStartOfDay());
-        simulation.setInitialAmount(params.getInitialAmount());
-        simulation.setSl(params.getSl());
-        simulation.setTp(params.getTp());
-        simulation.setAmplitude(params.getAmplitude());
-        simulation.setDaysLookback(params.getDaysLookback());
+        simulation.setIndex(index);
+        simulation.setStartTsLDT(startDate.atStartOfDay());
+        simulation.setInitialAmount(initialAmount);
 
         // you can exit this cycle only with a termination code assigned
         do {
@@ -199,8 +192,6 @@ public abstract class AbsStrategy implements Strategy {
      */
     private boolean ensureUnitsAvailable(){
 
-        MarketIndex index = params.getIndex();
-
         if(unitIndex<unitsPage.size()){   // requested unit index is available
             return true;
         }else{  // need to load a new page
@@ -216,8 +207,7 @@ public abstract class AbsStrategy implements Strategy {
                     return false;
                 }
             }else{  // no previous unit, it is the first time
-                LocalDate date = params.getStartDate();
-                int firstId = indexUnitService.findFirstIdOf(index, date);
+                int firstId = indexUnitService.findFirstIdOf(index, startDate);
                 unitsPage.clear();
                 if(firstId>0){
                     List<IndexUnit> units = indexUnitService.findAllByIndexFromId(index, firstId, PAGE_SIZE);
@@ -264,7 +254,7 @@ public abstract class AbsStrategy implements Strategy {
 
                 openPrice=unit.getClose();
                 lastPrice=openPrice;
-                openValue=params.getInitialAmount();
+                openValue=initialAmount;
                 currValue=openValue;
                 lastValue=currValue;
 
@@ -425,7 +415,7 @@ public abstract class AbsStrategy implements Strategy {
             simulation.setEndTsLDT(simulation.getStartTsLDT());
         }
         simulation.setPl(totPl);
-        simulation.setPlPercent(strategyService.deltaPercent(simulation.getInitialAmount(), simulation.getInitialAmount()+totPl));
+        simulation.setPlPercent(strategyService.deltaPercent(initialAmount, initialAmount+totPl));
         simulation.setNumPointsTotal(totPoints);
         simulation.setNumOpenings(totOpenings);
         simulation.setNumPointsOpen(totPointsOpen);
@@ -478,12 +468,12 @@ public abstract class AbsStrategy implements Strategy {
 
 
     /**
-     * Average price in the backlook period starting from the current unit time
+     * Moving average in the backlook period starting from the current unit time
      */
-    public float avgBackPrice(){
+    float movingAverage(int days){
         LocalDateTime t2 = unit.getDateTimeLDT();
-        LocalDateTime t1 = t2.minusDays(simulation.getDaysLookback());
-        float avg = indexUnitService.getAveragePrice(simulation.getIndex(), t1, t2);
+        LocalDateTime t1 = t2.minusDays(days);
+        float avg = indexUnitService.getMovingAverage(index, t1, t2);
         return avg;
     }
 

@@ -2,6 +2,7 @@ package com.algos.stockscanner.strategies;
 
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.enums.ActionTypes;
 import com.algos.stockscanner.enums.Actions;
 import com.algos.stockscanner.enums.Reasons;
@@ -43,15 +44,26 @@ public class SurferStrategy extends AbsStrategy {
         this.daysLookback=daysLookback;
     }
 
+    @Override
+    public Simulation execute() throws Exception {
+        Simulation simulation = super.execute();
+
+        // add specific info
+        simulation.setSl(sl);
+        simulation.setTp(tp);
+        simulation.setAmplitude(amplitude);
+        simulation.setDaysLookback(daysLookback);
+        return  simulation;
+    }
 
     @Override
     public Decision decideIfOpenPosition() {
         Decision decision;
 
-        float refPrice = avgBackPrice();
+        float refPrice = movingAverage(daysLookback);
         float deltaPercent = strategyService.deltaPercent(refPrice, unit.getClose());
 
-        if (Math.abs(deltaPercent) > simulation.getAmplitude()) {
+        if (Math.abs(deltaPercent) > amplitude) {
 
             if (deltaPercent > 0) { // up above amplitude
                 if (!preAlertSell) {
@@ -110,7 +122,7 @@ public class SurferStrategy extends AbsStrategy {
 
         Reasons sltpCondition = checkSlTp();
         if (sltpCondition == null) {
-            if (deltaPercent > simulation.getAmplitude()) {
+            if (deltaPercent > amplitude) {
                 if (!preAlertSell) {
                     preAlertSell = true;
                     decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_CLOSE);
@@ -154,7 +166,7 @@ public class SurferStrategy extends AbsStrategy {
 
         Reasons sltpCondition = checkSlTp();
         if (sltpCondition == null) {
-            if (deltaPercent < -simulation.getAmplitude()) {
+            if (deltaPercent < -amplitude) {
                 if (!preAlertSell) {
                     preAlertSell = true;
                     decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_CLOSE);
@@ -195,7 +207,7 @@ public class SurferStrategy extends AbsStrategy {
     private Reasons checkSlTp() {
 
         // check stop loss
-        Integer slPercent = params.getSl();
+        Integer slPercent = sl;
         if (slPercent != null && slPercent > 0) {
             if (posOpen) {
                 float valueNow = lastValue + calcDeltaValue();
@@ -207,7 +219,7 @@ public class SurferStrategy extends AbsStrategy {
         }
 
         // check take profit
-        Integer tpPercent = params.getTp();
+        Integer tpPercent = tp;
         if (tpPercent != null && tpPercent > 0) {
             if (posOpen) {
                 float valueNow = lastValue + calcDeltaValue();
@@ -227,16 +239,10 @@ public class SurferStrategy extends AbsStrategy {
     @Override
     public Terminations isFinished() {
 
-        // if 1) fixed days or 2) variable days with max specified, then check the max day
-        boolean fixedDays = params.isFixedDays();
-        LocalDate endDate = params.getEndDate();
-        if (fixedDays || (!fixedDays && endDate != null)) {
-            LocalDate unitDate = unit.getDateTimeLDT().toLocalDate();
-            if (unitDate.isAfter(endDate)) {
-                return Terminations.MAX_DAYS_REACHED;
-            }
+        LocalDate unitDate = unit.getDateTimeLDT().toLocalDate();
+        if (unitDate.isAfter(endDate)) {
+            return Terminations.MAX_DAYS_REACHED;
         }
-
 
         return null;
     }

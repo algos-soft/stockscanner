@@ -104,9 +104,9 @@ public class IndexUnitService extends CrudService<IndexUnit, Integer> {
 
 
     /**
-     * Return the average price in the specified period
+     * Return the moving average in the specified period
      */
-    public float getAveragePrice(MarketIndex index, LocalDateTime t1, LocalDateTime t2){
+    public float getMovingAverage(MarketIndex index, LocalDateTime t1, LocalDateTime t2){
         String st1 = Du.toUtcString(t1);
         String st2 = Du.toUtcString(t2);
         List<IndexUnit> units = repository.findAllByPeriod(index, st1, st2, Pageable.unpaged());

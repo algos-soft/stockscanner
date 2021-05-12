@@ -58,6 +58,7 @@ public class SimulationCallable implements Callable<Void> {
     private MarketIndexService marketIndexService;
 
     public SimulationCallable(Strategy strategy) {
+        this.strategy=strategy;
 //        this.startDate = startDate;
 //        this.indexId = indexId;
 //        this.initialAmount=initialAmount;

@@ -466,7 +466,7 @@ public abstract class AbsStrategyOld implements Strategy {
     public float avgBackPrice(){
         LocalDateTime t2 = unit.getDateTimeLDT();
         LocalDateTime t1 = t2.minusDays(simulation.getDaysLookback());
-        float avg = indexUnitService.getAveragePrice(simulation.getIndex(), t1, t2);
+        float avg = indexUnitService.getMovingAverage(simulation.getIndex(), t1, t2);
         return avg;
     }
 
