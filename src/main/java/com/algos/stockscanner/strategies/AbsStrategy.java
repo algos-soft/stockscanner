@@ -320,7 +320,7 @@ public abstract class AbsStrategy implements Strategy {
      * @return the value of the spread
      */
     private float applySpread(){
-        float spreadAmt = -strategyService.calcPercent(currValue,params.getSpreadPercent());
+        float spreadAmt = -strategyService.calcPercent(currValue,index.getSpreadPercent());
         currValue+=spreadAmt;
         return spreadAmt;
     }
