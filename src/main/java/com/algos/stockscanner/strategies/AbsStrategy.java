@@ -35,9 +35,9 @@ public abstract class AbsStrategy implements Strategy {
     float initialAmount;
 
     LocalDate endDate;
+    float spreadPercent;
 
     boolean abort=false;
-
 
     Simulation simulation;
 
