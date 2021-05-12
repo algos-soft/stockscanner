@@ -88,11 +88,11 @@ public class UserService extends CrudService<User, Integer> {
      * Initialize with default values
      */
     public void initEntity(User entity) {
-        entity.setUserName("Nick");
-        entity.setPassword("+++");
-        entity.setEmail("...@libero.it");
-        entity.setFirstName("Mario");
-        entity.setLastName("Rossi");
+        entity.setUserName("");
+        entity.setPassword("");
+        entity.setEmail("");
+        entity.setFirstName("");
+        entity.setLastName("");
     }
 
     /**
@@ -101,11 +101,17 @@ public class UserService extends CrudService<User, Integer> {
      * Initialize with default values
      */
     public void initModel(UserModel model) {
-        model.setUserName("Nick");
-        model.setPassword("+++");
-        model.setEmail("...@libero.it");
-        model.setFirstName("Mario");
-        model.setLastName("Rossi");
+        model.setUserName("");
+        model.setPassword("");
+        model.setEmail("");
+        model.setFirstName("");
+        model.setLastName("");
+    }
+
+    public User getOne(Integer id) {
+//        Optional<User> optional = repository.findById(Integer.valueOf(id));
+//        return optional.orElse(null);
+        return repository.findById(id).orElse(null);
     }
 
     public int count() {

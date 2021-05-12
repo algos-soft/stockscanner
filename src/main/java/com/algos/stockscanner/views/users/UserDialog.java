@@ -85,18 +85,29 @@ public class UserDialog extends Dialog {
 
         userFld = new TextField();
         userFld.setLabel("userName");
+        userFld.setPlaceholder("eMail or another nick");
+        userFld.setRequired(true);
+        userFld.setErrorMessage("userName must be filled in!");
 
         passwordFld = new TextField();
         passwordFld.setLabel("password");
+        passwordFld.setPlaceholder("******");
+        passwordFld.setRequired(true);
+        passwordFld.setErrorMessage("password must be filled in!");
 
         emailFld = new TextField();
         emailFld.setLabel("eMail");
+        emailFld.setPlaceholder("eMail address");
+        emailFld.setRequired(true);
+        emailFld.setErrorMessage("eMail must be filled in!");
 
         nomeFld = new TextField();
-        nomeFld.setLabel("Name");
+        nomeFld.setLabel("First name");
+        nomeFld.setPlaceholder("optional");
 
         cognomeFld = new TextField();
-        cognomeFld.setLabel("Cognome");
+        cognomeFld.setLabel("Last name");
+        cognomeFld.setPlaceholder("optional");
 
         body.add(userFld, passwordFld, emailFld, nomeFld, cognomeFld);
         return body;
