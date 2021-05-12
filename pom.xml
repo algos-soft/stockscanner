@@ -231,13 +231,20 @@
             <version>5.0.0</version>
         </dependency>
 
-<!--
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
+            <groupId>net.bull.javamelody</groupId>
+            <artifactId>javamelody-spring-boot-starter</artifactId>
+            <version>1.87.0</version>
         </dependency>
--->
+
+
+        <!--
+                <dependency>
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok</artifactId>
+                    <optional>true</optional>
+                </dependency>
+        -->
 
 <!--
         &lt;!&ndash; https://mvnrepository.com/artifact/com.google.guava/guava &ndash;&gt;

@@ -1,10 +1,8 @@
 package com.algos.stockscanner.strategies;
 
 import com.algos.stockscanner.beans.Utils;
-import com.algos.stockscanner.enums.ActionTypes;
+import com.algos.stockscanner.enums.*;
 import com.algos.stockscanner.enums.Actions;
-import com.algos.stockscanner.enums.Reasons;
-import com.algos.stockscanner.enums.Terminations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -13,7 +11,7 @@ import java.time.LocalDate;
 
 @Component
 @Scope("prototype")
-public class SurferStrategy extends AbsStrategy {
+public class SurferStrategyOld extends AbsStrategyOld {
 
     @Autowired
     Utils utils;
@@ -29,7 +27,7 @@ public class SurferStrategy extends AbsStrategy {
         return "SURFER";
     }
 
-    public SurferStrategy(StrategyParams params) {
+    public SurferStrategyOld(StrategyParamsOld params) {
         super(params);
     }
 

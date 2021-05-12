@@ -2,16 +2,15 @@ package com.algos.stockscanner.views.indexes;
 
 import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
-import com.algos.stockscanner.enums.FrequencyTypes;
-import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.algos.stockscanner.enums.FrequencyTypes;
+import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.services.MarketService;
 import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
@@ -25,15 +24,12 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.Command;
 import org.apache.commons.lang3.StringUtils;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
@@ -265,8 +261,37 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         row3.setVisible(model.getNumUnits() > 0);
         row3.add(frequencyIcon, frequencySpan);
 
+        IronIcon icon1 = new IronIcon("vaadin", "clock");
+        String text1;
+        if (model.getFundamentalUpdateTs() !=null) {
+            text1 = formatTs(model.getFundamentalUpdateTs());
+        } else {
+            text1 = "never";
+        }
+        text1="idx upd: "+text1;
+        Span span1 = new Span(text1);
+        span1.addClassName("interval");
+        HorizontalLayout row4 = new HorizontalLayout();
+        row4.addClassName("details");
+        row4.add(icon1, span1);
+
+        IronIcon icon2 = new IronIcon("vaadin", "clock");
+        String text2;
+        if (model.getPricesUpdateTs() !=null) {
+            text2 = formatTs(model.getPricesUpdateTs());
+        } else {
+            text2 = "never";
+        }
+        text2="price upd: "+text2;
+        Span span2 = new Span(text2);
+        span2.addClassName("interval");
+        HorizontalLayout row5 = new HorizontalLayout();
+        row5.addClassName("details");
+        row5.add(icon2, span2);
+
+
         Pan pan = new Pan();
-        pan.add(row1, row2, row3);
+        pan.add(row1, row2, row3, row4, row5);
 
         return pan;
     }
@@ -276,42 +301,18 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
     private Component buildPan4(IndexModel model) {
 
-        IronIcon icon1 = new IronIcon("vaadin", "clock");
-        String text1;
-        if (model.getFundamentalUpdateTs() !=null) {
-            text1 = formatTs(model.getFundamentalUpdateTs());
-        } else {
-            text1 = "never";
-        }
-        text1="last upd: "+text1;
-        Span span1 = new Span(text1);
-        span1.addClassName("interval");
-        HorizontalLayout row1 = new HorizontalLayout();
-        row1.addClassName("details");
-        row1.add(icon1, span1);
-
-        IronIcon icon2 = new IronIcon("vaadin", "clock");
-        String text2;
-        if (model.getPricesUpdateTs() !=null) {
-            text2 = formatTs(model.getPricesUpdateTs());
-        } else {
-            text2 = "never";
-        }
-        text2="prices upd: "+text2;
-        Span span2 = new Span(text2);
-        span2.addClassName("interval");
-        HorizontalLayout row2 = new HorizontalLayout();
-        row2.addClassName("details");
-        row2.add(icon2, span2);
+        Span span1 = new Span(model.getExchange()+", "+model.getCountry() );
+        span1.addClassName("detail-row");
+        Span span2 = new Span(model.getSector()+", "+model.getIndustry());
+        span2.addClassName("detail-row");
+        Span span3 = new Span("cap: "+utils.numberWithSuffix(model.getMarketCap())+", ebitda: "+utils.numberWithSuffix(model.getEbitda()));
+        span3.addClassName("detail-row");
 
         Pan pan = new Pan();
-        pan.add(row1, row2);
+        pan.add(span1, span2, span3);
 
         return pan;
     }
-
-
-
 
 
     private String format(LocalDate d) {
@@ -376,87 +377,87 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         });
 
 
-        // download data for the index
-        account.getSubMenu().addItem("Download historic data", i -> {
-
-            final MarketService.DownloadHandler[] handler = {null}; // use single-element array to avoid the need to be final
-
-            // setup the progress dialog
-            Text text = new Text("Loading...");
-            ProgressBar progressBar = new ProgressBar();
-            progressBar.setIndeterminate(true);
-            VerticalLayout layout = new VerticalLayout();
-            layout.add(text, progressBar);
-            Button bAbort = new Button();
-            ConfirmDialog dialog = ConfirmDialog.create()
-                    .withMessage(layout)
-                    .withButton(bAbort, ButtonOption.caption("Abort"), ButtonOption.closeOnClick(false));
-            dialog.setCloseOnEsc(false);
-            dialog.setCloseOnOutsideClick(false);
-            bAbort.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
-                handler[0].setAbort(true);
-            });
-            dialog.setWidth("20em");
-            dialog.open();
-
-            UI ui = UI.getCurrent();
-
-            // download data in a separate thread
-            new Thread(() -> {
-
-                handler[0] = marketService.downloadIndexData(model.getSymbol(), new MarketService.DownloadListener() {
-                    @Override
-                    public void onDownloadCompleted() {
-                        ui.access(new Command() {
-                            @Override
-                            public void execute() {
-                                dialog.close();
-
-                                MarketIndex entity = marketIndexService.get(model.getId()).get();
-                                marketIndexService.entityToModel(entity, model);
-                                grid.getDataProvider().refreshItem(model);
-
-                            }
-                        });
-
-                    }
-
-                    @Override
-                    public void onDownloadAborted(Exception e) {
-                        ui.access(new Command() {
-                            @Override
-                            public void execute() {
-                                dialog.close();
-                                ConfirmDialog dialog1 = ConfirmDialog.createError().withMessage("Download failed: " + e.getMessage());
-                                dialog1.open();
-                            }
-                        });
-
-                    }
-
-                    @Override
-                    public void onDownloadProgress(int current, int total, String message) {
-
-                        ui.access(new Command() {
-                            @Override
-                            public void execute() {
-                                progressBar.setMax(total);
-                                progressBar.setValue(current);
-                                if (current == 0) {
-                                    progressBar.setIndeterminate(true);
-                                    text.setText(message);
-                                } else {
-                                    progressBar.setIndeterminate(false);
-                                    text.setText(message + ": " + current + "/" + total);
-                                }
-                            }
-                        });
-                    }
-
-                });
-            }).start();
-
-        });
+//        // download data for the index
+//        account.getSubMenu().addItem("Download historic data", i -> {
+//
+//            final MarketService.DownloadHandler[] handler = {null}; // use single-element array to avoid the need to be final
+//
+//            // setup the progress dialog
+//            Text text = new Text("Loading...");
+//            ProgressBar progressBar = new ProgressBar();
+//            progressBar.setIndeterminate(true);
+//            VerticalLayout layout = new VerticalLayout();
+//            layout.add(text, progressBar);
+//            Button bAbort = new Button();
+//            ConfirmDialog dialog = ConfirmDialog.create()
+//                    .withMessage(layout)
+//                    .withButton(bAbort, ButtonOption.caption("Abort"), ButtonOption.closeOnClick(false));
+//            dialog.setCloseOnEsc(false);
+//            dialog.setCloseOnOutsideClick(false);
+//            bAbort.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+//                handler[0].setAbort(true);
+//            });
+//            dialog.setWidth("20em");
+//            dialog.open();
+//
+//            UI ui = UI.getCurrent();
+//
+//            // download data in a separate thread
+//            new Thread(() -> {
+//
+//                handler[0] = marketService.downloadIndexData(model.getSymbol(), new MarketService.DownloadListener() {
+//                    @Override
+//                    public void onDownloadCompleted() {
+//                        ui.access(new Command() {
+//                            @Override
+//                            public void execute() {
+//                                dialog.close();
+//
+//                                MarketIndex entity = marketIndexService.get(model.getId()).get();
+//                                marketIndexService.entityToModel(entity, model);
+//                                grid.getDataProvider().refreshItem(model);
+//
+//                            }
+//                        });
+//
+//                    }
+//
+//                    @Override
+//                    public void onDownloadAborted(Exception e) {
+//                        ui.access(new Command() {
+//                            @Override
+//                            public void execute() {
+//                                dialog.close();
+//                                ConfirmDialog dialog1 = ConfirmDialog.createError().withMessage("Download failed: " + e.getMessage());
+//                                dialog1.open();
+//                            }
+//                        });
+//
+//                    }
+//
+//                    @Override
+//                    public void onDownloadProgress(int current, int total, String message) {
+//
+//                        ui.access(new Command() {
+//                            @Override
+//                            public void execute() {
+//                                progressBar.setMax(total);
+//                                progressBar.setValue(current);
+//                                if (current == 0) {
+//                                    progressBar.setIndeterminate(true);
+//                                    text.setText(message);
+//                                } else {
+//                                    progressBar.setIndeterminate(false);
+//                                    text.setText(message + ": " + current + "/" + total);
+//                                }
+//                            }
+//                        });
+//                    }
+//
+//                });
+//            }).start();
+//
+//        });
 
         return menuBar;
 
@@ -480,15 +481,12 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         List<IndexModel> outList = new ArrayList<>();
 
         Pageable p = Pageable.unpaged();
-//        Page<MarketIndex> page = marketIndexService.list(p);
-//        Page<MarketIndex> page = marketIndexService.findAllOrderBySymbol(p);
         Page<MarketIndex> page;
         if(StringUtils.isEmpty(filterString)){
             page = marketIndexService.findAllOrderBySymbol(p);
         }else{
             page = marketIndexService.findAllWithFilterOrderBySymbol(p, filterString);
         }
-
 
         page.stream().forEach(e -> {
             outList.add(createIndex(e));

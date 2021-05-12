@@ -17,6 +17,14 @@ public class IndexModel {
     private String symbol;
     private String name;
     private IndexCategories category;
+
+    private String exchange;
+    private String country;
+    private String sector;
+    private String industry;
+    private long marketCap;
+    private long ebitda;
+
     private float spreadPercent;
     private float ovnSellDay;
     private float ovnSellWe;
@@ -65,6 +73,54 @@ public class IndexModel {
 
     public void setCategory(IndexCategories category) {
         this.category = category;
+    }
+
+    public String getExchange() {
+        return exchange;
+    }
+
+    public void setExchange(String exchange) {
+        this.exchange = exchange;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getSector() {
+        return sector;
+    }
+
+    public void setSector(String sector) {
+        this.sector = sector;
+    }
+
+    public String getIndustry() {
+        return industry;
+    }
+
+    public void setIndustry(String industry) {
+        this.industry = industry;
+    }
+
+    public long getMarketCap() {
+        return marketCap;
+    }
+
+    public void setMarketCap(long marketCap) {
+        this.marketCap = marketCap;
+    }
+
+    public long getEbitda() {
+        return ebitda;
+    }
+
+    public void setEbitda(long ebitda) {
+        this.ebitda = ebitda;
     }
 
     public float getSpreadPercent() {

@@ -81,7 +81,9 @@
 
 .indexes-view .interval,
 .indexes-view .points,
-.indexes-view .frequency {
+.indexes-view .frequency,
+.indexes-view .detail-row,
+ {
   color: var(--lumo-tertiary-text-color);
   font-size: var(--lumo-font-size-xs);
   margin-right: var(--lumo-space-l);

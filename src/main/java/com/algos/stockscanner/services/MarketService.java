@@ -321,39 +321,39 @@ public class MarketService {
 
 
 
-    /**
-     * Fetch fundamental data from the network
-     */
-    private FundamentalData fetchFundamentalData(String symbol) throws IOException {
-        FundamentalData fundamentalData=null;
-
-        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.alphavantage.co/query").newBuilder();
-        urlBuilder.addQueryParameter("apikey", alphavantageApiKey);
-        urlBuilder.addQueryParameter("function", "OVERVIEW");
-        urlBuilder.addQueryParameter("symbol", symbol);
-
-        String url = urlBuilder.build().toString();
-
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
-
-        Response response = okHttpClient.newCall(request).execute();
-        if(response.isSuccessful()){
-
-            FDResponse fdresp = fdJsonAdapter.fromJson(response.body().string());
-
-            if(fdresp.Symbol==null){
-                throw new IOException("malformed response, license limits reached?");
-            }
-
-            IndexCategories category = IndexCategories.getByAlphaVantageType(fdresp.AssetType);
-            fundamentalData=new FundamentalData(symbol, fdresp.Name, category);
-
-        }
-
-        return fundamentalData;
-    }
+//    /**
+//     * Fetch fundamental data from the network
+//     */
+//    private FundamentalData fetchFundamentalData(String symbol) throws IOException {
+//        FundamentalData fundamentalData=null;
+//
+//        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.alphavantage.co/query").newBuilder();
+//        urlBuilder.addQueryParameter("apikey", alphavantageApiKey);
+//        urlBuilder.addQueryParameter("function", "OVERVIEW");
+//        urlBuilder.addQueryParameter("symbol", symbol);
+//
+//        String url = urlBuilder.build().toString();
+//
+//        Request request = new Request.Builder()
+//                .url(url)
+//                .build();
+//
+//        Response response = okHttpClient.newCall(request).execute();
+//        if(response.isSuccessful()){
+//
+//            FDResponse fdresp = fdJsonAdapter.fromJson(response.body().string());
+//
+//            if(fdresp.Symbol==null){
+//                throw new IOException("malformed response, license limits reached?");
+//            }
+//
+//            IndexCategories category = IndexCategories.getByAlphaVantageType(fdresp.AssetType);
+//            fundamentalData=new FundamentalData(symbol, fdresp.Name, category);
+//
+//        }
+//
+//        return fundamentalData;
+//    }
 
 
 
@@ -383,6 +383,12 @@ public class MarketService {
         String Symbol;
         String Name;
         String AssetType;
+        String Exchange;
+        String Country;
+        String Sector;
+        String Industry;
+        long MarketCapitalization;
+        long EBITDA;
     }
 
 

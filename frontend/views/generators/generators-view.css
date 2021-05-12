@@ -84,6 +84,14 @@
   overflow: hidden;
 }
 
+.generators-view-statuslayout{
+    visibility: visible;
+    width: 100%;
+    flex-wrap: wrap;
+    padding-top: var(--lumo-space-s);
+    margin-bottom: var(--lumo-space-m);
+    border-top: thin solid;
+}
 
 
 

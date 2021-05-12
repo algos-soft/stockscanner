@@ -3,25 +3,15 @@ package com.algos.stockscanner.services;
 import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.beans.Utils;
-import com.algos.stockscanner.data.entity.IndexUnit;
 import com.algos.stockscanner.data.entity.MarketIndex;
-import com.algos.stockscanner.enums.FrequencyTypes;
-import com.algos.stockscanner.enums.IndexCategories;
-import com.algos.stockscanner.data.service.IndexUnitService;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.algos.stockscanner.enums.IndexDownloadModes;
+import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.task.AbortedByUserException;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
 import com.algos.stockscanner.utils.Du;
-import com.crazzyghost.alphavantage.AlphaVantage;
-import com.crazzyghost.alphavantage.parameters.DataType;
-import com.crazzyghost.alphavantage.parameters.OutputSize;
-import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
-import com.crazzyghost.alphavantage.timeseries.response.TimeSeriesResponse;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
-import com.vaadin.flow.component.html.Image;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -39,10 +29,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.ChronoField;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -52,15 +38,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class DownloadIndexCallable implements Callable<Void> {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-
-    private static final DateTimeFormatter fmt = new DateTimeFormatterBuilder()
-            .appendPattern("yyyy-MM-dd")
-            .optionalStart()
-            .appendPattern(" HH:mm")
-            .optionalEnd()
-            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
-            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-            .toFormatter();
 
     private String symbol;
     private ConcurrentLinkedQueue<TaskListener> listeners = new ConcurrentLinkedQueue<>();
@@ -74,8 +51,8 @@ public class DownloadIndexCallable implements Callable<Void> {
     @Autowired
     private ContextStore contextStore;
 
-    @Autowired
-    private IndexUnitService indexUnitService;
+//    @Autowired
+//    private IndexUnitService indexUnitService;
 
     @Autowired
     private MarketIndexService marketIndexService;
@@ -106,7 +83,7 @@ public class DownloadIndexCallable implements Callable<Void> {
         // register itself to the context-level storage
         contextStore.downloadIndexCallableMap.put("" + hashCode(), this);
 
-        currentProgress=new Progress();
+        currentProgress= new Progress();
 
         // puts the task in 'waiting for start' status
         currentProgress.update("waiting: "+symbol);
@@ -173,8 +150,7 @@ public class DownloadIndexCallable implements Callable<Void> {
         Duration duration = Duration.between(startTime, endTime);
         String sDuration = DurationFormatUtils.formatDuration(duration.toMillis(), "H:mm:ss", true);
         DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm:ss");
-        String info = "start: " + startTime.format(format) + ", end: " + endTime.format(format) + ", elapsed: " + sDuration;
-        return info;
+        return "start: " + startTime.format(format) + ", end: " + endTime.format(format) + ", elapsed: " + sDuration;
     }
 
     /**
@@ -193,21 +169,18 @@ public class DownloadIndexCallable implements Callable<Void> {
      * @return provide a handler to interrupt/manage the execution
      */
     public TaskHandler obtainHandler() {
-        TaskHandler handler = new TaskHandler() {
-            @Override
-            public void abort() {
+        TaskHandler handler = () -> {
 
-                // turn on the abort flag
-                abort=true;
+            // turn on the abort flag
+            abort=true;
 
-                // if not running yet (the task is scheduled and is in a wait state)
-                // call immediately the abort procedure
-                if(!running){
-                    try {
-                        checkAbort();
-                    } catch (Exception e) {
-                        terminateWithError(e);
-                    }
+            // if not running yet (the task is scheduled and is in a wait state)
+            // call immediately the abort procedure
+            if(!running){
+                try {
+                    checkAbort();
+                } catch (Exception e) {
+                    terminateWithError(e);
                 }
             }
         };
@@ -274,65 +247,13 @@ public class DownloadIndexCallable implements Callable<Void> {
             }
 
             IndexCategories category = IndexCategories.getByAlphaVantageType(fdresp.AssetType);
-            fundamentalData=new FundamentalData(symbol, fdresp.Name, category);
+            fundamentalData=new FundamentalData(symbol, fdresp.Name, category, fdresp.Exchange, fdresp.Country, fdresp.Sector, fdresp.Industry, fdresp.MarketCapitalization, fdresp.EBITDA);
 
         }
 
         return fundamentalData;
     }
 
-
-//    /**
-//     * Manage a successful response from the api
-//     */
-//    public void handleResponse(TimeSeriesResponse response)  throws Exception {
-//
-//        // delete all previous unit data
-//        notifyProgress(0, 0, "Deleting old data");
-//        indexUnitService.deleteByIndex(index);
-//
-//        // Iterate the new units and save them
-//        List<StockUnit> units = response.getStockUnits();
-//        Collections.sort(units, Comparator.comparing(StockUnit::getDate));
-//        int j = 0;
-//        LocalDateTime minDateTime = null;
-//        LocalDateTime maxDateTime = null;
-//        for (StockUnit unit : units) {
-//
-//            checkAbort();
-//
-//            j++;
-//
-//            notifyProgress(j, units.size(), index.getSymbol());
-//
-//            IndexUnit indexUnit = saveItem(unit);
-//
-//            // keep minDateTime and maxDateTime up to date
-//            if (minDateTime == null) {
-//                minDateTime = indexUnit.getDateTimeLDT();
-//            } else {
-//                if (indexUnit.getDateTimeLDT().isBefore(minDateTime)) {
-//                    minDateTime = indexUnit.getDateTimeLDT();
-//                }
-//            }
-//            if (maxDateTime == null) {
-//                maxDateTime = indexUnit.getDateTimeLDT();
-//            } else {
-//                if (indexUnit.getDateTimeLDT().isAfter(maxDateTime)) {
-//                    maxDateTime = indexUnit.getDateTimeLDT();
-//                }
-//            }
-//
-//        }
-//
-//        // Consolidate the totals in the MarketIndex
-//        index.setUnitsFromLD(minDateTime.toLocalDate());
-//        index.setUnitsToLD(maxDateTime.toLocalDate());
-//        index.setNumUnits(units.size());
-//        index.setUnitFrequency(FrequencyTypes.DAILY.getCode());
-//        marketIndexService.update(index);
-//
-//    }
 
 
 
@@ -355,20 +276,20 @@ public class DownloadIndexCallable implements Callable<Void> {
         if(indexes.size()==0){  // does not exist in db
             index=new MarketIndex();
             index.setSymbol(fd.getSymbol());
-            index.setName(fd.getName());
-            index.setCategory(fd.getType().getCode());
             updateIcon(index);
 
         }else{  // index exists in db
             index = indexes.get(0);
-            if(fd.getName()!=null){
-                index.setName(fd.getName());
-            }
-            if(fd.getType()!=null){
-                index.setCategory(fd.getType().getCode());
-            }
-
         }
+
+        index.setName(fd.getName());
+        index.setCategory(fd.getType().getCode());
+        index.setExchange(fd.getExchange());
+        index.setCountry(fd.getCountry());
+        index.setSector(fd.getSector());
+        index.setIndustry(fd.getIndustry());
+        index.setMarketCap(fd.getMarketCap());
+        index.setEbitda(fd.getEbitda());
 
         index.setFundamentalUpdateTs(Du.toUtcString(LocalDateTime.now()));
 
@@ -418,7 +339,7 @@ public class DownloadIndexCallable implements Callable<Void> {
     }
 
 
-    class Progress{
+    static class Progress{
         private int current;
         private int tot;
         private String status;

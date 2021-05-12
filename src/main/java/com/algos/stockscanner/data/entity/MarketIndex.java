@@ -25,12 +25,19 @@ public class MarketIndex extends AbstractEntity {
     private String symbol;
     private String name;
     private String category;
+
+    private String exchange;
+    private String country;
+    private String sector;
+    private String industry;
+    private Long marketCap;
+    private Long ebitda;
+
     private Float spreadPercent;
     private Float ovnSellDay;
     private Float ovnSellWe;
     private Float ovnBuyDay;
     private Float ovnBuyWe;
-
 
     private String unitsFrom;
 
@@ -42,6 +49,7 @@ public class MarketIndex extends AbstractEntity {
 
     private String fundamentalUpdateTs;  // last update od Fundamental Data
     private String pricesUpdateTs;  // last update od Prices data
+
 
 
     @OneToMany(mappedBy = "index", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -77,6 +85,54 @@ public class MarketIndex extends AbstractEntity {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public String getExchange() {
+        return exchange;
+    }
+
+    public void setExchange(String exchange) {
+        this.exchange = exchange;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getSector() {
+        return sector;
+    }
+
+    public void setSector(String sector) {
+        this.sector = sector;
+    }
+
+    public String getIndustry() {
+        return industry;
+    }
+
+    public void setIndustry(String industry) {
+        this.industry = industry;
+    }
+
+    public Long getMarketCap() {
+        return marketCap;
+    }
+
+    public void setMarketCap(Long marketCap) {
+        this.marketCap = marketCap;
+    }
+
+    public Long getEbitda() {
+        return ebitda;
+    }
+
+    public void setEbitda(Long ebitda) {
+        this.ebitda = ebitda;
     }
 
     public Float getSpreadPercent() {

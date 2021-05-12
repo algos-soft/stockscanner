@@ -1,6 +1,7 @@
 package com.algos.stockscanner.views.generators;
 
 import com.algos.stockscanner.Application;
+import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
@@ -10,6 +11,12 @@ import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.data.service.SimulationService;
 import com.algos.stockscanner.runner.GeneratorRunner;
 import com.algos.stockscanner.runner.RunnerService;
+import com.algos.stockscanner.services.DownloadIndexCallable;
+import com.algos.stockscanner.services.SimulationCallable;
+import com.algos.stockscanner.services.UpdateIndexDataCallable;
+import com.algos.stockscanner.task.TaskHandler;
+import com.algos.stockscanner.task.TaskListener;
+import com.algos.stockscanner.task.TaskMonitor;
 import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.indexes.IndexModel;
 import com.algos.stockscanner.views.simulations.SimulationsView;
@@ -47,10 +54,7 @@ import org.springframework.data.domain.Example;
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Route(value = "generators", layout = MainView.class)
 @RouteAlias(value = "", layout = MainView.class)
@@ -91,6 +95,10 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
     @Autowired
     private Utils utils;
 
+    @Autowired
+    private ContextStore contextStore;
+
+
     public GeneratorsView() {
     }
 
@@ -107,6 +115,10 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         //Component filterPanel = createFilterPanel();
 
         statusLayout = new HorizontalLayout();
+        statusLayout.setSpacing(false);
+        statusLayout.setPadding(false);
+        statusLayout.addClassName("generators-view-statuslayout");
+
 
         VerticalLayout layout = new VerticalLayout();
         layout.getStyle().set("height", "100%");
@@ -128,12 +140,19 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
             }
         });
 
-        // retrieve the runners from the context and put them in the UI
-        List<GeneratorRunner> runners = getContextRunners();
-        for (GeneratorRunner runner : runners) {
-            runner.getElement().removeFromTree();   // remove if attached to previous tree
-            addRunnerToUI(runner);
+//        // retrieve the runners from the context and put them in the UI
+//        List<GeneratorRunner> runners = getContextRunners();
+//        for (GeneratorRunner runner : runners) {
+//            runner.getElement().removeFromTree();   // remove if attached to previous tree
+//            addRunnerToUI(runner);
+//        }
+
+        // retrieve the running tasks from the context, create Task Monitors and put them in the UI
+        Collection<SimulationCallable> callables = contextStore.simulationCallableMap.values();
+        for(SimulationCallable callable : callables){
+            attachMonitorToTask(callable);
         }
+
 
     }
 
@@ -539,12 +558,14 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
                     .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
                     .withButton(bConfirm, ButtonOption.caption("Continue"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
             bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
-                run3(model);
+//                run3(model);
+                run4(model);
             });
 
             dialog.open();
         } else {
-            run3(model);
+//            run3(model);
+            run4(model);
         }
     }
 
@@ -566,6 +587,9 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
             dialog.open();
         }
     }
+
+
+
 
 
     /**
@@ -674,6 +698,84 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         }
 
     }
+
+
+    private void run4(GeneratorModel model){
+
+        try {
+
+            List<SimulationCallable> callables = runnerService.startGenerator(model);
+            for(SimulationCallable callable : callables){
+                attachMonitorToTask(callable);
+            }
+
+        } catch (Exception e) {
+            ConfirmDialog dialog = ConfirmDialog.createError()
+                    .withCaption("Error starting Generator id " + model.getId())
+                    .withMessage(e.getMessage())
+                    .withCancelButton();
+            dialog.open();
+        }
+
+
+    }
+
+
+    /**
+     * Attach a TaskMonitor to a task and add it to the status panel
+     */
+    private void attachMonitorToTask(SimulationCallable callable){
+
+        UI ui = UI.getCurrent();
+
+        // obtain a handle to interrupt/manage the task
+        TaskHandler handler=callable.obtainHandler();
+
+        // GUI component handling events coming from the monitor
+        TaskMonitor taskMonitor = context.getBean(TaskMonitor.class);
+        TaskMonitor.MonitorListener listener = new TaskMonitor.MonitorListener() {
+
+            // warning, the listener is called on another thread
+
+            @Override
+            public void onAborted() {
+                handler.abort();
+            }
+
+            @Override
+            public void onClosed() {
+                ui.access((Command) () -> statusLayout.remove(taskMonitor));
+            }
+        };
+        taskMonitor.setMonitorListener(listener);
+        //taskMonitor.setAutoClose(true);
+
+
+        // listen to events happening in the Callable
+        callable.addListener(new TaskListener() {
+
+            // warning, the listener is called on another thread
+
+            @Override
+            public void onProgress(int current, int total, Object progressInfo) {
+                taskMonitor.onProgress(current, total, progressInfo);
+            }
+
+            @Override
+            public void onCompleted(Object completionInfo) {
+                taskMonitor.onCompleted(completionInfo);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                taskMonitor.onError(e);
+            }
+        });
+
+        statusLayout.add(taskMonitor);
+
+    }
+
 
 
 }

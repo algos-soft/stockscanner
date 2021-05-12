@@ -77,6 +77,9 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         Page<MarketIndex> page;
         if(example!=null){
             page = repository.findAll(example, pageable);
+//            String filter = example.getProbe().getSymbol();
+//            log.info("filter: "+filter);
+//            page = repository.findAllWithFilterOrderBySymbol(pageable,filter,filter);
         }else{
             page = repository.findAll(pageable);
         }
@@ -131,6 +134,13 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
             model.setCategory(oCategory.get());
         }
 
+        model.setExchange(entity.getExchange());
+        model.setCountry(entity.getCountry());
+        model.setSector(entity.getSector());
+        model.setIndustry(entity.getIndustry());
+        model.setMarketCap(utils.toPrimitive(entity.getMarketCap()));
+        model.setEbitda(utils.toPrimitive(entity.getEbitda()));
+
         model.setImageData(entity.getImage());
         model.setSymbol(entity.getSymbol());
 
@@ -168,6 +178,13 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         if (category != null) {
             entity.setCategory(category.getCode());
         }
+
+        entity.setExchange(model.getExchange());
+        entity.setCountry(model.getCountry());
+        entity.setSector(model.getSector());
+        entity.setIndustry(model.getIndustry());
+        entity.setMarketCap(model.getMarketCap());
+        entity.setEbitda(model.getEbitda());
 
         entity.setSpreadPercent(model.getSpreadPercent());
         entity.setOvnBuyDay(model.getOvnBuyDay());

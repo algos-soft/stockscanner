@@ -8,8 +8,8 @@ import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.data.service.SimulationService;
 import com.algos.stockscanner.strategies.Strategy;
-import com.algos.stockscanner.strategies.StrategyParams;
-import com.algos.stockscanner.strategies.SurferStrategy;
+import com.algos.stockscanner.strategies.StrategyParamsOld;
+import com.algos.stockscanner.strategies.SurferStrategyOld;
 import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.google.common.collect.Lists;
 import com.vaadin.flow.component.ClickEvent;
@@ -230,7 +230,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
                     // prepare params
                     MarketIndex index = marketIndexService.get(indexId).get();
-                    StrategyParams params = new StrategyParams();
+                    StrategyParamsOld params = new StrategyParamsOld();
                     params.setIndex(index);
                     params.setStartDate(startDate);
                     params.setFixedDays(generator.getFixedDays());
@@ -250,7 +250,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
                     params.setDaysLookback(lookback);
 
                     // run the strategy and retrieve a Simulation
-                    strategy = context.getBean(SurferStrategy.class, params);
+                    strategy = context.getBean(SurferStrategyOld.class, params);
                     simulation = strategy.execute();
 
                     // assign the Simulation to the Generator and save
