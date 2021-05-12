@@ -97,6 +97,16 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         return repository.findAllAndSort(Sort.by("symbol"));
     }
 
+    public Page<MarketIndex> findAllOrderBySymbol(Pageable pageable){
+        return repository.findAllOrderBySymbol(pageable);
+    }
+
+    public Page<MarketIndex> findAllWithFilterOrderBySymbol(Pageable pageable, String filter){
+        return repository.findAllWithFilterOrderBySymbol(pageable, filter, filter);
+    }
+
+
+
     public int countDataPoints(MarketIndex index){
         return indexUnitService.countBy(index);
     }

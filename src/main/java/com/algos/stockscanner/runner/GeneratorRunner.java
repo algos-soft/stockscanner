@@ -427,7 +427,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
         // build a list of market indices
         List<MarketIndex> marketIndexes = new ArrayList<>();
-        if (generator.getIndexesPermutate()) {
+        if (utils.toPrimitive(generator.getIndexesPermutate())) {
             for (MarketIndex marketIndex : generator.getIndexes()) {
                 marketIndexes.add(marketIndex);
             }
@@ -542,7 +542,7 @@ public class GeneratorRunner extends VerticalLayout implements Callable<Void> {
 
     private List<Integer> getIndexIdsList() throws Exception {
         List<Integer> list = new ArrayList<>();
-        if (generator.getIndexesPermutate()) {
+        if (utils.toPrimitive(generator.getIndexesPermutate())) {
             for (MarketIndex index : generator.getIndexes()) {
                 list.add(index.getId());
             }

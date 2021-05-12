@@ -11,6 +11,7 @@ import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
@@ -25,11 +26,15 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
+import org.apache.commons.lang3.StringUtils;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.slf4j.Logger;
@@ -50,12 +55,14 @@ import java.util.Optional;
 @Route(value = "indexes", layout = MainView.class)
 @PageTitle(Application.APP_NAME+" | Indexes")
 @PageSubtitle("Indexes")
-@CssImport("./views/indexes/indexes-view.css")
+@CssImport(value = "./views/indexes/indexes-view.css")
 public class IndexesView extends Div implements AfterNavigationObserver {
 
     private static final Logger log = LoggerFactory.getLogger(IndexesView.class);
 
-    Grid<IndexModel> grid;
+    private Grid<IndexModel> grid;
+
+    private String filterString;
 
     @Autowired
     private Utils utils;
@@ -80,12 +87,20 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         addClassName("indexes-view");
         setSizeFull();
 
+
+        Component filterPanel = createFilterPanel();
+
         Grid.Column col;
         grid = new Grid<>();
         grid.setHeight("100%");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
         col = grid.addComponentColumn(index -> createCard(index));
-        add(grid);
+
+        VerticalLayout layout = new VerticalLayout();
+        layout.getStyle().set("height","100%");
+        layout.add(filterPanel, grid);
+
+        add(layout);
 
         // customize the header
         addAttachListener((ComponentEventListener<AttachEvent>) attachEvent -> {
@@ -115,6 +130,28 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         header.add(addButton);
 
     }
+
+
+    private Component createFilterPanel(){
+
+        TextField filterFld=new TextField("filter");
+        filterFld.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>() {
+            @Override
+            public void valueChanged(AbstractField.ComponentValueChangeEvent<TextField, String> event) {
+                filterString=event.getValue();
+                loadAll();
+            }
+        });
+        filterFld.setValueChangeMode(ValueChangeMode.EAGER);
+        filterFld.setAutofocus(true);
+        filterFld.setClearButtonVisible(true);
+
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.add(filterFld);
+        return layout;
+    }
+
+
 
 
     /**
@@ -426,106 +463,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
 
-//    private Component buildActions(IndexModel model) {
-//
-//        Select<String> select = new Select<>();
-//        select.setPlaceholder("Actions");
-//        select.setItems("Edit index", "Delete index", "Download historic data");
-//        select.getStyle().set("width", "3em");
-//        select.setEmptySelectionCaption("Test");
-////        select.add(new Label("Edit index"));
-////        select.add(new Label("Delete index"));
-////        select.add(new Label("Download historic data"));
-//
-//
-//        select.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<String>, String>>() {
-//            @Override
-//            public void valueChanged(AbstractField.ComponentValueChangeEvent<Select<String>, String> event) {
-//
-//                String text = event.getValue();
-//                select.setValue(null);
-//
-//                if (text != null) {
-//
-//                    switch (text) {
-//                        case "Edit index":
-//
-//                            MarketIndex entity = marketIndexService.get(model.getId()).get();
-//
-//                            IndexDialogConfirmListener listener = model1 -> {
-//                                marketIndexService.modelToEntity(model1, entity);
-//                                marketIndexService.update(entity);   // write db
-//                                marketIndexService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
-//                                grid.getDataProvider().refreshItem(model1); // refresh only this item
-//                            };
-//
-//                            IndexDialog dialog = context.getBean(IndexDialog.class, model, listener);
-//
-//                            dialog.open();
-//
-//                            break;
-//                        default:
-//                            break;
-//                    }
-//                }
-//
-//
-//            }
-//        });
-//
-////        select.setLabel("Name");
-////        select.setItems("Option one", "Option two");
-////
-////        Div value = new Div();
-////        value.setText("Select a value");
-////        select.addValueChangeListener(
-////                event -> value.setText("Selected: " + event.getValue()));
-////
-////
-////
-////        account.getSubMenu().addItem("Edit index", i -> {
-////
-////            MarketIndex entity = marketIndexService.get(model.getId()).get();
-////
-////            IndexDialogConfirmListener listener = model1 -> {
-////                updateEntity(entity, model1);
-////                marketIndexService.update(entity);   // write db
-////                marketIndexService.entityToModel(entity, model1); // from db back to model - to be sure model is aligned with db
-////                grid.getDataProvider().refreshItem(model1); // refresh only this item
-////            };
-////
-////            IndexDialog dialog = context.getBean(IndexDialog.class, model, listener);
-////
-////            dialog.open();
-////
-////        });
-//
-//
-//        return select;
-//
-//    }
-
-
-//    /**
-//     * Update entity from model
-//     */
-//    private void updateEntity(MarketIndex entity, IndexModel model) {
-//        entity.setImage(model.getImageData());
-//        entity.setSymbol(model.getSymbol());
-//        entity.setName(model.getName());
-//
-//        IndexCategories category = model.getCategory();
-//        if (category != null) {
-//            entity.setCategory(category.getCode());
-//        }
-//
-//        entity.setSpreadPercent(model.getSpreadPercent());
-//        entity.setOvnBuyDay(model.getOvnBuyDay());
-//        entity.setOvnBuyWe(model.getOvnBuyWe());
-//        entity.setOvnSellDay(model.getOvnSellDay());
-//        entity.setOvnSellWe(model.getOvnSellWe());
-//    }
-
 
     /**
      * Reload data when this view is displayed.
@@ -543,7 +480,15 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         List<IndexModel> outList = new ArrayList<>();
 
         Pageable p = Pageable.unpaged();
-        Page<MarketIndex> page = marketIndexService.list(p);
+//        Page<MarketIndex> page = marketIndexService.list(p);
+//        Page<MarketIndex> page = marketIndexService.findAllOrderBySymbol(p);
+        Page<MarketIndex> page;
+        if(StringUtils.isEmpty(filterString)){
+            page = marketIndexService.findAllOrderBySymbol(p);
+        }else{
+            page = marketIndexService.findAllWithFilterOrderBySymbol(p, filterString);
+        }
+
 
         page.stream().forEach(e -> {
             outList.add(createIndex(e));
