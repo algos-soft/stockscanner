@@ -387,8 +387,8 @@ public class MarketService {
         String Country;
         String Sector;
         String Industry;
-        long MarketCapitalization;
-        long EBITDA;
+        String MarketCapitalization;
+        String EBITDA;
     }
 
 

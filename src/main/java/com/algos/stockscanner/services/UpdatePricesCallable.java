@@ -75,7 +75,7 @@ public class UpdatePricesCallable implements Callable<Void> {
     private int minMillisBetweenReq;
     private int symbolCount=0;
 
-    private TimerTask cpuTimer;
+    private TimerTask cpuMonitor;
     private int cpuPauseMs;
 
     @Autowired
@@ -94,6 +94,7 @@ public class UpdatePricesCallable implements Callable<Void> {
     /**
      * @param symbols    the list of indexes to update
      * @param mode      the update mode (@see IndexUpdateModes)
+     * @param maxReqPerMinute the max number of request per minute
      */
     public UpdatePricesCallable(List<String> symbols, PriceUpdateModes mode, int maxReqPerMinute) {
         this.symbols = symbols;
@@ -119,7 +120,7 @@ public class UpdatePricesCallable implements Callable<Void> {
         currentProgress.update("waiting...");
 
         // start a thread to monitor the CPU load
-        cpuTimer = context.getBean(CpuMonitorTask.class, (CpuMonitorListener) delayMs -> {
+        cpuMonitor = context.getBean(CpuMonitorTask.class, (CpuMonitorListener) delayMs -> {
             cpuPauseMs =delayMs;
         });
 
@@ -204,8 +205,8 @@ public class UpdatePricesCallable implements Callable<Void> {
             contextStore.updateIndexCallableMap.remove("" + hashCode(), this);
 
             // cancel the CPU timer
-            if(cpuTimer!=null){
-                cpuTimer.cancel();
+            if(cpuMonitor !=null){
+                cpuMonitor.cancel();
             }
 
         }
@@ -226,19 +227,18 @@ public class UpdatePricesCallable implements Callable<Void> {
      */
     private TimeSeriesResponse executeRequest(MarketIndex index){
 
-        // check request frequency and eventually wait
+        // check request frequency and eventually pause for a while
         if(lastRequestTs!=null){
             int millisElapsed = (int)lastRequestTs.until(LocalDateTime.now(), ChronoUnit.MILLIS);
             if(millisElapsed<minMillisBetweenReq){
                 int millisToWait=minMillisBetweenReq-millisElapsed;
                 try {
-                    notifyProgress(0,0,"paused for request timing");
+                    notifyProgress(0,0,index.getSymbol() + " paused for timing");
                     Thread.sleep(millisToWait);
                 } catch (InterruptedException e) {
                     log.error("timing error", e);
                 }
             }
-
         }
 
         notifyProgress(0,0,"Requesting data for "+index.getSymbol());

@@ -38,25 +38,22 @@ public class CpuMonitorTask extends TimerTask {
     @Override
     public void run() {
 
-        if(appCpuLimit<=0){
-            return;
-        }
-
         double load=operatingSystemMXBean.getProcessCpuLoad();
         load = (double)Math.round(load * 10000d) / 10000d;  // round to 4 decimals
 
-
-        if(load > appCpuLimit){
-            currentDelayIndex++;
-        }else{
-            if(currentDelayIndex>0){
-                currentDelayIndex--;
+        if(appCpuLimit>0){
+            if(load > appCpuLimit){
+                currentDelayIndex++;
+            }else{
+                if(currentDelayIndex>0){
+                    currentDelayIndex--;
+                }
             }
         }
 
         int delayMs=(int) Math.round(currentDelayIndex * ADAPTATION_SPEED);
 
-        log.info("cpu load: "+load+" - delay ms: "+delayMs);
+        log.debug("cpu load: "+load+" - delay ms: "+delayMs);
 
         listener.delayReceived(delayMs);
 

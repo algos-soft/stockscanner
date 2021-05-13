@@ -2,7 +2,6 @@ package com.algos.stockscanner.services;
 
 import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.data.entity.Generator;
-import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.MarketIndexService;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -37,16 +35,6 @@ public class SimulationCallable implements Callable<Void> {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-//    LocalDate startDate;
-//    private int indexId;
-//    private float initialAmount;
-//    int sl;
-//    int tp;
-//    int numDays;
-//    private StrategyParams strategyParams;
-
-//    private MarketIndex marketIndex;
-
     private List<Strategy> strategies;
     private int generatorId;
 
@@ -58,8 +46,9 @@ public class SimulationCallable implements Callable<Void> {
     private boolean abort;
     private Progress currentProgress;
 
-    private TimerTask cpuTimer;
-    private int cpuPauseMs;
+    private TimerTask cpuMonitor;
+
+    private StrategyHandler strategyHandler;
 
     @Autowired
     private ContextStore contextStore;
@@ -94,9 +83,10 @@ public class SimulationCallable implements Callable<Void> {
         currentProgress.update("waiting...");
 
         // start a thread to monitor the CPU load
-        cpuTimer = context.getBean(CpuMonitorTask.class, (CpuMonitorListener) delayMs -> {
-            cpuPauseMs =delayMs;
-            // invoke the current StrategyHandler
+        cpuMonitor = context.getBean(CpuMonitorTask.class, (CpuMonitorListener) delayMs -> {
+            if(strategyHandler!=null){
+                strategyHandler.setRetroactionMs(delayMs);
+            }
         });
 
     }
@@ -129,9 +119,9 @@ public class SimulationCallable implements Callable<Void> {
             for(Strategy strategy : strategies){
 
                 // obtain a strategy handler from the Strategy,
-                // maintain it in this object as the current strategy handler,
+                // maintain it as the current strategy handler,
                 // and invoke the appropriate method anytime the cpuTimer receives a retroaction value.
-                //StrategyHandler handler = strategy.getStrategyHandler();
+                strategyHandler = strategy.getStrategyHandler();
 
                 checkAbort();
                 i++;
@@ -164,6 +154,10 @@ public class SimulationCallable implements Callable<Void> {
 
             // unregister itself from the context-level storage
             contextStore.simulationCallableMap.remove("" + hashCode(), this);
+
+            if(cpuMonitor!=null){
+                cpuMonitor.cancel();
+            }
 
         }
 

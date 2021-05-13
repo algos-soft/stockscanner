@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
@@ -43,7 +44,9 @@ public class DownloadIndexCallable implements Callable<Void> {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private String symbol;
+    private final List<String> symbols;
+    private final int maxReqPerMinute;
+
     private ConcurrentLinkedQueue<TaskListener> listeners = new ConcurrentLinkedQueue<>();
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -52,11 +55,13 @@ public class DownloadIndexCallable implements Callable<Void> {
     private boolean abort;
     private Progress currentProgress;
 
+    private LocalDateTime lastRequestTs;
+    private int minMillisBetweenReq;
+    private int symbolCount=0;
+
+
     @Autowired
     private ContextStore contextStore;
-
-//    @Autowired
-//    private IndexUnitService indexUnitService;
 
     @Autowired
     private MarketIndexService marketIndexService;
@@ -76,16 +81,18 @@ public class DownloadIndexCallable implements Callable<Void> {
 
 
     /**
-     * @param symbol    the symbol to download/update
+     * @param symbols the list of indexes to download/update
+     * @param maxReqPerMinute the max number of request per minute
      */
-    public DownloadIndexCallable(String symbol) {
-        this.symbol=symbol;
+    public DownloadIndexCallable(List<String> symbols, int maxReqPerMinute) {
+        this.symbols=symbols;
+        this.maxReqPerMinute=maxReqPerMinute;
     }
 
     @PostConstruct
     private void init() {
 
-        log.info("Download task created for index " + symbol);
+        log.info("Download task created for "+symbols);
 
         // register itself to the context-level storage
         contextStore.downloadIndexCallableMap.put("" + hashCode(), this);
@@ -93,12 +100,14 @@ public class DownloadIndexCallable implements Callable<Void> {
         currentProgress= new Progress();
 
         // puts the task in 'waiting for start' status
-        currentProgress.update("waiting: "+symbol);
+        currentProgress.update("waiting...");
+
+        minMillisBetweenReq=60/maxReqPerMinute*1000;
+        minMillisBetweenReq=(int)(minMillisBetweenReq*1.05); // security margin
 
         okHttpClient = new OkHttpClient();
         Moshi moshi = new Moshi.Builder().build();
         fdJsonAdapter = moshi.adapter(MarketService.FDResponse.class);
-
 
     }
 
@@ -112,7 +121,7 @@ public class DownloadIndexCallable implements Callable<Void> {
             return null;
         }
 
-        log.debug("Download task called for index " + symbol);
+        log.debug("Download task called for "+symbols);
 
         running=true;
 
@@ -122,17 +131,24 @@ public class DownloadIndexCallable implements Callable<Void> {
         // long task, can throw exception
         try {
 
-            checkAbort();   // throws exception if the task is aborted
+            for(String symbol : symbols){
 
-            notifyProgress(1, 3, "Requesting data");
+                symbolCount++;
 
-            FundamentalData fundamentalData = fetchFundamentalData(symbol);
+                checkAbort();   // throws exception if the task is aborted
 
-            handleResponse(fundamentalData);
+                notifyProgress(1, 3, "Requesting data");
+
+                FundamentalData fundamentalData = fetchFundamentalData(symbol);
+
+                handleResponse(fundamentalData, symbol);
+
+            }
+
+            log.info("Download task completed for "+symbols);
 
             endTime = LocalDateTime.now();
             String info = buildDurationInfo();
-            log.info("Download task completed for index " + symbol + " " + info);
 
             notifyCompleted(info);
 
@@ -198,8 +214,10 @@ public class DownloadIndexCallable implements Callable<Void> {
 
         currentProgress.update(current, tot, info);
 
+        String pre = "["+symbolCount+"/"+symbols.size()+"]";
+
         for (TaskListener listener : listeners) {
-            listener.onProgress(current, tot, info);
+            listener.onProgress(current, tot, pre+" "+info);
         }
     }
 
@@ -218,7 +236,7 @@ public class DownloadIndexCallable implements Callable<Void> {
 
     private void checkAbort() throws Exception{
         if (abort) {
-            currentProgress.update("Aborted: "+symbol);
+            currentProgress.update("Aborted");
             notifyProgress(currentProgress.getCurrent(), currentProgress.getTot(), currentProgress.getStatus());
             throw new AbortedByUserException();
         }
@@ -230,6 +248,21 @@ public class DownloadIndexCallable implements Callable<Void> {
      * Fetch fundamental data from the network
      */
     private FundamentalData fetchFundamentalData(String symbol) throws IOException {
+
+        // check request frequency and eventually pause for a while
+        if(lastRequestTs!=null){
+            int millisElapsed = (int)lastRequestTs.until(LocalDateTime.now(), ChronoUnit.MILLIS);
+            if(millisElapsed<minMillisBetweenReq){
+                int millisToWait=minMillisBetweenReq-millisElapsed;
+                try {
+                    notifyProgress(0,0,symbol+" paused for timing");
+                    Thread.sleep(millisToWait);
+                } catch (InterruptedException e) {
+                    log.error("timing error", e);
+                }
+            }
+        }
+
         FundamentalData fundamentalData=null;
 
         HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.alphavantage.co/query").newBuilder();
@@ -243,6 +276,8 @@ public class DownloadIndexCallable implements Callable<Void> {
                 .url(url)
                 .build();
 
+        lastRequestTs=LocalDateTime.now();
+
         Response response = okHttpClient.newCall(request).execute();
         if(response.isSuccessful()){
 
@@ -253,7 +288,17 @@ public class DownloadIndexCallable implements Callable<Void> {
             }
 
             IndexCategories category = IndexCategories.getByAlphaVantageType(fdresp.AssetType);
-            fundamentalData=new FundamentalData(symbol, fdresp.Name, category, fdresp.Exchange, fdresp.Country, fdresp.Sector, fdresp.Industry, fdresp.MarketCapitalization, fdresp.EBITDA);
+            long marketCap=0;
+            try {
+                marketCap=Long.parseLong(fdresp.MarketCapitalization);
+            }catch (Exception e){
+            }
+            long ebitda=0;
+            try {
+                ebitda=Long.parseLong(fdresp.EBITDA);
+            }catch (Exception e){
+            }
+            fundamentalData=new FundamentalData(symbol, fdresp.Name, category, fdresp.Exchange, fdresp.Country, fdresp.Sector, fdresp.Industry, marketCap, ebitda);
 
         }
 
@@ -269,7 +314,7 @@ public class DownloadIndexCallable implements Callable<Void> {
      * If exists, update it
      * If not, create it
      */
-    private void handleResponse(FundamentalData fd) throws Exception {
+    private void handleResponse(FundamentalData fd, String symbol) throws Exception {
 
         notifyProgress(2, 3, "updating db: "+symbol);
 
@@ -336,10 +381,9 @@ public class DownloadIndexCallable implements Callable<Void> {
     private void terminateWithError(Exception e){
         endTime = LocalDateTime.now();
         if(e instanceof AbortedByUserException){
-            log.info("Download task aborted by user for index " + symbol);
+            log.info("Download task aborted by user");
         }else{
-            notifyProgress(currentProgress.getCurrent(), currentProgress.getTot(), "Error: "+symbol);
-            log.error("Download task error for index " + symbol, e);
+            log.error("Download task error", e);
         }
         notifyError(e);
     }

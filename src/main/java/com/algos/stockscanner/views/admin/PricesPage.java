@@ -131,7 +131,7 @@ public class PricesPage extends VerticalLayout {
         filterFrom.setLabel("from");
         filterFrom.setItems(characters);
         filterFrom.setValue(new Character('A'));
-        filterFrom.setWidth("4em");
+        filterFrom.setWidth("4.5em");
         filterFrom.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<Character>, Character>>) event -> {
             updateFilter();
         });
@@ -140,7 +140,7 @@ public class PricesPage extends VerticalLayout {
         filterTo.setLabel("to");
         filterTo.setItems(characters);
         filterTo.setValue(new Character('Z'));
-        filterTo.setWidth("4em");
+        filterTo.setWidth("4.5em");
         filterTo.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<Character>, Character>>) event -> {
             updateFilter();
         });

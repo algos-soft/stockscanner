@@ -13,15 +13,20 @@ import com.algos.stockscanner.enums.ActionTypes;
 import com.algos.stockscanner.enums.Actions;
 import com.algos.stockscanner.enums.Reasons;
 import com.algos.stockscanner.enums.Terminations;
+import com.algos.stockscanner.utils.CpuMonitorListener;
+import com.algos.stockscanner.utils.CpuMonitorTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.TimerTask;
 
 public abstract class AbsStrategy implements Strategy {
 
@@ -77,6 +82,11 @@ public abstract class AbsStrategy implements Strategy {
 
     List<StrategyProgressListener> listeners=new ArrayList<>();
 
+    private int cpuPauseMs;
+
+    @Autowired
+    private ApplicationContext context;
+
     @Autowired
     IndexUnitService indexUnitService;
 
@@ -102,6 +112,10 @@ public abstract class AbsStrategy implements Strategy {
         this.numDays=numDays;
         this.initialAmount=initialAmount;
         this.endDate=startDate.plusDays(numDays);
+    }
+
+    @PostConstruct
+    private void init(){
     }
 
     @Override
@@ -131,6 +145,11 @@ public abstract class AbsStrategy implements Strategy {
             if(abort){
                 termination=Terminations.ABORTED_BY_USER;
                 break;
+            }
+
+            // apply retroaction to cpu load
+            if(cpuPauseMs >0){
+                Thread.sleep(cpuPauseMs);
             }
 
             if(ensureUnitsAvailable()){
@@ -490,6 +509,13 @@ public abstract class AbsStrategy implements Strategy {
         LocalDateTime t1 = t2.minusDays(days);
         float avg = indexUnitService.getMovingAverage(index, t1, t2);
         return avg;
+    }
+
+    @Override
+    public StrategyHandler getStrategyHandler() {
+        return millis -> {
+            cpuPauseMs=millis;
+        };
     }
 
     class TwoIntegers{

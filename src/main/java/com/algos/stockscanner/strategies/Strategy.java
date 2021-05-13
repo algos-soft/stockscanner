@@ -26,4 +26,6 @@ public interface Strategy {
 
     void addProgressListener(StrategyProgressListener listener);
 
+    StrategyHandler getStrategyHandler();
+
 }
