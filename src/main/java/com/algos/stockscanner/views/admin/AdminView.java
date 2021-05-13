@@ -30,8 +30,8 @@ public class AdminView extends VerticalLayout {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private static final String MARKET_INDEXES = "Download indexes";
-    private static final String PRICES = "Download prices";
+    private static final String MARKET_INDEXES = "Update indexes";
+    private static final String PRICES = "Update prices";
     private static final String TOOLS = "Tools";
 
     private Component marketIndexesComponent;

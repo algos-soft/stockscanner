@@ -7,10 +7,12 @@ import com.algos.stockscanner.enums.FrequencyTypes;
 import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.data.service.IndexUnitService;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.algos.stockscanner.enums.IndexUpdateModes;
+import com.algos.stockscanner.enums.PriceUpdateModes;
 import com.algos.stockscanner.task.AbortedByUserException;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
+import com.algos.stockscanner.utils.CpuMonitorListener;
+import com.algos.stockscanner.utils.CpuMonitorTask;
 import com.algos.stockscanner.utils.Du;
 import com.crazzyghost.alphavantage.AlphaVantage;
 import com.crazzyghost.alphavantage.parameters.DataType;
@@ -21,25 +23,29 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
 @Scope("prototype")
-public class UpdateIndexDataCallable implements Callable<Void> {
+public class UpdatePricesCallable implements Callable<Void> {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -52,11 +58,11 @@ public class UpdateIndexDataCallable implements Callable<Void> {
             .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
             .toFormatter();
 
-    private MarketIndex index;
-    private String symbol;
-    private IndexUpdateModes mode;
-    private LocalDate startDate;
-    private ConcurrentLinkedQueue<TaskListener> listeners = new ConcurrentLinkedQueue<>();
+    private final List<String> symbols;
+    private PriceUpdateModes mode;
+    private final int maxReqPerMinute;
+
+    private final ConcurrentLinkedQueue<TaskListener> listeners = new ConcurrentLinkedQueue<>();
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
@@ -65,6 +71,15 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     private Progress currentProgress;
 
     private LocalDateTime lastValidPoint;
+    private LocalDateTime lastRequestTs;
+    private int minMillisBetweenReq;
+    private int symbolCount=0;
+
+    private TimerTask cpuTimer;
+    private int cpuDelayMs;
+
+    @Autowired
+    private ApplicationContext context;
 
     @Autowired
     private ContextStore contextStore;
@@ -75,36 +90,39 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     @Autowired
     private MarketIndexService marketIndexService;
 
+
     /**
-     * @param symbol    the index to update
+     * @param symbols    the list of indexes to update
      * @param mode      the update mode (@see IndexUpdateModes)
-     * @param startDate in case of DATE mode, the date when to begin the update
      */
-    public UpdateIndexDataCallable(String symbol, IndexUpdateModes mode, LocalDate startDate) {
-        this.symbol = symbol;
+    public UpdatePricesCallable(List<String> symbols, PriceUpdateModes mode, int maxReqPerMinute) {
+        this.symbols = symbols;
         this.mode = mode;
-        this.startDate = startDate;
+        this.maxReqPerMinute=maxReqPerMinute;
     }
 
 
     @PostConstruct
     private void init() {
 
-        log.info("Callable task created for index " + symbol);
+        log.info("Update prices task created for "+symbols);
 
         // register itself to the context-level storage
         contextStore.updateIndexCallableMap.put("" + hashCode(), this);
 
-        try {
-            index=marketIndexService.findUniqueBySymbol(symbol);
-        } catch (Exception e) {
-            log.error("symbol not found: "+symbol, e);
-        }
-
         currentProgress=new Progress();
+
+        minMillisBetweenReq=60/maxReqPerMinute*1000;
+        minMillisBetweenReq=(int)(minMillisBetweenReq*1.05); // security margin
 
         // puts the task in 'waiting for start' status
         currentProgress.update("waiting...");
+
+        // start a thread to monitor the CPU load
+        cpuTimer = context.getBean(CpuMonitorTask.class, (CpuMonitorListener) delayMs -> {
+            cpuDelayMs=delayMs;
+            log.info("delay received: "+delayMs);
+        });
 
     }
 
@@ -118,7 +136,7 @@ public class UpdateIndexDataCallable implements Callable<Void> {
             return null;
         }
 
-        log.debug("Callable task called for index " + symbol);
+        log.debug("Update prices task called for "+symbols);
 
         running=true;
 
@@ -128,47 +146,53 @@ public class UpdateIndexDataCallable implements Callable<Void> {
         // long task, can throw exception
         try {
 
-            checkAbort();   // throws exception if the task is aborted
+            for(String symbol : symbols){
 
-            // retrieve the category
-            java.util.Optional<IndexCategories> oCategory = IndexCategories.getItem(index.getCategory());
-            if (!oCategory.isPresent()) {
-                throw new Exception("Index " + symbol + " does not have a category.");
+                symbolCount++;
+
+                MarketIndex index = marketIndexService.findUniqueBySymbol(symbol);
+
+                checkAbort();   // throws exception if the task is aborted
+
+                // retrieve the category
+                java.util.Optional<IndexCategories> oCategory = IndexCategories.getItem(index.getCategory());
+                if (!oCategory.isPresent()) {
+                    throw new Exception("Index " + symbol + " does not have a category.");
+                }
+                IndexCategories category = oCategory.get();
+
+                // switch on the category
+                switch (category) {
+                    case CRYPTO:
+                        break;
+                    case EXCHANGE:
+                        break;
+                    case FOREX:
+                        break;
+                    case SECTOR:
+                        break;
+                    case STOCK:
+
+                        TimeSeriesResponse response=executeRequest(index);
+
+                        String error=response.getErrorMessage();
+                        if(error!=null){
+                            throw new Exception(error);
+                        }
+
+                        handleResponse(response, index);
+
+                        break;
+                    case TECH:
+                        break;
+                }
+
             }
-            IndexCategories category = oCategory.get();
 
-            // switch on the category
-            String url = null;
-            switch (category) {
-                case CRYPTO:
-                    break;
-                case EXCHANGE:
-                    break;
-                case FOREX:
-                    break;
-                case SECTOR:
-                    break;
-                case STOCK:
-
-                    notifyProgress(0, 0, "Requesting data");
-
-                    TimeSeriesResponse response=executeRequest();
-
-                    String error=response.getErrorMessage();
-                    if(error!=null){
-                        throw new Exception(error);
-                    }
-
-                    handleResponse(response);
-
-                    break;
-                case TECH:
-                    break;
-            }
+            log.info("Update prices task completed for " + symbols);
 
             endTime = LocalDateTime.now();
             String info = buildDurationInfo();
-            log.info("Callable task completed for index " + symbol + " " + info);
             notifyCompleted(info);
 
         } catch (Exception e) {
@@ -179,6 +203,11 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
             // unregister itself from the context-level storage
             contextStore.updateIndexCallableMap.remove("" + hashCode(), this);
+
+            // cancel the CPU timer
+            if(cpuTimer!=null){
+                cpuTimer.cancel();
+            }
 
         }
 
@@ -196,7 +225,25 @@ public class UpdateIndexDataCallable implements Callable<Void> {
      * If the check is positive, return the result.
      * If negative, make a full request and return the result.
      */
-    private TimeSeriesResponse executeRequest(){
+    private TimeSeriesResponse executeRequest(MarketIndex index){
+
+        // check request frequency and eventually wait
+        if(lastRequestTs!=null){
+            int millisElapsed = (int)lastRequestTs.until(LocalDateTime.now(), ChronoUnit.MILLIS);
+            if(millisElapsed<minMillisBetweenReq){
+                int millisToWait=minMillisBetweenReq-millisElapsed;
+                try {
+                    notifyProgress(0,0,"paused for request timing");
+                    Thread.sleep(millisToWait);
+                } catch (InterruptedException e) {
+                    log.error("timing error", e);
+                }
+            }
+
+        }
+
+        notifyProgress(0,0,"Requesting data for "+index.getSymbol());
+        log.info("Requesting data for "+index.getSymbol());
 
         OutputSize outputSize=null;
         switch (mode){
@@ -208,26 +255,28 @@ public class UpdateIndexDataCallable implements Callable<Void> {
                 break;
         }
 
+        lastRequestTs=LocalDateTime.now();
+
         TimeSeriesResponse response=AlphaVantage.api()
                 .timeSeries()
                 .daily()
-                .forSymbol(symbol)
+                .forSymbol(index.getSymbol())
                 .outputSize(outputSize)
                 .dataType(DataType.JSON)
                 .fetchSync();
 
-        if(mode.equals(IndexUpdateModes.ADD_MISSING_DATA_ONLY)){
-            if(!coversMissingPeriod(response)){
+        if(mode.equals(PriceUpdateModes.ADD_MISSING_DATA_ONLY)){
+            if(!coversMissingPeriod(response, index)){
 
                 // the compact packet does not cover the missing period!
                 // switch automatically to REPLACE_ALL_DATA mode
                 // and perform the full query
-                mode=IndexUpdateModes.REPLACE_ALL_DATA;
+                mode= PriceUpdateModes.REPLACE_ALL_DATA;
 
                 response=AlphaVantage.api()
                         .timeSeries()
                         .daily()
-                        .forSymbol(symbol)
+                        .forSymbol(index.getSymbol())
                         .outputSize(OutputSize.FULL)
                         .dataType(DataType.JSON)
                         .fetchSync();
@@ -243,7 +292,7 @@ public class UpdateIndexDataCallable implements Callable<Void> {
      * The first point of the data contained in the response must precede or be equal to the
      * last point currently present for the symbol.
      */
-    private boolean coversMissingPeriod(TimeSeriesResponse response){
+    private boolean coversMissingPeriod(TimeSeriesResponse response, MarketIndex index){
         List<StockUnit> units = response.getStockUnits();
         if(units.size()>0){
             Collections.sort(units, Comparator.comparing(StockUnit::getDate));
@@ -264,8 +313,7 @@ public class UpdateIndexDataCallable implements Callable<Void> {
         Duration duration = Duration.between(startTime, endTime);
         String sDuration = DurationFormatUtils.formatDuration(duration.toMillis(), "H:mm:ss", true);
         DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm:ss");
-        String info = "start: " + startTime.format(format) + ", end: " + endTime.format(format) + ", elapsed: " + sDuration;
-        return info;
+        return "start: " + startTime.format(format) + ", end: " + endTime.format(format) + ", elapsed: " + sDuration;
     }
 
     /**
@@ -284,7 +332,7 @@ public class UpdateIndexDataCallable implements Callable<Void> {
      * @return provide a handler to interrupt/manage the execution
      */
     public TaskHandler obtainHandler() {
-        TaskHandler handler = new TaskHandler() {
+        return new TaskHandler() {
             @Override
             public void abort() {
 
@@ -302,7 +350,6 @@ public class UpdateIndexDataCallable implements Callable<Void> {
                 }
             }
         };
-        return handler;
     }
 
 
@@ -311,7 +358,8 @@ public class UpdateIndexDataCallable implements Callable<Void> {
         currentProgress.update(current, tot, info);
 
         for (TaskListener listener : listeners) {
-            listener.onProgress(current, tot, info);
+            String pre = "["+symbolCount+"/"+symbols.size()+"]";
+            listener.onProgress(current, tot, pre+" "+info);
         }
     }
 
@@ -340,11 +388,13 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     /**
      * Manage a successful response from the api
      */
-    public void handleResponse(TimeSeriesResponse response)  throws Exception {
+    public void handleResponse(TimeSeriesResponse response, MarketIndex index)  throws Exception {
+
+        log.info("Processing data for "+index.getSymbol());
 
         // if we are in REPLACE_ALL_DATA mode, delete all previous data
-        if(mode.equals(IndexUpdateModes.REPLACE_ALL_DATA)){
-            notifyProgress(0, 0, "Deleting old data");
+        if(mode.equals(PriceUpdateModes.REPLACE_ALL_DATA)){
+            notifyProgress(0, 0, "Deleting old data for "+index.getSymbol());
             indexUnitService.deleteByIndex(index);
         }
 
@@ -352,26 +402,35 @@ public class UpdateIndexDataCallable implements Callable<Void> {
         List<StockUnit> units = response.getStockUnits();
         Collections.sort(units, Comparator.comparing(StockUnit::getDate));
         int j = 0;
+        int countUnits=0;
         for (StockUnit unit : units) {
+
+            // retroaction
+            if(cpuDelayMs>0){
+                Thread.sleep(cpuDelayMs);
+            }
 
             checkAbort();
 
             j++;
 
-            notifyProgress(j, units.size(), symbol);
+            notifyProgress(j, units.size(), index.getSymbol());
 
             // if we are in ADD_MISSING_DATA_ONLY mode, skip the points
             // before or equal the lastValidPoint
-            if(mode.equals(IndexUpdateModes.ADD_MISSING_DATA_ONLY)){
+            if(mode.equals(PriceUpdateModes.ADD_MISSING_DATA_ONLY)){
                 LocalDateTime dateTime = LocalDateTime.parse(unit.getDate(), fmt);
                 if(!dateTime.isAfter(lastValidPoint)){
                     continue;
                 }
             }
 
-            saveItem(unit);
+            saveItem(unit, index);
+            countUnits++;
 
         }
+
+        log.info("Processing completed for "+index.getSymbol()+ " ("+countUnits+" units added)");
 
         // Consolidate the totals in the MarketIndex
         IndexUnit unit;
@@ -390,8 +449,26 @@ public class UpdateIndexDataCallable implements Callable<Void> {
 
     }
 
+    public static double getProcessCpuLoad() throws Exception {
 
-    private IndexUnit saveItem(StockUnit unit) {
+        MBeanServer mbs    = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name    = ObjectName.getInstance("java.lang:type=OperatingSystem");
+        AttributeList list = mbs.getAttributes(name, new String[]{ "ProcessCpuLoad" });
+
+        if (list.isEmpty())     return Double.NaN;
+
+        Attribute att = (Attribute)list.get(0);
+        Double value  = (Double)att.getValue();
+
+        // usually takes a couple of seconds before we get real values
+        if (value == -1.0)      return Double.NaN;
+        // returns a percentage value with 1 decimal point precision
+        return ((int)(value * 1000) / 10.0);
+    }
+
+
+
+    private IndexUnit saveItem(StockUnit unit, MarketIndex index) {
         IndexUnit indexUnit = createIndexUnit(unit);
         indexUnit.setIndex(index);
         return indexUnitService.update(indexUnit);
@@ -417,9 +494,9 @@ public class UpdateIndexDataCallable implements Callable<Void> {
     private void terminateWithError(Exception e){
         endTime = LocalDateTime.now();
         if(e instanceof AbortedByUserException){
-            log.info("Callable task aborted by user for index " + symbol);
+            log.info("Callable task aborted by user");
         }else{
-            log.error("Callable task error for index " + symbol, e);
+            log.error("Callable task error", e);
         }
         notifyError(e);
     }

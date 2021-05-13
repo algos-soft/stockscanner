@@ -151,11 +151,8 @@ public class MarketIndexesPage  extends VerticalLayout {
 
                     IndexDownloadModes mode = optionsGroup.getValue();
                     log.info(mode.toString()+" requested - "+symbols.size()+" indexes to download");
-                    int intervalSec = 60/limitField.getValue();
-                    List<DownloadIndexCallable> callables = adminService.scheduleDownload(symbols, intervalSec);
-                    for(DownloadIndexCallable callable : callables){
-                        attachMonitorToTask(callable);
-                    }
+                    DownloadIndexCallable callable = adminService.scheduleDownload(symbols, limitField.getValue());
+                    attachMonitorToTask(callable);
 
                 } catch (Exception e) {
                     e.printStackTrace();

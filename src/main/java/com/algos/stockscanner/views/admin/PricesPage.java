@@ -4,10 +4,10 @@ import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.algos.stockscanner.enums.IndexUpdateModes;
+import com.algos.stockscanner.enums.PriceUpdateModes;
 import com.algos.stockscanner.services.AdminService;
 import com.algos.stockscanner.services.MarketService;
-import com.algos.stockscanner.services.UpdateIndexDataCallable;
+import com.algos.stockscanner.services.UpdatePricesCallable;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
 import com.algos.stockscanner.task.TaskMonitor;
@@ -73,7 +73,7 @@ public class PricesPage extends VerticalLayout {
 
     private Span filterResult;
 
-    private RadioButtonGroup<IndexUpdateModes> optionsGroup;
+    private RadioButtonGroup<PriceUpdateModes> optionsGroup;
 
 
     @PostConstruct
@@ -87,11 +87,11 @@ public class PricesPage extends VerticalLayout {
         optionsGroup = new RadioButtonGroup<>();
         optionsGroup.setLabel("Download mode");
         optionsGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-        optionsGroup.setItems(IndexUpdateModes.values());
-        optionsGroup.setValue(IndexUpdateModes.ADD_MISSING_DATA_ONLY);
-        optionsGroup.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<IndexUpdateModes>, IndexUpdateModes>>() {
+        optionsGroup.setItems(PriceUpdateModes.values());
+        optionsGroup.setValue(PriceUpdateModes.ADD_MISSING_DATA_ONLY);
+        optionsGroup.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<PriceUpdateModes>, PriceUpdateModes>>() {
             @Override
-            public void valueChanged(AbstractField.ComponentValueChangeEvent<RadioButtonGroup<IndexUpdateModes>, IndexUpdateModes> event) {
+            public void valueChanged(AbstractField.ComponentValueChangeEvent<RadioButtonGroup<PriceUpdateModes>, PriceUpdateModes> event) {
                 updateFilter();
             }
         });
@@ -113,12 +113,8 @@ public class PricesPage extends VerticalLayout {
                     List<String> symbols=buildFilteredSymbolList();
 
                     log.info("price update requested - "+symbols.size()+" indexes to update");
-                    int intervalSec = 60/limitField.getValue();
-                    List<UpdateIndexDataCallable> callables = adminService.scheduleUpdate(symbols, optionsGroup.getValue(), intervalSec);
-                    for(UpdateIndexDataCallable callable : callables){
-                        attachMonitorToTask(callable);
-                    }
-
+                    UpdatePricesCallable callable = adminService.scheduleUpdate(symbols, optionsGroup.getValue(), limitField.getValue());
+                    attachMonitorToTask(callable);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -191,8 +187,8 @@ public class PricesPage extends VerticalLayout {
         updateFilter();
 
         // retrieve the running tasks from the context, create Task Monitors and put them in the UI
-        Collection<UpdateIndexDataCallable> callables = contextStore.updateIndexCallableMap.values();
-        for(UpdateIndexDataCallable callable : callables){
+        Collection<UpdatePricesCallable> callables = contextStore.updateIndexCallableMap.values();
+        for(UpdatePricesCallable callable : callables){
             attachMonitorToTask(callable);
         }
 
@@ -248,7 +244,7 @@ public class PricesPage extends VerticalLayout {
     /**
      * Attach a TaskMonitor to a task and add it to the status panel
      */
-    private void attachMonitorToTask(UpdateIndexDataCallable callable){
+    private void attachMonitorToTask(UpdatePricesCallable callable){
 
         UI ui = UI.getCurrent();
 

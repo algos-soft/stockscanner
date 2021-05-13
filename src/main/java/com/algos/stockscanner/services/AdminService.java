@@ -2,10 +2,8 @@ package com.algos.stockscanner.services;
 
 import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.beans.Utils;
-import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
-import com.algos.stockscanner.enums.IndexDownloadModes;
-import com.algos.stockscanner.enums.IndexUpdateModes;
+import com.algos.stockscanner.enums.PriceUpdateModes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +11,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -32,7 +29,7 @@ public class AdminService {
     @Autowired
     private MarketIndexService marketIndexService;
 
-    private ScheduledExecutorService executorService;
+    private ExecutorService executorService;
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -42,42 +39,21 @@ public class AdminService {
 
     @PostConstruct
     private void init(){
-        executorService = Executors.newScheduledThreadPool(Integer.MAX_VALUE);
+        int numThreads = Runtime.getRuntime().availableProcessors() + 1;
+        executorService = Executors.newFixedThreadPool(numThreads);
     }
 
-    public List<UpdateIndexDataCallable> scheduleUpdate(List<String> symbols, IndexUpdateModes mode, int intervalSeconds)  {
-        List<UpdateIndexDataCallable> callables = new ArrayList<>();
-
-        UpdateIndexDataCallable callable;
-        long millis=0;
-        for(String symbol : symbols){
-            callable = context.getBean(UpdateIndexDataCallable.class, symbol, mode, null);
-            callables.add(callable);
-            executorService.schedule(callable, millis, TimeUnit.MILLISECONDS);
-            millis+=intervalSeconds*1000;
-        }
-
-        //executorService.shutdown(); // terminate ongoing and scheduled tasks, then shutdown
-
-        return callables;
-
+    public UpdatePricesCallable scheduleUpdate(List<String> symbols, PriceUpdateModes mode, int maxReqPerMinute)  {
+        UpdatePricesCallable callable = context.getBean(UpdatePricesCallable.class, symbols, mode, maxReqPerMinute);
+        executorService.submit(callable);
+        return callable;
     }
 
 
-    public List<DownloadIndexCallable> scheduleDownload(List<String> symbols, int intervalSeconds){
-        List<DownloadIndexCallable> callables = new ArrayList<>();
-
-        DownloadIndexCallable callable;
-        long millis=0;
-        for(String symbol : symbols){
-            callable = context.getBean(DownloadIndexCallable.class, symbol);
-            callables.add(callable);
-            executorService.schedule(callable, millis, TimeUnit.MILLISECONDS);
-            millis+=intervalSeconds*1000;
-        }
-
-        return callables;
-
+    public DownloadIndexCallable scheduleDownload(List<String> symbols, int maxReqPerMinute){
+        DownloadIndexCallable callable = context.getBean(DownloadIndexCallable.class, symbols, maxReqPerMinute);
+        executorService.submit(callable);
+        return callable;
     }
 
 
