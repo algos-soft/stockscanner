@@ -76,7 +76,7 @@ public class UpdatePricesCallable implements Callable<Void> {
     private int symbolCount=0;
 
     private TimerTask cpuTimer;
-    private int cpuDelayMs;
+    private int cpuPauseMs;
 
     @Autowired
     private ApplicationContext context;
@@ -120,8 +120,7 @@ public class UpdatePricesCallable implements Callable<Void> {
 
         // start a thread to monitor the CPU load
         cpuTimer = context.getBean(CpuMonitorTask.class, (CpuMonitorListener) delayMs -> {
-            cpuDelayMs=delayMs;
-            log.info("delay received: "+delayMs);
+            cpuPauseMs =delayMs;
         });
 
     }
@@ -405,9 +404,9 @@ public class UpdatePricesCallable implements Callable<Void> {
         int countUnits=0;
         for (StockUnit unit : units) {
 
-            // retroaction
-            if(cpuDelayMs>0){
-                Thread.sleep(cpuDelayMs);
+            // apply retroaction to cpu load
+            if(cpuPauseMs >0){
+                Thread.sleep(cpuPauseMs);
             }
 
             checkAbort();

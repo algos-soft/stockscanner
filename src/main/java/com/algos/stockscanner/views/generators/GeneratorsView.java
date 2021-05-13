@@ -8,7 +8,6 @@ import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.data.service.SimulationService;
-import com.algos.stockscanner.runner.GeneratorRunner;
 import com.algos.stockscanner.runner.RunnerService;
 import com.algos.stockscanner.services.SimulationCallable;
 import com.algos.stockscanner.task.TaskHandler;
@@ -562,23 +561,23 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
     }
 
 
-    private void run3(GeneratorModel model) {
-        Generator generator = generatorService.get(model.getId()).get();
-        try {
-
-            UI ui = UI.getCurrent();
-            GeneratorRunner runner = runnerService.run(generator, ui);
-            addRunnerToUI(runner);
-            registerRunnerInContext(runner);
-
-        } catch (Exception e) {
-            ConfirmDialog dialog = ConfirmDialog.createError()
-                    .withCaption("The runner for Generator " + model.getNumber() + " returned an error")
-                    .withMessage(e.getMessage())
-                    .withCancelButton();
-            dialog.open();
-        }
-    }
+//    private void run3(GeneratorModel model) {
+//        Generator generator = generatorService.get(model.getId()).get();
+//        try {
+//
+//            UI ui = UI.getCurrent();
+//            GeneratorRunner runner = runnerService.run(generator, ui);
+//            addRunnerToUI(runner);
+//            registerRunnerInContext(runner);
+//
+//        } catch (Exception e) {
+//            ConfirmDialog dialog = ConfirmDialog.createError()
+//                    .withCaption("The runner for Generator " + model.getNumber() + " returned an error")
+//                    .withMessage(e.getMessage())
+//                    .withCancelButton();
+//            dialog.open();
+//        }
+//    }
 
 
 
@@ -609,87 +608,87 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
     }
 
 
-    /**
-     * Add a GeneratorRunner to the UI and and attach the listeners
-     */
-    private void addRunnerToUI(GeneratorRunner runner) {
+//    /**
+//     * Add a GeneratorRunner to the UI and and attach the listeners
+//     */
+//    private void addRunnerToUI(GeneratorRunner runner) {
+//
+//        // add listener
+//        runner.setRunnerListener(new GeneratorRunner.RunnerListener() {
+//
+//            UI ui = UI.getCurrent();
+//
+//            @Override
+//            public void onAborted() {
+//                removeRunnerFromUI(runner);
+//                unregisterRunnerFromContext(runner);
+//            }
+//
+//            @Override
+//            public void onClosed() {
+//                removeRunnerFromUI(runner);
+//                unregisterRunnerFromContext(runner);
+//            }
+//
+//        });
+//
+//        // add the runner to the status layout
+//        statusLayout.add(runner);
+//
+//    }
 
-        // add listener
-        runner.setRunnerListener(new GeneratorRunner.RunnerListener() {
-
-            UI ui = UI.getCurrent();
-
-            @Override
-            public void onAborted() {
-                removeRunnerFromUI(runner);
-                unregisterRunnerFromContext(runner);
-            }
-
-            @Override
-            public void onClosed() {
-                removeRunnerFromUI(runner);
-                unregisterRunnerFromContext(runner);
-            }
-
-        });
-
-        // add the runner to the status layout
-        statusLayout.add(runner);
-
-    }
-
-    /**
-     * Remove a GeneratorRunner from the UI panel
-     */
-    private void removeRunnerFromUI(GeneratorRunner runner) {
-        UI ui = UI.getCurrent();
-        ui.access((Command) () -> statusLayout.remove(runner));
-    }
-
-
-    /**
-     * Retrieve runners from Session Context
-     */
-    private List<GeneratorRunner> getContextRunners() {
-        UI ui = UI.getCurrent();
-        Object obj = ui.getSession().getAttribute(RUNNERS_KEY);
-        List<GeneratorRunner> runners;
-        if (obj == null) {
-            runners = new ArrayList<>();
-            ui.getSession().setAttribute(RUNNERS_KEY, runners);
-        } else {
-            runners = (ArrayList) obj;
-        }
-        return runners;
-    }
+//    /**
+//     * Remove a GeneratorRunner from the UI panel
+//     */
+//    private void removeRunnerFromUI(GeneratorRunner runner) {
+//        UI ui = UI.getCurrent();
+//        ui.access((Command) () -> statusLayout.remove(runner));
+//    }
 
 
-    // add GeneratorRunner to Session context
-    private void registerRunnerInContext(GeneratorRunner runner) {
-        UI ui = UI.getCurrent();
-        Object obj = ui.getSession().getAttribute(RUNNERS_KEY);
-        List<GeneratorRunner> runners;
-        if (obj == null) {
-            runners = new ArrayList<>();
-            ui.getSession().setAttribute(RUNNERS_KEY, runners);
-        } else {
-            runners = (ArrayList) obj;
-        }
-        runners.add(runner);
-    }
+//    /**
+//     * Retrieve runners from Session Context
+//     */
+//    private List<GeneratorRunner> getContextRunners() {
+//        UI ui = UI.getCurrent();
+//        Object obj = ui.getSession().getAttribute(RUNNERS_KEY);
+//        List<GeneratorRunner> runners;
+//        if (obj == null) {
+//            runners = new ArrayList<>();
+//            ui.getSession().setAttribute(RUNNERS_KEY, runners);
+//        } else {
+//            runners = (ArrayList) obj;
+//        }
+//        return runners;
+//    }
 
 
-    // remove GeneratorRunner from Session context
-    private void unregisterRunnerFromContext(GeneratorRunner runner) {
-        UI ui = UI.getCurrent();
-        Object obj = ui.getSession().getAttribute(RUNNERS_KEY);
-        List<GeneratorRunner> runners;
-        if (obj != null) {
-            runners = (ArrayList) obj;
-            runners.remove(runner);
-        }
+//    // add GeneratorRunner to Session context
+//    private void registerRunnerInContext(GeneratorRunner runner) {
+//        UI ui = UI.getCurrent();
+//        Object obj = ui.getSession().getAttribute(RUNNERS_KEY);
+//        List<GeneratorRunner> runners;
+//        if (obj == null) {
+//            runners = new ArrayList<>();
+//            ui.getSession().setAttribute(RUNNERS_KEY, runners);
+//        } else {
+//            runners = (ArrayList) obj;
+//        }
+//        runners.add(runner);
+//    }
 
-    }
+
+//    // remove GeneratorRunner from Session context
+//    private void unregisterRunnerFromContext(GeneratorRunner runner) {
+//        UI ui = UI.getCurrent();
+//        Object obj = ui.getSession().getAttribute(RUNNERS_KEY);
+//        List<GeneratorRunner> runners;
+//        if (obj != null) {
+//            runners = (ArrayList) obj;
+//            runners.remove(runner);
+//        }
+//
+//    }
 
 
     private void run4(GeneratorModel model){

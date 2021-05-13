@@ -15,39 +15,50 @@ import java.util.TimerTask;
 @Scope("prototype")
 public class CpuMonitorTask extends TimerTask {
 
+    // how quick to adapt to the desired rate
+    private static final double ADAPTATION_SPEED =2;
+
     @Value("${app.cpu.limit:0.0}")
     private double appCpuLimit;
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private OperatingSystemMXBean operatingSystemMXBean;
-    private static final int cpuDelayFactor=100;
     private CpuMonitorListener listener;
+    private int currentDelayIndex=0;
 
     public CpuMonitorTask(CpuMonitorListener listener) {
         this.listener=listener;
         operatingSystemMXBean =(OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 
-        new Timer().schedule(this, 0, 2000);
+        new Timer().schedule(this, 0, 1000);
 
     }
 
     @Override
     public void run() {
+
+        if(appCpuLimit<=0){
+            return;
+        }
+
         double load=operatingSystemMXBean.getProcessCpuLoad();
-        log.debug("cpu load "+(int)(load*100)+"%");
+        load = (double)Math.round(load * 10000d) / 10000d;  // round to 4 decimals
+
 
         if(load > appCpuLimit){
-            double excessLoad = load-appCpuLimit;
-            if(excessLoad>0){
-                listener.delayReceived((int)(excessLoad*cpuDelayFactor));
-            }else{
-                listener.delayReceived(0);
-            }
-
+            currentDelayIndex++;
         }else{
-            listener.delayReceived(0);
+            if(currentDelayIndex>0){
+                currentDelayIndex--;
+            }
         }
+
+        int delayMs=(int) Math.round(currentDelayIndex * ADAPTATION_SPEED);
+
+        log.info("cpu load: "+load+" - delay ms: "+delayMs);
+
+        listener.delayReceived(delayMs);
 
     }
 

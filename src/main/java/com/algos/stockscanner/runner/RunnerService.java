@@ -52,15 +52,15 @@ public class RunnerService {
         executorService=Executors.newFixedThreadPool(4);
     }
 
-    public GeneratorRunner run(Generator generator, UI ui)  {
-
-        GeneratorRunner runner = context.getBean(GeneratorRunner.class, generator, ui);
-        ExecutorService executorService = Executors.newFixedThreadPool(4);
-        executorService.submit(runner);
-
-        return runner;
-
-    }
+//    public GeneratorRunner run(Generator generator, UI ui)  {
+//
+//        GeneratorRunner runner = context.getBean(GeneratorRunner.class, generator, ui);
+//        ExecutorService executorService = Executors.newFixedThreadPool(4);
+//        executorService.submit(runner);
+//
+//        return runner;
+//
+//    }
 
 
     public SimulationCallable startGenerator(GeneratorModel model) throws Exception {

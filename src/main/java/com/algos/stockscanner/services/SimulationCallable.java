@@ -11,6 +11,8 @@ import com.algos.stockscanner.strategies.*;
 import com.algos.stockscanner.task.AbortedByUserException;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
+import com.algos.stockscanner.utils.CpuMonitorListener;
+import com.algos.stockscanner.utils.CpuMonitorTask;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -54,6 +57,9 @@ public class SimulationCallable implements Callable<Void> {
     private boolean running;
     private boolean abort;
     private Progress currentProgress;
+
+    private TimerTask cpuTimer;
+    private int cpuPauseMs;
 
     @Autowired
     private ContextStore contextStore;
@@ -87,6 +93,12 @@ public class SimulationCallable implements Callable<Void> {
         // puts the task in 'waiting for start' status
         currentProgress.update("waiting...");
 
+        // start a thread to monitor the CPU load
+        cpuTimer = context.getBean(CpuMonitorTask.class, (CpuMonitorListener) delayMs -> {
+            cpuPauseMs =delayMs;
+            // invoke the current StrategyHandler
+        });
+
     }
 
 
@@ -115,6 +127,12 @@ public class SimulationCallable implements Callable<Void> {
             Generator generator = generatorService.get(generatorId).get();
             int i=0;
             for(Strategy strategy : strategies){
+
+                // obtain a strategy handler from the Strategy,
+                // maintain it in this object as the current strategy handler,
+                // and invoke the appropriate method anytime the cpuTimer receives a retroaction value.
+                //StrategyHandler handler = strategy.getStrategyHandler();
+
                 checkAbort();
                 i++;
                 log.info("Starting strategy: " + strategy);

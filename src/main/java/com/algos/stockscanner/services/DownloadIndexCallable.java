@@ -9,6 +9,8 @@ import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.task.AbortedByUserException;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
+import com.algos.stockscanner.utils.CpuMonitorListener;
+import com.algos.stockscanner.utils.CpuMonitorTask;
 import com.algos.stockscanner.utils.Du;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -21,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +33,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -59,6 +63,9 @@ public class DownloadIndexCallable implements Callable<Void> {
 
     @Autowired
     private Utils utils;
+
+    @Autowired
+    private ApplicationContext context;
 
     @Value("${alphavantage.api.key}")
     private String alphavantageApiKey;
@@ -91,6 +98,7 @@ public class DownloadIndexCallable implements Callable<Void> {
         okHttpClient = new OkHttpClient();
         Moshi moshi = new Moshi.Builder().build();
         fdJsonAdapter = moshi.adapter(MarketService.FDResponse.class);
+
 
     }
 
@@ -138,8 +146,6 @@ public class DownloadIndexCallable implements Callable<Void> {
             contextStore.downloadIndexCallableMap.remove("" + hashCode(), this);
 
         }
-
-
 
         return null;
 
