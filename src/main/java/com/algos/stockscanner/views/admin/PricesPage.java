@@ -277,6 +277,10 @@ public class PricesPage extends VerticalLayout {
             // warning, the listener is called on another thread
 
             @Override
+            public void onStarted(Object info) {
+            }
+
+            @Override
             public void onProgress(int current, int total, Object progressInfo) {
                 taskMonitor.onProgress(current, total, progressInfo);
             }

@@ -6,7 +6,11 @@ import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.enums.FrequencyTypes;
 import com.algos.stockscanner.enums.IndexCategories;
+import com.algos.stockscanner.enums.PriceUpdateModes;
+import com.algos.stockscanner.services.AdminService;
 import com.algos.stockscanner.services.MarketService;
+import com.algos.stockscanner.services.UpdatePricesCallable;
+import com.algos.stockscanner.task.TaskListener;
 import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.main.MainView;
 import com.vaadin.flow.component.*;
@@ -22,6 +26,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -30,6 +35,7 @@ import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.Command;
 import org.apache.commons.lang3.StringUtils;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
@@ -68,6 +74,10 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
     @Autowired
     private MarketService marketService;
+
+    @Autowired
+    private AdminService adminService;
+
 
     @Autowired
     private ApplicationContext context;
@@ -375,6 +385,46 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
             dialog.open();
         });
+
+        // Update prices
+        account.getSubMenu().addItem("Update prices", i -> {
+            List<String> symbols = new ArrayList<>();
+            symbols.add(model.getSymbol());
+            UpdatePricesCallable callable = adminService.scheduleUpdate(symbols, PriceUpdateModes.ADD_MISSING_DATA_ONLY, 5);
+            UI ui = UI.getCurrent();
+            callable.addListener(new TaskListener() {
+                @Override
+                public void onStarted(Object info) {
+                    ui.access((Command) () -> {
+                        Notification notification = new Notification("Price update started", 3000);
+                        notification.open();
+                    });
+                }
+
+                @Override
+                public void onProgress(int current, int total, Object info) {
+
+                }
+
+                @Override
+                public void onCompleted(Object info) {
+                    ui.access((Command) () -> {
+                        Notification notification = new Notification("Price update completed", 3000);
+                        notification.open();
+                    });
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    ui.access((Command) () -> {
+                        Notification notification = new Notification("Error updating price: "+e.getMessage(), 3000);
+                        notification.open();
+                    });
+                }
+            });
+        });
+
+
 
 
 //        // download data for the index

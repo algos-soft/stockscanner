@@ -206,8 +206,6 @@ public class TaskMonitor extends VerticalLayout  {
                 builder.append(" ");
             }
             builder.append("[" + current + "/" + total+"]");
-//        }else{
-//            builder.append("[running...]");
         }
         final String finalmsg = builder.toString();
 

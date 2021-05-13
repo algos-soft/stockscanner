@@ -125,6 +125,8 @@ public class DownloadIndexCallable implements Callable<Void> {
 
         running=true;
 
+        notifyStarted(null);
+
         // if is already aborted, don't perform the task
         startTime = LocalDateTime.now();
 
@@ -209,6 +211,12 @@ public class DownloadIndexCallable implements Callable<Void> {
         return handler;
     }
 
+    private void notifyStarted(String info) {
+        for (TaskListener listener : listeners) {
+            listener.onStarted(info);
+        }
+    }
+
 
     private void notifyProgress(int current, int tot, String info) {
 
@@ -281,10 +289,11 @@ public class DownloadIndexCallable implements Callable<Void> {
         Response response = okHttpClient.newCall(request).execute();
         if(response.isSuccessful()){
 
-            MarketService.FDResponse fdresp = fdJsonAdapter.fromJson(response.body().string());
+            String respString=response.body().string();
+            MarketService.FDResponse fdresp = fdJsonAdapter.fromJson(respString);
 
             if(fdresp.Symbol==null){
-                throw new IOException("malformed response, license limits reached?");
+                throw new IOException("malformed response for "+symbol+", license limits reached? resp="+respString);
             }
 
             IndexCategories category = IndexCategories.getByAlphaVantageType(fdresp.AssetType);

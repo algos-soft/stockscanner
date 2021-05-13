@@ -140,6 +140,8 @@ public class UpdatePricesCallable implements Callable<Void> {
 
         running=true;
 
+        notifyStarted(null);
+
         // if is already aborted, don't perform the task
         startTime = LocalDateTime.now();
 
@@ -349,6 +351,12 @@ public class UpdatePricesCallable implements Callable<Void> {
                 }
             }
         };
+    }
+
+    private void notifyStarted(String info) {
+        for (TaskListener listener : listeners) {
+            listener.onStarted(info);
+        }
     }
 
 
