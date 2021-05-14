@@ -3,6 +3,7 @@ package com.algos.stockscanner.views.indexes;
 import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.enums.FrequencyTypes;
 import com.algos.stockscanner.enums.IndexCategories;
@@ -15,6 +16,7 @@ import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
 import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.main.MainView;
+import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
@@ -33,6 +35,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
@@ -46,6 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -68,6 +74,9 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     private Grid<IndexModel> grid;
 
     private String filterString;
+
+    private Example<MarketIndex> filter; // current filter
+    private List<QuerySortOrder> order; // current order
 
     @Autowired
     private Utils utils;
@@ -96,14 +105,9 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         addClassName("indexes-view");
         setSizeFull();
 
-
         Component filterPanel = createFilterPanel();
 
-        Grid.Column col;
-        grid = new Grid<>();
-        grid.setHeight("100%");
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        col = grid.addComponentColumn(index -> createCard(index));
+        createGrid();
 
         VerticalLayout layout = new VerticalLayout();
         layout.getStyle().set("height", "100%");
@@ -139,6 +143,31 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         header.add(addButton);
 
     }
+
+
+    private void createGrid(){
+
+        grid = new Grid<>();
+        grid.setHeight("100%");
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
+        Grid.Column col = grid.addComponentColumn(index -> createCard(index));
+
+        CallbackDataProvider<IndexModel, Void> provider;
+        provider = DataProvider.fromCallbacks(fetchCallback -> {
+            int offset = fetchCallback.getOffset();
+            int limit = fetchCallback.getLimit();
+            order = fetchCallback.getSortOrders();
+            List<MarketIndex> entities = marketIndexService.fetch(offset, limit, filter, order);
+            return marketIndexService.entitiesToModels(entities).stream();
+        }, countCallback -> {
+            return marketIndexService.count(filter);
+        });
+
+        grid.setDataProvider(provider);
+
+    }
+
+
 
 
     private Component createFilterPanel() {

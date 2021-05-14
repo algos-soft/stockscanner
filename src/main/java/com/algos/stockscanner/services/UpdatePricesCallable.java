@@ -359,7 +359,7 @@ public class UpdatePricesCallable implements Callable<Void> {
             try {
                 listener.onStarted(info);
             }catch (Exception e){
-                log.warn("Could not notify the start listener", e);
+                log.debug("Could not notify the start listener", e);
             }
         }
     }
@@ -375,7 +375,7 @@ public class UpdatePricesCallable implements Callable<Void> {
             try {
                 listener.onProgress(current, tot, pre+" "+info);
             }catch (Exception e){
-                log.warn("Could not notify the progress listener", e);
+                log.debug("Could not notify the progress listener", e);
             }
         }
     }
@@ -386,7 +386,7 @@ public class UpdatePricesCallable implements Callable<Void> {
             try {
                 listener.onError(e);
             }catch (Exception e1){
-                log.warn("Could not notify the error listener", e1);
+                log.debug("Could not notify the error listener", e1);
             }
         }
     }
@@ -397,7 +397,7 @@ public class UpdatePricesCallable implements Callable<Void> {
             try {
                 listener.onCompleted(info);
             }catch (Exception e){
-                log.warn("Could not notify the completed listener", e);
+                log.debug("Could not notify the completed listener", e);
             }
         }
     }

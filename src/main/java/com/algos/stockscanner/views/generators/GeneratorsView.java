@@ -196,25 +196,25 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
     }
 
-    private Component createFilterPanel() {
-
-        ComboBox<MarketIndex> indexCombo = utils.buildIndexCombo();
-        indexCombo.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<ComboBox<MarketIndex>, MarketIndex>>() {
-            @Override
-            public void valueChanged(AbstractField.ComponentValueChangeEvent<ComboBox<MarketIndex>, MarketIndex> event) {
-                filtSymbol = null;
-                MarketIndex marketIndex = event.getValue();
-                if (marketIndex != null) {
-                    filtSymbol = marketIndex.getSymbol();
-                }
-                filter();
-            }
-        });
-
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.add(indexCombo);
-        return layout;
-    }
+//    private Component createFilterPanel() {
+//
+//        ComboBox<MarketIndex> indexCombo = utils.buildIndexCombo();
+//        indexCombo.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<ComboBox<MarketIndex>, MarketIndex>>() {
+//            @Override
+//            public void valueChanged(AbstractField.ComponentValueChangeEvent<ComboBox<MarketIndex>, MarketIndex> event) {
+//                filtSymbol = null;
+//                MarketIndex marketIndex = event.getValue();
+//                if (marketIndex != null) {
+//                    filtSymbol = marketIndex.getSymbol();
+//                }
+//                filter();
+//            }
+//        });
+//
+//        HorizontalLayout layout = new HorizontalLayout();
+//        layout.add(indexCombo);
+//        return layout;
+//    }
 
 
     private HorizontalLayout createCard(GeneratorModel model) {

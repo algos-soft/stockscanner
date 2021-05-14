@@ -186,7 +186,6 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
             filter();
         });
 
-
         ComboBox<MarketIndex> indexCombo = utils.buildIndexCombo();
         indexCombo.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<ComboBox<MarketIndex>, MarketIndex>>() {
             @Override

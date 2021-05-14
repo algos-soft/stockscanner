@@ -3,14 +3,17 @@ package com.algos.stockscanner.data.service;
 import com.algos.stockscanner.Application;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
+import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.enums.FrequencyTypes;
 import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.services.IndexEntry;
 import com.algos.stockscanner.utils.Du;
 import com.algos.stockscanner.views.indexes.IndexModel;
+import com.algos.stockscanner.views.simulations.SimulationModel;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
+import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,23 +67,16 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
     }
 
 
+    public List<MarketIndex> fetch(int offset, int limit, Example<MarketIndex> example, List<QuerySortOrder> orders) {
 
-    public List<MarketIndex> fetch(int offset, int limit, Example<MarketIndex> example, Sort sort) {
-
-        // default sort - by symbol
-        if(sort==null){
-            sort = Sort.by("symbol");
-        }
+        Sort sort = utils.buildSort(orders);
 
         Pageable pageable = new OffsetBasedPageRequest(offset, limit, sort);
 
         Page<MarketIndex> page;
-        if(example!=null){
+        if (example != null) {
             page = repository.findAll(example, pageable);
-//            String filter = example.getProbe().getSymbol();
-//            log.info("filter: "+filter);
-//            page = repository.findAllWithFilterOrderBySymbol(pageable,filter,filter);
-        }else{
+        } else {
             page = repository.findAll(pageable);
         }
 
@@ -90,7 +86,6 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
     public int count(Example<MarketIndex> example) {
         return (int)repository.count(example);
     }
-
 
     public List<MarketIndex> findAll ()  {
         return repository.findAll();
@@ -193,6 +188,16 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         entity.setOvnSellWe(model.getOvnSellWe());
     }
 
+
+    public List<IndexModel> entitiesToModels(List<MarketIndex> entities) {
+        List<IndexModel> list = new ArrayList<>();
+        for (MarketIndex entity : entities) {
+            IndexModel model = new IndexModel();
+            entityToModel(entity, model);
+            list.add(model);
+        }
+        return list;
+    }
 
 
     /**

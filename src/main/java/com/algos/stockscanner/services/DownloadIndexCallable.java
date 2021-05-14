@@ -216,7 +216,7 @@ public class DownloadIndexCallable implements Callable<Void> {
             try {
                 listener.onStarted(info);
             }catch (Exception e){
-                log.warn("Could not notify the start listener", e);
+                log.debug("Could not notify the start listener", e);
             }
         }
     }
@@ -232,7 +232,7 @@ public class DownloadIndexCallable implements Callable<Void> {
             try {
                 listener.onProgress(current, tot, pre+" "+info);
             }catch (Exception e){
-                log.warn("Could not notify the progress listener", e);
+                log.debug("Could not notify the progress listener", e);
             }
         }
     }
@@ -242,7 +242,7 @@ public class DownloadIndexCallable implements Callable<Void> {
             try {
                 listener.onError(e);
             }catch (Exception e1){
-                log.warn("Could not notify the error listener", e1);
+                log.debug("Could not notify the error listener", e1);
             }
         }
     }
@@ -252,7 +252,7 @@ public class DownloadIndexCallable implements Callable<Void> {
             try {
                 listener.onCompleted(info);
             }catch (Exception e){
-                log.warn("Could not notify the completed listener", e);
+                log.debug("Could not notify the completed listener", e);
             }
         }
     }
@@ -349,13 +349,15 @@ public class DownloadIndexCallable implements Callable<Void> {
         }
 
         MarketIndex index;
+        String action;
         if(indexes.size()==0){  // does not exist in db
             index=new MarketIndex();
             index.setSymbol(fd.getSymbol());
             updateIcon(index);
-
+            action="created";
         }else{  // index exists in db
             index = indexes.get(0);
+            action="updated";
         }
 
         index.setName(fd.getName());
@@ -372,6 +374,8 @@ public class DownloadIndexCallable implements Callable<Void> {
         marketIndexService.update(index);
 
         notifyProgress(3, 3, "done: "+symbol);
+
+        log.info(symbol+" "+action);
 
     }
 

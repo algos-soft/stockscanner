@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.QuerySortOrderBuilder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -256,11 +257,14 @@ public class Utils {
         return resourceToByteArray(Application.GENERIC_INDEX_ICON);
     }
 
-
-
     public ComboBox<MarketIndex> buildIndexCombo() {
 
+
         // create a DataProvider with filtering callbacks
+        List<QuerySortOrder> orders=new ArrayList<>(); // current order
+        QuerySortOrder order =new QuerySortOrder("symbol", SortDirection.ASCENDING);
+        orders.add(order);
+
         MarketIndex exampleItem = new MarketIndex();
         ExampleMatcher matcher = ExampleMatcher.matchingAny().withMatcher("symbol", ExampleMatcher.GenericPropertyMatchers.startsWith().ignoreCase());
         Example<MarketIndex> example = Example.of(exampleItem, matcher);
@@ -268,7 +272,7 @@ public class Utils {
             AtomicReference<String> filter=new AtomicReference<>();
             fetchCallback.getFilter().ifPresent( x -> filter.set(x));
             exampleItem.setSymbol(filter.get());
-            return marketIndexService.fetch(fetchCallback.getOffset(), fetchCallback.getLimit(), example, null).stream();
+            return marketIndexService.fetch(fetchCallback.getOffset(), fetchCallback.getLimit(), example, orders).stream();
         }, countCallback -> {
             AtomicReference<String> filter=new AtomicReference<>();
             countCallback.getFilter().ifPresent( x -> filter.set(x));

@@ -79,6 +79,7 @@ public class IndexesPickerDialog extends Dialog  {
 
         TextField filterFld= new TextField("Filter");
         filterFld.addClassName("filterfield");
+        filterFld.setClearButtonVisible(true);
 
         filterFld.setValueChangeMode(ValueChangeMode.EAGER);
         filterFld.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>) event -> {
