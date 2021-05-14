@@ -107,6 +107,8 @@ public class SimulationCallable implements Callable<Void> {
 
         running = true;
 
+        notifyStarted(null);
+
         // if is already aborted, don't perform the task
         startTime = LocalDateTime.now();
 
@@ -211,25 +213,48 @@ public class SimulationCallable implements Callable<Void> {
         return handler;
     }
 
+    private void notifyStarted(String info) {
+        for (TaskListener listener : listeners) {
+            // anything that happens here, must not stop the execution
+            try {
+                listener.onStarted(info);
+            }catch (Exception e){
+                log.warn("Could not notify the start listener", e);
+            }
+        }
+    }
+
 
     private void notifyProgress(int current, int tot, String info) {
 
         currentProgress.update(current, tot, info);
 
         for (TaskListener listener : listeners) {
-            listener.onProgress(current, tot, info);
+            try {
+                listener.onProgress(current, tot, info);
+            }catch (Exception e){
+                log.warn("Could not notify the progress listener", e);
+            }
         }
     }
 
     private void notifyError(Exception e) {
         for (TaskListener listener : listeners) {
-            listener.onError(e);
+            try {
+                listener.onError(e);
+            }catch (Exception e1){
+                log.warn("Could not notify the error listener", e1);
+            }
         }
     }
 
     private void notifyCompleted(String info) {
         for (TaskListener listener : listeners) {
-            listener.onCompleted(info);
+            try {
+                listener.onCompleted(info);
+            }catch (Exception e){
+                log.warn("Could not notify the completed listener", e);
+            }
         }
     }
 

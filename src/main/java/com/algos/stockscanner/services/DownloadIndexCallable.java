@@ -213,7 +213,11 @@ public class DownloadIndexCallable implements Callable<Void> {
 
     private void notifyStarted(String info) {
         for (TaskListener listener : listeners) {
-            listener.onStarted(info);
+            try {
+                listener.onStarted(info);
+            }catch (Exception e){
+                log.warn("Could not notify the start listener", e);
+            }
         }
     }
 
@@ -225,19 +229,31 @@ public class DownloadIndexCallable implements Callable<Void> {
         String pre = "["+symbolCount+"/"+symbols.size()+"]";
 
         for (TaskListener listener : listeners) {
-            listener.onProgress(current, tot, pre+" "+info);
+            try {
+                listener.onProgress(current, tot, pre+" "+info);
+            }catch (Exception e){
+                log.warn("Could not notify the progress listener", e);
+            }
         }
     }
 
     private void notifyError(Exception e) {
         for (TaskListener listener : listeners) {
-            listener.onError(e);
+            try {
+                listener.onError(e);
+            }catch (Exception e1){
+                log.warn("Could not notify the error listener", e1);
+            }
         }
     }
 
     private void notifyCompleted(String info) {
         for (TaskListener listener : listeners) {
-            listener.onCompleted(info);
+            try {
+                listener.onCompleted(info);
+            }catch (Exception e){
+                log.warn("Could not notify the completed listener", e);
+            }
         }
     }
 

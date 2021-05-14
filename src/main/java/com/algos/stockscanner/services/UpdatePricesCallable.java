@@ -355,7 +355,12 @@ public class UpdatePricesCallable implements Callable<Void> {
 
     private void notifyStarted(String info) {
         for (TaskListener listener : listeners) {
-            listener.onStarted(info);
+            // anything that happens here, must not stop the execution
+            try {
+                listener.onStarted(info);
+            }catch (Exception e){
+                log.warn("Could not notify the start listener", e);
+            }
         }
     }
 
@@ -366,19 +371,34 @@ public class UpdatePricesCallable implements Callable<Void> {
 
         for (TaskListener listener : listeners) {
             String pre = "["+symbolCount+"/"+symbols.size()+"]";
-            listener.onProgress(current, tot, pre+" "+info);
+            // anything that happens here, must not stop the execution
+            try {
+                listener.onProgress(current, tot, pre+" "+info);
+            }catch (Exception e){
+                log.warn("Could not notify the progress listener", e);
+            }
         }
     }
 
     private void notifyError(Exception e) {
         for (TaskListener listener : listeners) {
-            listener.onError(e);
+            // anything that happens here, must not stop the execution
+            try {
+                listener.onError(e);
+            }catch (Exception e1){
+                log.warn("Could not notify the error listener", e1);
+            }
         }
     }
 
     private void notifyCompleted(String info) {
         for (TaskListener listener : listeners) {
-            listener.onCompleted(info);
+            // anything that happens here, must not stop the execution
+            try {
+                listener.onCompleted(info);
+            }catch (Exception e){
+                log.warn("Could not notify the completed listener", e);
+            }
         }
     }
 

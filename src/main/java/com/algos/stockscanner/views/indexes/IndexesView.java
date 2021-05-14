@@ -8,8 +8,10 @@ import com.algos.stockscanner.enums.FrequencyTypes;
 import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.enums.PriceUpdateModes;
 import com.algos.stockscanner.services.AdminService;
+import com.algos.stockscanner.services.DownloadIndexCallable;
 import com.algos.stockscanner.services.MarketService;
 import com.algos.stockscanner.services.UpdatePricesCallable;
+import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
 import com.algos.stockscanner.views.PageSubtitle;
 import com.algos.stockscanner.views.main.MainView;
@@ -29,6 +31,7 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.AfterNavigationEvent;
@@ -55,7 +58,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Route(value = "indexes", layout = MainView.class)
-@PageTitle(Application.APP_NAME+" | Indexes")
+@PageTitle(Application.APP_NAME + " | Indexes")
 @PageSubtitle("Indexes")
 @CssImport(value = "./views/indexes/indexes-view.css")
 public class IndexesView extends Div implements AfterNavigationObserver {
@@ -103,7 +106,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         col = grid.addComponentColumn(index -> createCard(index));
 
         VerticalLayout layout = new VerticalLayout();
-        layout.getStyle().set("height","100%");
+        layout.getStyle().set("height", "100%");
         layout.add(filterPanel, grid);
 
         add(layout);
@@ -138,13 +141,13 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
 
-    private Component createFilterPanel(){
+    private Component createFilterPanel() {
 
-        TextField filterFld=new TextField("filter");
+        TextField filterFld = new TextField("filter");
         filterFld.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>() {
             @Override
             public void valueChanged(AbstractField.ComponentValueChangeEvent<TextField, String> event) {
-                filterString=event.getValue();
+                filterString = event.getValue();
                 loadAll();
             }
         });
@@ -156,8 +159,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         layout.add(filterFld);
         return layout;
     }
-
-
 
 
     /**
@@ -273,12 +274,12 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         IronIcon icon1 = new IronIcon("vaadin", "clock");
         String text1;
-        if (model.getFundamentalUpdateTs() !=null) {
+        if (model.getFundamentalUpdateTs() != null) {
             text1 = formatTs(model.getFundamentalUpdateTs());
         } else {
             text1 = "never";
         }
-        text1="idx upd: "+text1;
+        text1 = "idx upd: " + text1;
         Span span1 = new Span(text1);
         span1.addClassName("interval");
         HorizontalLayout row4 = new HorizontalLayout();
@@ -287,12 +288,12 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         IronIcon icon2 = new IronIcon("vaadin", "clock");
         String text2;
-        if (model.getPricesUpdateTs() !=null) {
+        if (model.getPricesUpdateTs() != null) {
             text2 = formatTs(model.getPricesUpdateTs());
         } else {
             text2 = "never";
         }
-        text2="price upd: "+text2;
+        text2 = "price upd: " + text2;
         Span span2 = new Span(text2);
         span2.addClassName("interval");
         HorizontalLayout row5 = new HorizontalLayout();
@@ -307,15 +308,13 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
 
-
-
     private Component buildPan4(IndexModel model) {
 
-        Span span1 = new Span(model.getExchange()+", "+model.getCountry() );
+        Span span1 = new Span(model.getExchange() + ", " + model.getCountry());
         span1.addClassName("detail-row");
-        Span span2 = new Span(model.getSector()+", "+model.getIndustry());
+        Span span2 = new Span(model.getSector() + ", " + model.getIndustry());
         span2.addClassName("detail-row");
-        Span span3 = new Span("cap: "+utils.numberWithSuffix(model.getMarketCap())+", ebitda: "+utils.numberWithSuffix(model.getEbitda()));
+        Span span3 = new Span("cap: " + utils.numberWithSuffix(model.getMarketCap()) + ", ebitda: " + utils.numberWithSuffix(model.getEbitda()));
         span3.addClassName("detail-row");
 
         Pan pan = new Pan();
@@ -379,52 +378,197 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                     marketIndexService.delete(model.getId());
                     loadAll();
                 } catch (Exception e) {
-                    log.error("could not delete index entity id "+model.getId(), e);
+                    log.error("could not delete index entity id " + model.getId(), e);
                 }
             });
 
             dialog.open();
         });
 
-        // Update prices
-        account.getSubMenu().addItem("Update prices", i -> {
+
+        // Update info
+        account.getSubMenu().addItem("Update info", i -> {
+
             List<String> symbols = new ArrayList<>();
             symbols.add(model.getSymbol());
-            UpdatePricesCallable callable = adminService.scheduleUpdate(symbols, PriceUpdateModes.ADD_MISSING_DATA_ONLY, 5);
+            DownloadIndexCallable callable = adminService.scheduleDownload(symbols, 5);
+            TaskHandler handler = callable.obtainHandler();
+
+            // setup the progress dialog
+            Text text = new Text("Loading...");
+            ProgressBar progressBar = new ProgressBar();
+            progressBar.setIndeterminate(true);
+            VerticalLayout layout = new VerticalLayout();
+            layout.add(text, progressBar);
+            Button bAbort = new Button();
+            ConfirmDialog dialog = ConfirmDialog.create()
+                    .withCaption("Updating info")
+                    .withMessage(layout)
+                    .withButton(bAbort, ButtonOption.caption("Abort"), ButtonOption.closeOnClick(false));
+            dialog.setCloseOnEsc(false);
+            dialog.setCloseOnOutsideClick(false);
+            bAbort.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+                handler.abort();
+            });
+            dialog.setWidth("20em");
+            dialog.open();
+
+            // attach a listener to the task
             UI ui = UI.getCurrent();
             callable.addListener(new TaskListener() {
                 @Override
                 public void onStarted(Object info) {
-                    ui.access((Command) () -> {
-                        Notification notification = new Notification("Price update started", 3000);
-                        notification.open();
-                    });
                 }
 
                 @Override
                 public void onProgress(int current, int total, Object info) {
 
+                    ui.access(new Command() {
+                        @Override
+                        public void execute() {
+                            progressBar.setMax(total);
+                            progressBar.setValue(current);
+
+                            String message="";
+                            if(info!=null){
+                                message=info.toString();
+                            }
+                            if (current == 0) {
+                                progressBar.setIndeterminate(true);
+                                text.setText(message);
+                            } else {
+                                progressBar.setIndeterminate(false);
+                                text.setText(message + ": " + current + "/" + total);
+                            }
+                        }
+                    });
+
                 }
 
                 @Override
                 public void onCompleted(Object info) {
-                    ui.access((Command) () -> {
-                        Notification notification = new Notification("Price update completed", 3000);
-                        notification.open();
+
+                    ui.access(new Command() {
+                        @Override
+                        public void execute() {
+                            dialog.close();
+
+                            MarketIndex entity = marketIndexService.get(model.getId()).get();
+                            marketIndexService.entityToModel(entity, model);
+                            grid.getDataProvider().refreshItem(model);
+
+                        }
                     });
+
                 }
 
                 @Override
                 public void onError(Exception e) {
-                    ui.access((Command) () -> {
-                        Notification notification = new Notification("Error updating price: "+e.getMessage(), 3000);
-                        notification.open();
+                    ui.access(new Command() {
+                        @Override
+                        public void execute() {
+                            dialog.close();
+                            ConfirmDialog dialog1 = ConfirmDialog.createError().withMessage("Download failed: " + e.getMessage());
+                            dialog1.open();
+                        }
                     });
+
                 }
             });
         });
 
 
+
+        // Update prices
+        account.getSubMenu().addItem("Update prices", i -> {
+
+            List<String> symbols = new ArrayList<>();
+            symbols.add(model.getSymbol());
+            UpdatePricesCallable callable = adminService.scheduleUpdate(symbols, PriceUpdateModes.ADD_MISSING_DATA_ONLY, 5);
+            TaskHandler handler = callable.obtainHandler();
+
+            // setup the progress dialog
+            Text text = new Text("Loading...");
+            ProgressBar progressBar = new ProgressBar();
+            progressBar.setIndeterminate(true);
+            VerticalLayout layout = new VerticalLayout();
+            layout.add(text, progressBar);
+            Button bAbort = new Button();
+            ConfirmDialog dialog = ConfirmDialog.create()
+                    .withCaption("Updating prices")
+                    .withMessage(layout)
+                    .withButton(bAbort, ButtonOption.caption("Abort"), ButtonOption.closeOnClick(false));
+            dialog.setCloseOnEsc(false);
+            dialog.setCloseOnOutsideClick(false);
+            bAbort.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
+                handler.abort();
+            });
+            dialog.setWidth("20em");
+            dialog.open();
+
+            // attach a listener to the task
+            UI ui = UI.getCurrent();
+            callable.addListener(new TaskListener() {
+                @Override
+                public void onStarted(Object info) {
+                }
+
+                @Override
+                public void onProgress(int current, int total, Object info) {
+
+                    ui.access(new Command() {
+                            @Override
+                            public void execute() {
+                                progressBar.setMax(total);
+                                progressBar.setValue(current);
+
+                                String message="";
+                                if(info!=null){
+                                    message=info.toString();
+                                }
+                                if (current == 0) {
+                                    progressBar.setIndeterminate(true);
+                                    text.setText(message);
+                                } else {
+                                    progressBar.setIndeterminate(false);
+                                    text.setText(message + ": " + current + "/" + total);
+                                }
+                            }
+                        });
+
+                }
+
+                @Override
+                public void onCompleted(Object info) {
+
+                    ui.access(new Command() {
+                        @Override
+                        public void execute() {
+                            dialog.close();
+
+                            MarketIndex entity = marketIndexService.get(model.getId()).get();
+                            marketIndexService.entityToModel(entity, model);
+                            grid.getDataProvider().refreshItem(model);
+
+                        }
+                    });
+
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    ui.access(new Command() {
+                        @Override
+                        public void execute() {
+                            dialog.close();
+                            ConfirmDialog dialog1 = ConfirmDialog.createError().withMessage("Download failed: " + e.getMessage());
+                            dialog1.open();
+                        }
+                    });
+
+                }
+            });
+        });
 
 
 //        // download data for the index
@@ -514,7 +658,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     }
 
 
-
     /**
      * Reload data when this view is displayed.
      */
@@ -532,9 +675,9 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         Pageable p = Pageable.unpaged();
         Page<MarketIndex> page;
-        if(StringUtils.isEmpty(filterString)){
+        if (StringUtils.isEmpty(filterString)) {
             page = marketIndexService.findAllOrderBySymbol(p);
-        }else{
+        } else {
             page = marketIndexService.findAllWithFilterOrderBySymbol(p, filterString);
         }
 
