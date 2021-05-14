@@ -160,6 +160,14 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         return layout;
     }
 
+    /**
+     * Reload data when this view is displayed.
+     */
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        loadAll();
+    }
+
 
     /**
      * Present an empty dialog to create a new item
@@ -571,100 +579,11 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         });
 
 
-//        // download data for the index
-//        account.getSubMenu().addItem("Download historic data", i -> {
-//
-//            final MarketService.DownloadHandler[] handler = {null}; // use single-element array to avoid the need to be final
-//
-//            // setup the progress dialog
-//            Text text = new Text("Loading...");
-//            ProgressBar progressBar = new ProgressBar();
-//            progressBar.setIndeterminate(true);
-//            VerticalLayout layout = new VerticalLayout();
-//            layout.add(text, progressBar);
-//            Button bAbort = new Button();
-//            ConfirmDialog dialog = ConfirmDialog.create()
-//                    .withMessage(layout)
-//                    .withButton(bAbort, ButtonOption.caption("Abort"), ButtonOption.closeOnClick(false));
-//            dialog.setCloseOnEsc(false);
-//            dialog.setCloseOnOutsideClick(false);
-//            bAbort.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
-//                handler[0].setAbort(true);
-//            });
-//            dialog.setWidth("20em");
-//            dialog.open();
-//
-//            UI ui = UI.getCurrent();
-//
-//            // download data in a separate thread
-//            new Thread(() -> {
-//
-//                handler[0] = marketService.downloadIndexData(model.getSymbol(), new MarketService.DownloadListener() {
-//                    @Override
-//                    public void onDownloadCompleted() {
-//                        ui.access(new Command() {
-//                            @Override
-//                            public void execute() {
-//                                dialog.close();
-//
-//                                MarketIndex entity = marketIndexService.get(model.getId()).get();
-//                                marketIndexService.entityToModel(entity, model);
-//                                grid.getDataProvider().refreshItem(model);
-//
-//                            }
-//                        });
-//
-//                    }
-//
-//                    @Override
-//                    public void onDownloadAborted(Exception e) {
-//                        ui.access(new Command() {
-//                            @Override
-//                            public void execute() {
-//                                dialog.close();
-//                                ConfirmDialog dialog1 = ConfirmDialog.createError().withMessage("Download failed: " + e.getMessage());
-//                                dialog1.open();
-//                            }
-//                        });
-//
-//                    }
-//
-//                    @Override
-//                    public void onDownloadProgress(int current, int total, String message) {
-//
-//                        ui.access(new Command() {
-//                            @Override
-//                            public void execute() {
-//                                progressBar.setMax(total);
-//                                progressBar.setValue(current);
-//                                if (current == 0) {
-//                                    progressBar.setIndeterminate(true);
-//                                    text.setText(message);
-//                                } else {
-//                                    progressBar.setIndeterminate(false);
-//                                    text.setText(message + ": " + current + "/" + total);
-//                                }
-//                            }
-//                        });
-//                    }
-//
-//                });
-//            }).start();
-//
-//        });
-
         return menuBar;
 
     }
 
 
-    /**
-     * Reload data when this view is displayed.
-     */
-    @Override
-    public void afterNavigation(AfterNavigationEvent event) {
-        loadAll();
-    }
 
 
     /**
