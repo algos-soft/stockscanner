@@ -320,6 +320,18 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
     }
 
 
+    /**
+     * Populates a row of the Excel with the cells created from a Simulation item
+     */
+    private void populateExcelRow(Workbook wb, Row row, MarketIndex index) {
+        int idx=0;
+//        eUtils.createCell(wb, row, idx++, simulation.getNumGenerator(), wb.createCellStyle());
+//        eUtils.createCell(wb, row, idx++, simulation.getSymbol(), wb.createCellStyle());
+//        eUtils.createCell(wb, row, idx++, simulation.getStartTs(), wb.createCellStyle());
+    }
+
+
+
 
 
 }
