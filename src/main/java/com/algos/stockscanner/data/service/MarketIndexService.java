@@ -1,6 +1,7 @@
 package com.algos.stockscanner.data.service;
 
 import com.algos.stockscanner.Application;
+import com.algos.stockscanner.beans.ExportUtils;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
@@ -10,11 +11,14 @@ import com.algos.stockscanner.services.IndexEntry;
 import com.algos.stockscanner.utils.Du;
 import com.algos.stockscanner.views.indexes.IndexModel;
 import com.algos.stockscanner.views.simulations.SimulationModel;
+import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +29,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +45,9 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
 
     @Autowired
     private Utils utils;
+
+    @Autowired
+    private ExportUtils eUtils;
 
     @Autowired
     private IndexUnitService indexUnitService;
@@ -247,5 +256,70 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         }
         return indexes;
     }
+
+
+    public byte[] exportExcel(Example<MarketIndex> filter, List<QuerySortOrder> orders) {
+
+        List<MarketIndex> indexes = fetch(0, count(filter), filter, orders);
+        if(indexes.size()==0){
+            return null;
+        }
+
+        int rowCount = 0;
+        Row row;
+        Workbook wb = new HSSFWorkbook();
+        String name = "Indexes";
+        Sheet sheet = wb.createSheet(name);
+
+        // create header row
+        row = sheet.createRow(rowCount);
+
+
+        // populate header row
+        populateExcelHeaderRow(wb, row);
+
+        rowCount++;
+        for(MarketIndex index : indexes){
+            row = sheet.createRow(rowCount);
+            populateExcelRow(wb, row, index);
+            rowCount++;
+        }
+
+        // at the end autosize each column
+        int numColumns = sheet.getRow(0).getPhysicalNumberOfCells();
+        for(int i=0; i<numColumns; i++){
+            sheet.autoSizeColumn(i);
+        }
+
+//        // write the workbook to a byte array to return
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            wb.write(bos);
+        } catch (IOException e) {
+            log.error("can't serialize excel workbook", e);
+            e.printStackTrace();
+        }
+
+        return bos.toByteArray();
+
+    }
+
+
+    private void populateExcelHeaderRow(Workbook wb, Row row) {
+
+        // same style for all header cells
+        CellStyle style = wb.createCellStyle();
+        Font font = wb.createFont();
+        font.setBold(true);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setFont(font);
+
+        int idx=0;
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_NUMGEN, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_SYMBOL, style);
+    }
+
+
+
 
 }

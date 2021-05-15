@@ -161,11 +161,11 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
 
         header.getStyle().set("flex-direction", "row-reverse");
 
-        Button addButton = new Button("Export", new Icon(VaadinIcon.ARROW_CIRCLE_DOWN_O));
-        addButton.getStyle().set("margin-left", "1em");
-        addButton.getStyle().set("margin-right", "1em");
-        addButton.setIconAfterText(true);
-        addButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
+        Button expButton = new Button("Export", new Icon(VaadinIcon.ARROW_CIRCLE_DOWN_O));
+        expButton.getStyle().set("margin-left", "1em");
+        expButton.getStyle().set("margin-right", "1em");
+        expButton.setIconAfterText(true);
+        expButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
             byte[] barray = simulationService.exportExcel(filter, order);
             if(barray!=null){
                 excelInputStream = new ByteArrayInputStream(barray);
@@ -173,7 +173,7 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
             }
         });
 
-        header.add(addButton);
+        header.add(expButton);
     }
 
 

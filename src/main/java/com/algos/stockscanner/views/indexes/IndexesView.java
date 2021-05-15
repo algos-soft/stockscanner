@@ -23,6 +23,7 @@ import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
@@ -44,6 +45,7 @@ import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.StreamResource;
 import org.apache.commons.lang3.StringUtils;
 import org.claspina.confirmdialog.ButtonOption;
 import org.claspina.confirmdialog.ConfirmDialog;
@@ -56,6 +58,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -77,6 +81,10 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
     private Example<MarketIndex> filter; // current filter
     private List<QuerySortOrder> order; // current order
+
+    private Button anchorButton;
+
+    private InputStream excelInputStream;
 
     @Autowired
     private Utils utils;
@@ -126,9 +134,23 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                 }
             }
         });
+
+        // Add to the UI an invisible button with anchor.
+        // This button is clicked programmatically on the client to download the file
+        // When this happens, the createResource() method is invoked which should
+        // return the resource to download in the form of an InputStream.
+        anchorButton = new Button();
+        anchorButton.getStyle().set("display", "none");
+        Anchor download = new Anchor(new StreamResource("indexes.xls", () -> excelInputStream), "");
+        download.getElement().setAttribute("download", true);
+        download.add(anchorButton);
+        add(download);
+
     }
 
     private void customizeHeader(HorizontalLayout header) {
+
+        header.getStyle().set("flex-direction", "row-reverse");
 
         Button addButton = new Button("New Index", new Icon(VaadinIcon.PLUS_CIRCLE));
         addButton.getStyle().set("margin-left", "1em");
@@ -138,11 +160,25 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             addNewItem();
         });
 
-        header.getStyle().set("flex-direction", "row-reverse");
 
-        header.add(addButton);
+        Button expButton = new Button("Export", new Icon(VaadinIcon.ARROW_CIRCLE_DOWN_O));
+        expButton.getStyle().set("margin-left", "1em");
+        expButton.getStyle().set("margin-right", "1em");
+        expButton.setIconAfterText(true);
+        expButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
+            byte[] barray = marketIndexService.exportExcel(filter, order);
+            if(barray!=null){
+                excelInputStream = new ByteArrayInputStream(barray);
+                anchorButton.clickInClient();
+            }
+        });
+
+        header.add(addButton, expButton);
 
     }
+
+
+
 
 
     private void createGrid(){

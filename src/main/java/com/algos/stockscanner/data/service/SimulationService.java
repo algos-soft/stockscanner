@@ -1,5 +1,6 @@
 package com.algos.stockscanner.data.service;
 
+import com.algos.stockscanner.beans.ExportUtils;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
@@ -35,6 +36,9 @@ public class SimulationService extends CrudService<Simulation, Integer> {
 
     @Autowired
     private Utils utils;
+
+    @Autowired
+    private ExportUtils eUtils;
 
     private SimulationRepository repository;
 
@@ -221,24 +225,24 @@ public class SimulationService extends CrudService<Simulation, Integer> {
         style.setFont(font);
 
         int idx=0;
-        createCell(wb, row, idx++, SimulationsView.H_NUMGEN, style);
-        createCell(wb, row, idx++, SimulationsView.H_SYMBOL, style);
-        createCell(wb, row, idx++, SimulationsView.H_START, style);
-        createCell(wb, row, idx++, SimulationsView.H_END, style);
-        createCell(wb, row, idx++, SimulationsView.H_INITIAL_AMT, style);
-        createCell(wb, row, idx++, SimulationsView.H_AMPLITUDE, style);
-        createCell(wb, row, idx++, SimulationsView.H_DAYS_BACK, style);
-        createCell(wb, row, idx++, SimulationsView.H_TERMINATION_REASON, style);
-        createCell(wb, row, idx++, SimulationsView.H_PL, style);
-        createCell(wb, row, idx++, SimulationsView.H_PL_PERCENT, style);
-        createCell(wb, row, idx++, SimulationsView.H_SPREAD, style);
-        createCell(wb, row, idx++, SimulationsView.H_COMMISSION, style);
-        createCell(wb, row, idx++, SimulationsView.H_POINTS_SCANNED, style);
-        createCell(wb, row, idx++, SimulationsView.H_NUM_POSITIONS_OPENED, style);
-        createCell(wb, row, idx++, SimulationsView.H_POINTS_IN_OPEN, style);
-        createCell(wb, row, idx++, SimulationsView.H_POINTS_IN_CLOSE, style);
-        createCell(wb, row, idx++, SimulationsView.H_MIN_SERIES_OPEN, style);
-        createCell(wb, row, idx++, SimulationsView.H_MAX_SERIES_OPEN, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_NUMGEN, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_SYMBOL, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_START, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_END, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_INITIAL_AMT, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_AMPLITUDE, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_DAYS_BACK, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_TERMINATION_REASON, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_PL, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_PL_PERCENT, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_SPREAD, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_COMMISSION, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_POINTS_SCANNED, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_NUM_POSITIONS_OPENED, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_POINTS_IN_OPEN, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_POINTS_IN_CLOSE, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_MIN_SERIES_OPEN, style);
+        eUtils.createCell(wb, row, idx++, SimulationsView.H_MAX_SERIES_OPEN, style);
     }
 
 
@@ -247,87 +251,24 @@ public class SimulationService extends CrudService<Simulation, Integer> {
      */
     private void populateExcelRow(Workbook wb, Row row, SimulationModel simulation) {
         int idx=0;
-        createCell(wb, row, idx++, simulation.getNumGenerator(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getSymbol(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getStartTs(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getEndTs(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getInitialAmount(), wb.createCellStyle());
-        createCell(wb, row, idx++, (int)simulation.getAmplitude(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getDaysLookback(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getTerminationCode(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getPl(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getPlPercent(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getTotSpread(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getTotCommission(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getNumPointsScanned(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getNumOpenings(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getNumPointsHold(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getNumPointsWait(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getMinPointsHold(), wb.createCellStyle());
-        createCell(wb, row, idx++, simulation.getMaxPointsHold(), wb.createCellStyle());
-    }
-
-
-    /**
-     * Create a String cell
-     */
-    private Cell createCell(Workbook wb, Row row,  int idx, String value, CellStyle style){
-        Cell cell = createCell(row, idx, style);
-        if(value!=null){
-            cell.setCellValue(value);
-        }
-        return cell;
-    }
-
-    /**
-     * Create a Number (float) cell
-     */
-    private Cell createCell(Workbook wb, Row row, int idx, float value, CellStyle style){
-        Cell cell = createCell(row, idx, style);
-        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,##0.00;-#,##0.00;@"));
-        cell.setCellValue(value);
-        return cell;
-    }
-
-    /**
-     * Create a Integer cell
-     */
-    private Cell createCell(Workbook wb, Row row, int idx, int value, CellStyle style){
-        Cell cell = createCell(row, idx, style);
-        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,###;#,###;@"));
-        cell.setCellValue(value);
-        return cell;
-    }
-
-    /**
-     * Create a Date cell
-     */
-    private Cell createCell(Workbook wb, Row row, int idx, LocalDate value, CellStyle style){
-        Cell cell = createCell(row, idx, style);
-        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("dd/mm/yyyy"));
-        if(value!=null){
-            cell.setCellValue(value);
-        }
-        return cell;
-    }
-
-
-    /**
-     * Create a single cell in a row with a Style
-     */
-    private Cell createCell(Row row,  int idx, CellStyle style){
-        Cell cell = createCell(row, idx++);
-        if(style!=null){
-            cell.setCellStyle(style);
-        }
-        return cell;
-    }
-
-    /**
-     * Create a single cell in a row
-     */
-    private Cell createCell(Row row,  int idx){
-        return row.createCell(idx++);
+        eUtils.createCell(wb, row, idx++, simulation.getNumGenerator(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getSymbol(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getStartTs(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getEndTs(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getInitialAmount(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, (int)simulation.getAmplitude(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getDaysLookback(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getTerminationCode(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getPl(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getPlPercent(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getTotSpread(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getTotCommission(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getNumPointsScanned(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getNumOpenings(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getNumPointsHold(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getNumPointsWait(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getMinPointsHold(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, simulation.getMaxPointsHold(), wb.createCellStyle());
     }
 
 
