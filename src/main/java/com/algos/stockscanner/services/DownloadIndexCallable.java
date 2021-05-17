@@ -273,7 +273,7 @@ public class DownloadIndexCallable implements Callable<Void> {
     /**
      * Fetch fundamental data from the network
      */
-    private FundamentalData fetchFundamentalData(String symbol) throws IOException {
+    private FundamentalData fetchFundamentalData(String symbol) throws IOException, ApiLimitExceededException {
 
         // check request frequency and eventually pause for a while
         if(lastRequestTs!=null){
@@ -310,28 +310,30 @@ public class DownloadIndexCallable implements Callable<Void> {
             String respString=response.body().string();
 
             if (respString.contains("Thank you")) {   // limit reached
-                log.error("Alphavantage limit reached: " + respString);
-                throw new LimitReachedException();
+
+                log.error("Api limit exceeded: " + respString);
+                throw new ApiLimitExceededException();
+
             }else{
 
                 MarketService.FDResponse fdresp = fdJsonAdapter.fromJson(respString);
 
-                if(fdresp.Symbol==null){
-                    throw new IOException("malformed response for "+symbol+", license limits reached? resp="+respString);
+                if(fdresp.Symbol!=null){
+                    IndexCategories category = IndexCategories.getByAlphaVantageType(fdresp.AssetType);
+                    long marketCap=0;
+                    try {
+                        marketCap=Long.parseLong(fdresp.MarketCapitalization);
+                    }catch (Exception e){
+                    }
+                    long ebitda=0;
+                    try {
+                        ebitda=Long.parseLong(fdresp.EBITDA);
+                    }catch (Exception e){
+                    }
+                    fundamentalData=new FundamentalData(symbol, fdresp.Name, category, fdresp.Exchange, fdresp.Country, fdresp.Sector, fdresp.Industry, marketCap, ebitda);
+                }else{
+                    log.error("Received empty response for symbol "+symbol +" "+ respString);
                 }
-
-                IndexCategories category = IndexCategories.getByAlphaVantageType(fdresp.AssetType);
-                long marketCap=0;
-                try {
-                    marketCap=Long.parseLong(fdresp.MarketCapitalization);
-                }catch (Exception e){
-                }
-                long ebitda=0;
-                try {
-                    ebitda=Long.parseLong(fdresp.EBITDA);
-                }catch (Exception e){
-                }
-                fundamentalData=new FundamentalData(symbol, fdresp.Name, category, fdresp.Exchange, fdresp.Country, fdresp.Sector, fdresp.Industry, marketCap, ebitda);
 
             }
 
@@ -339,11 +341,6 @@ public class DownloadIndexCallable implements Callable<Void> {
         }
 
         return fundamentalData;
-    }
-
-
-    public class LimitReachedException extends Exception {
-
     }
 
 

@@ -23,10 +23,7 @@ import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -278,7 +275,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         Pan pan = new Pan();
         Image image = utils.byteArrayToImage(model.getImageData());
         pan.add(image);
-        pan.setMaxWidth("6em");
+        pan.addClassName("indexesview-pan1");
         return pan;
     }
 
@@ -300,7 +297,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         category.addClassName("category");
 
         Pan pan = new Pan();
-        pan.setMaxWidth("18em");
+        pan.addClassName("indexesview-pan2");
         pan.add(symbol, name, category);
 
         return pan;
@@ -326,10 +323,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         IronIcon pointsIcon = new IronIcon("vaadin", "ellipsis-dots-h");
         Span pointsSpan = new Span(String.format("%,d", model.getNumUnits()));
         pointsSpan.addClassName("points");
-        HorizontalLayout row2 = new HorizontalLayout();
-        row2.addClassName("details");
-        row2.setVisible(model.getNumUnits() > 0);
-        row2.add(pointsIcon, pointsSpan);
 
 
         IronIcon frequencyIcon = new IronIcon("vaadin", "clock");
@@ -338,12 +331,21 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         if (frequencyType != null) {
             frequencyDesc = frequencyType.getDescription();
         }
+
+
         Span frequencySpan = new Span(frequencyDesc);
         frequencySpan.addClassName("frequency");
-        HorizontalLayout row3 = new HorizontalLayout();
-        row3.addClassName("details");
-        row3.setVisible(model.getNumUnits() > 0);
-        row3.add(frequencyIcon, frequencySpan);
+//        frequencySpan.getStyle().set("margin-left","0em");
+//        HorizontalLayout row3 = new HorizontalLayout();
+//        row3.addClassName("details");
+//        row3.setVisible(model.getNumUnits() > 0);
+//        row3.add(frequencyIcon, frequencySpan);
+
+        HorizontalLayout row2 = new HorizontalLayout();
+        row2.addClassName("details");
+        row2.setVisible(model.getNumUnits() > 0);
+        row2.add(pointsIcon, pointsSpan, frequencyIcon, frequencySpan);
+
 
         IronIcon icon1 = new IronIcon("vaadin", "clock");
         String text1;
@@ -355,6 +357,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         text1 = "idx upd: " + text1;
         Span span1 = new Span(text1);
         span1.addClassName("interval");
+
         HorizontalLayout row4 = new HorizontalLayout();
         row4.addClassName("details");
         row4.add(icon1, span1);
@@ -375,7 +378,8 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
         Pan pan = new Pan();
-        pan.add(row1, row2, row3, row4, row5);
+        pan.addClassName("indexesview-pan3");
+        pan.add(row1, row2, row4, row5);
 
         return pan;
     }
@@ -391,6 +395,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         span3.addClassName("detail-row");
 
         Pan pan = new Pan();
+        pan.addClassName("indexesview-pan4");
         pan.add(span1, span2, span3);
 
         return pan;

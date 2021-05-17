@@ -43,6 +43,7 @@
   font-size: var(--lumo-font-size-s);
   margin-right: var(--lumo-space-s);
   margin-top: 0px;
+  white-space:normal;
 }
 
 .indexes-view .category {
@@ -82,14 +83,39 @@
 .indexes-view .interval,
 .indexes-view .points,
 .indexes-view .frequency,
-.indexes-view .detail-row,
+.indexes-view .detail-row
  {
   color: var(--lumo-tertiary-text-color);
   font-size: var(--lumo-font-size-xs);
+  margin-left: 5px;
   margin-right: var(--lumo-space-l);
+  white-space: normal;
 }
+
+
 
 .indexes-view .panel {
   border-right: 2px solid #ccc;
 }
+
+.indexesview-pan1{
+    min-width:5.5em;
+    max-width:5.5em;
+}
+
+.indexesview-pan2{
+    min-width:12em;
+    max-width:12em;
+}
+
+.indexesview-pan3{
+    min-width:18em;
+    max-width:18em;
+}
+
+.indexesview-pan4{
+    min-width:18em;
+    max-width:18em;
+}
+
 
