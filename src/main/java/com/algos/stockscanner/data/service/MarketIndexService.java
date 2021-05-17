@@ -15,6 +15,8 @@ import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -35,13 +37,26 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class MarketIndexService extends CrudService<MarketIndex, Integer> {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+    // export file headers
+    public static final String H_SYMBOL="symbol";
+    public static final String H_NAME="name";
+    public static final String H_CATEGORY="category";
+    public static final String H_EXCHANGE="exchange";
+    public static final String H_COUNTRY="country";
+    public static final String H_SECTOR="sector";
+    public static final String H_INDUSTRY="industry";
+    public static final String H_MARKETCAP="marketCap";
+    public static final String H_EBITDA="ebitda";
 
     @Autowired
     private Utils utils;
@@ -258,12 +273,11 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
     }
 
 
-    public byte[] exportExcel(Example<MarketIndex> filter, List<QuerySortOrder> orders) {
+    public byte[] exportExcel(DataProvider dataProvider) {
 
-        List<MarketIndex> indexes = fetch(0, count(filter), filter, orders);
-        if(indexes.size()==0){
-            return null;
-        }
+        Query query=new Query();
+        Stream<IndexModel> indexStream=dataProvider.fetch(query);
+        Iterator<IndexModel> iterator = indexStream.iterator();
 
         int rowCount = 0;
         Row row;
@@ -274,14 +288,15 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         // create header row
         row = sheet.createRow(rowCount);
 
-
         // populate header row
         populateExcelHeaderRow(wb, row);
 
         rowCount++;
-        for(MarketIndex index : indexes){
+
+        while(iterator.hasNext()) {
+            IndexModel indexModel = iterator.next();
             row = sheet.createRow(rowCount);
-            populateExcelRow(wb, row, index);
+            populateExcelRow(wb, row, indexModel);
             rowCount++;
         }
 
@@ -315,19 +330,33 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         style.setFont(font);
 
         int idx=0;
-        eUtils.createCell(wb, row, idx++, SimulationsView.H_NUMGEN, style);
-        eUtils.createCell(wb, row, idx++, SimulationsView.H_SYMBOL, style);
+        eUtils.createCell(wb, row, idx++, H_SYMBOL, style);
+        eUtils.createCell(wb, row, idx++, H_NAME, style);
+        eUtils.createCell(wb, row, idx++, H_CATEGORY, style);
+        eUtils.createCell(wb, row, idx++, H_EXCHANGE, style);
+        eUtils.createCell(wb, row, idx++, H_COUNTRY, style);
+        eUtils.createCell(wb, row, idx++, H_SECTOR, style);
+        eUtils.createCell(wb, row, idx++, H_INDUSTRY, style);
+        eUtils.createCell(wb, row, idx++, H_MARKETCAP, style);
+        eUtils.createCell(wb, row, idx++, H_EBITDA, style);
+
     }
 
 
     /**
      * Populates a row of the Excel with the cells created from a Simulation item
      */
-    private void populateExcelRow(Workbook wb, Row row, MarketIndex index) {
+    private void populateExcelRow(Workbook wb, Row row, IndexModel index) {
         int idx=0;
-//        eUtils.createCell(wb, row, idx++, simulation.getNumGenerator(), wb.createCellStyle());
-//        eUtils.createCell(wb, row, idx++, simulation.getSymbol(), wb.createCellStyle());
-//        eUtils.createCell(wb, row, idx++, simulation.getStartTs(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, index.getSymbol(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, index.getName(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, index.getCategory().getCode(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, index.getExchange(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, index.getCountry(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, index.getSector(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, index.getIndustry(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, index.getMarketCap(), wb.createCellStyle());
+        eUtils.createCell(wb, row, idx++, index.getEbitda(), wb.createCellStyle());
     }
 
 

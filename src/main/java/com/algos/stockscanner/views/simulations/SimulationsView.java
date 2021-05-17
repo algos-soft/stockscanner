@@ -167,6 +167,7 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
         expButton.setIconAfterText(true);
         expButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
             byte[] barray = simulationService.exportExcel(filter, order);
+
             if(barray!=null){
                 excelInputStream = new ByteArrayInputStream(barray);
                 anchorButton.clickInClient();

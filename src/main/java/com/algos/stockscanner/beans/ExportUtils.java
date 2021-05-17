@@ -51,6 +51,17 @@ public class ExportUtils {
     }
 
     /**
+     * Create a Long cell
+     */
+    public Cell createCell(Workbook wb, Row row, int idx, long value, CellStyle style){
+        Cell cell = createCell(row, idx, style);
+        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,###;#,###;@"));
+        cell.setCellValue(value);
+        return cell;
+    }
+
+
+    /**
      * Create a Date cell
      */
     public Cell createCell(Workbook wb, Row row, int idx, LocalDate value, CellStyle style){

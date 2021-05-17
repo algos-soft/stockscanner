@@ -163,7 +163,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         expButton.getStyle().set("margin-right", "1em");
         expButton.setIconAfterText(true);
         expButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> {
-            byte[] barray = marketIndexService.exportExcel(filter, order);
+            byte[] barray = marketIndexService.exportExcel(grid.getDataProvider());
             if(barray!=null){
                 excelInputStream = new ByteArrayInputStream(barray);
                 anchorButton.clickInClient();
