@@ -143,7 +143,9 @@ public class DownloadIndexCallable implements Callable<Void> {
 
                 FundamentalData fundamentalData = fetchFundamentalData(symbol);
 
-                handleResponse(fundamentalData, symbol);
+                if(fundamentalData!=null){
+                    handleResponse(fundamentalData, symbol);
+                }
 
             }
 
@@ -306,28 +308,42 @@ public class DownloadIndexCallable implements Callable<Void> {
         if(response.isSuccessful()){
 
             String respString=response.body().string();
-            MarketService.FDResponse fdresp = fdJsonAdapter.fromJson(respString);
 
-            if(fdresp.Symbol==null){
-                throw new IOException("malformed response for "+symbol+", license limits reached? resp="+respString);
+            if (respString.contains("Thank you")) {   // limit reached
+                log.error("Alphavantage limit reached: " + respString);
+                throw new LimitReachedException();
+            }else{
+
+                MarketService.FDResponse fdresp = fdJsonAdapter.fromJson(respString);
+
+                if(fdresp.Symbol==null){
+                    throw new IOException("malformed response for "+symbol+", license limits reached? resp="+respString);
+                }
+
+                IndexCategories category = IndexCategories.getByAlphaVantageType(fdresp.AssetType);
+                long marketCap=0;
+                try {
+                    marketCap=Long.parseLong(fdresp.MarketCapitalization);
+                }catch (Exception e){
+                }
+                long ebitda=0;
+                try {
+                    ebitda=Long.parseLong(fdresp.EBITDA);
+                }catch (Exception e){
+                }
+                fundamentalData=new FundamentalData(symbol, fdresp.Name, category, fdresp.Exchange, fdresp.Country, fdresp.Sector, fdresp.Industry, marketCap, ebitda);
+
             }
 
-            IndexCategories category = IndexCategories.getByAlphaVantageType(fdresp.AssetType);
-            long marketCap=0;
-            try {
-                marketCap=Long.parseLong(fdresp.MarketCapitalization);
-            }catch (Exception e){
-            }
-            long ebitda=0;
-            try {
-                ebitda=Long.parseLong(fdresp.EBITDA);
-            }catch (Exception e){
-            }
-            fundamentalData=new FundamentalData(symbol, fdresp.Name, category, fdresp.Exchange, fdresp.Country, fdresp.Sector, fdresp.Industry, marketCap, ebitda);
 
         }
 
         return fundamentalData;
+    }
+
+
+    public class LimitReachedException extends Exception {
+
     }
 
 
