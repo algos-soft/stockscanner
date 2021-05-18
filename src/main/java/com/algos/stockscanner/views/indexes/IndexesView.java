@@ -110,13 +110,15 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         addClassName("indexes-view");
         setSizeFull();
 
-        Component filterPanel = createFilterPanel();
+        Component filterPanel = context.getBean(FilterPanel.class);
+
+        Component filterComponent = createFilterPanel();
 
         createGrid();
 
         VerticalLayout layout = new VerticalLayout();
         layout.getStyle().set("height", "100%");
-        layout.add(filterPanel, grid);
+        layout.add(filterPanel, filterComponent, grid);
 
         add(layout);
 
