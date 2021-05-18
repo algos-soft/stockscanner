@@ -1,7 +1,6 @@
 package com.algos.stockscanner.data.service;
 
 import com.algos.stockscanner.beans.ExportHelper;
-import com.algos.stockscanner.beans.ExportUtils;
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.Generator;
 import com.algos.stockscanner.data.entity.MarketIndex;
