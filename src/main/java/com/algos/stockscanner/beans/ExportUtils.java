@@ -35,7 +35,9 @@ public class ExportUtils {
      */
     public Cell createCell(Workbook wb, Row row, int idx, float value, CellStyle style){
         Cell cell = createCell(row, idx, style);
-        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,##0.00;-#,##0.00;@"));
+        if(style!=null){
+            style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,##0.00;-#,##0.00;@"));
+        }
         cell.setCellValue(value);
         return cell;
     }
@@ -45,7 +47,9 @@ public class ExportUtils {
      */
     public Cell createCell(Workbook wb, Row row, int idx, int value, CellStyle style){
         Cell cell = createCell(row, idx, style);
-        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,###;#,###;@"));
+        if(style!=null){
+            style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,###;#,###;@"));
+        }
         cell.setCellValue(value);
         return cell;
     }
@@ -55,7 +59,9 @@ public class ExportUtils {
      */
     public Cell createCell(Workbook wb, Row row, int idx, long value, CellStyle style){
         Cell cell = createCell(row, idx, style);
-        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,###;#,###;@"));
+        if(style!=null){
+            style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("#,###;#,###;@"));
+        }
         cell.setCellValue(value);
         return cell;
     }
@@ -66,7 +72,9 @@ public class ExportUtils {
      */
     public Cell createCell(Workbook wb, Row row, int idx, LocalDate value, CellStyle style){
         Cell cell = createCell(row, idx, style);
-        style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("dd/mm/yyyy"));
+        if(style!=null){
+            style.setDataFormat(wb.getCreationHelper().createDataFormat().getFormat("dd/mm/yyyy"));
+        }
         if(value!=null){
             cell.setCellValue(value);
         }
