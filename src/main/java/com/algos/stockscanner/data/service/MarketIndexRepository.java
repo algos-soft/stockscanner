@@ -23,7 +23,12 @@ public interface MarketIndexRepository extends JpaRepository<MarketIndex, Intege
     @Query("SELECT m FROM MarketIndex m ORDER BY m.symbol")
     Page<MarketIndex> findAllOrderBySymbol (Pageable pageable);
 
+
     @Query("SELECT m FROM MarketIndex m WHERE m.symbol LIKE :filterSymbol% OR m.name LIKE %:filterName% ORDER BY m.symbol")
     Page<MarketIndex> findAllWithFilterOrderBySymbol (Pageable pageable, @Param("filterSymbol") String filterSymbol, @Param("filterName") String filterName);
+
+
+//    @Query("SELECT m FROM MarketIndex m WHERE m.symbol LIKE :symbol% OR m.name LIKE %:name% ORDER BY m.symbol")
+//    Page<MarketIndex> findAllWithFilterOrderBySymbol (Pageable pageable, @Param("symbol") String symbol, @Param("name") String name,  @Param("exchange") String exchange,  @Param("country") String country,  @Param("sector") String sector,  @Param("industry") String industry,  @Param("capFrom") String capFrom, @Param("capFrom") String capTo, @Param("ebitdaFrom") String ebitdaFrom, @Param("ebitdaTo") String ebitdaTo);
 
 }

@@ -67,14 +67,13 @@
   align-items: center;
 }
 
-/*
-.indexes-view iron-icon {
+
+.indexes-view-icon {
   color: var(--lumo-tertiary-text-color);
   height: calc(var(--lumo-icon-size-s) * 0.8);
-  margin-right: var(--lumo-space-s);
+  margin-right: 0em;
   width: calc(var(--lumo-icon-size-s) * 0.8);
 }
-*/
 
 .indexes-view .details {
   margin-top: var(--lumo-space-xs);

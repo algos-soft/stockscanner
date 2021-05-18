@@ -8,6 +8,7 @@ import com.algos.stockscanner.enums.FrequencyTypes;
 import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.services.IndexEntry;
 import com.algos.stockscanner.utils.Du;
+import com.algos.stockscanner.views.indexes.IndexFilter;
 import com.algos.stockscanner.views.indexes.IndexModel;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
@@ -101,6 +102,16 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
 
         return page.toList();
     }
+
+
+    public List<MarketIndex> fetch(int offset, int limit, IndexFilter filter, List<QuerySortOrder> orders) {
+        String symbol = filter.symbol;
+        String name = filter.name;
+
+//        return repository.findAllWithFilterOrderBySymbol();
+        return null;
+    }
+
 
     public int count(Example<MarketIndex> example) {
         return (int) repository.count(example);

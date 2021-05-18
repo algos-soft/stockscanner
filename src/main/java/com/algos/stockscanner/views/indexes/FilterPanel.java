@@ -1,10 +1,14 @@
 package com.algos.stockscanner.views.indexes;
 
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -23,6 +27,7 @@ public class FilterPanel extends FlexLayout {
     private TextField industryFld;
     private RangeFld marketCapRange;
     private RangeFld ebitdaRange;
+    private Button bSearch;
 
     @PostConstruct
     private void init(){
@@ -32,9 +37,9 @@ public class FilterPanel extends FlexLayout {
         countryFld=new TextField("country");
         sectorFld=new TextField("sector");
         industryFld=new TextField("industry");
-        marketCapRange=new RangeFld("industry");
+        marketCapRange=new RangeFld("cap");
         ebitdaRange=new RangeFld("ebitda");
-
+        bSearch=new Button("Search");
         buildUI();
     }
 
@@ -46,7 +51,24 @@ public class FilterPanel extends FlexLayout {
         countryFld.addClassName("filter-panel-field");
         sectorFld.addClassName("filter-panel-field");
         industryFld.addClassName("filter-panel-field");
-        add(nameFld, exchangeFld, countryFld, sectorFld, industryFld, marketCapRange, ebitdaRange);
+        bSearch.addClassName("filter-panel-search-button");
+        add(nameFld, exchangeFld, countryFld, sectorFld, industryFld, marketCapRange, ebitdaRange, bSearch);
+    }
+
+
+    public IndexFilter buildFilter(){
+        IndexFilter filter = new IndexFilter();
+        filter.symbol=nameFld.getValue();
+        filter.name=nameFld.getValue();
+        filter.exchange=exchangeFld.getValue();
+        filter.country=countryFld.getValue();
+        filter.sector=sectorFld.getValue();
+        filter.industry=industryFld.getValue();
+        filter.marketCapFrom=marketCapRange.getFromValue();
+        filter.marketCapFrom=marketCapRange.getToValue();
+        filter.ebitdaFrom=ebitdaRange.getFromValue();
+        filter.ebitdaFrom=ebitdaRange.getToValue();
+        return filter;
     }
 
 
@@ -57,19 +79,34 @@ public class FilterPanel extends FlexLayout {
 
         public RangeFld(String label) {
             this.label = label;
-            fromFld=new TextField("from");
-            toFld=new TextField("to");
+            fromFld=new TextField(label+" from");
+            fromFld.getElement().setAttribute("title", "0.0 M/G/T");    // tooltip
+            fromFld.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>) event -> {
+                toFld.setValue(event.getValue());
+            });
+            toFld=new TextField(label+" to");
+            toFld.getElement().setAttribute("title", "0.0 M/G/T");    // tooltip
             buildUI();
         }
 
         private void buildUI(){
             addClassName("filter-panel-range");
-            fromFld.addClassName("filter-panel-range-field");
+            fromFld.addClassName("filter-panel-range-field1");
             Icon arrow = new Icon(VaadinIcon.CHEVRON_RIGHT_SMALL);
             arrow.addClassName("filter-panel-range-arrow");
-            toFld.addClassName("filter-panel-range-field");
+            toFld.addClassName("filter-panel-range-field2");
             add(fromFld, arrow, toFld);
         }
+
+        public long getFromValue(){
+            return 100;
+        }
+
+        public long getToValue(){
+            return 1000;
+        }
+
     }
+
 
 }

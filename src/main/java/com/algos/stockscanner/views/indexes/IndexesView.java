@@ -178,8 +178,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
 
-
-
     private void createGrid(){
 
         grid = new Grid<>();
@@ -309,6 +307,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     private Component buildPan3(IndexModel model) {
 
         IronIcon intervalIcon = new IronIcon("vaadin", "line-chart");
+        intervalIcon.addClassName("indexes-view-icon");
         String text;
         if (model.getNumUnits() > 0) {
             text = format(model.getUnitsFrom()) + " -> " + format(model.getUnitsTo());
@@ -323,11 +322,13 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
         IronIcon pointsIcon = new IronIcon("vaadin", "ellipsis-dots-h");
+        pointsIcon.addClassName("indexes-view-icon");
         Span pointsSpan = new Span(String.format("%,d", model.getNumUnits()));
         pointsSpan.addClassName("points");
 
 
         IronIcon frequencyIcon = new IronIcon("vaadin", "clock");
+        frequencyIcon.addClassName("indexes-view-icon");
         String frequencyDesc = null;
         FrequencyTypes frequencyType = model.getUnitFrequency();
         if (frequencyType != null) {
@@ -350,6 +351,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
         IronIcon icon1 = new IronIcon("vaadin", "clock");
+        icon1.addClassName("indexes-view-icon");
         String text1;
         if (model.getFundamentalUpdateTs() != null) {
             text1 = formatTs(model.getFundamentalUpdateTs());
@@ -365,6 +367,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         row4.add(icon1, span1);
 
         IronIcon icon2 = new IronIcon("vaadin", "clock");
+        icon2.addClassName("indexes-view-icon");
         String text2;
         if (model.getPricesUpdateTs() != null) {
             text2 = formatTs(model.getPricesUpdateTs());
