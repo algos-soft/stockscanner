@@ -4,6 +4,7 @@ package com.algos.stockscanner.beans;
 import com.algos.stockscanner.Application;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
+import com.algos.stockscanner.exceptions.InvalidBigNumException;
 import com.vaadin.flow.component.Component;
 //import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -357,5 +358,9 @@ public class Utils {
     }
 
 
+
+    public long convertBigNum(String bigNum) throws InvalidBigNumException {
+        return 0;
+    }
 
 }

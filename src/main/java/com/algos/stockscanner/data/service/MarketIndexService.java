@@ -103,19 +103,44 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         return page.toList();
     }
 
-
-    public List<MarketIndex> fetch(int offset, int limit, IndexFilter filter, List<QuerySortOrder> orders) {
-        String symbol = filter.symbol;
-        String name = filter.name;
-
-//        return repository.findAllWithFilterOrderBySymbol();
-        return null;
-    }
-
-
     public int count(Example<MarketIndex> example) {
         return (int) repository.count(example);
     }
+
+    public List<MarketIndex> fetch(int offset, int limit, IndexFilter filter, List<QuerySortOrder> orders) {
+
+        Sort sort = utils.buildSort(orders);
+        Pageable pageable = new OffsetBasedPageRequest(offset, limit, sort);
+
+        Page<MarketIndex> page;
+        if (filter != null) {
+            String symbol = filter.symbol;
+            String name = filter.name;
+            String exchange = filter.exchange;
+            String country = filter.country;
+            page = repository.findAllWithFilterOrderBySymbol(pageable, symbol, name, exchange, country, null, 800000000l);
+        } else {
+            page = repository.findAll(pageable);
+        }
+
+        return page.toList();
+    }
+
+    public int count(IndexFilter filter) {
+        int count;
+        if (filter != null) {
+            String symbol = filter.symbol;
+            String name = filter.name;
+            String exchange = filter.exchange;
+            String country = filter.country;
+            count = (int)repository.count(symbol, name, exchange, country, null, 800000000l);
+        } else {
+            count = (int)repository.count();
+        }
+
+        return count;
+    }
+
 
     public List<MarketIndex> findAll() {
         return repository.findAll();

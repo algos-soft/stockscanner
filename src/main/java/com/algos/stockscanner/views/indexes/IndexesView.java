@@ -8,6 +8,7 @@ import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.enums.FrequencyTypes;
 import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.enums.PriceUpdateModes;
+import com.algos.stockscanner.exceptions.InvalidBigNumException;
 import com.algos.stockscanner.services.AdminService;
 import com.algos.stockscanner.services.DownloadIndexCallable;
 import com.algos.stockscanner.services.MarketService;
@@ -79,6 +80,8 @@ public class IndexesView extends Div implements AfterNavigationObserver {
     private Example<MarketIndex> filter; // current filter
     private List<QuerySortOrder> order; // current order
 
+    private FilterPanel filterPanel;
+
     private Button anchorButton;
 
     private InputStream excelInputStream;
@@ -110,7 +113,14 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         addClassName("indexes-view");
         setSizeFull();
 
-        Component filterPanel = context.getBean(FilterPanel.class);
+        filterPanel = context.getBean(FilterPanel.class);
+        filterPanel.addListener(new FilterPanel.FilterPanelListener() {
+            @Override
+            public void searchButtonPressed() {
+                grid.getDataProvider().refreshAll();
+                //loadAll();
+            }
+        });
 
         Component filterComponent = createFilterPanel();
 
@@ -187,13 +197,27 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
         CallbackDataProvider<IndexModel, Void> provider;
         provider = DataProvider.fromCallbacks(fetchCallback -> {
-            int offset = fetchCallback.getOffset();
-            int limit = fetchCallback.getLimit();
-            order = fetchCallback.getSortOrders();
-            List<MarketIndex> entities = marketIndexService.fetch(offset, limit, filter, order);
-            return marketIndexService.entitiesToModels(entities).stream();
+            IndexFilter indexFilter= null;
+            try {
+                indexFilter = filterPanel.buildFilter();
+                int offset = fetchCallback.getOffset();
+                int limit = fetchCallback.getLimit();
+                order = fetchCallback.getSortOrders();
+                List<MarketIndex> entities = marketIndexService.fetch(offset, limit, indexFilter, order);
+                return marketIndexService.entitiesToModels(entities).stream();
+            } catch (InvalidBigNumException e) {
+                log.warn(e.getMessage());
+                return null;
+            }
         }, countCallback -> {
-            return marketIndexService.count(filter);
+            IndexFilter indexFilter= null;
+            try {
+                indexFilter = filterPanel.buildFilter();
+                return marketIndexService.count(indexFilter);
+            } catch (InvalidBigNumException e) {
+                log.warn(e.getMessage());
+                return 0;
+            }
         });
 
         grid.setDataProvider(provider);
@@ -210,7 +234,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             @Override
             public void valueChanged(AbstractField.ComponentValueChangeEvent<TextField, String> event) {
                 filterString = event.getValue();
-                loadAll();
+                //loadAll();
             }
         });
         filterFld.setValueChangeMode(ValueChangeMode.EAGER);
@@ -227,7 +251,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
      */
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
-        loadAll();
+        //loadAll();
     }
 
 
@@ -242,7 +266,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                 MarketIndex entity = new MarketIndex();
                 marketIndexService.modelToEntity(model, entity);
                 marketIndexService.update(entity);
-                loadAll();
+                //loadAll();
             }
         };
 
@@ -459,7 +483,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
                 try {
                     marketIndexService.delete(model.getId());
-                    loadAll();
+                    //loadAll();
                 } catch (Exception e) {
                     log.error("could not delete index entity id " + model.getId(), e);
                 }
@@ -661,26 +685,26 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
 
-    /**
-     * Load all data in the grid
-     */
-    private void loadAll() {
-        List<IndexModel> outList = new ArrayList<>();
-
-        Pageable p = Pageable.unpaged();
-        Page<MarketIndex> page;
-        if (StringUtils.isEmpty(filterString)) {
-            page = marketIndexService.findAllOrderBySymbol(p);
-        } else {
-            page = marketIndexService.findAllWithFilterOrderBySymbol(p, filterString);
-        }
-
-        page.stream().forEach(e -> {
-            outList.add(createIndex(e));
-        });
-
-        grid.setItems(outList);
-    }
+//    /**
+//     * Load all data in the grid
+//     */
+//    private void loadAll() {
+//        List<IndexModel> outList = new ArrayList<>();
+//
+//        Pageable p = Pageable.unpaged();
+//        Page<MarketIndex> page;
+//        if (StringUtils.isEmpty(filterString)) {
+//            page = marketIndexService.findAllOrderBySymbol(p);
+//        } else {
+//            page = marketIndexService.findAllWithFilterOrderBySymbol(p, filterString);
+//        }
+//
+//        page.stream().forEach(e -> {
+//            outList.add(createIndex(e));
+//        });
+//
+//        grid.setItems(outList);
+//    }
 
 
     /**

@@ -1,6 +1,10 @@
 package com.algos.stockscanner.views.indexes;
 
+import com.algos.stockscanner.beans.Utils;
+import com.algos.stockscanner.exceptions.InvalidBigNumException;
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -9,11 +13,14 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -29,17 +36,32 @@ public class FilterPanel extends FlexLayout {
     private RangeFld ebitdaRange;
     private Button bSearch;
 
+    private List<FilterPanelListener> listeners=new ArrayList<>();
+
+    @Autowired
+    private Utils utils;
+
+
     @PostConstruct
     private void init(){
 
         nameFld=new TextField("name|symbol");
+        //nameFld.setClearButtonVisible(true);
         exchangeFld=new TextField("exchange");
+        //exchangeFld.setClearButtonVisible(true);
         countryFld=new TextField("country");
+        //countryFld.setClearButtonVisible(true);
         sectorFld=new TextField("sector");
+        //sectorFld.setClearButtonVisible(true);
         industryFld=new TextField("industry");
+        //industryFld.setClearButtonVisible(true);
         marketCapRange=new RangeFld("cap");
+        //marketCapRange.setClearButtonVisible(true);
         ebitdaRange=new RangeFld("ebitda");
+        //ebitdaRange.setClearButtonVisible(true);
         bSearch=new Button("Search");
+        bSearch.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> fireSearchPressed());
+
         buildUI();
     }
 
@@ -56,7 +78,7 @@ public class FilterPanel extends FlexLayout {
     }
 
 
-    public IndexFilter buildFilter(){
+    public IndexFilter buildFilter() throws InvalidBigNumException {
         IndexFilter filter = new IndexFilter();
         filter.symbol=nameFld.getValue();
         filter.name=nameFld.getValue();
@@ -98,14 +120,33 @@ public class FilterPanel extends FlexLayout {
             add(fromFld, arrow, toFld);
         }
 
-        public long getFromValue(){
-            return 100;
+        private void setClearButtonVisible(boolean flag){
+            fromFld.setClearButtonVisible(flag);
+            toFld.setClearButtonVisible(flag);
         }
 
-        public long getToValue(){
-            return 1000;
+        public long getFromValue() throws InvalidBigNumException {
+            return utils.convertBigNum(fromFld.getValue());
         }
 
+        public long getToValue() throws InvalidBigNumException {
+            return utils.convertBigNum(toFld.getValue());
+        }
+
+    }
+
+    public void addListener(FilterPanelListener listener){
+        listeners.add(listener);
+    }
+
+    private void fireSearchPressed(){
+        for(FilterPanelListener listener : listeners){
+            listener.searchButtonPressed();
+        }
+    }
+
+    public interface FilterPanelListener{
+        void searchButtonPressed();
     }
 
 
