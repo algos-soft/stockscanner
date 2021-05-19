@@ -106,7 +106,7 @@ public class FilterPanel extends FlexLayout {
             fromFld.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>) event -> {
                 toFld.setValue(event.getValue());
             });
-            toFld=new TextField(label+" to");
+            toFld=new TextField("to");
             toFld.getElement().setAttribute("title", "0.0 M/G/T");    // tooltip
             buildUI();
         }

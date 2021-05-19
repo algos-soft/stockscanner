@@ -22,6 +22,7 @@ import com.vaadin.flow.server.*;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -359,7 +360,62 @@ public class Utils {
 
 
 
+    /**
+     * Convert a number expressed as a string containing
+     * a group of digits followed by "M/G/T" to a long
+     */
     public long convertBigNum(String bigNum) throws InvalidBigNumException {
+
+        // must not be null or empty
+        if(StringUtils.isEmpty(bigNum)){
+            throw new InvalidBigNumException("Null or empty string");
+        }
+
+        // extract the first numeric part
+        int i=0;
+        String numericPart = "";
+        boolean stop=false;
+        while(!stop){
+            if(bigNum.length()<i){
+                Character charx = bigNum.charAt(i);
+                if(Character.isDigit(charx)){
+                    numericPart+=charx;
+                }else{
+                    stop=true;
+                }
+            }else{
+                stop=true;
+            }
+
+            i++;
+        }
+
+        // extract the remaining part
+        String strPart = bigNum.substring(i, bigNum.length());
+        if(strPart.length()==0){
+            throw new InvalidBigNumException("Missing suffix M/G/T");
+        }
+
+        strPart=strPart.trim();
+        if(strPart.length()==0){
+            throw new InvalidBigNumException("Missing suffix M/G/T");
+        }
+
+        if(strPart.length()!=1){
+            throw new InvalidBigNumException("Suffix too long");
+        }
+
+        strPart=strPart.toUpperCase();
+        Character suffix=strPart.charAt(0);
+        if ("MGT".indexOf(suffix) == -1){
+            throw new InvalidBigNumException("Invalid suffix "+suffix+", must be M/G/T");
+        }
+
+        // now the suffix is M/G/T
+
+
+
+
         return 0;
     }
 
