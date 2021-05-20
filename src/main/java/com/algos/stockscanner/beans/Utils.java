@@ -353,16 +353,16 @@ public class Utils {
     public static String numberWithSuffix(long count) {
         if (count < 1000) return "" + count;
         int exp = (int) (Math.log(count) / Math.log(1000));
-        return String.format("%.1f %c",
+        return String.format("%.1f%c",
                 count / Math.pow(1000, exp),
-                "kMGTPE".charAt(exp-1));
+                "kMBTPE".charAt(exp-1));
     }
 
 
 
     /**
      * Convert a number expressed as a string containing
-     * a group of digits followed by "M/G/T" to a long
+     * a group of digits followed by "M/B/T" to a long
      */
     public long convertBigNum(String bigNum) throws InvalidBigNumException {
 
@@ -371,52 +371,78 @@ public class Utils {
             throw new InvalidBigNumException("Null or empty string");
         }
 
+        bigNum=bigNum.trim();
+
         // extract the first numeric part
         int i=0;
-        String numericPart = "";
-        boolean stop=false;
-        while(!stop){
-            if(bigNum.length()<i){
+        String sNumericPart = "";
+        while(true){
+            if(bigNum.length()>i){
                 Character charx = bigNum.charAt(i);
-                if(Character.isDigit(charx)){
-                    numericPart+=charx;
+                if(Character.isDigit(charx) || charx.equals('.') || charx.equals(',')){
+                    sNumericPart+=charx;
                 }else{
-                    stop=true;
+                    break;
                 }
             }else{
-                stop=true;
+                break;
             }
 
             i++;
         }
 
+        // we must have a numeric part
+        if(i==0){
+            throw new InvalidBigNumException("Missing numeric part");
+        }
+
+        // we must have at least 1 character more after the numeric part
+        if(i>=bigNum.length()){
+            throw new InvalidBigNumException("Missing suffix M/B/T");
+        }
+
         // extract the remaining part
         String strPart = bigNum.substring(i, bigNum.length());
-        if(strPart.length()==0){
-            throw new InvalidBigNumException("Missing suffix M/G/T");
-        }
-
         strPart=strPart.trim();
-        if(strPart.length()==0){
-            throw new InvalidBigNumException("Missing suffix M/G/T");
-        }
 
+        // 1 letter expected
         if(strPart.length()!=1){
             throw new InvalidBigNumException("Suffix too long");
         }
 
         strPart=strPart.toUpperCase();
         Character suffix=strPart.charAt(0);
-        if ("MGT".indexOf(suffix) == -1){
-            throw new InvalidBigNumException("Invalid suffix "+suffix+", must be M/G/T");
+
+        // must be one of the recognized chars
+        if ("MBT".indexOf(suffix) == -1){
+            throw new InvalidBigNumException("Invalid suffix "+suffix+", must be M/B/T");
         }
 
-        // now the suffix is M/G/T
+        // starting from here, we have a valid numeric string and suffix
 
+        //replace commas with dots
+        sNumericPart = sNumericPart.replace(",",".");
 
+        // parse the number as Float
+        float fNumericPart=Float.parseFloat(sNumericPart);
 
+        //multiply for the unit
+        long result=0;
+        switch (suffix){
+            case 'M':
+                result=(long)(fNumericPart*1000000l);
+            break;
 
-        return 0;
+            case 'B':
+                result=(long)(fNumericPart*1000000000l);
+                break;
+
+            case 'T':
+                result=(long)(fNumericPart*1000000000000l);
+                break;
+        }
+
+        return result;
     }
 
 }

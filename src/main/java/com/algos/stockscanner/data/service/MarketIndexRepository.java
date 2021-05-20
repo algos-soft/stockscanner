@@ -30,16 +30,19 @@ public interface MarketIndexRepository extends JpaRepository<MarketIndex, Intege
 
     static final String sWhere=
             "((:symbol is null or m.symbol LIKE :symbol%) or (:name is null or m.name LIKE %:name%))" +
-            " AND (:exchange is null or m.exchange LIKE %:exchange%)" +
-            " AND (:country is null or m.country LIKE %:country%)" +
-            " AND (:capmin is null or m.marketCap >= :capmin)"+
-            " AND (:capmax is null or m.marketCap <= :capmax)";
+                    " AND (:exchange is null or m.exchange LIKE %:exchange%)" +
+                    " AND (:country is null or m.country LIKE %:country%)" +
+                    " AND (:sector is null or m.sector LIKE %:sector%)" +
+                    " AND (:industry is null or m.industry LIKE %:industry%)" +
+                    " AND (:capmin is null or m.marketCap >= :capmin)"+
+                    " AND (:capmax is null or m.marketCap <= :capmax)"+
+                    " AND (:ebitdamin is null or m.ebitda >= :ebitdamin)"+
+                    " AND (:ebitdamax is null or m.ebitda <= :ebitdamax)";
 
     @Query("SELECT m FROM MarketIndex m WHERE " + sWhere+ " ORDER BY m.symbol")
-    Page<MarketIndex> findAllWithFilterOrderBySymbol(Pageable pageable, @Param("symbol") String symbol,  @Param("name") String name, @Param("exchange") String exchange, @Param("country") String country,  @Param("capmin") Long capmin,  @Param("capmax") Long capmax);
-//  @Param("sector") String sector,  @Param("industry") String industry,  @Param("capFrom") String capFrom, @Param("capFrom") String capTo, @Param("ebitdaFrom") String ebitdaFrom, @Param("ebitdaTo") String ebitdaTo);
+    Page<MarketIndex> findAllWithFilterOrderBySymbol(Pageable pageable, @Param("symbol") String symbol,  @Param("name") String name, @Param("exchange") String exchange, @Param("country") String country,  @Param("sector") String sector, @Param("industry") String industry, @Param("capmin") Long capmin,  @Param("capmax") Long capmax, @Param("ebitdamin") Long ebitdamin,  @Param("ebitdamax") Long ebitdamax);
 
     @Query("SELECT count(m) FROM MarketIndex m WHERE " +sWhere)
-    long count(@Param("symbol") String symbol, @Param("name") String name, @Param("exchange") String exchange, @Param("country") String country,  @Param("capmin") Long capmin,  @Param("capmax") Long capmax);
+    long count(@Param("symbol") String symbol,  @Param("name") String name, @Param("exchange") String exchange, @Param("country") String country,  @Param("sector") String sector, @Param("industry") String industry, @Param("capmin") Long capmin,  @Param("capmax") Long capmax, @Param("ebitdamin") Long ebitdamin,  @Param("ebitdamax") Long ebitdamax);
 
 }

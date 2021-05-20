@@ -1,31 +1,69 @@
-.dialog {
+.indexpickerdialog-dialog {
   height: 100%;
 }
 
-.dialogheader {
+/*
+.indexpickerdialog-dialogheader {
     width: 100%;
 }
+*/
 
-.dialogbody {
+.indexpickerdialog-dialogbody {
     width: 100%;
     height: 100%;
-    flex-wrap: wrap;
 }
 
-.dialogfooter {
+
+.indexpickerdialog-dialogfooter {
     width: 100%;
     justify-content: flex-end;
 }
 
-.filterfield {
-}
 
+/*
 .selectionindicator {
     margin-left: auto;
     margin-top: auto;
     margin-bottom:0.3em;
 }
+*/
 
+/*
 .selectbutton{
     margin-top: auto;
 }
+*/
+
+
+
+
+
+.indexpickerdialog-image{
+    max-width:2em;
+}
+
+.indexpickerdialog-name,
+.indexpickerdialog-symbol,
+.indexpickerdialog-exchange,
+.indexpickerdialog-country,
+.indexpickerdialog-sector,
+.indexpickerdialog-industry,
+.indexpickerdialog-marketcap,
+.indexpickerdialog-ebitda{
+}
+
+.indexpickerdialog-name{
+    font-size: 0.8em;
+}
+
+.indexpickerdialog-symbol-name{
+    margin-left: 0.5em;
+}
+
+.indexpickerdialog-col1,
+.indexpickerdialog-col2,
+.indexpickerdialog-col3,
+.indexpickerdialog-col4
+{
+}
+

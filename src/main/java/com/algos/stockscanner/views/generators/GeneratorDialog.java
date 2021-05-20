@@ -18,7 +18,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -91,14 +90,14 @@ public class GeneratorDialog extends Dialog {
     private MarketIndexService marketIndexService;
 
 
-    public GeneratorDialog() {
-        this((GeneratorDialogConfirmListener) null);
-    }
+//    public GeneratorDialog() {
+//        this((GeneratorDialogConfirmListener) null);
+//    }
 
-    public GeneratorDialog(GeneratorDialogConfirmListener confirmListener) {
-        this((GeneratorModel) null, confirmListener);
-        this.model = model;
-    }
+//    public GeneratorDialog(GeneratorDialogConfirmListener confirmListener) {
+//        this((GeneratorModel) null, confirmListener);
+//        this.model = model;
+//    }
 
     public GeneratorDialog(GeneratorModel model, GeneratorDialogConfirmListener confirmListener) {
         this.model = model;
@@ -315,6 +314,7 @@ public class GeneratorDialog extends Dialog {
                 }
 
                 // open the dialog
+//                IndexesPickerDialogOld dialog = context.getBean(IndexesPickerDialogOld.class, listener, ids);
                 IndexesPickerDialog dialog = context.getBean(IndexesPickerDialog.class, listener, ids);
                 dialog.open();
             }

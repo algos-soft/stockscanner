@@ -69,18 +69,17 @@ import java.util.Optional;
 @PageTitle(Application.APP_NAME + " | Indexes")
 @PageSubtitle("Indexes")
 @CssImport(value = "./views/indexes/indexes-view.css")
-public class IndexesView extends Div implements AfterNavigationObserver {
+public class IndexesView extends Div {
 
     private static final Logger log = LoggerFactory.getLogger(IndexesView.class);
 
     private Grid<IndexModel> grid;
 
-    private String filterString;
-
-    private Example<MarketIndex> filter; // current filter
     private List<QuerySortOrder> order; // current order
 
     private FilterPanel filterPanel;
+
+    private Label counterLabel;
 
     private Button anchorButton;
 
@@ -114,21 +113,15 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         setSizeFull();
 
         filterPanel = context.getBean(FilterPanel.class);
-        filterPanel.addListener(new FilterPanel.FilterPanelListener() {
-            @Override
-            public void searchButtonPressed() {
-                grid.getDataProvider().refreshAll();
-                //loadAll();
-            }
-        });
+        filterPanel.addListener(() -> grid.getDataProvider().refreshAll());
 
-        Component filterComponent = createFilterPanel();
+        counterLabel=new Label();
 
         createGrid();
 
         VerticalLayout layout = new VerticalLayout();
         layout.getStyle().set("height", "100%");
-        layout.add(filterPanel, filterComponent, grid);
+        layout.add(filterPanel, counterLabel, grid);
 
         add(layout);
 
@@ -193,13 +186,12 @@ public class IndexesView extends Div implements AfterNavigationObserver {
         grid = new Grid<>();
         grid.setHeight("100%");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
-        Grid.Column col = grid.addComponentColumn(index -> createCard(index));
+        grid.addComponentColumn(index -> createCard(index));
 
         CallbackDataProvider<IndexModel, Void> provider;
         provider = DataProvider.fromCallbacks(fetchCallback -> {
-            IndexFilter indexFilter= null;
             try {
-                indexFilter = filterPanel.buildFilter();
+                IndexFilter indexFilter = filterPanel.buildFilter();
                 int offset = fetchCallback.getOffset();
                 int limit = fetchCallback.getLimit();
                 order = fetchCallback.getSortOrders();
@@ -210,10 +202,11 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                 return null;
             }
         }, countCallback -> {
-            IndexFilter indexFilter= null;
             try {
-                indexFilter = filterPanel.buildFilter();
-                return marketIndexService.count(indexFilter);
+                IndexFilter indexFilter = filterPanel.buildFilter();
+                int count=marketIndexService.count(indexFilter);
+                counterLabel.setText(count+" rows");
+                return count;
             } catch (InvalidBigNumException e) {
                 log.warn(e.getMessage());
                 return 0;
@@ -227,33 +220,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
 
-    private Component createFilterPanel() {
-
-        TextField filterFld = new TextField("filter");
-        filterFld.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>() {
-            @Override
-            public void valueChanged(AbstractField.ComponentValueChangeEvent<TextField, String> event) {
-                filterString = event.getValue();
-                //loadAll();
-            }
-        });
-        filterFld.setValueChangeMode(ValueChangeMode.EAGER);
-        filterFld.setAutofocus(true);
-        filterFld.setClearButtonVisible(true);
-
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.add(filterFld);
-        return layout;
-    }
-
-    /**
-     * Reload data when this view is displayed.
-     */
-    @Override
-    public void afterNavigation(AfterNavigationEvent event) {
-        //loadAll();
-    }
-
 
     /**
      * Present an empty dialog to create a new item
@@ -266,7 +232,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
                 MarketIndex entity = new MarketIndex();
                 marketIndexService.modelToEntity(model, entity);
                 marketIndexService.update(entity);
-                //loadAll();
+                grid.getDataProvider().refreshAll();
             }
         };
 
@@ -483,7 +449,7 @@ public class IndexesView extends Div implements AfterNavigationObserver {
             bConfirm.addClickListener((ComponentEventListener<ClickEvent<Button>>) event1 -> {
                 try {
                     marketIndexService.delete(model.getId());
-                    //loadAll();
+                    grid.getDataProvider().refreshAll();
                 } catch (Exception e) {
                     log.error("could not delete index entity id " + model.getId(), e);
                 }
@@ -685,26 +651,6 @@ public class IndexesView extends Div implements AfterNavigationObserver {
 
 
 
-//    /**
-//     * Load all data in the grid
-//     */
-//    private void loadAll() {
-//        List<IndexModel> outList = new ArrayList<>();
-//
-//        Pageable p = Pageable.unpaged();
-//        Page<MarketIndex> page;
-//        if (StringUtils.isEmpty(filterString)) {
-//            page = marketIndexService.findAllOrderBySymbol(p);
-//        } else {
-//            page = marketIndexService.findAllWithFilterOrderBySymbol(p, filterString);
-//        }
-//
-//        page.stream().forEach(e -> {
-//            outList.add(createIndex(e));
-//        });
-//
-//        grid.setItems(outList);
-//    }
 
 
     /**

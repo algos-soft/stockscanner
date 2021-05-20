@@ -13,6 +13,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -80,17 +81,29 @@ public class FilterPanel extends FlexLayout {
 
     public IndexFilter buildFilter() throws InvalidBigNumException {
         IndexFilter filter = new IndexFilter();
-        filter.symbol=nameFld.getValue();
-        filter.name=nameFld.getValue();
-        filter.exchange=exchangeFld.getValue();
-        filter.country=countryFld.getValue();
-        filter.sector=sectorFld.getValue();
-        filter.industry=industryFld.getValue();
+        filter.symbol=getFilterValue(nameFld);
+        filter.name=getFilterValue(nameFld);
+        filter.exchange=getFilterValue(exchangeFld);
+        filter.country=getFilterValue(countryFld);
+        filter.sector=getFilterValue(sectorFld);
+        filter.industry=getFilterValue(industryFld);
         filter.marketCapFrom=marketCapRange.getFromValue();
-        filter.marketCapFrom=marketCapRange.getToValue();
+        filter.marketCapTo=marketCapRange.getToValue();
         filter.ebitdaFrom=ebitdaRange.getFromValue();
-        filter.ebitdaFrom=ebitdaRange.getToValue();
+        filter.ebitdaTo=ebitdaRange.getToValue();
         return filter;
+    }
+
+    /**
+     * return null filter value for empty fields!
+     */
+    private String getFilterValue(TextField field){
+        String filterValue=null;
+        String fieldValue=field.getValue();
+        if(!StringUtils.isEmpty(fieldValue)){
+            filterValue=fieldValue;
+        }
+        return filterValue;
     }
 
 
@@ -102,12 +115,12 @@ public class FilterPanel extends FlexLayout {
         public RangeFld(String label) {
             this.label = label;
             fromFld=new TextField(label+" from");
-            fromFld.getElement().setAttribute("title", "0.0 M/G/T");    // tooltip
-            fromFld.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>) event -> {
-                toFld.setValue(event.getValue());
-            });
+            fromFld.getElement().setAttribute("title", "0.0 M|B|T");    // tooltip
+//            fromFld.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>) event -> {
+//                toFld.setValue(event.getValue());
+//            });
             toFld=new TextField("to");
-            toFld.getElement().setAttribute("title", "0.0 M/G/T");    // tooltip
+            toFld.getElement().setAttribute("title", "0.0 M|B|T");    // tooltip
             buildUI();
         }
 
@@ -125,12 +138,22 @@ public class FilterPanel extends FlexLayout {
             toFld.setClearButtonVisible(flag);
         }
 
-        public long getFromValue() throws InvalidBigNumException {
-            return utils.convertBigNum(fromFld.getValue());
+        public Long getFromValue() throws InvalidBigNumException {
+            String sValue = fromFld.getValue();
+            if(!StringUtils.isEmpty(sValue)){
+                return utils.convertBigNum(sValue);
+            }else{
+                return null;
+            }
         }
 
-        public long getToValue() throws InvalidBigNumException {
-            return utils.convertBigNum(toFld.getValue());
+        public Long getToValue() throws InvalidBigNumException {
+            String sValue = toFld.getValue();
+            if(!StringUtils.isEmpty(sValue)){
+                return utils.convertBigNum(sValue);
+            }else{
+                return null;
+            }
         }
 
     }

@@ -31,7 +31,7 @@ import java.util.Map;
 @CssImport(value = "./views/generators/indexpicker.css")
 @org.springframework.stereotype.Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class IndexPicker extends HorizontalLayout {
+public class IndexPickerOld extends HorizontalLayout {
 
     @Autowired
     private MarketIndexService marketIndexService;
@@ -46,7 +46,7 @@ public class IndexPicker extends HorizontalLayout {
 
     private List<PickerItem> pickerItems;
 
-    public IndexPicker(List<Integer> selectedIds, IndexPickerSelectionListener selectionListener) {
+    public IndexPickerOld(List<Integer> selectedIds, IndexPickerSelectionListener selectionListener) {
         this.selectedIds=selectedIds;
         this.selectionListener = selectionListener;
     }

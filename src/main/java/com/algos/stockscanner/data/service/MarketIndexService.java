@@ -32,10 +32,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -107,18 +104,14 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         return (int) repository.count(example);
     }
 
-    public List<MarketIndex> fetch(int offset, int limit, IndexFilter filter, List<QuerySortOrder> orders) {
+    public List<MarketIndex> fetch(int offset, int limit, IndexFilter f, List<QuerySortOrder> orders) {
 
         Sort sort = utils.buildSort(orders);
         Pageable pageable = new OffsetBasedPageRequest(offset, limit, sort);
 
         Page<MarketIndex> page;
-        if (filter != null) {
-            String symbol = filter.symbol;
-            String name = filter.name;
-            String exchange = filter.exchange;
-            String country = filter.country;
-            page = repository.findAllWithFilterOrderBySymbol(pageable, symbol, name, exchange, country, null, 800000000l);
+        if (f != null) {
+            page = repository.findAllWithFilterOrderBySymbol(pageable, f.symbol, f.name, f.exchange, f.country, f.sector, f.industry, f.marketCapFrom, f. marketCapTo, f.ebitdaFrom, f.ebitdaTo);
         } else {
             page = repository.findAll(pageable);
         }
@@ -126,20 +119,34 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         return page.toList();
     }
 
-    public int count(IndexFilter filter) {
+    public int count(IndexFilter f) {
         int count;
-        if (filter != null) {
-            String symbol = filter.symbol;
-            String name = filter.name;
-            String exchange = filter.exchange;
-            String country = filter.country;
-            count = (int)repository.count(symbol, name, exchange, country, null, 800000000l);
+        if (f != null) {
+            count = (int)repository.count(f.symbol, f.name, f.exchange, f.country, f.sector, f.industry, f.marketCapFrom, f. marketCapTo, f.ebitdaFrom, f.ebitdaTo);
         } else {
             count = (int)repository.count();
         }
 
         return count;
     }
+
+
+    public List<MarketIndex> fetch(int offset, int limit, Set<MarketIndex> indexes, List<QuerySortOrder> orders) {
+
+        Sort sort = utils.buildSort(orders);
+        Pageable pageable = new OffsetBasedPageRequest(offset, limit, sort);
+
+        Page<MarketIndex> page=null;
+//        if (f != null) {
+//            page = repository.findAllWithFilterOrderBySymbol(pageable, f.symbol, f.name, f.exchange, f.country, f.sector, f.industry, f.marketCapFrom, f. marketCapTo, f.ebitdaFrom, f.ebitdaTo);
+//        } else {
+//            page = repository.findAll(pageable);
+//        }
+
+        return page.toList();
+    }
+
+
 
 
     public List<MarketIndex> findAll() {
@@ -163,6 +170,13 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         return indexUnitService.countBy(index);
     }
 
+
+    @Override
+    public void delete(Integer id) {
+        MarketIndex index = get(id).get();
+        super.delete(id);
+        log.info("Market index deleted: "+index);
+    }
 
     @Override
     protected MarketIndexRepository getRepository() {
