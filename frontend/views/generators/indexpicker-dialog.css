@@ -40,6 +40,7 @@
 
 .indexpickerdialog-image{
     max-width:2em;
+    border-radius: var(--lumo-border-radius);
 }
 
 .indexpickerdialog-name,
@@ -63,7 +64,20 @@
 .indexpickerdialog-col1,
 .indexpickerdialog-col2,
 .indexpickerdialog-col3,
-.indexpickerdialog-col4
-{
+.indexpickerdialog-col4{
 }
+
+.indexpickerdialog-counterlabel{
+    margin-left: auto;
+    font-weight:bold;
+}
+
+.indexpickerdialog-selectedlabel{
+    font-weight:bold;
+}
+
+.indexpickerdialog-checkselectedonly{
+    font-weight:bold;
+}
+
 

@@ -132,17 +132,9 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
 
 
     public List<MarketIndex> fetch(int offset, int limit, Set<MarketIndex> indexes, List<QuerySortOrder> orders) {
-
         Sort sort = utils.buildSort(orders);
         Pageable pageable = new OffsetBasedPageRequest(offset, limit, sort);
-
-        Page<MarketIndex> page=null;
-//        if (f != null) {
-//            page = repository.findAllWithFilterOrderBySymbol(pageable, f.symbol, f.name, f.exchange, f.country, f.sector, f.industry, f.marketCapFrom, f. marketCapTo, f.ebitdaFrom, f.ebitdaTo);
-//        } else {
-//            page = repository.findAll(pageable);
-//        }
-
+        Page<MarketIndex> page = repository.findAllInSet(pageable, indexes);
         return page.toList();
     }
 

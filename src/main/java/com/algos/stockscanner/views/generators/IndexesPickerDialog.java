@@ -77,7 +77,7 @@ public class IndexesPickerDialog extends Dialog  {
 
     @PostConstruct
     private void init() {
-        setWidth("50em");
+        setWidth("70em");
         setHeight("40em");
         setCloseOnEsc(false);
         setCloseOnOutsideClick(true);
@@ -85,9 +85,14 @@ public class IndexesPickerDialog extends Dialog  {
         setDraggable(true);
 
         counterLabel=new Label();
+        counterLabel.addClassName("indexpickerdialog-counterlabel");
+
         selectedLabel=new Label();
+        selectedLabel.addClassName("indexpickerdialog-selectedlabel");
 
         onlySelected=new Checkbox("show selected only");
+        onlySelected.addClassName("indexpickerdialog-checkselectedonly");
+
         onlySelected.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>>() {
             @Override
             public void valueChanged(AbstractField.ComponentValueChangeEvent<Checkbox, Boolean> event) {
@@ -128,8 +133,9 @@ public class IndexesPickerDialog extends Dialog  {
 
 
         HorizontalLayout layout1=new HorizontalLayout();
+        layout1.setWidthFull();
         layout1.setAlignItems(FlexComponent.Alignment.BASELINE);
-        layout1.add(counterLabel, selectedLabel, onlySelected);
+        layout1.add(selectedLabel, onlySelected, counterLabel);
 
         VerticalLayout layout = new VerticalLayout();
         layout.setSizeFull();
@@ -188,37 +194,34 @@ public class IndexesPickerDialog extends Dialog  {
         CallbackDataProvider<MarketIndex, Void> provider;
         provider = DataProvider.fromCallbacks(fetchCallback -> {
             try {
-                IndexFilter indexFilter = filterPanel.buildFilter();
+
+                List<MarketIndex> entities;
                 int offset = fetchCallback.getOffset();
                 int limit = fetchCallback.getLimit();
                 order = fetchCallback.getSortOrders();
-                List<MarketIndex> entities = marketIndexService.fetch(offset, limit, indexFilter, order);
-
-                if(onlySelected.getValue()){
+                if(!onlySelected.getValue()){
+                    IndexFilter indexFilter = filterPanel.buildFilter();
+                    entities = marketIndexService.fetch(offset, limit, indexFilter, order);
+                }else{
                     Set<MarketIndex> selectedItems = grid.getSelectedItems();
                     entities = marketIndexService.fetch(offset, limit, selectedItems, order);
                 }
 
                 return entities.stream();
+
             } catch (InvalidBigNumException e) {
                 log.warn(e.getMessage());
                 return null;
             }
         }, countCallback -> {
             try {
-                IndexFilter indexFilter = filterPanel.buildFilter();
-                int count=marketIndexService.count(indexFilter);
-
-
-                if(onlySelected.getValue()){
-//                    int offset = countCallback.getOffset();
-//                    int limit = countCallback.getLimit();
-//                    List<MarketIndex> entities = marketIndexService.fetch(offset, limit, indexFilter, order);
-//                    entities=filterSelectedOnly(entities);
-//                    count=entities.size();
+                int count;
+                if(!onlySelected.getValue()){
+                    IndexFilter indexFilter = filterPanel.buildFilter();
+                    count=marketIndexService.count(indexFilter);
+                }else{
+                    count = grid.getSelectionModel().getSelectedItems().size();
                 }
-
-
                 counterLabel.setText(count+" rows");
                 return count;
             } catch (InvalidBigNumException e) {
@@ -335,18 +338,18 @@ public class IndexesPickerDialog extends Dialog  {
     }
 
 
-    /**
-     * Given a list of indexes, returns a new list containing
-     * only the ones which are also selected in the list
-     */
-    private List<MarketIndex> filterSelectedOnly(List<MarketIndex> entities){
-        List<MarketIndex> newList=new ArrayList<>();
-        for(MarketIndex entity : entities){
-            if(grid.getSelectionModel().getSelectedItems().contains(entity)){
-                newList.add(entity);
-            }
-        }
-        return newList;
-    }
+//    /**
+//     * Given a list of indexes, returns a new list containing
+//     * only the ones which are also selected in the list
+//     */
+//    private List<MarketIndex> filterSelectedOnly(List<MarketIndex> entities){
+//        List<MarketIndex> newList=new ArrayList<>();
+//        for(MarketIndex entity : entities){
+//            if(grid.getSelectionModel().getSelectedItems().contains(entity)){
+//                newList.add(entity);
+//            }
+//        }
+//        return newList;
+//    }
 
 }

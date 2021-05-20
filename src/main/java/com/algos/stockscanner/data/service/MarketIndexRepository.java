@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Set;
 
 public interface MarketIndexRepository extends JpaRepository<MarketIndex, Integer> {
 
@@ -44,5 +45,9 @@ public interface MarketIndexRepository extends JpaRepository<MarketIndex, Intege
 
     @Query("SELECT count(m) FROM MarketIndex m WHERE " +sWhere)
     long count(@Param("symbol") String symbol,  @Param("name") String name, @Param("exchange") String exchange, @Param("country") String country,  @Param("sector") String sector, @Param("industry") String industry, @Param("capmin") Long capmin,  @Param("capmax") Long capmax, @Param("ebitdamin") Long ebitdamin,  @Param("ebitdamax") Long ebitdamax);
+
+
+    @Query("SELECT m FROM MarketIndex m WHERE m IN (:indexes)")
+    Page<MarketIndex> findAllInSet(Pageable pageable, @Param("indexes")Set<MarketIndex> indexes);
 
 }
