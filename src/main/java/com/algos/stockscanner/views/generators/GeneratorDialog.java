@@ -367,9 +367,9 @@ public class GeneratorDialog extends Dialog {
         layout.setSpacing(false);
         layout.setPadding(false);
 
-        avgDaysFld = new IntegerField("days lookback");
-        avgDaysMinFld = new IntegerField("days lookback min");
-        avgDaysMaxFld = new IntegerField("days lookback max");
+        avgDaysFld = new IntegerField("moving average");
+        avgDaysMinFld = new IntegerField("moving avg min");
+        avgDaysMaxFld = new IntegerField("moving avg max");
         avgDaysStepsFld = new IntegerField("# of steps");
         HorizontalLayout avgDaysLayout = new HorizontalLayout();
         avgDaysLayout.setSpacing(true);
@@ -378,7 +378,7 @@ public class GeneratorDialog extends Dialog {
         avgDaysLayout.setVisible(false);
 
         permutateAvgDaysCheckbox = new Checkbox();
-        permutateAvgDaysCheckbox.setLabel("Permutate days lookback");
+        permutateAvgDaysCheckbox.setLabel("Permutate moving average");
         permutateAvgDaysCheckbox.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>>) event -> {
             boolean checked = event.getValue();
             avgDaysFld.setVisible(!checked);

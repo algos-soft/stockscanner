@@ -1,8 +1,8 @@
 package com.algos.stockscanner.enums;
 
 public enum PriceUpdateModes {
-    REPLACE_ALL_DATA("Download all available prices"),
-    ADD_MISSING_DATA_ONLY("Download only missing prices");
+    ADD_MISSING_DATA_ONLY("Update prices"),
+    REPLACE_ALL_DATA("Reload prices");
 
     private String description;
 

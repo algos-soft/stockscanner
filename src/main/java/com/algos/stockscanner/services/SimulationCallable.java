@@ -2,6 +2,7 @@ package com.algos.stockscanner.services;
 
 import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.data.entity.Generator;
+import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.entity.Simulation;
 import com.algos.stockscanner.data.service.GeneratorService;
 import com.algos.stockscanner.data.service.MarketIndexService;
@@ -22,8 +23,10 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
@@ -112,8 +115,12 @@ public class SimulationCallable implements Callable<Void> {
         // if is already aborted, don't perform the task
         startTime = LocalDateTime.now();
 
+
         // long task, can throw exception
         try {
+
+            // execute preliminary checks
+            preliminaryChecks();
 
             Simulation simulation;
             Generator generator = generatorService.get(generatorId).get();
@@ -164,6 +171,37 @@ public class SimulationCallable implements Callable<Void> {
         }
 
         return null;
+
+    }
+
+
+    // general checks before starting the simulations
+    private void preliminaryChecks() throws Exception{
+
+        notifyProgress(0,0, "validating");
+
+        // all the indexes must have enough prices to cover the requested period
+        Generator generator = generatorService.get(generatorId).get();
+        LocalDate startDate = generator.getStartDateLD();
+        LocalDate endDate = startDate.plusDays(generator.getDays()*generator.getSpans());
+
+        // build final list of indexes used
+        List<MarketIndex> indexes;
+        if(!generator.getIndexesPermutate()){
+            indexes=new ArrayList<>();
+            indexes.add(generator.getIndex());
+        }else{
+            indexes=generator.getIndexes();
+        }
+
+        // check boundaries
+        for(MarketIndex index : indexes){
+            LocalDate unitsFromDate = index.getUnitsFromLD();
+            LocalDate unitsToDate = index.getUnitsToLD();
+            if(startDate.isBefore(unitsFromDate) || endDate.isAfter(unitsToDate)){
+                throw new Exception("Prices missing for index "+index.getSymbol()+". Load prices in the index first.");
+            }
+        }
 
     }
 

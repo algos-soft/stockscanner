@@ -239,6 +239,10 @@ public class MarketIndex extends AbstractEntity {
         this.unitsFrom = Du.toUtcString(localDate);
     }
 
+    public LocalDate getUnitsToLD(){
+        return Du.toLocalDate(unitsTo);
+    }
+
     public void setUnitsToLD(LocalDate localDate) {
         this.unitsTo = Du.toUtcString(localDate);
     }

@@ -243,8 +243,7 @@ public class TaskMonitor extends VerticalLayout  {
     private void setAborted() {
         executionCompleted = true;
         ui.access((Command) () -> {
-//            progressBar.setMax(1);
-//            progressBar.setValue(1);
+            label.setText("Error - click (!) for details");
             progressBar.setIndeterminate(false);
         });
         setImage("ERR");

@@ -21,8 +21,10 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.server.Command;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,8 +70,9 @@ public class PricesPage extends VerticalLayout {
 
     private IntegerField limitField;
 
-    private Select<Character> filterFrom;
-    private Select<Character> filterTo;
+    private TextField filterFrom;
+    private TextField filterTo;
+
 
     private Span filterResult;
 
@@ -123,27 +126,18 @@ public class PricesPage extends VerticalLayout {
             }
         });
 
-        String str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        char[] charArray = str.toCharArray();
-        Character[] characters = ArrayUtils.toObject(charArray);
-
-        filterFrom =new Select<>();
-        filterFrom.setLabel("from");
-        filterFrom.setItems(characters);
-        filterFrom.setValue(new Character('A'));
-        filterFrom.setWidth("4.5em");
-        filterFrom.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<Character>, Character>>) event -> {
+        filterFrom=new TextField("from");
+        filterFrom.setWidth("5em");
+        filterFrom.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>) event -> {
             updateFilter();
         });
 
-        filterTo =new Select<>();
-        filterTo.setLabel("to");
-        filterTo.setItems(characters);
-        filterTo.setValue(new Character('Z'));
-        filterTo.setWidth("4.5em");
-        filterTo.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<Character>, Character>>) event -> {
+        filterTo=new TextField("to");
+        filterTo.setWidth("5em");
+        filterTo.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<TextField, String>>) event -> {
             updateFilter();
         });
+
 
 
         filterResult = new Span();
@@ -201,6 +195,21 @@ public class PricesPage extends VerticalLayout {
         filterResult.getElement().setProperty("innerHTML", html);
     }
 
+//    /**
+//     * Build the list of symbols based on the current filters
+//     */
+//    private List<String> buildFilteredSymbolList(){
+//        List<String> list=new ArrayList<>();
+//        List<MarketIndex> entities = marketIndexService.findAll();
+//        for(MarketIndex index : entities){
+//            list.add(index.getSymbol());
+//        }
+//        list= filterFromSelect(list);
+//        list= filterToSelect(list);
+//        Collections.sort(list);
+//        return list;
+//    }
+
     /**
      * Build the list of symbols based on the current filters
      */
@@ -210,20 +219,22 @@ public class PricesPage extends VerticalLayout {
         for(MarketIndex index : entities){
             list.add(index.getSymbol());
         }
-        list=filterFrom(list);
-        list=filterTo(list);
+        list= filterFrom(list);
+        list= filterTo(list);
         Collections.sort(list);
         return list;
     }
 
-
     private List<String> filterFrom(List<String> list){
         List<String> filteredList=new ArrayList<>();
-        Character from = filterFrom.getValue();
-        for(String string : list){
-            Character first = string.charAt(0);
-            if(Character.toUpperCase(first) >= Character.toUpperCase(from)){
-                filteredList.add(string);
+        String from = filterFrom.getValue();
+        if(StringUtils.isEmpty(from)){
+            return list;
+        }else{
+            for(String string : list){
+                if(string.toUpperCase().compareTo(from.toUpperCase())>=0){
+                    filteredList.add(string);
+                }
             }
         }
         return filteredList;
@@ -231,15 +242,19 @@ public class PricesPage extends VerticalLayout {
 
     private List<String> filterTo(List<String> list){
         List<String> filteredList=new ArrayList<>();
-        Character to = filterTo.getValue();
-        for(String string : list){
-            Character first = string.charAt(0);
-            if(Character.toUpperCase(first) <= Character.toUpperCase(to)){
-                filteredList.add(string);
+        String to = filterTo.getValue();
+        if(StringUtils.isEmpty(to)){
+            return list;
+        }else{
+            for(String string : list){
+                if(string.toUpperCase().compareTo(to.toUpperCase())<=0){
+                    filteredList.add(string);
+                }
             }
         }
         return filteredList;
     }
+
 
     /**
      * Attach a TaskMonitor to a task and add it to the status panel

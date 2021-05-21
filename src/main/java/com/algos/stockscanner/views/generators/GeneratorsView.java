@@ -368,7 +368,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         Span spanAmplitude = new Span(amplIcon, new Text(sAmplitude));
         spanAmplitude.addClassName("amplitude");
 
-        IronIcon lookIcon = new IronIcon("vaadin", "glasses");
+        IronIcon lookIcon = new IronIcon("vaadin", "trending_up");
         String sLook;
         if (model.isPermutateDaysLookback()) {
             sLook = model.getDaysLookbackMin() + " - " + model.getDaysLookbackMax() + " days, in " + model.getDaysLookbackSteps() + " steps";
