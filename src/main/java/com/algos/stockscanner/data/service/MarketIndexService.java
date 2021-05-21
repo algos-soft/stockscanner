@@ -21,10 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
@@ -157,6 +154,11 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
         return repository.findAllWithFilterOrderBySymbol(pageable, filter, filter);
     }
 
+    public List<MarketIndex> findAllOrderByUnitsToLimit(int limit){
+        Pageable pageable = PageRequest.of(0, limit);
+        Page page = repository.findAllOrderByUnitsTo(pageable);
+        return page.toList();
+    }
 
     public int countDataPoints(MarketIndex index) {
         return indexUnitService.countBy(index);

@@ -50,4 +50,7 @@ public interface MarketIndexRepository extends JpaRepository<MarketIndex, Intege
     @Query("SELECT m FROM MarketIndex m WHERE m IN (:indexes)")
     Page<MarketIndex> findAllInSet(Pageable pageable, @Param("indexes")Set<MarketIndex> indexes);
 
+    @Query("SELECT m FROM MarketIndex m ORDER BY m.unitsTo")
+    Page<MarketIndex> findAllOrderByUnitsTo(Pageable pageable);
+
 }

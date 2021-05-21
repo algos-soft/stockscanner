@@ -1,4 +1,4 @@
-package com.algos.stockscanner.runner;
+package com.algos.stockscanner.exceptions;
 
 public class RunnerException extends Exception {
     public RunnerException(String message) {

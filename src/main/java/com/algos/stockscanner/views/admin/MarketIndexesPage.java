@@ -29,6 +29,7 @@ import org.claspina.confirmdialog.ConfirmDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -47,6 +48,9 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 public class MarketIndexesPage  extends VerticalLayout {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Value("${alphavantage.max.requests.per.minute:5}")
+    private int MAX_REQ_PER_MINUTE;
 
     @Autowired
     private ApplicationContext context;
@@ -124,7 +128,7 @@ public class MarketIndexesPage  extends VerticalLayout {
         // request limit field
         limitField=new IntegerField("Max req per minute");
         limitField.setId("adminview-reqlimitfield");
-        limitField.setValue(5);
+        limitField.setValue(MAX_REQ_PER_MINUTE);
 
         Button bDownloadIndexes = new Button("Start download");
         bDownloadIndexes.setId("adminview-bdownloadindexes");
