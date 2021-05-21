@@ -16,6 +16,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.IronIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
@@ -276,6 +277,7 @@ public class GeneratorDialog extends Dialog {
         permutateIndexesCheckbox = new Checkbox("Permutate indexes");
         indexesPanel.setVisible(false);
 
+
         // when the dialog is confirmed, replace the contents of the indexes panel
         IndexPickerDialogConfirmListener listener = selectedIds -> {
             List<IndexComponent> components = new ArrayList<>();
@@ -299,35 +301,54 @@ public class GeneratorDialog extends Dialog {
 
         };
 
-
-        // add a click listener to the indexesPanel to open the
-        // indexes picker dialog when is clicked
-        indexesPanel.addClickListener(new ComponentEventListener<ClickEvent<HorizontalLayout>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<HorizontalLayout> horizontalLayoutClickEvent) {
-
-                // build a list of the ids of the indexes contained in the IndexesPanel
-                List<IndexComponent> indexComponents = indexesPanel.getIndexComponents();
-                List<Integer> ids = new ArrayList<>();
-                for (IndexComponent comp : indexComponents) {
-                    ids.add(comp.getIndexId());
-                }
-
-                // open the dialog
-//                IndexesPickerDialogOld dialog = context.getBean(IndexesPickerDialogOld.class, listener, ids);
-                IndexesPickerDialog dialog = context.getBean(IndexesPickerDialog.class, listener, ids);
-                dialog.open();
+        Button chooseButton = new Button("Choose...");
+        chooseButton.addClickListener((ComponentEventListener<ClickEvent<Button>>) event -> {
+            // build a list of the ids of the indexes contained in the IndexesPanel
+            List<IndexComponent> indexComponents = indexesPanel.getIndexComponents();
+            List<Integer> ids = new ArrayList<>();
+            for (IndexComponent comp : indexComponents) {
+                ids.add(comp.getIndexId());
             }
+
+            // open the dialog
+            IndexesPickerDialog dialog = context.getBean(IndexesPickerDialog.class, listener, ids);
+            dialog.open();
+
         });
+
+
+//        // add a click listener to the indexesPanel to open the
+//        // indexes picker dialog when is clicked
+//        indexesPanel.addClickListener(new ComponentEventListener<ClickEvent<HorizontalLayout>>() {
+//            @Override
+//            public void onComponentEvent(ClickEvent<HorizontalLayout> horizontalLayoutClickEvent) {
+//
+//                // build a list of the ids of the indexes contained in the IndexesPanel
+//                List<IndexComponent> indexComponents = indexesPanel.getIndexComponents();
+//                List<Integer> ids = new ArrayList<>();
+//                for (IndexComponent comp : indexComponents) {
+//                    ids.add(comp.getIndexId());
+//                }
+//                // open the dialog
+//                IndexesPickerDialog dialog = context.getBean(IndexesPickerDialog.class, listener, ids);
+//                dialog.open();
+//            }
+//        });
 
 
         permutateIndexesCheckbox.addValueChangeListener((HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>>) event -> {
             boolean checked = event.getValue();
             indexCombo.setVisible(!checked);
             indexesPanel.setVisible(checked);
+            chooseButton.setVisible(checked);
         });
 
-        layout.add(indexCombo, indexesPanel, permutateIndexesCheckbox);
+        // chechbox and button
+        HorizontalLayout layout1=new HorizontalLayout();
+        layout1.setAlignItems(FlexComponent.Alignment.BASELINE);
+        layout1.add(permutateIndexesCheckbox, chooseButton);
+
+        layout.add(indexCombo, indexesPanel, layout1);
         return layout;
     }
 
