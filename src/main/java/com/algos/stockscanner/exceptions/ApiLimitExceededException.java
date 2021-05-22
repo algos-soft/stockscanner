@@ -1,4 +1,4 @@
-package com.algos.stockscanner.services;
+package com.algos.stockscanner.exceptions;
 
 public class ApiLimitExceededException extends Exception {
     public ApiLimitExceededException() {

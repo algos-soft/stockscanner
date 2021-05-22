@@ -8,6 +8,7 @@ import com.algos.stockscanner.enums.IndexCategories;
 import com.algos.stockscanner.data.service.IndexUnitService;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.enums.PriceUpdateModes;
+import com.algos.stockscanner.exceptions.ApiLimitExceededException;
 import com.algos.stockscanner.task.AbortedByUserException;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
@@ -17,6 +18,7 @@ import com.algos.stockscanner.utils.Du;
 import com.crazzyghost.alphavantage.AlphaVantage;
 import com.crazzyghost.alphavantage.parameters.DataType;
 import com.crazzyghost.alphavantage.parameters.OutputSize;
+import com.crazzyghost.alphavantage.timeseries.response.MetaData;
 import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
 import com.crazzyghost.alphavantage.timeseries.response.TimeSeriesResponse;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -74,6 +76,8 @@ public class UpdatePricesCallable implements Callable<Void> {
     private LocalDateTime lastRequestTs;
     private int minMillisBetweenReq;
     private int symbolCount=0;
+    private int countUpdated;
+
 
     private TimerTask cpuMonitor;
     private int cpuPauseMs;
@@ -176,15 +180,20 @@ public class UpdatePricesCallable implements Callable<Void> {
                     case STOCK:
 
                         TimeSeriesResponse response=executeRequest(index);
-
                         String error=response.getErrorMessage();
-                        if(error!=null){
-                            throw new Exception(error);
+                        if(error==null){
+                            handleResponse(response, index);
+                        }else{
+                            if(error.contains("Thank you")){    // limit reached, stop execution
+                                log.error("Api limit exceeded: " + error);
+                                throw new ApiLimitExceededException();
+                            }else{  // other error, just log and skip
+                                log.error("Api error, "+symbol+" skipped: " + error);
+                            }
                         }
 
-                        handleResponse(response, index);
-
                         break;
+
                     case TECH:
                         break;
                 }
@@ -281,6 +290,7 @@ public class UpdatePricesCallable implements Callable<Void> {
                         .outputSize(OutputSize.FULL)
                         .dataType(DataType.JSON)
                         .fetchSync();
+
             }
         }
 
@@ -314,7 +324,7 @@ public class UpdatePricesCallable implements Callable<Void> {
         Duration duration = Duration.between(startTime, endTime);
         String sDuration = DurationFormatUtils.formatDuration(duration.toMillis(), "H:mm:ss", true);
         DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm:ss");
-        return "start: " + startTime.format(format) + ", end: " + endTime.format(format) + ", elapsed: " + sDuration;
+        return "completed:["+countUpdated+"/"+symbols.size()+"], start: " + startTime.format(format) + ", end: " + endTime.format(format) + ", elapsed: " + sDuration;
     }
 
     /**
@@ -474,24 +484,26 @@ public class UpdatePricesCallable implements Callable<Void> {
         index.setPricesUpdateTs(Du.toUtcString(LocalDateTime.now()));
         marketIndexService.update(index);
 
+        countUpdated++;
+
     }
 
-    public static double getProcessCpuLoad() throws Exception {
-
-        MBeanServer mbs    = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name    = ObjectName.getInstance("java.lang:type=OperatingSystem");
-        AttributeList list = mbs.getAttributes(name, new String[]{ "ProcessCpuLoad" });
-
-        if (list.isEmpty())     return Double.NaN;
-
-        Attribute att = (Attribute)list.get(0);
-        Double value  = (Double)att.getValue();
-
-        // usually takes a couple of seconds before we get real values
-        if (value == -1.0)      return Double.NaN;
-        // returns a percentage value with 1 decimal point precision
-        return ((int)(value * 1000) / 10.0);
-    }
+//    public static double getProcessCpuLoad() throws Exception {
+//
+//        MBeanServer mbs    = ManagementFactory.getPlatformMBeanServer();
+//        ObjectName name    = ObjectName.getInstance("java.lang:type=OperatingSystem");
+//        AttributeList list = mbs.getAttributes(name, new String[]{ "ProcessCpuLoad" });
+//
+//        if (list.isEmpty())     return Double.NaN;
+//
+//        Attribute att = (Attribute)list.get(0);
+//        Double value  = (Double)att.getValue();
+//
+//        // usually takes a couple of seconds before we get real values
+//        if (value == -1.0)      return Double.NaN;
+//        // returns a percentage value with 1 decimal point precision
+//        return ((int)(value * 1000) / 10.0);
+//    }
 
 
 

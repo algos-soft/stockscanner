@@ -6,11 +6,10 @@ import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.data.entity.MarketIndex;
 import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.enums.IndexCategories;
+import com.algos.stockscanner.exceptions.ApiLimitExceededException;
 import com.algos.stockscanner.task.AbortedByUserException;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
-import com.algos.stockscanner.utils.CpuMonitorListener;
-import com.algos.stockscanner.utils.CpuMonitorTask;
 import com.algos.stockscanner.utils.Du;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -34,7 +33,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -58,6 +56,7 @@ public class DownloadIndexCallable implements Callable<Void> {
     private LocalDateTime lastRequestTs;
     private int minMillisBetweenReq;
     private int symbolCount=0;
+
 
 
     @Autowired
