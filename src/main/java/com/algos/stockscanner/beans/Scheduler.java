@@ -50,8 +50,10 @@ public class Scheduler {
 
 
     /**
-     * Retrieve the indexes with the oldest update date and update them.
-     * This updates the indexes in a rotation.
+     * Retrieve the indexes starting with the oldest update date (new indexes with null updates come first).
+     * Limit the list to the configured count.
+     * Build a scheduled update, add the indexes and run it.
+     * This keeps all the indexed updated in a rotational pattern.
      */
     private void launchPriceUpdate(){
         List<MarketIndex> marketIndexes = marketIndexService.findAllOrderByUnitsToLimit(priceUpdateMaxPerCycle);
