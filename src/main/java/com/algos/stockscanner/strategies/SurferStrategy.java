@@ -21,8 +21,9 @@ public class SurferStrategy extends AbsStrategy {
     Utils utils;
 
     private int sl;
-    private int tp;
+
     private float amplitude;
+
     private int daysLookback;
 
     boolean amplitudeExceeded;
@@ -36,10 +37,10 @@ public class SurferStrategy extends AbsStrategy {
         return "SURFER";
     }
 
-    public SurferStrategy(MarketIndex index, LocalDate startDate, int numDays, float initialAmount, int sl, int tp, float amplitude, int daysLookback) {
+    public SurferStrategy(MarketIndex index, LocalDate startDate, int numDays, float initialAmount, int sl, float amplitude, int daysLookback) {
         super(index, startDate, numDays, initialAmount);
         this.sl=sl;
-        this.tp=tp;
+//        this.tp=tp;
         this.amplitude=amplitude;
         this.daysLookback=daysLookback;
     }
@@ -50,7 +51,7 @@ public class SurferStrategy extends AbsStrategy {
 
         // add specific info
         simulation.setSl(sl);
-        simulation.setTp(tp);
+//        simulation.setTp(tp);
         simulation.setAmplitude(amplitude);
         simulation.setDaysLookback(daysLookback);
         return  simulation;
@@ -218,17 +219,17 @@ public class SurferStrategy extends AbsStrategy {
             }
         }
 
-        // check take profit
-        Integer tpPercent = tp;
-        if (tpPercent != null && tpPercent > 0) {
-            if (posOpen) {
-                float valueNow = lastValue + calcDeltaValue();
-                float deltaPercent = strategyService.deltaPercent(openValue, valueNow);
-                if (deltaPercent > tpPercent) {
-                    return Reasons.TAKE_PROFIT_REACHED;
-                }
-            }
-        }
+//        // check take profit
+//        Integer tpPercent = tp;
+//        if (tpPercent != null && tpPercent > 0) {
+//            if (posOpen) {
+//                float valueNow = lastValue + calcDeltaValue();
+//                float deltaPercent = strategyService.deltaPercent(openValue, valueNow);
+//                if (deltaPercent > tpPercent) {
+//                    return Reasons.TAKE_PROFIT_REACHED;
+//                }
+//            }
+//        }
 
         return null;
     }

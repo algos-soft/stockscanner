@@ -93,9 +93,9 @@ public class RunnerService {
                 startDate = startDate.plusDays(numDays*nspan);
                 float amount = generator.getAmount();
                 int sl = generator.getStopLoss();
-                int tp=generator.getTakeProfit();
+//                int tp=generator.getTakeProfit();
                 MarketIndex index = marketIndexService.get(indexId).get();
-                Strategy strategy = context.getBean(SurferStrategy.class, index, startDate, numDays, amount, sl, tp, amplitude, lookback);
+                Strategy strategy = context.getBean(SurferStrategy.class, index, startDate, numDays, amount, sl, amplitude, lookback);
                 strategies.add(strategy);
             }
         }

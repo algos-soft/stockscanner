@@ -302,14 +302,14 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         if (sl > 0) {
             cSL.add("SL " + format(sl) + "%");
         }
-        int tp = utils.toPrimitive(model.getTakeProfit());
-        Span cTP = new Span();
-        if (tp > 0) {
-            cTP.add("TP " + format(tp) + "%");
-        }
+//        int tp = utils.toPrimitive(model.getTakeProfit());
+//        Span cTP = new Span();
+//        if (tp > 0) {
+//            cTP.add("TP " + format(tp) + "%");
+//        }
         HorizontalLayout row2 = new HorizontalLayout();
         row2.addClassName("sltp");
-        row2.add(cSL, cTP);
+        row2.add(cSL);
 
         Pan pan = new Pan();
         pan.add(row1, row2);

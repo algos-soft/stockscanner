@@ -28,7 +28,7 @@ public class GeneratorModel {
     private int spans;
     private int amount;
     private int stopLoss; // of a single span, in percent
-    private int takeProfit; // of a single span, in percent
+//    private int takeProfit; // of a single span, in percent
 
     private int amplitude;
     private boolean permutateAmpitude;
@@ -140,14 +140,14 @@ public class GeneratorModel {
         this.stopLoss = stopLoss;
     }
 
-    public int getTakeProfit() {
-        return takeProfit;
-    }
-
-    public void setTakeProfit(int takeProfit) {
-        this.takeProfit = takeProfit;
-    }
-
+//    public int getTakeProfit() {
+//        return takeProfit;
+//    }
+//
+//    public void setTakeProfit(int takeProfit) {
+//        this.takeProfit = takeProfit;
+//    }
+//
     public int getAmplitude() {
         return amplitude;
     }

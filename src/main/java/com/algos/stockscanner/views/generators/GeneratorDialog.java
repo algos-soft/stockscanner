@@ -57,7 +57,7 @@ public class GeneratorDialog extends Dialog {
 
     private IntegerField amountFld;
     private IntegerField stopLossFld;
-    private IntegerField takeProfitFld;
+//    private IntegerField takeProfitFld;
 
     private IntegerField numberOfDays;
     private IntegerField numberOfSpans;
@@ -211,14 +211,13 @@ public class GeneratorDialog extends Dialog {
         stopLossFld.setWidth("6em");
         stopLossFld.setHelperText("for each cycle");
 
-        takeProfitFld = new IntegerField("TP%");
-        takeProfitFld.setWidth("6em");
-        takeProfitFld.setHelperText("for each cycle");
-        //takeProfitFld.getElement().setAttribute("tooltip", "for each cycle");
+//        takeProfitFld = new IntegerField("TP%");
+//        takeProfitFld.setWidth("6em");
+//        takeProfitFld.setHelperText("for each cycle");
 
         HorizontalLayout amountsLayout = new HorizontalLayout();
         amountsLayout.setSpacing(true);
-        amountsLayout.add(amountFld, stopLossFld, takeProfitFld);
+        amountsLayout.add(amountFld, stopLossFld);
 
 
         numberOfDays = new IntegerField("Number of days");
@@ -470,7 +469,7 @@ public class GeneratorDialog extends Dialog {
         model.setStartDate(startDatePicker.getValue());
         model.setAmount(utils.toPrimitive(amountFld.getValue()));
         model.setStopLoss(utils.toPrimitive(stopLossFld.getValue()));
-        model.setTakeProfit(utils.toPrimitive(takeProfitFld.getValue()));
+//        model.setTakeProfit(utils.toPrimitive(takeProfitFld.getValue()));
 
         model.setDays(utils.toPrimitive(numberOfDays.getValue()));
         model.setSpans(utils.toPrimitive(numberOfSpans.getValue()));
@@ -526,7 +525,7 @@ public class GeneratorDialog extends Dialog {
         startDatePicker.setValue(model.getStartDate());
         amountFld.setValue(utils.toPrimitive(model.getAmount()));
         stopLossFld.setValue(utils.toPrimitive(model.getStopLoss()));
-        takeProfitFld.setValue(utils.toPrimitive(model.getTakeProfit()));
+//        takeProfitFld.setValue(utils.toPrimitive(model.getTakeProfit()));
         numberOfDays.setValue(utils.toPrimitive(model.getDays()));
         numberOfSpans.setValue(utils.toPrimitive(model.getSpans()));
 
