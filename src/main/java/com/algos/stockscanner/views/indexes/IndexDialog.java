@@ -24,6 +24,7 @@ import org.claspina.confirmdialog.ConfirmDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
@@ -60,6 +61,9 @@ public class IndexDialog extends Dialog {
 
     private FlexLayout imgPlaceholder;
 
+    @Value("${default.buy.spread.percent:0.15}")
+    private float defaultBuySpreadPercent;
+
     @Autowired
     private Utils utils;
 
@@ -93,7 +97,11 @@ public class IndexDialog extends Dialog {
 
         add(buildContent());
 
-        if(model!=null){
+        if(model==null){
+            BigDecimal bd = new BigDecimal(defaultBuySpreadPercent);
+            bd=bd.round(new MathContext(2, RoundingMode.FLOOR));
+            buySpreadFld.setValue(bd);
+        }else{
             populateFromModel();
         }
     }

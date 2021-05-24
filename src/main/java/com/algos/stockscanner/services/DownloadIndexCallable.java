@@ -74,6 +74,9 @@ public class DownloadIndexCallable implements Callable<Void> {
     @Value("${alphavantage.api.key}")
     private String alphavantageApiKey;
 
+    @Value("${default.buy.spread.percent:0.15}")
+    private float defaultBuySpreadPercent;
+
     private OkHttpClient okHttpClient;
 
     private JsonAdapter<MarketService.FDResponse> fdJsonAdapter;
@@ -365,6 +368,7 @@ public class DownloadIndexCallable implements Callable<Void> {
         if(indexes.size()==0){  // does not exist in db
             index=new MarketIndex();
             index.setSymbol(fd.getSymbol());
+            index.setSpreadPercent(defaultBuySpreadPercent);
             updateIcon(index);
             action="created";
         }else{  // index exists in db
