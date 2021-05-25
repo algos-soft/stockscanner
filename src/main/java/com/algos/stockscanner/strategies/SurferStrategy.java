@@ -18,7 +18,7 @@ import java.time.LocalDate;
 public class SurferStrategy extends AbsStrategy {
 
     @Autowired
-    Utils utils;
+    private Utils utils;
 
     private int sl;
 
@@ -26,7 +26,7 @@ public class SurferStrategy extends AbsStrategy {
 
     private int daysLookback;
 
-    boolean amplitudeExceeded;
+//    boolean amplitudeExceeded;
 
     private boolean preAlertBuy;
 
