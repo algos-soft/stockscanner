@@ -242,6 +242,10 @@ public class GeneratorDialog extends Dialog {
         HorizontalLayout row1=new HorizontalLayout();
         row1.add(nameFld, startDatePicker);
 
+
+        
+
+
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(false);
         layout.setPadding(false);
