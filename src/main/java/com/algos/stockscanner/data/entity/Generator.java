@@ -42,6 +42,11 @@ public class Generator extends AbstractEntity {
     private Integer spans;   // number of times to repeat the simulation, starting from the end of the previous simulation
     private Integer amount;  // amount invested
     private Integer stopLoss; // applied to each open/close cycle inside a span, in percent
+
+    // balancing applied to amplitudeUp/amplitudeDown
+    // -1: amplitudeDn=amplitudeUp*2 (down 45°), 0:amplitudeDn=amplitudeUp (flat 0°), +1 amplitudeUp=amplitudeDn*2 (up 45°);
+    private Float trend;
+
 //    private Integer takeProfit;  // applied to each open/close cycle inside a span, in percent
 
     // permutable properties
@@ -156,7 +161,16 @@ public class Generator extends AbstractEntity {
         this.stopLoss = stopLoss;
     }
 
-//    public Integer getTakeProfit() {
+    public Float getTrend() {
+        return trend;
+    }
+
+    public void setTrend(Float trend) {
+        this.trend = trend;
+    }
+
+
+    //    public Integer getTakeProfit() {
 //        return takeProfit;
 //    }
 

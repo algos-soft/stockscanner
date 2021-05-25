@@ -50,11 +50,14 @@ public class SurferStrategy extends AbsStrategy {
 
     @PostConstruct
     private void init(){
+        // trend=0: amplitudeUp=amplitudeDown, 0deg slope (flat)
+        // trend=1: amplitudeUp=amplitudeDown*2, 45deg slope (up)
+        // trend=-1: amplitudeDn=amplitudeUp*2, -45deg slope (dn)
         float trend=0;
-        this.amplitudeUp=amplitude+(amplitude*trend/2);
-        this.amplitudeDown=this.amplitude-(amplitude*trend/2);
-        int a = 87;
-        int b=a;
+        float oneThird=amplitude/3;
+        float delta = oneThird*trend;
+        this.amplitudeUp=amplitude+delta;
+        this.amplitudeDown=amplitude-delta;
     }
 
     @Override

@@ -21,7 +21,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -58,6 +60,9 @@ public class GeneratorDialog extends Dialog {
     private IntegerField amountFld;
     private IntegerField stopLossFld;
 //    private IntegerField takeProfitFld;
+
+    private NumberField trendField;
+
 
     private IntegerField numberOfDays;
     private IntegerField numberOfSpans;
@@ -211,13 +216,23 @@ public class GeneratorDialog extends Dialog {
         stopLossFld.setWidth("6em");
         stopLossFld.setHelperText("for each cycle");
 
+        trendField=new NumberField("Trend");
+        trendField.setValue(0d);
+        trendField.setWidth("9em");
+        trendField.setHelperText("-1=-45°, 0=flat, 1=+45°");
+        trendField.setHasControls(true);
+        trendField.setStep(0.1d);
+        trendField.setMin(-1);
+        trendField.setMax(1);
+
+
 //        takeProfitFld = new IntegerField("TP%");
 //        takeProfitFld.setWidth("6em");
 //        takeProfitFld.setHelperText("for each cycle");
 
         HorizontalLayout amountsLayout = new HorizontalLayout();
         amountsLayout.setSpacing(true);
-        amountsLayout.add(amountFld, stopLossFld);
+        amountsLayout.add(amountFld, stopLossFld, trendField);
 
 
         numberOfDays = new IntegerField("Number of days");
@@ -473,6 +488,7 @@ public class GeneratorDialog extends Dialog {
         model.setStartDate(startDatePicker.getValue());
         model.setAmount(utils.toPrimitive(amountFld.getValue()));
         model.setStopLoss(utils.toPrimitive(stopLossFld.getValue()));
+        model.setTrend((float)utils.toPrimitive(trendField.getValue()));
 //        model.setTakeProfit(utils.toPrimitive(takeProfitFld.getValue()));
 
         model.setDays(utils.toPrimitive(numberOfDays.getValue()));
@@ -529,6 +545,7 @@ public class GeneratorDialog extends Dialog {
         startDatePicker.setValue(model.getStartDate());
         amountFld.setValue(utils.toPrimitive(model.getAmount()));
         stopLossFld.setValue(utils.toPrimitive(model.getStopLoss()));
+        trendField.setValue((double)utils.toPrimitive(model.getTrend()));
 //        takeProfitFld.setValue(utils.toPrimitive(model.getTakeProfit()));
         numberOfDays.setValue(utils.toPrimitive(model.getDays()));
         numberOfSpans.setValue(utils.toPrimitive(model.getSpans()));

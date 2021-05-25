@@ -28,6 +28,8 @@ public class GeneratorModel {
     private int spans;
     private int amount;
     private int stopLoss; // of a single span, in percent
+    private Float trend;
+
 //    private int takeProfit; // of a single span, in percent
 
     private int amplitude;
@@ -140,7 +142,15 @@ public class GeneratorModel {
         this.stopLoss = stopLoss;
     }
 
-//    public int getTakeProfit() {
+    public float getTrend() {
+        return trend;
+    }
+
+    public void setTrend(Float trend) {
+        this.trend = trend;
+    }
+
+    //    public int getTakeProfit() {
 //        return takeProfit;
 //    }
 //
