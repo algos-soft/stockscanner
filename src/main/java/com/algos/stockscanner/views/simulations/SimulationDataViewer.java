@@ -141,28 +141,45 @@ public class SimulationDataViewer extends VerticalLayout {
         col.setResizable(true);
 
         // delta ampl
-        col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getDeltaAmpl, "%,.2f",Locale.getDefault()));
+//        col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getDeltaAmpl, "%,.2f",Locale.getDefault()));
+        col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getDeltaAmpl, "%+.2f",Locale.getDefault()));
         col.setHeader("delta%");
         col.setWidth("4em");
+        col.setResizable(true);
+
+        // amplitude dn
+        col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getAmplitudeDn, "-%,.2f",Locale.getDefault()));
+        col.setHeader("ampl dn%");
+        col.setWidth("3em");
+        col.setResizable(true);
+
+        // amplitude up
+        col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getAmplitudeUp, "+%,.2f",Locale.getDefault()));
+        col.setHeader("ampl up%");
+        col.setWidth("3em");
         col.setResizable(true);
 
         // spread amount
         col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getSpreadAmt, "%,.2f",Locale.getDefault()));
         col.setHeader("spread");
-        col.setWidth("4em");
+        col.setWidth("3em");
         col.setResizable(true);
+        col.setClassNameGenerator(item -> getZeroHiddenStyle(item.getSpreadAmt()));
 
         // commission amount
         col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getCommissionAmt, "%,.2f",Locale.getDefault()));
-        col.setHeader("commission");
-        col.setWidth("4em");
+        col.setHeader("commiss");
+        col.setWidth("3em");
         col.setResizable(true);
+        col.setClassNameGenerator(item -> getZeroHiddenStyle(item.getCommissionAmt()));
 
         // curr value
         col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getCurrValue, "%,.2f",Locale.getDefault()));
         col.setHeader("value");
         col.setWidth("4em");
         col.setResizable(true);
+        col.setClassNameGenerator(item -> getZeroHiddenStyle(item.getCurrValue()));
+
 
         // P/L
         col=grid.addColumn(new NumberRenderer<>(SimulationItemModel::getPl, "%,.2f",Locale.getDefault()));
@@ -185,9 +202,26 @@ public class SimulationDataViewer extends VerticalLayout {
             }else{
                 style="negative";
             }
+
+        }else{
+            style="zero";
         }
         return style;
     }
+
+    /**
+     * styles to hide zeroes
+     */
+    private String getZeroHiddenStyle(float number){
+        String style="";
+        if(number==0){
+            style="zero";
+        }
+        return style;
+    }
+
+
+
 
 
     /**

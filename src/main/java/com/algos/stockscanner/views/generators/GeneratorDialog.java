@@ -61,7 +61,7 @@ public class GeneratorDialog extends Dialog {
     private IntegerField stopLossFld;
 //    private IntegerField takeProfitFld;
 
-    private NumberField trendField;
+//    private NumberField trendField;
 
 
     private IntegerField numberOfDays;
@@ -216,14 +216,14 @@ public class GeneratorDialog extends Dialog {
         stopLossFld.setWidth("6em");
         stopLossFld.setHelperText("for each cycle");
 
-        trendField=new NumberField("Trend");
-        trendField.setValue(0d);
-        trendField.setWidth("9em");
-        trendField.setHelperText("-1=-45°, 0=flat, 1=+45°");
-        trendField.setHasControls(true);
-        trendField.setStep(0.1d);
-        trendField.setMin(-1);
-        trendField.setMax(1);
+//        trendField=new NumberField("Trend");
+//        trendField.setValue(0d);
+//        trendField.setWidth("9em");
+//        trendField.setHelperText("-1=-45°, 0=flat, 1=+45°");
+//        trendField.setHasControls(true);
+//        trendField.setStep(0.1d);
+//        trendField.setMin(-1);
+//        trendField.setMax(1);
 
 
 //        takeProfitFld = new IntegerField("TP%");
@@ -232,7 +232,7 @@ public class GeneratorDialog extends Dialog {
 
         HorizontalLayout amountsLayout = new HorizontalLayout();
         amountsLayout.setSpacing(true);
-        amountsLayout.add(amountFld, stopLossFld, trendField);
+        amountsLayout.add(amountFld, stopLossFld);
 
 
         numberOfDays = new IntegerField("Number of days");
@@ -240,7 +240,7 @@ public class GeneratorDialog extends Dialog {
         numberOfDays.setHasControls(true);
         numberOfDays.setMin(2);
         numberOfDays.setWidth("10em");
-        numberOfDays.setHelperText("The simulation will stop after this number of days or when you reach SL or TP");
+        numberOfDays.setHelperText("The simulation will stop after this number of days or when you reach SL");
 
 
         numberOfSpans = new IntegerField("Number of spans");
@@ -488,7 +488,7 @@ public class GeneratorDialog extends Dialog {
         model.setStartDate(startDatePicker.getValue());
         model.setAmount(utils.toPrimitive(amountFld.getValue()));
         model.setStopLoss(utils.toPrimitive(stopLossFld.getValue()));
-        model.setTrend((float)utils.toPrimitive(trendField.getValue()));
+//        model.setTrend((float)utils.toPrimitive(trendField.getValue()));
 //        model.setTakeProfit(utils.toPrimitive(takeProfitFld.getValue()));
 
         model.setDays(utils.toPrimitive(numberOfDays.getValue()));
@@ -545,7 +545,7 @@ public class GeneratorDialog extends Dialog {
         startDatePicker.setValue(model.getStartDate());
         amountFld.setValue(utils.toPrimitive(model.getAmount()));
         stopLossFld.setValue(utils.toPrimitive(model.getStopLoss()));
-        trendField.setValue((double)utils.toPrimitive(model.getTrend()));
+//        trendField.setValue((double)utils.toPrimitive(model.getTrend()));
 //        takeProfitFld.setValue(utils.toPrimitive(model.getTakeProfit()));
         numberOfDays.setValue(utils.toPrimitive(model.getDays()));
         numberOfSpans.setValue(utils.toPrimitive(model.getSpans()));

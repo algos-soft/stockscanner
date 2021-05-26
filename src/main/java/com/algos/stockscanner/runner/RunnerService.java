@@ -9,12 +9,12 @@ import com.algos.stockscanner.data.service.SimulationService;
 import com.algos.stockscanner.exceptions.RunnerException;
 import com.algos.stockscanner.services.SimulationCallable;
 import com.algos.stockscanner.strategies.Strategy;
-import com.algos.stockscanner.strategies.SurferStrategy;
 import com.algos.stockscanner.views.generators.GeneratorModel;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +46,9 @@ public class RunnerService {
     private Utils utils;
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Value("${strategy.bean.name:surferStrategy}")
+    private String strategyBeanName;
 
     @PostConstruct
     private void init(){
@@ -87,15 +90,17 @@ public class RunnerService {
             int amplitude = permutation.get(1);
             int lookback = permutation.get(2);
 
-            LocalDate startDate = generator.getStartDateLD();
+            LocalDate initialDate = generator.getStartDateLD();
+            LocalDate startDate;
             for (int nspan = 0; nspan < numSpans; nspan++) {
                 int numDays=generator.getDays();
-                startDate = startDate.plusDays(numDays*nspan);
+                startDate = initialDate.plusDays(numDays*nspan);
                 float amount = generator.getAmount();
                 int sl = generator.getStopLoss();
-//                int tp=generator.getTakeProfit();
                 MarketIndex index = marketIndexService.get(indexId).get();
-                Strategy strategy = context.getBean(SurferStrategy.class, index, startDate, numDays, amount, sl, amplitude, lookback);
+
+                Strategy strategy = (Strategy)context.getBean(strategyBeanName, index, startDate, numDays, amount, sl, amplitude, lookback);
+
                 strategies.add(strategy);
             }
         }

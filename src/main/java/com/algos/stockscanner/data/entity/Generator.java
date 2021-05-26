@@ -45,7 +45,7 @@ public class Generator extends AbstractEntity {
 
     // balancing applied to amplitudeUp/amplitudeDown
     // -1: amplitudeDn=amplitudeUp*2 (down 45°), 0:amplitudeDn=amplitudeUp (flat 0°), +1 amplitudeUp=amplitudeDn*2 (up 45°);
-    private Float trend;
+//    private Float trend;
 
 //    private Integer takeProfit;  // applied to each open/close cycle inside a span, in percent
 
@@ -161,13 +161,13 @@ public class Generator extends AbstractEntity {
         this.stopLoss = stopLoss;
     }
 
-    public Float getTrend() {
-        return trend;
-    }
+//    public Float getTrend() {
+//        return trend;
+//    }
 
-    public void setTrend(Float trend) {
-        this.trend = trend;
-    }
+//    public void setTrend(Float trend) {
+//        this.trend = trend;
+//    }
 
 
     //    public Integer getTakeProfit() {

@@ -263,6 +263,8 @@ public abstract class AbsStrategy implements Strategy {
     @Override
     public SimulationItem processUnit() throws Exception {
 
+        preProcessUnit();   // chance for subclasses to do something before processint the unit
+
         Decision decision = takeDecision();
         Actions action = decision.getAction();
 
@@ -348,6 +350,11 @@ public abstract class AbsStrategy implements Strategy {
     }
 
     /**
+     * chance for subclasses to do something before processing the unit
+     */
+    void preProcessUnit(){};
+
+    /**
      * reduces the current value by the value of the spread
      *
      * @return the value of the spread
@@ -412,10 +419,30 @@ public abstract class AbsStrategy implements Strategy {
     /**
      * update current amount
      */
-    private void updatePosition(DecisionInfo decisionInfo){
+    private void updatePositionOld(DecisionInfo decisionInfo){
         currValue = currValue + calcDeltaValue();
         decisionInfo.setCurrValue(currValue);
     }
+
+    /**
+     * update current amount
+     */
+    private void updatePosition(DecisionInfo decisionInfo){
+        float diffPrice=unit.getClose()-openPrice;
+        float diffValue=diffPrice * openValue / openPrice;
+        switch (posType){
+            case BUY:
+                currValue=openValue+diffValue;
+                break;
+            case SELL:
+                currValue=openValue-diffValue;
+                break;
+        }
+
+//        currValue = currValue + calcDeltaValue();
+        decisionInfo.setCurrValue(currValue);
+    }
+
 
 
     /**

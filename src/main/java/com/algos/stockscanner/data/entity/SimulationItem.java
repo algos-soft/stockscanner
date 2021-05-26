@@ -26,6 +26,10 @@ public class SimulationItem extends AbstractEntity {
 
     private Float deltaAmpl;
 
+    private Float ampitudeUp;
+
+    private Float ampitudeDn;
+
     private Float spreadAmt;
 
     private Float commissionAmt;
@@ -97,6 +101,22 @@ public class SimulationItem extends AbstractEntity {
 
     public void setDeltaAmpl(Float deltaAmpl) {
         this.deltaAmpl = deltaAmpl;
+    }
+
+    public Float getAmpitudeUp() {
+        return ampitudeUp;
+    }
+
+    public void setAmpitudeUp(Float ampitudeUp) {
+        this.ampitudeUp = ampitudeUp;
+    }
+
+    public Float getAmpitudeDn() {
+        return ampitudeDn;
+    }
+
+    public void setAmpitudeDn(Float ampitudeDn) {
+        this.ampitudeDn = ampitudeDn;
     }
 
     public Float getSpreadAmt() {

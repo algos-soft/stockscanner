@@ -11,7 +11,7 @@ public class StrategyService {
 
 
     /**
-     * delta percent between the first and the secon number
+     * delta percent between the first and the second number
      */
     public float deltaPercent(float first, float second){
         if(first==0){
@@ -56,6 +56,8 @@ public class StrategyService {
             item.setRefPrice(info.getRefPrice());
             item.setCurrPrice(info.getCurrPrice());
             item.setDeltaAmpl(info.getDeltaAmpl());
+            item.setAmpitudeUp(info.getAmplitudeUp());
+            item.setAmpitudeDn(info.getAmplitudeDn());
             item.setPl(info.getPl());
             item.setSpreadAmt(info.getSpreadAmt());
         }

@@ -13,6 +13,10 @@ public class DecisionInfo {
 
     private Float deltaAmpl;
 
+    private Float amplitudeUp;
+
+    private Float amplitudeDn;
+
     private Float spreadAmt;
 
     private Float currValue;
@@ -51,6 +55,22 @@ public class DecisionInfo {
         this.deltaAmpl = deltaAmpl;
     }
 
+    public Float getAmplitudeUp() {
+        return amplitudeUp;
+    }
+
+    public void setAmplitudeUp(Float amplitudeUp) {
+        this.amplitudeUp = amplitudeUp;
+    }
+
+    public Float getAmplitudeDn() {
+        return amplitudeDn;
+    }
+
+    public void setAmplitudeDn(Float amplitudeDn) {
+        this.amplitudeDn = amplitudeDn;
+    }
+
     public Float getSpreadAmt() {
         return spreadAmt;
     }
@@ -83,6 +103,8 @@ public class DecisionInfo {
                 ", refPrice=" + refPrice +
                 ", currPrice=" + currPrice +
                 ", deltaAmpl=" + deltaAmpl +
+                ", amplitudeUp=" + amplitudeUp +
+                ", amplitudeDn=" + amplitudeDn +
                 ", spreadAmt=" + spreadAmt +
                 ", currValue=" + currValue +
                 ", pl=" + pl +

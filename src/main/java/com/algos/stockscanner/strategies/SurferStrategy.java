@@ -14,20 +14,20 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 
-@Component
+@Component("surferStrategy")
 @Scope("prototype")
 public class SurferStrategy extends AbsStrategy {
 
     @Autowired
-    private Utils utils;
+    Utils utils;
 
     private int sl;
 
-    private float amplitude;
-    private float amplitudeDown;
-    private float amplitudeUp;
+    float amplitude;
+    float amplitudeDown;
+    float amplitudeUp;
 
-    private int daysLookback;
+    int daysLookback;
 
 //    boolean amplitudeExceeded;
 
@@ -50,14 +50,8 @@ public class SurferStrategy extends AbsStrategy {
 
     @PostConstruct
     private void init(){
-        // trend=0: amplitudeUp=amplitudeDown, 0deg slope (flat)
-        // trend=1: amplitudeUp=amplitudeDown*2, 45deg slope (up)
-        // trend=-1: amplitudeDn=amplitudeUp*2, -45deg slope (dn)
-        float trend=0;
-        float oneThird=amplitude/3;
-        float delta = oneThird*trend;
-        this.amplitudeUp=amplitude+delta;
-        this.amplitudeDown=amplitude-delta;
+        this.amplitudeUp=amplitude;
+        this.amplitudeDown=amplitude;
     }
 
     @Override
@@ -71,57 +65,57 @@ public class SurferStrategy extends AbsStrategy {
         return  simulation;
     }
 
-    //@Override
-    public Decision decideIfOpenPositionOld() {
-        Decision decision;
-
-        float refPrice = movingAverage(daysLookback);
-        float deltaPercent = strategyService.deltaPercent(refPrice, unit.getClose());
-
-        if (Math.abs(deltaPercent) > amplitude) {
-
-            if (deltaPercent > 0) { // up above amplitude
-                if (!preAlertSell) {
-                    preAlertSell = true;
-                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_SELL);
-                } else {
-                    if (unit.getClose() > lastPrice) {   // still growing
-                        decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_UP);
-                    } else {  // curve inverted
-                        decision = new Decision(Actions.OPEN, ActionTypes.SELL, Reasons.ABOVE_THRESHOLD);
-                        preAlertSell = false;
-                    }
-                }
-
-            } else {   // down below amplitude
-                if (!preAlertBuy) {
-                    preAlertBuy = true;
-                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_BUY);
-                } else {
-                    if (unit.getClose() < lastPrice) {   // still going down
-                        decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_DOWN);
-                    } else {  // curve inverted
-                        decision = new Decision(Actions.OPEN, ActionTypes.BUY, Reasons.BELOW_THRESHOLD);
-                        preAlertBuy = false;
-                    }
-                }
-
-            }
-        } else {
-            decision = new Decision(Actions.STAY, null, Reasons.IN_BOUNDS);
-            preAlertSell = false;
-            preAlertBuy = false;
-        }
-
-        // enrich decision info
-        DecisionInfo info = decision.getDecisionInfo();
-        info.setRefPrice(refPrice);
-        info.setTimestamp(unit.getDateTime());
-        info.setCurrPrice(unit.getClose());
-        info.setDeltaAmpl(deltaPercent);
-
-        return decision;
-    }
+//    //@Override
+//    public Decision decideIfOpenPositionOld() {
+//        Decision decision;
+//
+//        float refPrice = movingAverage(daysLookback);
+//        float deltaPercent = strategyService.deltaPercent(refPrice, unit.getClose());
+//
+//        if (Math.abs(deltaPercent) > amplitude) {
+//
+//            if (deltaPercent > 0) { // up above amplitude
+//                if (!preAlertSell) {
+//                    preAlertSell = true;
+//                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_SELL);
+//                } else {
+//                    if (unit.getClose() > lastPrice) {   // still growing
+//                        decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_UP);
+//                    } else {  // curve inverted
+//                        decision = new Decision(Actions.OPEN, ActionTypes.SELL, Reasons.ABOVE_THRESHOLD);
+//                        preAlertSell = false;
+//                    }
+//                }
+//
+//            } else {   // down below amplitude
+//                if (!preAlertBuy) {
+//                    preAlertBuy = true;
+//                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_BUY);
+//                } else {
+//                    if (unit.getClose() < lastPrice) {   // still going down
+//                        decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_DOWN);
+//                    } else {  // curve inverted
+//                        decision = new Decision(Actions.OPEN, ActionTypes.BUY, Reasons.BELOW_THRESHOLD);
+//                        preAlertBuy = false;
+//                    }
+//                }
+//
+//            }
+//        } else {
+//            decision = new Decision(Actions.STAY, null, Reasons.IN_BOUNDS);
+//            preAlertSell = false;
+//            preAlertBuy = false;
+//        }
+//
+//        // enrich decision info
+//        DecisionInfo info = decision.getDecisionInfo();
+//        info.setRefPrice(refPrice);
+//        info.setTimestamp(unit.getDateTime());
+//        info.setCurrPrice(unit.getClose());
+//        info.setDeltaAmpl(deltaPercent);
+//
+//        return decision;
+//    }
 
 
 
@@ -174,54 +168,56 @@ public class SurferStrategy extends AbsStrategy {
         info.setTimestamp(unit.getDateTime());
         info.setCurrPrice(unit.getClose());
         info.setDeltaAmpl(deltaPercent);
+        info.setAmplitudeUp(amplitudeUp);
+        info.setAmplitudeDn(amplitudeDown);
 
         return decision;
     }
 
 
 
-    /**
-     * we have an open position of type BUY and we have to decide if closing it
-     *
-     * WARNING, CURRENT VARIABLES ARE NOT YET UPDATED
-     */
-    //@Override
-    public Decision decideIfCloseBuyPositionOld() {
-        Decision decision;
-        float refPrice = openPrice;
-        float deltaPercent = strategyService.deltaPercent(refPrice, unit.getClose());
-
-        Reasons sltpCondition = checkStopLoss();
-        if (sltpCondition == null) {
-            if (deltaPercent > amplitude) {
-                if (!preAlertSell) {
-                    preAlertSell = true;
-                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_CLOSE);
-                } else {
-                    if (unit.getClose() > lastPrice) {   // still growing
-                        decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_UP);
-                    } else {  // curve inverted
-                        decision = new Decision(Actions.CLOSE, null, Reasons.ABOVE_THRESHOLD);
-                        preAlertSell = false;
-                    }
-                }
-            } else {
-                decision = new Decision(Actions.STAY, null, Reasons.IN_BOUNDS);
-                preAlertSell = false;
-            }
-        } else {
-            decision = new Decision(Actions.CLOSE, null, sltpCondition);
-        }
-
-        // enrich decision info
-        DecisionInfo info = decision.getDecisionInfo();
-        info.setRefPrice(refPrice);
-        info.setTimestamp(unit.getDateTime());
-        info.setCurrPrice(unit.getClose());
-        info.setDeltaAmpl(deltaPercent);
-
-        return decision;
-    }
+//    /**
+//     * we have an open position of type BUY and we have to decide if closing it
+//     *
+//     * WARNING, CURRENT VARIABLES ARE NOT YET UPDATED
+//     */
+//    //@Override
+//    public Decision decideIfCloseBuyPositionOld() {
+//        Decision decision;
+//        float refPrice = openPrice;
+//        float deltaPercent = strategyService.deltaPercent(refPrice, unit.getClose());
+//
+//        Reasons sltpCondition = checkStopLoss();
+//        if (sltpCondition == null) {
+//            if (deltaPercent > amplitude) {
+//                if (!preAlertSell) {
+//                    preAlertSell = true;
+//                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_CLOSE);
+//                } else {
+//                    if (unit.getClose() > lastPrice) {   // still growing
+//                        decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_UP);
+//                    } else {  // curve inverted
+//                        decision = new Decision(Actions.CLOSE, null, Reasons.ABOVE_THRESHOLD);
+//                        preAlertSell = false;
+//                    }
+//                }
+//            } else {
+//                decision = new Decision(Actions.STAY, null, Reasons.IN_BOUNDS);
+//                preAlertSell = false;
+//            }
+//        } else {
+//            decision = new Decision(Actions.CLOSE, null, sltpCondition);
+//        }
+//
+//        // enrich decision info
+//        DecisionInfo info = decision.getDecisionInfo();
+//        info.setRefPrice(refPrice);
+//        info.setTimestamp(unit.getDateTime());
+//        info.setCurrPrice(unit.getClose());
+//        info.setDeltaAmpl(deltaPercent);
+//
+//        return decision;
+//    }
 
 
     /**
@@ -263,54 +259,56 @@ public class SurferStrategy extends AbsStrategy {
         info.setTimestamp(unit.getDateTime());
         info.setCurrPrice(unit.getClose());
         info.setDeltaAmpl(deltaPercent);
+        info.setAmplitudeUp(amplitudeUp);
+        info.setAmplitudeDn(amplitudeDown);
 
         return decision;
     }
 
 
 
-    /**
-     * we have an open position of type SELL and we have to decide if closing it
-     *
-     * WARNING, CURRENT VARIABLES ARE NOT YET UPDATED
-     */
-    //@Override
-    public Decision decideIfCloseSellPositionOld() {
-        Decision decision;
-        float refPrice = openPrice;
-        float deltaPercent = strategyService.deltaPercent(refPrice, unit.getClose());
-
-        Reasons sltpCondition = checkStopLoss();
-        if (sltpCondition == null) {
-            if (deltaPercent < -amplitude) {
-                if (!preAlertSell) {
-                    preAlertSell = true;
-                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_CLOSE);
-                } else {
-                    if (unit.getClose() < lastPrice) {   // still going down
-                        decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_DOWN);
-                    } else {  // curve inverted
-                        decision = new Decision(Actions.CLOSE, null, Reasons.BELOW_THRESHOLD);
-                        preAlertSell = false;
-                    }
-                }
-            } else {
-                decision = new Decision(Actions.STAY, null, Reasons.IN_BOUNDS);
-                preAlertSell = false;
-            }
-        } else {
-            decision = new Decision(Actions.CLOSE, null, sltpCondition);
-        }
-
-        // enrich decision info
-        DecisionInfo info = decision.getDecisionInfo();
-        info.setRefPrice(refPrice);
-        info.setTimestamp(unit.getDateTime());
-        info.setCurrPrice(unit.getClose());
-        info.setDeltaAmpl(deltaPercent);
-
-        return decision;
-    }
+//    /**
+//     * we have an open position of type SELL and we have to decide if closing it
+//     *
+//     * WARNING, CURRENT VARIABLES ARE NOT YET UPDATED
+//     */
+//    //@Override
+//    public Decision decideIfCloseSellPositionOld() {
+//        Decision decision;
+//        float refPrice = openPrice;
+//        float deltaPercent = strategyService.deltaPercent(refPrice, unit.getClose());
+//
+//        Reasons sltpCondition = checkStopLoss();
+//        if (sltpCondition == null) {
+//            if (deltaPercent < -amplitude) {
+//                if (!preAlertSell) {
+//                    preAlertSell = true;
+//                    decision = new Decision(Actions.STAY, null, Reasons.PRE_ALERT_CLOSE);
+//                } else {
+//                    if (unit.getClose() < lastPrice) {   // still going down
+//                        decision = new Decision(Actions.STAY, null, Reasons.STILL_GOING_DOWN);
+//                    } else {  // curve inverted
+//                        decision = new Decision(Actions.CLOSE, null, Reasons.BELOW_THRESHOLD);
+//                        preAlertSell = false;
+//                    }
+//                }
+//            } else {
+//                decision = new Decision(Actions.STAY, null, Reasons.IN_BOUNDS);
+//                preAlertSell = false;
+//            }
+//        } else {
+//            decision = new Decision(Actions.CLOSE, null, sltpCondition);
+//        }
+//
+//        // enrich decision info
+//        DecisionInfo info = decision.getDecisionInfo();
+//        info.setRefPrice(refPrice);
+//        info.setTimestamp(unit.getDateTime());
+//        info.setCurrPrice(unit.getClose());
+//        info.setDeltaAmpl(deltaPercent);
+//
+//        return decision;
+//    }
 
     /**
      * we have an open position of type SELL and we have to decide if closing it
@@ -351,6 +349,8 @@ public class SurferStrategy extends AbsStrategy {
         info.setTimestamp(unit.getDateTime());
         info.setCurrPrice(unit.getClose());
         info.setDeltaAmpl(deltaPercent);
+        info.setAmplitudeUp(amplitudeUp);
+        info.setAmplitudeDn(amplitudeDown);
 
         return decision;
     }

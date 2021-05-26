@@ -20,6 +20,8 @@ public class SimulationItemModel {
     private float refPrice;
     private float currPrice;
     private float deltaAmpl;
+    private float amplitudeUp;
+    private float amplitudeDn;
     private float spreadAmt;
     private float commissionAmt;
     private float currValue;
@@ -87,6 +89,22 @@ public class SimulationItemModel {
 
     public void setDeltaAmpl(float deltaAmpl) {
         this.deltaAmpl = deltaAmpl;
+    }
+
+    public float getAmplitudeUp() {
+        return amplitudeUp;
+    }
+
+    public void setAmplitudeUp(float amplitudeUp) {
+        this.amplitudeUp = amplitudeUp;
+    }
+
+    public float getAmplitudeDn() {
+        return amplitudeDn;
+    }
+
+    public void setAmplitudeDn(float amplitudeDn) {
+        this.amplitudeDn = amplitudeDn;
     }
 
     public float getSpreadAmt() {

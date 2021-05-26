@@ -79,6 +79,8 @@ public class SimulationItemService extends CrudService<SimulationItem, Integer> 
         model.setRefPrice(utils.toPrimitive(entity.getRefPrice()));
         model.setCurrPrice(utils.toPrimitive(entity.getCurrPrice()));
         model.setDeltaAmpl(utils.toPrimitive(entity.getDeltaAmpl()));
+        model.setAmplitudeUp(utils.toPrimitive(entity.getAmpitudeUp()));
+        model.setAmplitudeDn(utils.toPrimitive(entity.getAmpitudeDn()));
         model.setSpreadAmt(utils.toPrimitive(entity.getSpreadAmt()));
         model.setCommissionAmt(utils.toPrimitive(entity.getCommissionAmt()));
         model.setCurrValue(utils.toPrimitive(entity.getCurrValue()));
