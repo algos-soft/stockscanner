@@ -370,25 +370,13 @@ public class SurferStrategy extends AbsStrategy {
         Integer slPercent = sl;
         if (slPercent != null && slPercent > 0) {
             if (posOpen) {
-                float valueNow = lastValue + calcDeltaValue();
+                float valueNow = calcCurrValue();
                 float deltaPercent = strategyService.deltaPercent(openValue, valueNow);
                 if (deltaPercent < -slPercent) {
                     return Reasons.STOP_LOSS_REACHED;
                 }
             }
         }
-
-//        // check take profit
-//        Integer tpPercent = tp;
-//        if (tpPercent != null && tpPercent > 0) {
-//            if (posOpen) {
-//                float valueNow = lastValue + calcDeltaValue();
-//                float deltaPercent = strategyService.deltaPercent(openValue, valueNow);
-//                if (deltaPercent > tpPercent) {
-//                    return Reasons.TAKE_PROFIT_REACHED;
-//                }
-//            }
-//        }
 
         return null;
     }

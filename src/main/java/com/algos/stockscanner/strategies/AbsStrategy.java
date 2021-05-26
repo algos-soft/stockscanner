@@ -416,52 +416,67 @@ public abstract class AbsStrategy implements Strategy {
 //        openPrice=0;
 //    }
 
-    /**
-     * update current amount
-     */
-    private void updatePositionOld(DecisionInfo decisionInfo){
-        currValue = currValue + calcDeltaValue();
-        decisionInfo.setCurrValue(currValue);
-    }
+//    /**
+//     * update current amount
+//     */
+//    private void updatePositionOld(DecisionInfo decisionInfo){
+//        currValue = currValue + calcDeltaValue();
+//        decisionInfo.setCurrValue(currValue);
+//    }
 
     /**
      * update current amount
      */
     private void updatePosition(DecisionInfo decisionInfo){
-        float diffPrice=unit.getClose()-openPrice;
-        float diffValue=diffPrice * openValue / openPrice;
-        switch (posType){
-            case BUY:
-                currValue=openValue+diffValue;
-                break;
-            case SELL:
-                currValue=openValue-diffValue;
-                break;
-        }
-
-//        currValue = currValue + calcDeltaValue();
+//        float diffPrice=unit.getClose()-openPrice;
+//        float diffValue=diffPrice * openValue / openPrice;
+//        switch (posType){
+//            case BUY:
+//                currValue=openValue+diffValue;
+//                break;
+//            case SELL:
+//                currValue=openValue-diffValue;
+//                break;
+//        }
+        currValue=calcCurrValue();
         decisionInfo.setCurrValue(currValue);
     }
 
 
-
-    /**
-     * Calculate value change based on previous value, and previous and current price.
-     */
-    float calcDeltaValue(){
-        float deltaPricePercent = strategyService.deltaPercent(lastPrice, unit.getClose());
-        float deltaValue = lastValue*deltaPricePercent/100;
-        float applyValue=0;
+    float calcCurrValue(){
+        float value=0;
+        float diffPrice=unit.getClose()-openPrice;
+        float diffValue=diffPrice * openValue / openPrice;
         switch (posType){
             case BUY:
-                applyValue=deltaValue;
+                value=openValue+diffValue;
                 break;
             case SELL:
-                applyValue=-deltaValue;
+                value=openValue-diffValue;
                 break;
         }
-        return applyValue;
+        return value;
     }
+
+
+
+//    /**
+//     * Calculate value change based on previous value, and previous and current price.
+//     */
+//    float calcDeltaValue(){
+//        float deltaPricePercent = strategyService.deltaPercent(lastPrice, unit.getClose());
+//        float deltaValue = lastValue*deltaPricePercent/100;
+//        float applyValue=0;
+//        switch (posType){
+//            case BUY:
+//                applyValue=deltaValue;
+//                break;
+//            case SELL:
+//                applyValue=-deltaValue;
+//                break;
+//        }
+//        return applyValue;
+//    }
 
 
 
