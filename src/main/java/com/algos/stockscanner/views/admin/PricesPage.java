@@ -8,6 +8,7 @@ import com.algos.stockscanner.enums.PriceUpdateModes;
 import com.algos.stockscanner.services.AdminService;
 import com.algos.stockscanner.services.MarketService;
 import com.algos.stockscanner.services.UpdatePricesCallable;
+import com.algos.stockscanner.services.UpdatePricesCallableOld;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
 import com.algos.stockscanner.task.TaskMonitor;
@@ -19,11 +20,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.server.Command;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.claspina.confirmdialog.ConfirmDialog;
 import org.slf4j.Logger;
@@ -112,7 +111,7 @@ public class PricesPage extends VerticalLayout {
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 try {
 
-                    if(contextStore.updateIndexCallableMap.size()>0){
+                    if(contextStore.updateIndexCallableMapOld.size()>0){
                         ConfirmDialog.createWarning().withMessage("Operation already in progress").open();
                         return;
                     }

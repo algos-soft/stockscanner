@@ -3,10 +3,10 @@ package com.algos.stockscanner.services;
 import com.algos.stockscanner.beans.ContextStore;
 import com.algos.stockscanner.data.entity.IndexUnit;
 import com.algos.stockscanner.data.entity.MarketIndex;
-import com.algos.stockscanner.data.service.IndexUnitService;
-import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.enums.FrequencyTypes;
 import com.algos.stockscanner.enums.IndexCategories;
+import com.algos.stockscanner.data.service.IndexUnitService;
+import com.algos.stockscanner.data.service.MarketIndexService;
 import com.algos.stockscanner.enums.PriceUpdateModes;
 import com.algos.stockscanner.exceptions.ApiLimitExceededException;
 import com.algos.stockscanner.task.AbortedByUserException;
@@ -20,23 +20,15 @@ import com.crazzyghost.alphavantage.parameters.DataType;
 import com.crazzyghost.alphavantage.parameters.OutputSize;
 import com.crazzyghost.alphavantage.timeseries.response.StockUnit;
 import com.crazzyghost.alphavantage.timeseries.response.TimeSeriesResponse;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -49,18 +41,18 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
 @Scope("prototype")
-public class UpdatePricesCallable implements Callable<Void> {
+public class UpdatePricesCallableOld implements Callable<Void> {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-//    private static final DateTimeFormatter fmt = new DateTimeFormatterBuilder()
-//            .appendPattern("yyyy-MM-dd")
-//            .optionalStart()
-//            .appendPattern(" HH:mm")
-//            .optionalEnd()
-//            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
-//            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-//            .toFormatter();
+    private static final DateTimeFormatter fmt = new DateTimeFormatterBuilder()
+            .appendPattern("yyyy-MM-dd")
+            .optionalStart()
+            .appendPattern(" HH:mm")
+            .optionalEnd()
+            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+            .toFormatter();
 
     private final List<String> symbols;
     private PriceUpdateModes mode;
@@ -96,19 +88,13 @@ public class UpdatePricesCallable implements Callable<Void> {
     @Autowired
     private MarketIndexService marketIndexService;
 
-    private OkHttpClient okHttpClient;
-
-    private JsonAdapter<MarketService.FDResponse> fdJsonAdapter;
-
-    @Value("${alphavantage.api.key}")
-    private String alphavantageApiKey;
 
     /**
      * @param symbols    the list of indexes to update
      * @param mode      the update mode (@see IndexUpdateModes)
      * @param maxReqPerMinute the max number of request per minute
      */
-    public UpdatePricesCallable(List<String> symbols, PriceUpdateModes mode, int maxReqPerMinute) {
+    public UpdatePricesCallableOld(List<String> symbols, PriceUpdateModes mode, int maxReqPerMinute) {
         this.symbols = symbols;
         this.mode = mode;
         this.maxReqPerMinute=maxReqPerMinute;
@@ -121,7 +107,7 @@ public class UpdatePricesCallable implements Callable<Void> {
         log.info("Update prices task created for "+symbols);
 
         // register itself to the context-level storage
-        contextStore.updateIndexCallableMap.put("" + hashCode(), this);
+        contextStore.updateIndexCallableMapOld.put("" + hashCode(), this);
 
         currentProgress=new Progress();
 
@@ -136,10 +122,6 @@ public class UpdatePricesCallable implements Callable<Void> {
             cpuPauseMs =delayMs;
         });
 
-        okHttpClient = new OkHttpClient();
-        Moshi moshi = new Moshi.Builder().build();
-        fdJsonAdapter = moshi.adapter(MarketService.FDResponse.class);
-
     }
 
     @Override
@@ -148,7 +130,7 @@ public class UpdatePricesCallable implements Callable<Void> {
         // if already aborted before starting,
         // unregister itself from the context-level storage and return
         if(abort){
-            contextStore.updateIndexCallableMap.remove("" + hashCode(), this);
+            contextStore.updateIndexCallableMapOld.remove("" + hashCode(), this);
             return null;
         }
 
@@ -173,7 +155,7 @@ public class UpdatePricesCallable implements Callable<Void> {
                 checkAbort();   // throws exception if the task is aborted
 
                 // retrieve the category
-                Optional<IndexCategories> oCategory = IndexCategories.getItem(index.getCategory());
+                java.util.Optional<IndexCategories> oCategory = IndexCategories.getItem(index.getCategory());
                 if (!oCategory.isPresent()) {
                     throw new Exception("Index " + symbol + " does not have a category.");
                 }
@@ -191,24 +173,18 @@ public class UpdatePricesCallable implements Callable<Void> {
                         break;
                     case STOCK:
 
-                        TimeSeriesDailyAdjusted timeSeries = executeRequest(index);
-
-                        if(timeSeries!=null){
-                            handleResponse(timeSeries, index);
+                        TimeSeriesResponse response=executeRequest(index);
+                        String error=response.getErrorMessage();
+                        if(error==null){
+                            handleResponse(response, index);
+                        }else{
+                            if(error.contains("Thank you")){    // limit reached, stop execution
+                                log.error("Api limit exceeded: " + error);
+                                throw new ApiLimitExceededException();
+                            }else{  // other error, just log and skip
+                                log.error("Api error, "+symbol+" skipped: " + error);
+                            }
                         }
-
-//                        TimeSeriesResponse response=executeRequest(index);
-//                        String error=response.getErrorMessage();
-//                        if(error==null){
-//                            handleResponse(response, index);
-//                        }else{
-//                            if(error.contains("Thank you")){    // limit reached, stop execution
-//                                log.error("Api limit exceeded: " + error);
-//                                throw new ApiLimitExceededException();
-//                            }else{  // other error, just log and skip
-//                                log.error("Api error, "+symbol+" skipped: " + error);
-//                            }
-//                        }
 
                         break;
 
@@ -231,7 +207,7 @@ public class UpdatePricesCallable implements Callable<Void> {
         } finally {
 
             // unregister itself from the context-level storage
-            contextStore.updateIndexCallableMap.remove("" + hashCode(), this);
+            contextStore.updateIndexCallableMapOld.remove("" + hashCode(), this);
 
             // cancel the CPU timer
             if(cpuMonitor !=null){
@@ -254,7 +230,7 @@ public class UpdatePricesCallable implements Callable<Void> {
      * If the check is positive, return the result.
      * If negative, make a full request and return the result.
      */
-    private TimeSeriesDailyAdjusted executeRequest(MarketIndex index) throws IOException, ApiLimitExceededException {
+    private TimeSeriesResponse executeRequest(MarketIndex index){
 
         // check request frequency and eventually pause for a while
         if(lastRequestTs!=null){
@@ -270,121 +246,49 @@ public class UpdatePricesCallable implements Callable<Void> {
             }
         }
 
-        String symbol = index.getSymbol();
+        notifyProgress(0,0,"Requesting data for "+index.getSymbol());
+        log.info("Requesting data for "+index.getSymbol());
 
-        notifyProgress(0,0,"Requesting data for "+symbol);
-        log.info("Requesting data for "+symbol);
-
-        String outputSize=null;
+        OutputSize outputSize=null;
         switch (mode){
             case REPLACE_ALL_DATA:
-                outputSize="full";
+                outputSize=OutputSize.FULL;
                 break;
             case ADD_MISSING_DATA_ONLY:
-                outputSize="compact";
+                outputSize=OutputSize.COMPACT;
                 break;
         }
-
-
-        TimeSeriesDailyAdjusted timeSeries=null;
-
-
-        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://www.alphavantage.co/query").newBuilder();
-        urlBuilder.addQueryParameter("apikey", alphavantageApiKey);
-        urlBuilder.addQueryParameter("function", "TIME_SERIES_DAILY_ADJUSTED");
-        urlBuilder.addQueryParameter("symbol", symbol);
-        urlBuilder.addQueryParameter("outputsize", outputSize);
-
-        String url = urlBuilder.build().toString();
-
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
 
         lastRequestTs=LocalDateTime.now();
 
-        Response response = okHttpClient.newCall(request).execute();
-
-        if(response.isSuccessful()){
-
-            String respString=response.body().string();
-
-            if (respString.contains("Thank you")) {   // limit reached
-
-                log.error("Api limit exceeded: " + respString);
-                throw new ApiLimitExceededException();
-
-            }else{
-
-                //@todo here
-                MarketService.FDResponse fdresp = fdJsonAdapter.fromJson(respString);
-
-                if(fdresp.Symbol!=null){
-                    IndexCategories category = IndexCategories.getByAlphaVantageType(fdresp.AssetType);
-                    long marketCap=0;
-                    try {
-                        marketCap=Long.parseLong(fdresp.MarketCapitalization);
-                    }catch (Exception e){
-                    }
-                    long ebitda=0;
-                    try {
-                        ebitda=Long.parseLong(fdresp.EBITDA);
-                    }catch (Exception e){
-                    }
-
-                    timeSeries=new TimeSeriesDailyAdjusted(symbol);
-
-                }else{
-                    log.error("Received empty response for symbol "+symbol +" "+ respString);
-                }
-
-            }
-
-
-        }
-
-
-
-
-
-
-//        String url = urlBuilder.build().toString();
-//
-//        Request request = new Request.Builder()
-//                .url(url)
-//                .build();
-//
-//
-//        TimeSeriesResponse response=AlphaVantage.api()
-//                .timeSeries()
-//                .daily()
-//                .forSymbol(index.getSymbol())
-//                .outputSize(outputSize)
-//                .dataType(DataType.JSON)
-//                .fetchSync();
+        TimeSeriesResponse response=AlphaVantage.api()
+                .timeSeries()
+                .daily()
+                .forSymbol(index.getSymbol())
+                .outputSize(outputSize)
+                .dataType(DataType.JSON)
+                .fetchSync();
 
         if(mode.equals(PriceUpdateModes.ADD_MISSING_DATA_ONLY)){
-            if(!coversMissingPeriod(timeSeries, index)){
+            if(!coversMissingPeriod(response, index)){
 
                 // the compact packet does not cover the missing period!
                 // switch automatically to REPLACE_ALL_DATA mode
                 // and perform the full query
                 mode= PriceUpdateModes.REPLACE_ALL_DATA;
 
-                timeSeries=executeRequest(index);
-
-//                response=AlphaVantage.api()
-//                        .timeSeries()
-//                        .daily()
-//                        .forSymbol(index.getSymbol())
-//                        .outputSize(OutputSize.FULL)
-//                        .dataType(DataType.JSON)
-//                        .fetchSync();
+                response=AlphaVantage.api()
+                        .timeSeries()
+                        .daily()
+                        .forSymbol(index.getSymbol())
+                        .outputSize(OutputSize.FULL)
+                        .dataType(DataType.JSON)
+                        .fetchSync();
 
             }
         }
 
-        return timeSeries;
+        return response;
     }
 
 
@@ -393,12 +297,12 @@ public class UpdatePricesCallable implements Callable<Void> {
      * The first point of the data contained in the response must precede or be equal to the
      * last point currently present for the symbol.
      */
-    private boolean coversMissingPeriod(TimeSeriesDailyAdjusted response, MarketIndex index){
-        List<IndexUnit> units = response.getUnits();
+    private boolean coversMissingPeriod(TimeSeriesResponse response, MarketIndex index){
+        List<StockUnit> units = response.getStockUnits();
         if(units.size()>0){
-            Collections.sort(units, Comparator.comparing(IndexUnit::getDateTime));
-            IndexUnit firstUnit= units.get(0);
-            LocalDateTime firstPoint = firstUnit.getDateTimeLDT();
+            Collections.sort(units, Comparator.comparing(StockUnit::getDate));
+            StockUnit firstUnit= units.get(0);
+            LocalDateTime firstPoint = LocalDateTime.parse(firstUnit.getDate(), fmt);
             List<IndexUnit> unitsEqOrPost = indexUnitService.findAllByIndexWithDateTimeEqualOrAfterOrderByDate(index, firstPoint);
             if(unitsEqOrPost.size()>0){
                 IndexUnit lastValidUnit = unitsEqOrPost.get(unitsEqOrPost.size()-1); // last valid unit present in db, save it for later
@@ -515,7 +419,7 @@ public class UpdatePricesCallable implements Callable<Void> {
     /**
      * Manage a successful response from the api
      */
-    public void handleResponse(TimeSeriesDailyAdjusted timeSeries, MarketIndex index)  throws Exception {
+    public void handleResponse(TimeSeriesResponse response, MarketIndex index)  throws Exception {
 
         log.info("Processing data for "+index.getSymbol());
 
@@ -526,11 +430,11 @@ public class UpdatePricesCallable implements Callable<Void> {
         }
 
         // Iterate the new units and save them
-        List<IndexUnit> units = timeSeries.getUnits();
-        Collections.sort(units, Comparator.comparing(IndexUnit::getDateTime));
+        List<StockUnit> units = response.getStockUnits();
+        Collections.sort(units, Comparator.comparing(StockUnit::getDate));
         int j = 0;
         int countUnits=0;
-        for (IndexUnit unit : units) {
+        for (StockUnit unit : units) {
 
             // apply retroaction to cpu load
             if(cpuPauseMs >0){
@@ -546,7 +450,7 @@ public class UpdatePricesCallable implements Callable<Void> {
             // if we are in ADD_MISSING_DATA_ONLY mode, skip the points
             // before or equal the lastValidPoint
             if(mode.equals(PriceUpdateModes.ADD_MISSING_DATA_ONLY)){
-                LocalDateTime dateTime = unit.getDateTimeLDT();
+                LocalDateTime dateTime = LocalDateTime.parse(unit.getDate(), fmt);
                 if(!dateTime.isAfter(lastValidPoint)){
                     continue;
                 }
@@ -597,23 +501,23 @@ public class UpdatePricesCallable implements Callable<Void> {
 
 
 
-    private IndexUnit saveItem(IndexUnit unit, MarketIndex index) {
-//        IndexUnit indexUnit = createIndexUnit(unit);
-        unit.setIndex(index);
-        return indexUnitService.update(unit);
+    private IndexUnit saveItem(StockUnit unit, MarketIndex index) {
+        IndexUnit indexUnit = createIndexUnit(unit);
+        indexUnit.setIndex(index);
+        return indexUnitService.update(indexUnit);
     }
 
-//    private IndexUnit createIndexUnit(StockUnit unit) {
-//        IndexUnit indexUnit = new IndexUnit();
-//        indexUnit.setOpen((float) unit.getOpen());
-//        indexUnit.setClose((float) unit.getClose());
-//
-//        LocalDateTime dateTime = LocalDateTime.parse(unit.getDate(), fmt);
-//
-//        indexUnit.setDateTimeLDT(dateTime);
-//
-//        return indexUnit;
-//    }
+    private IndexUnit createIndexUnit(StockUnit unit) {
+        IndexUnit indexUnit = new IndexUnit();
+        indexUnit.setOpen((float) unit.getOpen());
+        indexUnit.setClose((float) unit.getClose());
+
+        LocalDateTime dateTime = LocalDateTime.parse(unit.getDate(), fmt);
+
+        indexUnit.setDateTimeLDT(dateTime);
+
+        return indexUnit;
+    }
 
 
     /**

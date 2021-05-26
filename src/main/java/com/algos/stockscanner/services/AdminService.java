@@ -43,11 +43,18 @@ public class AdminService {
         executorService = Executors.newFixedThreadPool(numThreads);
     }
 
+//    public UpdatePricesCallableOld scheduleUpdate(List<String> symbols, PriceUpdateModes mode, int maxReqPerMinute)  {
+//        UpdatePricesCallableOld callable = context.getBean(UpdatePricesCallableOld.class, symbols, mode, maxReqPerMinute);
+//        executorService.submit(callable);
+//        return callable;
+//    }
+
     public UpdatePricesCallable scheduleUpdate(List<String> symbols, PriceUpdateModes mode, int maxReqPerMinute)  {
         UpdatePricesCallable callable = context.getBean(UpdatePricesCallable.class, symbols, mode, maxReqPerMinute);
         executorService.submit(callable);
         return callable;
     }
+
 
 
     public DownloadIndexCallable scheduleDownload(List<String> symbols, int maxReqPerMinute){
