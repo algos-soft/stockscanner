@@ -428,16 +428,6 @@ public abstract class AbsStrategy implements Strategy {
      * update current amount
      */
     private void updatePosition(DecisionInfo decisionInfo){
-//        float diffPrice=unit.getClose()-openPrice;
-//        float diffValue=diffPrice * openValue / openPrice;
-//        switch (posType){
-//            case BUY:
-//                currValue=openValue+diffValue;
-//                break;
-//            case SELL:
-//                currValue=openValue-diffValue;
-//                break;
-//        }
         currValue=calcCurrValue();
         decisionInfo.setCurrValue(currValue);
     }
@@ -458,25 +448,6 @@ public abstract class AbsStrategy implements Strategy {
         return value;
     }
 
-
-
-//    /**
-//     * Calculate value change based on previous value, and previous and current price.
-//     */
-//    float calcDeltaValue(){
-//        float deltaPricePercent = strategyService.deltaPercent(lastPrice, unit.getClose());
-//        float deltaValue = lastValue*deltaPricePercent/100;
-//        float applyValue=0;
-//        switch (posType){
-//            case BUY:
-//                applyValue=deltaValue;
-//                break;
-//            case SELL:
-//                applyValue=-deltaValue;
-//                break;
-//        }
-//        return applyValue;
-//    }
 
 
 
