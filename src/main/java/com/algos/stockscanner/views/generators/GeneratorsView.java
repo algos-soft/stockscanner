@@ -501,8 +501,12 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
             dialog.open();
         });
 
-        // edit an item
+        // clone an item
         account.getSubMenu().addItem("Clone generator", i -> {
+            Generator generator = generatorService.get(model.getId()).get();
+            generatorService.detach(generator);
+            generator.setId(null);
+            generatorService.update(generator);
         });
 
         // delete existing simulations

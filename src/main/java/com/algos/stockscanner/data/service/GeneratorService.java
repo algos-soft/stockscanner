@@ -254,4 +254,8 @@ public class GeneratorService extends CrudService<Generator, Integer> {
     public List<Generator> findAll() {
         return repository.findAll();
     }
+
+    public void detach(Generator generator){
+        repository.detach(generator);
+    }
 }
