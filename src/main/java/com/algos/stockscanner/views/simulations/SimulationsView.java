@@ -12,6 +12,7 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -58,7 +59,7 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
     public static final String H_END="end";
     public static final String H_INITIAL_AMT="initial amt";
     public static final String H_AMPLITUDE="amp";
-    public static final String H_DAYS_BACK="days back";
+    public static final String H_DAYS_BACK="moving avg";
     public static final String H_TERMINATION_REASON="term";
     public static final String H_PL="P/L";
     public static final String H_PL_PERCENT="P/L%";
@@ -379,12 +380,17 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
     private Component createDataButton(Grid grid, SimulationModel item){
         Button button = new Button("data", clickEvent -> {
             Simulation simulation = simulationService.get(item.getId()).get();
-            Component comp = context.getBean(SimulationDataViewer.class, simulation);
-            ConfirmDialog dialog = ConfirmDialog.create().withMessage(comp);
-            dialog.setWidth("100%");
+            VerticalLayout comp = context.getBean(SimulationDataViewer.class, simulation);
+            comp.setHeightFull();
+
+            Dialog dialog = new Dialog();
+            dialog.setWidthFull();
+            dialog.setHeightFull();
             dialog.setResizable(true);
             dialog.setDraggable(true);
+            dialog.add(comp);
             dialog.open();
+
         });
         button.addClassName("databutton");
         return button;

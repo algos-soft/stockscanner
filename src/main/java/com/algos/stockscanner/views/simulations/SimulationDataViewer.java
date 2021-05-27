@@ -56,6 +56,8 @@ public class SimulationDataViewer extends VerticalLayout {
     @PostConstruct
     private void init(){
 
+//        setHeight("100%");
+
         SimulationItem probe = new SimulationItem();
         probe.setSimulation(simulation);
         filter=Example.of(probe);

@@ -8,7 +8,6 @@ import com.algos.stockscanner.enums.PriceUpdateModes;
 import com.algos.stockscanner.services.AdminService;
 import com.algos.stockscanner.services.MarketService;
 import com.algos.stockscanner.services.UpdatePricesCallable;
-import com.algos.stockscanner.services.UpdatePricesCallableOld;
 import com.algos.stockscanner.task.TaskHandler;
 import com.algos.stockscanner.task.TaskListener;
 import com.algos.stockscanner.task.TaskMonitor;
@@ -111,7 +110,7 @@ public class PricesPage extends VerticalLayout {
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 try {
 
-                    if(contextStore.updateIndexCallableMapOld.size()>0){
+                    if(contextStore.updateIndexCallableMap.size()>0){
                         ConfirmDialog.createWarning().withMessage("Operation already in progress").open();
                         return;
                     }

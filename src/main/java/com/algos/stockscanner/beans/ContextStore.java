@@ -3,7 +3,6 @@ package com.algos.stockscanner.beans;
 import com.algos.stockscanner.services.DownloadIndexCallable;
 import com.algos.stockscanner.services.SimulationCallable;
 import com.algos.stockscanner.services.UpdatePricesCallable;
-import com.algos.stockscanner.services.UpdatePricesCallableOld;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -17,8 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class ContextStore {
-
-    public ConcurrentHashMap<String, UpdatePricesCallableOld> updateIndexCallableMapOld = new ConcurrentHashMap<>();
 
     public ConcurrentHashMap<String, UpdatePricesCallable> updateIndexCallableMap = new ConcurrentHashMap<>();
 
