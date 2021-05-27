@@ -59,7 +59,7 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
     public static final String H_END="end";
     public static final String H_INITIAL_AMT="initial amt";
     public static final String H_AMPLITUDE="amp";
-    public static final String H_DAYS_BACK="days back";
+    public static final String H_DAYS_BACK="moving avg";
     public static final String H_TERMINATION_REASON="term";
     public static final String H_PL="P/L";
     public static final String H_PL_PERCENT="P/L%";
