@@ -24,6 +24,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
@@ -47,6 +48,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Example;
 
 import javax.annotation.PostConstruct;
+import javax.swing.text.html.HTML;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -256,7 +258,8 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         return pan;
     }
 
-    private Component buildPan1(GeneratorModel model) {
+
+    private Component buildPan1Old(GeneratorModel model) {
 
         Component comp;
 
@@ -287,6 +290,53 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         pan.add(comp);
         return pan;
     }
+
+
+    private Component buildPan1(GeneratorModel model) {
+
+        Component comp;
+
+        if (model.isPermutateIndexes()) {
+            List<IndexModel> idxList=model.getIndexes();
+            idxList.sort(Comparator.comparing(IndexModel::getSymbol));
+            StringBuilder builder=new StringBuilder();
+            for(int i=0; i<idxList.size(); i++){
+                if(i==0){
+                    builder.append("<strong>"+idxList.size()+" symbols:</strong> ");
+                }else{
+                    builder.append(", ");
+                }
+                IndexModel idxModel = idxList.get(i);
+                builder.append(idxModel.getSymbol());
+            }
+
+            Span cmp = new Span();
+            cmp.addClassName("symbols");
+            cmp.getElement().setProperty("innerHTML", builder.toString());
+            comp = cmp;
+
+        } else {
+
+            Image img = model.getImage();
+            if (img == null) {
+                img=utils.getDefaultIndexIcon();
+            }
+            img.addClassName("icon");
+
+            Span symbol = new Span(model.getSymbol());
+            symbol.addClassName("symbol");
+            HorizontalLayout hl = new HorizontalLayout();
+            hl.add(img, symbol);
+            comp = hl;
+        }
+
+        Pan pan = new Pan();
+//        pan.setMinWidth("20em");
+//        pan.setMaxWidth("20em");
+        pan.add(comp);
+        return pan;
+    }
+
 
 
     private Component buildPan2(GeneratorModel model) {
