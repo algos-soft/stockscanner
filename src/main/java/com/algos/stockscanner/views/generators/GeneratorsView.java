@@ -332,7 +332,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
         Pan pan = new Pan();
 //        pan.setMinWidth("20em");
-//        pan.setMaxWidth("20em");
+        pan.setMaxWidth("20em");
         pan.add(comp);
         return pan;
     }

@@ -43,6 +43,7 @@
   margin-left: var(--lumo-space-s);
   font-size: var(--lumo-font-size-m);
   font-weight: bold;
+
 }
 
 .generators-view .symbols {
@@ -51,6 +52,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+
 
 
 .generators-view .startdate, .period, .spans, .amplitude, .lookback {
