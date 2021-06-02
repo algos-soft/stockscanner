@@ -18,13 +18,11 @@ import com.algos.stockscanner.views.indexes.IndexModel;
 import com.algos.stockscanner.views.simulations.SimulationsView;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IronIcon;
@@ -48,7 +46,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Example;
 
 import javax.annotation.PostConstruct;
-import javax.swing.text.html.HTML;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -226,20 +223,19 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         card.setSpacing(false);
         card.getThemeList().add("spacing-s");
 
-        Component pan0 = buildPan0(model);
         Component pan1 = buildPan1(model);
         Component pan2 = buildPan2(model);
         Component pan3 = buildPan3(model);
         Component pan4 = buildPan4(model);
         Component action = buildActionCombo(model);
 
-        card.add(pan0, pan1, pan2, pan3, pan4, action);
+        card.add(pan1, pan2, pan3, pan4, action);
 
         return card;
     }
 
 
-    private Component buildPan0(GeneratorModel model) {
+    private Component buildPan1(GeneratorModel model) {
         IronIcon tagIcon = new IronIcon("vaadin", "tag");
         int number = utils.toPrimitive(model.getNumber());
         Span sNumber = new Span("" + number);
@@ -259,40 +255,9 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
     }
 
 
-    private Component buildPan1Old(GeneratorModel model) {
-
-        Component comp;
-
-        if (model.isPermutateIndexes()) {
-            IndexesPanel panel = context.getBean(IndexesPanel.class, "-list");
-            for (IndexModel idxModel : model.getIndexes()) {
-                IndexComponent idxComp = context.getBean(IndexComponent.class, idxModel.getId(), idxModel.getImageData(), idxModel.getSymbol(), "-list");
-                panel.add(idxComp);
-            }
-            comp = panel;
-        } else {
-            Image img = model.getImage();
-            if (img == null) {
-                img=utils.getDefaultIndexIcon();
-            }
-            img.addClassName("icon");
-
-            Span symbol = new Span(model.getSymbol());
-            symbol.addClassName("symbol");
-            HorizontalLayout hl = new HorizontalLayout();
-            hl.add(img, symbol);
-            comp = hl;
-        }
-
-        Pan pan = new Pan();
-        pan.setMinWidth("20em");
-        pan.setMaxWidth("20em");
-        pan.add(comp);
-        return pan;
-    }
 
 
-    private Component buildPan1(GeneratorModel model) {
+    private Component buildPan2(GeneratorModel model) {
 
         Component comp;
 
@@ -339,49 +304,22 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
 
 
-    private Component buildPan2(GeneratorModel model) {
-
-        int amount = utils.toPrimitive(model.getAmount());
-        Span cAmount = new Span(format(amount));
-        cAmount.addClassName("amount");
-        HorizontalLayout row1 = new HorizontalLayout();
-        row1.add(cAmount);
-
-        int sl = utils.toPrimitive(model.getStopLoss());
-        Span cSL = new Span();
-        if (sl > 0) {
-            cSL.add("SL " + format(sl) + "%");
-        }
-//        int tp = utils.toPrimitive(model.getTakeProfit());
-//        Span cTP = new Span();
-//        if (tp > 0) {
-//            cTP.add("TP " + format(tp) + "%");
-//        }
-        HorizontalLayout row2 = new HorizontalLayout();
-        row2.addClassName("sltp");
-        row2.add(cSL);
-
-        Pan pan = new Pan();
-        pan.add(row1, row2);
-
-        return pan;
-    }
 
 
     private Component buildPan3(GeneratorModel model) {
 
-        IronIcon calendar = new IronIcon("vaadin", "flag-checkered");
+        Icon calendarIcon = VaadinIcon.FLAG_CHECKERED.create();
         String sDate;
         if (model.getStartDate() != null) {
             sDate = format(model.getStartDate());
         } else {
             sDate = "n.a.";
         }
-        Span spanDate = new Span(calendar, new Text(sDate));
+        Span spanDate = new Span(calendarIcon, new Text(sDate));
         spanDate.addClassName("startdate");
 
         String period;
-        IronIcon durationIcon = new IronIcon("vaadin", "clock");
+        Icon durationIcon = VaadinIcon.CLOCK.create();
         if (model.getDays() > 0) {
             period = "max " + model.getDays() + " days";
         } else {
@@ -391,7 +329,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         spanPeriod.addClassName("period");
 
         String sSpan;
-        IronIcon spanIcon = new IronIcon("vaadin", "refresh");
+        Icon spanIcon = VaadinIcon.REFRESH.create();
         if (model.getSpans() > 1) {
             sSpan = model.getSpans() + " spans";
         } else {
@@ -408,20 +346,30 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
 
     private Component buildPan4(GeneratorModel model) {
 
-        IronIcon amplIcon = new IronIcon("vaadin", "arrows-long-v");
+        Icon amtIcon = VaadinIcon.DOLLAR.create();
+        int amount = utils.toPrimitive(model.getAmount());
+        String sAmt=format(amount);
+        int sl = utils.toPrimitive(model.getStopLoss());
+        if (sl > 0) {
+            sAmt+=", SL " + format(sl) + "%";
+        }
+        Span spanAmount = new Span(amtIcon, new Text(sAmt));
+        spanAmount.addClassName("amount");
+
+        Icon amplIcon = VaadinIcon.ARROWS_LONG_V.create();
         String sAmplitude;
         if (model.isPermutateAmpitude()) {
-            sAmplitude = model.getAmplitudeMin() + "% - " + model.getAmplitudeMax() + "%, in " + model.getAmplitudeSteps() + " steps";
+            sAmplitude = model.getAmplitudeMin() + "% - " + model.getAmplitudeMax() + "%, " + model.getAmplitudeSteps() + " steps";
         } else {
             sAmplitude = model.getAmplitude() + "%";
         }
         Span spanAmplitude = new Span(amplIcon, new Text(sAmplitude));
         spanAmplitude.addClassName("amplitude");
 
-        IronIcon lookIcon = new IronIcon("vaadin", "trending_up");
+        Icon lookIcon = VaadinIcon.TRENDING_UP.create();
         String sLook;
         if (model.isPermutateDaysLookback()) {
-            sLook = model.getDaysLookbackMin() + " - " + model.getDaysLookbackMax() + " days, in " + model.getDaysLookbackSteps() + " steps";
+            sLook = model.getDaysLookbackMin() + " - " + model.getDaysLookbackMax() + " days, " + model.getDaysLookbackSteps() + " steps";
         } else {
             sLook = model.getDaysLookback() + " days";
         }
@@ -429,7 +377,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         spanLook.addClassName("lookback");
 
         Pan pan = new Pan();
-        pan.add(spanAmplitude, spanLook);
+        pan.add(spanAmount, spanAmplitude, spanLook);
         return pan;
 
     }
@@ -535,7 +483,7 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         account.getSubMenu().addItem("Delete generator", i -> {
 
             Button bConfirm = new Button();
-            ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete " + model.getNumber() + " - " + model.getSymbol() + "?")
+            ConfirmDialog dialog = ConfirmDialog.create().withMessage("Do you want to delete generator #" + model.getNumber() + "?")
                     .withButton(new Button(), ButtonOption.caption("Cancel"), ButtonOption.closeOnClick(true))
                     .withButton(bConfirm, ButtonOption.caption("Delete"), ButtonOption.focus(), ButtonOption.closeOnClick(true));
 
@@ -554,9 +502,8 @@ public class GeneratorsView extends Div implements AfterNavigationObserver {
         // clone an item
         account.getSubMenu().addItem("Clone generator", i -> {
             Generator generator = generatorService.get(model.getId()).get();
-            generatorService.detach(generator);
-            generator.setId(null);
-            generatorService.update(generator);
+            generatorService.clone(generator);
+            refreshGrid();
         });
 
         // delete existing simulations

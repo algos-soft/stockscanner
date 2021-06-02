@@ -56,7 +56,7 @@
 
 
 
-.generators-view .startdate, .period, .spans, .amplitude, .lookback {
+.generators-view .startdate, .period, .spans, .amount, .amplitude, .lookback {
   font-size: var(--lumo-font-size-s);
 }
 
@@ -66,11 +66,6 @@
   height: calc(var(--lumo-icon-size-s)*0.8);
   width: calc(var(--lumo-icon-size-s)*0.8);
   margin-right: var(--lumo-space-xs);
-}
-
-.generators-view .amount {
-  font-size: var(--lumo-font-size-xl);
-  font-weight: bold;
 }
 
 .generators-view .leverage {

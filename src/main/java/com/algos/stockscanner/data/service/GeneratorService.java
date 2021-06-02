@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.vaadin.artur.helpers.CrudService;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,9 @@ import java.util.List;
 public class GeneratorService extends CrudService<Generator, Integer> {
 
     private static final Logger log = LoggerFactory.getLogger(GeneratorService.class);
+
+    @PersistenceContext
+    private EntityManager em;
 
     @Autowired
     private Utils utils;
@@ -223,7 +228,9 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         entity.setCreated(LocalDateTime.now());
         entity.setModified(LocalDateTime.now());
         entity.setNumber(calcNextNumber());
-        entity.setSpans(1);
+        if(entity.getSpans()==null){
+            entity.setSpans(1);
+        }
     }
 
 
@@ -255,7 +262,26 @@ public class GeneratorService extends CrudService<Generator, Integer> {
         return repository.findAll();
     }
 
-    public void detach(Generator generator){
-        repository.detach(generator);
+
+    public void clone(Generator generator){
+
+        // clone indexes list
+        List<MarketIndex> indexes=generator.getIndexes();
+        List<MarketIndex> indexesCopy = new ArrayList<>();
+        for(MarketIndex index : indexes){
+            em.detach(index);
+            indexesCopy.add(index);
+        }
+
+        em.detach(generator);
+        generator.setId(null);
+        generator.setNumber(null);
+        generator.setIndexes(indexesCopy);
+        generator.setSimulations(new ArrayList<>()); // new empty list of simulations
+        initEntity(generator);
+
+        update(generator);
+
     }
+
 }
