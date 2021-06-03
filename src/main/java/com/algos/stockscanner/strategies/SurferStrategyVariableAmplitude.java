@@ -27,14 +27,17 @@ public class SurferStrategyVariableAmplitude extends SurferStrategy {
         LocalDateTime t0 = unit.getDateTimeLDT();   // now
         LocalDateTime t2 = t0.minusDays(daysLookback);  // one period back
         LocalDateTime t1 = t2.minusDays(daysLookback);  // two periods back
-        float ma1 = indexUnitService.getMovingAverage(index, t1, t2);   // moving average 2 periods back
         float ma2 = movingAverage(daysLookback);    // moving average 1 period back
-        float maDeltaFactor=ma2/ma1;    // how the moving average is changing
+        float ma1 = indexUnitService.getMovingAverage(index, t1, t2);   // moving average 2 periods back
+        if (ma1==0) {   // data for 2 periods back is not available, set ma1 = ma2
+            ma1=ma2;
+        }
+        float maDeltaFactor = ma2 / ma1;    // how the moving average is changing
 
         // reflect the trend of the moving average on the up/down balance
-        float delta = -amplitude*(1-maDeltaFactor);
-        amplitudeUp=amplitude+delta;
-        amplitudeDown=amplitude-delta;
+        float delta = -amplitude * (1 - maDeltaFactor);
+        amplitudeUp = amplitude + delta;
+        amplitudeDown = amplitude - delta;
 
     }
 

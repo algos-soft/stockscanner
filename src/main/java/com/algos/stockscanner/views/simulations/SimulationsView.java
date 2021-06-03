@@ -14,13 +14,11 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -93,6 +91,8 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
 
     private Button anchorButton;
 
+    private Span counterSpan;
+
     private InputStream excelInputStream;
 
     public SimulationsView() {
@@ -108,10 +108,17 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
         createGrid();
 
         Component filterPanel = createFilterPanel();
+        HorizontalLayout counterPanel = createCounterPanel();
+        counterPanel.getStyle().set("margin-left","auto");
+
+        HorizontalLayout layout1 = new HorizontalLayout();
+        layout1.getStyle().set("width","100%");
+        layout1.setAlignItems(FlexComponent.Alignment.BASELINE);
+        layout1.add(filterPanel, counterPanel);
 
         VerticalLayout layout = new VerticalLayout();
         layout.getStyle().set("height","100%");
-        layout.add(filterPanel, grid);
+        layout.add(layout1, grid);
 
         add(layout);
 
@@ -202,9 +209,23 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
         });
 
         HorizontalLayout layout = new HorizontalLayout();
+        layout.setAlignItems(FlexComponent.Alignment.BASELINE);
         layout.add(generatorNumberFld, indexCombo);
         return layout;
     }
+
+
+
+    private HorizontalLayout createCounterPanel(){
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setAlignItems(FlexComponent.Alignment.BASELINE);
+        Span span1=new Span("total");
+        span1.getElement().setProperty("innerHTML", "total:");
+        counterSpan=new Span();
+        layout.add(span1, counterSpan);
+        return layout;
+    }
+
 
 
     private void createGrid() {
@@ -223,7 +244,6 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
 
         grid.setDataProvider(provider);
         grid.setColumnReorderingAllowed(true);
-
 
         Grid.Column<SimulationModel> col;
 
@@ -413,7 +433,14 @@ public class SimulationsView extends Div implements HasUrlParameter<String>, Aft
     private void refreshGrid() {
         grid.select(null);
         grid.getDataProvider().refreshAll();
+        refreshCounter();
     }
+
+    private void refreshCounter(){
+        int count = simulationService.count(filter);
+        counterSpan.getElement().setProperty("innerHTML", "<strong>"+count+"</strong>");
+    }
+
 
     /**
      * update the current filter

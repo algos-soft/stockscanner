@@ -27,7 +27,6 @@ public class Simulation extends AbstractEntity {
     private String endTs;  // timestamp of last point scanned
     private Float initialAmount;  // initial amount
     private Integer sl;
-    private Integer tp;
     private Float amplitude;    // amplitude of the oscillation max/min, in percent
     private Integer daysLookback;    // number of days to lookback to determine the avg price
 
@@ -100,13 +99,13 @@ public class Simulation extends AbstractEntity {
         this.sl = sl;
     }
 
-    public Integer getTp() {
-        return tp;
-    }
-
-    public void setTp(Integer tp) {
-        this.tp = tp;
-    }
+//    public Integer getTp() {
+//        return tp;
+//    }
+//
+//    public void setTp(Integer tp) {
+//        this.tp = tp;
+//    }
 
     public Float getAmplitude() {
         return amplitude;

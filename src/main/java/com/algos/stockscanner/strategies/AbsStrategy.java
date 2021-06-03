@@ -515,7 +515,7 @@ public abstract class AbsStrategy implements Strategy {
 
 
     /**
-     * Moving average in the backlook period starting from the current unit time
+     * Moving average from the current unit time, back for the given days
      */
     float movingAverage(int days){
         LocalDateTime t2 = unit.getDateTimeLDT();
