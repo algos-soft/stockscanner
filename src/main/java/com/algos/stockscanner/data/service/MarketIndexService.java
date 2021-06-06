@@ -108,7 +108,7 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
 
         Page<MarketIndex> page;
         if (f != null) {
-            page = repository.findAllWithFilterOrderBySymbol(pageable, f.symbol, f.name, f.exchange, f.country, f.sector, f.industry, f.marketCapFrom, f. marketCapTo, f.ebitdaFrom, f.ebitdaTo);
+            page = repository.findAllWithFilterOrderBySymbol(pageable, f.symbol, f.name, f.exchange, f.country, f.sector, f.industry, f.marketCapFrom, f. marketCapTo, f.ebitdaFrom, f.ebitdaTo, f.marketDataFrom);
         } else {
             page = repository.findAll(pageable);
         }
@@ -119,7 +119,7 @@ public class MarketIndexService extends CrudService<MarketIndex, Integer> {
     public int count(IndexFilter f) {
         int count;
         if (f != null) {
-            count = (int)repository.count(f.symbol, f.name, f.exchange, f.country, f.sector, f.industry, f.marketCapFrom, f. marketCapTo, f.ebitdaFrom, f.ebitdaTo);
+            count = (int)repository.count(f.symbol, f.name, f.exchange, f.country, f.sector, f.industry, f.marketCapFrom, f. marketCapTo, f.ebitdaFrom, f.ebitdaTo, f.marketDataFrom);
         } else {
             count = (int)repository.count();
         }

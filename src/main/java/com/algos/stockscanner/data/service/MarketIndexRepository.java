@@ -38,13 +38,14 @@ public interface MarketIndexRepository extends JpaRepository<MarketIndex, Intege
                     " AND (:capmin is null or m.marketCap >= :capmin)"+
                     " AND (:capmax is null or m.marketCap <= :capmax)"+
                     " AND (:ebitdamin is null or m.ebitda >= :ebitdamin)"+
-                    " AND (:ebitdamax is null or m.ebitda <= :ebitdamax)";
+                    " AND (:ebitdamax is null or m.ebitda <= :ebitdamax)"+
+                    " AND (:unitsfrommin is null or m.unitsFrom <= :unitsfrommin)";
 
     @Query("SELECT m FROM MarketIndex m WHERE " + sWhere+ " ORDER BY m.symbol")
-    Page<MarketIndex> findAllWithFilterOrderBySymbol(Pageable pageable, @Param("symbol") String symbol,  @Param("name") String name, @Param("exchange") String exchange, @Param("country") String country,  @Param("sector") String sector, @Param("industry") String industry, @Param("capmin") Long capmin,  @Param("capmax") Long capmax, @Param("ebitdamin") Long ebitdamin,  @Param("ebitdamax") Long ebitdamax);
+    Page<MarketIndex> findAllWithFilterOrderBySymbol(Pageable pageable, @Param("symbol") String symbol,  @Param("name") String name, @Param("exchange") String exchange, @Param("country") String country,  @Param("sector") String sector, @Param("industry") String industry, @Param("capmin") Long capmin,  @Param("capmax") Long capmax, @Param("ebitdamin") Long ebitdamin,  @Param("ebitdamax") Long ebitdamax, @Param("unitsfrommin") String unitsFromMin);
 
     @Query("SELECT count(m) FROM MarketIndex m WHERE " +sWhere)
-    long count(@Param("symbol") String symbol,  @Param("name") String name, @Param("exchange") String exchange, @Param("country") String country,  @Param("sector") String sector, @Param("industry") String industry, @Param("capmin") Long capmin,  @Param("capmax") Long capmax, @Param("ebitdamin") Long ebitdamin,  @Param("ebitdamax") Long ebitdamax);
+    long count(@Param("symbol") String symbol,  @Param("name") String name, @Param("exchange") String exchange, @Param("country") String country,  @Param("sector") String sector, @Param("industry") String industry, @Param("capmin") Long capmin,  @Param("capmax") Long capmax, @Param("ebitdamin") Long ebitdamin,  @Param("ebitdamax") Long ebitdamax, @Param("unitsfrommin") String unitsFromMin);
 
 
     @Query("SELECT m FROM MarketIndex m WHERE m IN (:indexes)")

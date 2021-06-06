@@ -1,5 +1,7 @@
 package com.algos.stockscanner.views.indexes;
 
+import java.time.LocalDate;
+
 public class IndexFilter {
     public String symbol;
     public String name;
@@ -11,4 +13,5 @@ public class IndexFilter {
     public Long marketCapTo;
     public Long ebitdaFrom;
     public Long ebitdaTo;
+    public String marketDataFrom;
 }

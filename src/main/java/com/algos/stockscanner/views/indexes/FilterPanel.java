@@ -2,11 +2,13 @@ package com.algos.stockscanner.views.indexes;
 
 import com.algos.stockscanner.beans.Utils;
 import com.algos.stockscanner.exceptions.InvalidBigNumException;
+import com.algos.stockscanner.utils.Du;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -20,6 +22,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +38,7 @@ public class FilterPanel extends FlexLayout {
     private TextField industryFld;
     private RangeFld marketCapRange;
     private RangeFld ebitdaRange;
+    private DatePicker dataFromPicker;
     private Button bSearch;
 
     private List<FilterPanelListener> listeners=new ArrayList<>();
@@ -60,6 +64,8 @@ public class FilterPanel extends FlexLayout {
         //marketCapRange.setClearButtonVisible(true);
         ebitdaRange=new RangeFld("ebitda");
         //ebitdaRange.setClearButtonVisible(true);
+        dataFromPicker=new DatePicker("min market data");
+
         bSearch=new Button("Search");
         bSearch.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent -> fireSearchPressed());
 
@@ -74,8 +80,10 @@ public class FilterPanel extends FlexLayout {
         countryFld.addClassName("filter-panel-field");
         sectorFld.addClassName("filter-panel-field");
         industryFld.addClassName("filter-panel-field");
+        industryFld.addClassName("filter-panel-field");
+        dataFromPicker.addClassName("filter-panel-field");
         bSearch.addClassName("filter-panel-search-button");
-        add(nameFld, exchangeFld, countryFld, sectorFld, industryFld, marketCapRange, ebitdaRange, bSearch);
+        add(nameFld, exchangeFld, countryFld, sectorFld, industryFld, marketCapRange, ebitdaRange, dataFromPicker, bSearch);
     }
 
 
@@ -91,6 +99,10 @@ public class FilterPanel extends FlexLayout {
         filter.marketCapTo=marketCapRange.getToValue();
         filter.ebitdaFrom=ebitdaRange.getFromValue();
         filter.ebitdaTo=ebitdaRange.getToValue();
+        LocalDate ld=dataFromPicker.getValue();
+        if(ld!=null){
+            filter.marketDataFrom=Du.toUtcString(ld);
+        }
         return filter;
     }
 
@@ -157,6 +169,9 @@ public class FilterPanel extends FlexLayout {
         }
 
     }
+
+
+
 
     public void addListener(FilterPanelListener listener){
         listeners.add(listener);
