@@ -81,7 +81,7 @@ public class FilterPanel extends FlexLayout {
         sectorFld.addClassName("filter-panel-field");
         industryFld.addClassName("filter-panel-field");
         industryFld.addClassName("filter-panel-field");
-        dataFromPicker.addClassName("filter-panel-field");
+        dataFromPicker.addClassName("filter-panel-date-picker");
         bSearch.addClassName("filter-panel-search-button");
         add(nameFld, exchangeFld, countryFld, sectorFld, industryFld, marketCapRange, ebitdaRange, dataFromPicker, bSearch);
     }
