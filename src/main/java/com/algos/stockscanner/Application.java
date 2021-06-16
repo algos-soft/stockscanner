@@ -2,6 +2,7 @@ package com.algos.stockscanner;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.servlet.error.*;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.vaadin.artur.helpers.LaunchUtil;
@@ -12,8 +13,8 @@ import java.util.TimeZone;
 /**
  * The entry point of the Spring Boot application.
  */
-@SpringBootApplication
 @EnableScheduling
+@SpringBootApplication(exclude = ErrorMvcAutoConfiguration.class)
 public class Application extends SpringBootServletInitializer {
 
     public static final String APP_NAME="StockScanner";
